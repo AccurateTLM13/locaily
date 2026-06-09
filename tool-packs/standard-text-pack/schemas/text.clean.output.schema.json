@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["clean_text", "changes_summary"],
+  "properties": {
+    "clean_text": { "type": "string" },
+    "changes_summary": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

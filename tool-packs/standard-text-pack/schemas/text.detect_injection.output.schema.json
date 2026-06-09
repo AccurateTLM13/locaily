@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "required": ["risk_level", "flags", "safe_to_process"],
+  "properties": {
+    "risk_level": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "blocked"]
+    },
+    "flags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "safe_to_process": { "type": "boolean" }
+  }
+}

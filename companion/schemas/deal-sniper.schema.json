@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "required": [
+    "dealScore",
+    "riskLevel",
+    "summary",
+    "redFlags",
+    "positiveSignals",
+    "negotiationTip",
+    "nextAction"
+  ],
+  "properties": {
+    "dealScore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "riskLevel": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "redFlags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "positiveSignals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "negotiationTip": {
+      "type": "string"
+    },
+    "nextAction": {
+      "type": "string"
+    }
+  }
+}

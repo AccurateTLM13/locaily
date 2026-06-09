@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "required": ["data", "missing_fields", "confidence"],
+  "properties": {
+    "data": { "type": "object" },
+    "missing_fields": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}

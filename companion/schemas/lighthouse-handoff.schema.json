@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "required": [
+    "clientSummary",
+    "developerSummary",
+    "priorityFixes",
+    "handoffChecklist",
+    "estimatedImpact"
+  ],
+  "properties": {
+    "clientSummary": {
+      "type": "string"
+    },
+    "developerSummary": {
+      "type": "string"
+    },
+    "priorityFixes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "priority", "reason"],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "handoffChecklist": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "estimatedImpact": {
+      "type": "string",
+      "enum": ["Low", "Medium", "High"]
+    }
+  }
+}

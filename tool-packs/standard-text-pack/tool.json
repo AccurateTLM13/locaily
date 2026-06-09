@@ -1,0 +1,50 @@
+{
+  "id": "standard-text-pack",
+  "name": "Standard Text Pack",
+  "version": "0.1.0",
+  "trust": "official",
+  "tools": [
+    {
+      "id": "text.clean",
+      "model_role": "default_worker",
+      "permissions": ["model.run"],
+      "input_schema": "schemas/text.clean.input.schema.json",
+      "output_schema": "schemas/text.clean.output.schema.json"
+    },
+    {
+      "id": "text.summarize",
+      "model_role": "default_worker",
+      "permissions": ["model.run"],
+      "input_schema": "schemas/text.summarize.input.schema.json",
+      "output_schema": "schemas/text.summarize.output.schema.json"
+    },
+    {
+      "id": "text.extract_json",
+      "model_role": "default_worker",
+      "permissions": ["model.run"],
+      "input_schema": "schemas/text.extract_json.input.schema.json",
+      "output_schema": "schemas/text.extract_json.output.schema.json"
+    },
+    {
+      "id": "text.classify",
+      "model_role": "default_worker",
+      "permissions": ["model.run"],
+      "input_schema": "schemas/text.classify.input.schema.json",
+      "output_schema": "schemas/text.classify.output.schema.json"
+    },
+    {
+      "id": "text.detect_injection",
+      "model_role": "default_worker",
+      "permissions": ["model.run"],
+      "input_schema": "schemas/text.detect_injection.input.schema.json",
+      "output_schema": "schemas/text.detect_injection.output.schema.json"
+    },
+    {
+      "id": "text.validate_schema",
+      "model_role": null,
+      "permissions": [],
+      "input_schema": "schemas/text.validate_schema.input.schema.json",
+      "output_schema": "schemas/text.validate_schema.output.schema.json"
+    }
+  ]
+}

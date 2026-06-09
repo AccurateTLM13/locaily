@@ -1,0 +1,44 @@
+{
+  "server": {
+    "port": 31313,
+    "host": "127.0.0.1"
+  },
+  "runtime": {
+    "provider": "ollama",
+    "baseUrl": "http://127.0.0.1:11434",
+    "model": "llama3.2"
+  },
+  "modelRoles": {
+    "roles": {
+      "fast_worker": "llama3.2",
+      "default_worker": "llama3.2",
+      "reasoning_worker": "llama3.2",
+      "voice_worker": null
+    },
+    "providers": {
+      "mock": {
+        "fast_worker": "mock-local-model",
+        "default_worker": "mock-local-model",
+        "reasoning_worker": "mock-local-model",
+        "voice_worker": null
+      }
+    }
+  },
+  "tools": {
+    "enabled": [
+      "deal-sniper",
+      "lighthouse-handoff",
+      "text.clean",
+      "text.summarize",
+      "text.extract_json",
+      "text.classify",
+      "text.detect_injection",
+      "text.validate_schema"
+    ]
+  },
+  "permissions": {
+    "filePath": "data/permissions.json",
+    "approved": ["model.run"],
+    "denied": ["file.delete", "file.write", "network.send", "browser.write", "memory.delete"]
+  }
+}

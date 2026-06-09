@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["data", "schema"],
+  "properties": {
+    "data": {},
+    "schema": { "type": "object" }
+  }
+}

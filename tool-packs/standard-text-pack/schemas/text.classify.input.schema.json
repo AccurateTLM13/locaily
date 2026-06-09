@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["text", "categories"],
+  "properties": {
+    "text": { "type": "string" },
+    "categories": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

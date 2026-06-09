@@ -1,0 +1,9 @@
+{
+  "tool": "text.clean",
+  "input": {
+    "text": "hey so um this is a rough note",
+    "format": "markdown",
+    "tone": "clear/direct",
+    "preserve_user_words": true
+  }
+}

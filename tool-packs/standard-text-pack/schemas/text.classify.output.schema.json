@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "required": ["category", "confidence", "reason"],
+  "properties": {
+    "category": { "type": "string" },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "reason": { "type": "string" }
+  }
+}

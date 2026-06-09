@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["summary", "key_points"],
+  "properties": {
+    "summary": { "type": "string" },
+    "key_points": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

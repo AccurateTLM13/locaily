@@ -1,0 +1,17 @@
+{
+  "tool": "text.validate_schema",
+  "input": {
+    "data": {
+      "title": "Example"
+    },
+    "schema": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
