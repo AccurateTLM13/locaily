@@ -21,6 +21,8 @@ Practical sequencing for Locaily. **Dates omitted**—order reflects dependency,
 - [ ] Implement extension ↔ Local Brain HTTP bridge (extension repo + CORS/proxy)
 - [ ] L2: live Ollama orchestration evidence on target hardware
 - [ ] Example normalized fixture in `examples/lighthouse-handoff/`
+- [ ] Persistent provider / model role config across restarts
+- [ ] CORS policy (or MV3 background proxy pattern) for extension testing
 
 ## Next — Pit Crew Mechanics
 
