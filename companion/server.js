@@ -21,6 +21,7 @@ const {
 } = require("./core/envelope");
 const { createModelRoleManager } = require("./core/model-roles");
 const { createModelProfileManager } = require("./core/model-profiles");
+const { createModelGarage } = require("./core/model-garage");
 const { createPermissionManager } = require("./core/permissions");
 const { runToolWithValidation } = require("./core/result-validator");
 const { createProviderRouter } = require("./providers/router");
@@ -58,6 +59,9 @@ const DEFAULT_CONFIG = {
   },
   modelProfiles: {
     active: "balanced"
+  },
+  modelGarage: {
+    candidates: {}
   },
   tools: {
     enabled: ["deal-sniper", "lighthouse-handoff"]
@@ -100,6 +104,8 @@ const initialProfileApply = modelProfileManager.applyProfileRoles(
 if (!initialProfileApply.ok) {
   console.warn(`[Model Profiles] Warning: ${initialProfileApply.error.message}`);
 }
+
+const modelGarage = createModelGarage(config.modelGarage || {});
 const toolRegistry = createToolRegistry({
   enabledTools: config.tools.enabled
 });
@@ -228,6 +234,18 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, setResult.ok ? 200 : 400, setResult);
     }
 
+    if (request.method === "GET" && url.pathname === "/models/garage") {
+      return sendJson(response, 200, await buildModelGarageResponse());
+    }
+
+    if (request.method === "POST" && url.pathname === "/models/garage/evaluate") {
+      const bodyResult = await readJsonBody(request);
+      const body = bodyResult.ok ? bodyResult.body : {};
+      const evaluateResult = await runModelGarageEvaluation(body || {});
+
+      return sendJson(response, evaluateResult.ok ? 200 : evaluateResult.statusCode || 400, evaluateResult);
+    }
+
     if (request.method === "POST" && url.pathname === "/tasks/run") {
       const bodyResult = await readJsonBody(request);
 
@@ -301,7 +319,7 @@ const server = http.createServer(async (request, response) => {
       ok: false,
       code: "NOT_FOUND",
       message: `No route matched ${request.method} ${url.pathname}.`,
-      nextStep: "Use GET /health, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, POST /tasks/run, or legacy POST /analyze."
+      nextStep: "Use GET /health, GET /tools, GET /models/garage, GET /models/profiles, GET /tracks, POST /tracks/run, POST /tasks/run, or legacy POST /analyze."
     });
   } catch (error) {
     console.error("Unexpected server error.");
@@ -378,6 +396,14 @@ function mergeConfig(base, override) {
       profiles: {
         ...((base.modelProfiles && base.modelProfiles.profiles) || {}),
         ...((override.modelProfiles && override.modelProfiles.profiles) || {})
+      }
+    },
+    modelGarage: {
+      ...base.modelGarage,
+      ...(override.modelGarage || {}),
+      candidates: {
+        ...((base.modelGarage && base.modelGarage.candidates) || {}),
+        ...((override.modelGarage && override.modelGarage.candidates) || {})
       }
     },
     audit: {
@@ -643,6 +669,84 @@ function setModelProfile(body) {
   };
 }
 
+async function buildModelGarageResponse() {
+  const runtimeState = await checkRuntimeState();
+  const profile = modelProfileManager.getActive();
+
+  return {
+    ok: true,
+    active_profile: profile.id,
+    garage: modelGarage.list({
+      profile,
+      installedModels: runtimeState.models || []
+    }),
+    evaluations: modelGarage.getEvaluationSummary()
+  };
+}
+
+async function runModelGarageEvaluation(body = {}) {
+  const providerId = body.provider || getActiveProviderId();
+
+  if (body.provider) {
+    const switchResult = providerRouter.setActiveProvider(providerId);
+
+    if (!switchResult.ok) {
+      return {
+        ok: false,
+        statusCode: 400,
+        code: switchResult.error.code,
+        message: switchResult.error.message,
+        nextStep: switchResult.error.nextStep
+      };
+    }
+  }
+
+  const runtimeState = await checkRuntimeState();
+
+  if (!runtimeState.available) {
+    return {
+      ok: false,
+      statusCode: 503,
+      code: "PROVIDER_UNAVAILABLE",
+      message: runtimeState.warning ? runtimeState.warning.message : "Provider is unavailable.",
+      nextStep: runtimeState.warning ? runtimeState.warning.nextStep : "Start the configured provider."
+    };
+  }
+
+  const roles = Array.isArray(body.roles) && body.roles.length > 0
+    ? body.roles
+    : ["fast_worker", "default_worker"];
+  const roleModels = {};
+
+  for (const role of roles) {
+    const resolution = modelRoleManager.resolve(role, providerId);
+
+    if (resolution.ok && resolution.model) {
+      roleModels[role] = resolution.model;
+    }
+  }
+
+  if (Object.keys(roleModels).length === 0) {
+    return {
+      ok: false,
+      statusCode: 400,
+      code: "INVALID_INPUT",
+      message: "No evaluatable role models were configured for the selected provider.",
+      nextStep: "Assign models to roles or pass roles with configured mappings."
+    };
+  }
+
+  const evaluation = await modelGarage.runEvaluation({
+    runtime: getActiveRuntime(),
+    toolRegistry,
+    providerId,
+    roleModels,
+    roles
+  });
+
+  return evaluation;
+}
+
 function validateAnalyzeRequest(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return {
@@ -742,12 +846,58 @@ function resolveModelForRole(modelRole) {
   return modelRoleManager.resolve(modelRole, getActiveProviderId());
 }
 
+function resolveModelForRoleWithGarage(modelRole) {
+  const roleResolution = modelRoleManager.resolve(modelRole, getActiveProviderId());
+
+  if (!roleResolution.ok) {
+    return roleResolution;
+  }
+
+  const profile = modelProfileManager.getActive();
+  const defaultWorkerResolution = modelRoleManager.resolve("default_worker", getActiveProviderId());
+  const garageResult = modelGarage.prepareForRole({
+    role: modelRole,
+    model: roleResolution.model,
+    policy: profile.policy,
+    maxAutoModelGb: profile.max_auto_model_gb,
+    providerId: getActiveProviderId(),
+    defaultRole: "default_worker",
+    defaultModel: defaultWorkerResolution.ok ? defaultWorkerResolution.model : config.runtime.model
+  });
+
+  return {
+    ok: true,
+    role: modelRole,
+    model: garageResult.model,
+    switches: garageResult.switches,
+    candidate: garageResult.candidate
+  };
+}
+
+function releaseGarageModel(modelRole, model) {
+  const profile = modelProfileManager.getActive();
+  const defaultWorkerResolution = modelRoleManager.resolve("default_worker", getActiveProviderId());
+
+  return modelGarage.releaseAfterTask({
+    role: modelRole,
+    model,
+    policy: profile.policy,
+    defaultRole: "default_worker",
+    defaultModel: defaultWorkerResolution.ok ? defaultWorkerResolution.model : config.runtime.model
+  });
+}
+
+function canEscalateToRole(role) {
+  const resolution = modelRoleManager.resolve(role, getActiveProviderId());
+  return resolution.ok && Boolean(resolution.model);
+}
+
 function buildModelRoutingOptions(extra = {}) {
   return {
     ...extra,
     profile_id: modelProfileManager.resolveActiveProfileId(),
     getRoleSuitability: (role) => modelProfileManager.getRoleSuitability(role),
-    resolveModelForRole: (role) => resolveModelForRole(role),
+    resolveModelForRole: (role) => resolveModelForRoleWithGarage(role),
     toolRegistry
   };
 }
@@ -1001,7 +1151,10 @@ async function executeTaskRunRequest(body, context) {
 
   const contextPacket = contextResult.context;
   const modelRole = contextPacket.task.model_role;
-  const modelResolution = resolveModelForRole(modelRole);
+  let activeModelRole = modelRole;
+  let modelResolution = resolveModelForRoleWithGarage(activeModelRole);
+  const modelSwitches = [...(modelResolution.switches || [])];
+  const combinedFallbacks = [];
   const inputGateResult = inspectContextInput(contextPacket);
 
   if (!inputGateResult.ok) {
@@ -1017,7 +1170,7 @@ async function executeTaskRunRequest(body, context) {
         code: inputGateResult.code,
         message: inputGateResult.message,
         nextStep: inputGateResult.nextStep,
-        modelRole,
+        modelRole: activeModelRole,
         model: modelResolution.ok ? modelResolution.model : getActiveModel(),
         inputGateResult
       })
@@ -1153,53 +1306,97 @@ async function executeTaskRunRequest(body, context) {
   }
 
   try {
-    const selectedModel = modelResolution.ok ? modelResolution.model : getActiveModel();
-    const execution = await runToolWithValidation({
-      tool,
-      fallbackPolicy: contextPacket.fallback,
-      runOnce: (fallbackContext = {}) => tool.handle({
-        task,
-        input: toolInput,
-        runtime: getActiveRuntime(),
-        options: buildModelRoutingOptions({
-          ...(body.options || {}),
-          model: selectedModel,
-          fallback: fallbackContext
-        }),
-        meta: {
-          requestId: context.identity.requestId,
-          run_id: context.identity.run_id,
-          trace_id: context.identity.trace_id,
-          context: contextPacket,
-          provider: getActiveProviderId(),
-          model: selectedModel,
-          model_role: modelRole,
-          fallback: fallbackContext
-        }
-      })
-    });
+    while (true) {
+      const selectedModel = modelResolution.ok ? modelResolution.model : getActiveModel();
 
-    return {
-      statusCode: 200,
-      tool,
-      contextPacket,
-      permissionResult,
-      body: buildEngineSuccess({
-        run_id: context.identity.run_id,
-        trace_id: context.identity.trace_id,
-        tool: body.tool,
-        task,
-        provider: getActiveProviderId(),
-        model: selectedModel,
-        model_role: modelRole,
-        result: normalizeToolResult(execution.result),
-        confidence: 1,
-        warnings: inputGateResult.warnings,
-        fallbacks_used: execution.fallbacks_used,
-        meta: buildTaskRunMeta(context, inputGateResult, execution.validation.ok, permissionResult)
-      })
-    };
+      try {
+        const execution = await runToolWithValidation({
+          tool,
+          fallbackPolicy: contextPacket.fallback,
+          runOnce: (fallbackContext = {}) => tool.handle({
+            task,
+            input: toolInput,
+            runtime: getActiveRuntime(),
+            options: buildModelRoutingOptions({
+              ...(body.options || {}),
+              model: selectedModel,
+              fallback: fallbackContext
+            }),
+            meta: {
+              requestId: context.identity.requestId,
+              run_id: context.identity.run_id,
+              trace_id: context.identity.trace_id,
+              context: contextPacket,
+              provider: getActiveProviderId(),
+              model: selectedModel,
+              model_role: activeModelRole,
+              fallback: fallbackContext
+            }
+          })
+        });
+
+        const release = releaseGarageModel(activeModelRole, selectedModel);
+        modelSwitches.push(...(release.switches || []));
+
+        return {
+          statusCode: 200,
+          tool,
+          contextPacket,
+          permissionResult,
+          body: buildEngineSuccess({
+            run_id: context.identity.run_id,
+            trace_id: context.identity.trace_id,
+            tool: body.tool,
+            task,
+            provider: getActiveProviderId(),
+            model: selectedModel,
+            model_role: activeModelRole,
+            result: normalizeToolResult(execution.result),
+            confidence: 1,
+            warnings: inputGateResult.warnings,
+            fallbacks_used: [...execution.fallbacks_used, ...combinedFallbacks],
+            meta: buildTaskRunMeta(context, inputGateResult, execution.validation.ok, permissionResult, {
+              model_switches: modelSwitches
+            })
+          })
+        };
+      } catch (error) {
+        if (error.code !== "SCHEMA_VALIDATION_FAILED") {
+          throw error;
+        }
+
+        const escalatedRole = modelGarage.escalateRole(activeModelRole);
+
+        if (
+          !escalatedRole
+          || !canEscalateToRole(escalatedRole)
+          || contextPacket.fallback.on_low_confidence !== "escalate_model_role"
+        ) {
+          throw error;
+        }
+
+        combinedFallbacks.push(...(error.fallbacks_used || []));
+        combinedFallbacks.push(`escalate_model_role:${escalatedRole}`);
+        activeModelRole = escalatedRole;
+        modelResolution = resolveModelForRoleWithGarage(activeModelRole);
+        modelSwitches.push(...(modelResolution.switches || []));
+
+        if (!modelResolution.ok) {
+          throw error;
+        }
+
+        const runtimeState = await checkRuntimeState(modelResolution.model);
+
+        if (!runtimeState.available || !runtimeState.modelReady) {
+          throw error;
+        }
+      }
+    }
   } catch (error) {
+    if (modelResolution.ok) {
+      releaseGarageModel(activeModelRole, modelResolution.model);
+    }
+
     const code = normalizeTaskRunErrorCode(error.code || "INTERNAL_ERROR");
     const statusCode = code === "NOT_IMPLEMENTED" ? 501 : code === "SCHEMA_VALIDATION_FAILED" ? 422 : 500;
 
@@ -1216,12 +1413,12 @@ async function executeTaskRunRequest(body, context) {
         code,
         message: error.message || "Tool execution failed.",
         nextStep: error.nextStep || getTaskRunErrorNextStep(code),
-        modelRole,
+        modelRole: activeModelRole,
         model: modelResolution.ok ? modelResolution.model : getActiveModel(),
         inputGateResult,
         permissionResult,
         schemaValid: code !== "SCHEMA_VALIDATION_FAILED",
-        fallbacksUsed: error.fallbacks_used || []
+        fallbacksUsed: [...(error.fallbacks_used || []), ...combinedFallbacks]
       })
     };
   }
@@ -1663,8 +1860,8 @@ function buildTaskRunError({
   });
 }
 
-function buildTaskRunMeta(context, inputGateResult = null, schemaValid = true, permissionResult = null) {
-  const extra = {};
+function buildTaskRunMeta(context, inputGateResult = null, schemaValid = true, permissionResult = null, extraMeta = {}) {
+  const extra = { ...extraMeta };
 
   if (inputGateResult) {
     extra.input_gate = {

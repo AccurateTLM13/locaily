@@ -36,6 +36,9 @@ const {
   createModelProfileManager
 } = require("../companion/core/model-profiles");
 const {
+  createModelGarage
+} = require("../companion/core/model-garage");
+const {
   createPermissionManager
 } = require("../companion/core/permissions");
 const {
@@ -457,6 +460,49 @@ async function testProviderRouter() {
   assert(router.getActiveProviderId() === "ollama", "Expected Ollama active provider.");
 }
 
+function testModelGarage() {
+  const garage = createModelGarage({
+    candidates: {
+      fast_worker: [
+        { id: "mock-fast", model: "mock-fast-model", size_gb: 0.1, label: "Mock Fast" }
+      ],
+      default_worker: [
+        { id: "mock-default", model: "mock-local-model", size_gb: 0.1, label: "Mock Default" }
+      ],
+      reasoning_worker: [
+        { id: "mock-reasoning", model: "mock-reasoning-model", size_gb: 0.1, label: "Mock Reasoning" }
+      ]
+    }
+  });
+
+  const prepared = garage.prepareForRole({
+    role: "fast_worker",
+    model: "mock-fast-model",
+    policy: "smart_load",
+    maxAutoModelGb: 4,
+    defaultModel: "mock-local-model"
+  });
+  const listAfterPrepare = garage.list({
+    profile: { policy: "smart_load", max_auto_model_gb: 4 },
+    installedModels: ["mock-fast-model", "mock-local-model"]
+  });
+  const released = garage.releaseAfterTask({
+    role: "fast_worker",
+    model: prepared.model,
+    policy: "smart_load",
+    defaultModel: "mock-local-model"
+  });
+  const escalated = garage.escalateRole("fast_worker");
+
+  assert(prepared.model === "mock-fast-model", "Expected garage to select fast worker model.");
+  assert(prepared.switches.length > 0, "Expected garage load switches.");
+  assert(prepared.switches.some((entry) => entry.action === "load"), "Expected garage load action.");
+  assert(listAfterPrepare.loaded_models.length > 0, "Expected loaded model slots after prepare.");
+  assert(released.switches.some((entry) => entry.action === "unload"), "Expected garage unload on release.");
+  assert(escalated === "default_worker", "Expected role escalation path.");
+  assert(listAfterPrepare.roles.some((role) => role.role === "fast_worker"), "Expected fast_worker garage role.");
+}
+
 function testModelProfileManager() {
   const roleManager = createModelRoleManager({
     defaultModel: "base-model",
@@ -673,6 +719,7 @@ async function main() {
   await testStandardTextPack();
   await testAuditLog();
   await testProviderRouter();
+  testModelGarage();
   testModelProfileManager();
   testModelRoleManager();
   testPermissionManager();

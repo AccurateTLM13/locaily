@@ -42,6 +42,7 @@ function normalizeAuditEvent(event) {
     input_summary: summarizeInput(event.input_summary),
     output_summary: summarizeOutput(event.output_summary),
     fallbacks_used: normalizeStringArray(event.fallbacks_used),
+    model_switches: normalizeModelSwitches(event.model_switches),
     duration_ms: normalizeNumber(event.duration_ms),
     status: event.status === "success" ? "success" : "error",
     error_code: event.error_code || null
@@ -78,6 +79,7 @@ function buildAuditEvent({
     input_summary: inputGateSummary || (contextPacket ? summarizeContextInput(contextPacket.input) : null),
     output_summary: summarizeResponseOutput(body),
     fallbacks_used: body.fallbacks_used || [],
+    model_switches: body.meta && body.meta.model_switches ? body.meta.model_switches : [],
     duration_ms: body.meta && typeof body.meta.duration_ms === "number"
       ? body.meta.duration_ms
       : Date.now() - startedAt,
@@ -214,6 +216,22 @@ function estimateChars(value) {
   } catch (error) {
     return String(value).length;
   }
+}
+
+function normalizeModelSwitches(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter((item) => item && typeof item === "object")
+    .map((item) => ({
+      action: stringOrNull(item.action),
+      model: stringOrNull(item.model),
+      role: stringOrNull(item.role),
+      reason: stringOrNull(item.reason),
+      timestamp: stringOrNull(item.timestamp)
+    }));
 }
 
 function normalizeStringArray(value) {

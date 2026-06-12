@@ -121,6 +121,16 @@ Tools request roles such as `default_worker`; the role manager resolves those ro
 
 Model suitability profiles (`lightweight`, `balanced`, `developer`) apply role mappings and memory policies. Track orchestration records profile and suitability metadata on model steps.
 
+### Model Garage And Auto Switching
+
+Implemented in:
+
+```txt
+companion/core/model-garage.js
+```
+
+The garage tracks candidate models per role, simulates load/unload policies (`single_loaded`, `smart_load`, `multi_warm`), records model switch events, and runs a benchmark harness against standard text tools.
+
 ### Permissions
 
 Implemented in:
@@ -164,6 +174,8 @@ GET  /models/roles
 POST /models/roles/set
 GET  /models/profiles
 POST /models/profiles/set
+GET  /models/garage
+POST /models/garage/evaluate
 POST /analyze       legacy compatibility
 ```
 

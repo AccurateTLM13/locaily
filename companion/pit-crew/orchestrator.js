@@ -99,6 +99,7 @@ async function runTrack({
       role: stepResult.meta.role || step.executor.role || "tool",
       profile_id: stepResult.meta.profile_id || options.profile_id || null,
       suitability: stepResult.meta.suitability || null,
+      switches: stepResult.meta.switches || [],
       durationMs: stepResult.meta.durationMs,
       output: stepResult.output
     });

@@ -285,5 +285,5 @@ Implemented:
 - `start-windows.bat` & `start-dev.ps1` (Windows startup scripts)
 
 Next phase:
-- Model Garage evaluation harness and auto model switching (Phase 2).
 - Track Classifier for multi-track auto-routing.
+- Full FallbackHandler escalation ladder and NearbyNodes stubs.

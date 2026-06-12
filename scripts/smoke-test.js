@@ -269,6 +269,58 @@ async function checkModelProfileSet() {
   assert(mockFast && mockFast.model === "mock-fast-model", "Expected mock fast worker from profile.");
 }
 
+async function checkModelGarageEndpoint() {
+  const garage = await request("/models/garage");
+  assert(garage.response.status === 200, "Expected GET /models/garage to return HTTP 200.");
+  assertJsonObject(garage.body, "/models/garage response");
+  assert(garage.body.ok === true, "Expected /models/garage ok true.");
+  assert(garage.body.garage && Array.isArray(garage.body.garage.roles), "Expected garage roles.");
+  assert(typeof garage.body.garage.policy === "string", "Expected garage policy.");
+  assert(Array.isArray(garage.body.garage.loaded_models), "Expected loaded model slots.");
+}
+
+async function checkModelGarageEvaluate() {
+  await request("/providers/set", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      provider: "mock"
+    })
+  });
+
+  try {
+    const evaluation = await request("/models/garage/evaluate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        provider: "mock",
+        roles: ["fast_worker", "default_worker"]
+      })
+    });
+
+    assert(evaluation.response.status === 200, "Expected POST /models/garage/evaluate HTTP 200.");
+    assertJsonObject(evaluation.body, "/models/garage/evaluate response");
+    assert(evaluation.body.ok === true, "Expected garage evaluation ok true.");
+    assert(Array.isArray(evaluation.body.results), "Expected evaluation results.");
+    assert(evaluation.body.results.length >= 3, "Expected at least one benchmark per role.");
+    assert(Array.isArray(evaluation.body.summary), "Expected evaluation summary.");
+  } finally {
+    await request("/providers/set", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        provider: "ollama"
+      })
+    });
+  }
+}
+
 async function checkTasksRunMockProviderDealSniper() {
   await request("/providers/set", {
     method: "POST",
@@ -1030,6 +1082,8 @@ async function main() {
   await runCheck("POST /models/roles/set", checkModelRoleSet);
   await runCheck("GET /models/profiles", checkModelProfilesEndpoint);
   await runCheck("POST /models/profiles/set", checkModelProfileSet);
+  await runCheck("GET /models/garage", checkModelGarageEndpoint);
+  await runCheck("POST /models/garage/evaluate", checkModelGarageEvaluate);
   await runCheck("tasks run DealSniper mock provider", checkTasksRunMockProviderDealSniper);
   await runCheck("tasks run text.clean mock provider", checkTasksRunTextCleanMockProvider);
   await runCheck("tasks run text.validate_schema", checkTasksRunTextValidateSchema);

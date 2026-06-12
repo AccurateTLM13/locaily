@@ -1,6 +1,6 @@
 # Pit Crew Platform — Gap Analysis
 
-Status: Phase 4 extraction (complete); Model Suitability Profiles (in progress)
+Status: Phase 4 extraction (complete); Model Suitability Profiles (complete); Model Garage (complete)
 
 ## Summary
 
@@ -24,7 +24,7 @@ The repo contains a **proof-of-concept pit crew** embedded inside the `lighthous
 | FallbackHandler | `retry_same_model_once` only | Full escalation ladder | **Future** |
 | Scoreboard | `scoreboard.js` + GET /scoreboard | Measured metrics + feedback | **Extend** |
 | CapabilityRegistry | Partial registry | Unified index | **Future** |
-| ModelGarage | All roles → llama3.2 | Slot-based candidates | Phase 2 |
+| ModelGarage | All roles → llama3.2 | Slot-based candidates | **Done** (`core/model-garage.js`) |
 | lighthouse_handoff | Tool + embedded orchestrator | Tool pack step only | **This extraction** |
 | NearbyNodes | — | Stubs | **Future** |
 
@@ -72,7 +72,6 @@ INTERIM (this milestone):
 - Full FallbackHandler escalation ladder
 - Track Classifier for multi-track auto-routing
 - NearbyNodes execution
-- Model Garage evaluation harness (Phase 2)
 - Markdown-only output without JSON handoff schema
 
 ## Success criteria (this milestone)
@@ -83,4 +82,5 @@ INTERIM (this milestone):
 - [x] `lighthouse-handoff` orchestrated mode uses same pit-crew runner (no duplicate inline logic)
 - [x] Smoke tests pass including new `/tracks/run` check
 - [x] Model suitability profiles (`GET/POST /models/profiles`) with role suitability metadata
+- [x] Model garage with auto switching policies and `GET/POST /models/garage/evaluate`
 - [x] Gap doc reflects completed items

@@ -13,14 +13,16 @@ function resolveModel(role, resolveModelForRole) {
     return {
       ok: true,
       role: role || "default_worker",
-      model: result.model
+      model: result.model,
+      switches: result.switches || []
     };
   }
 
   return {
     ok: true,
     role: role || "default_worker",
-    model: "mock-local-model"
+    model: "mock-local-model",
+    switches: []
   };
 }
 
@@ -56,6 +58,7 @@ async function executeModelStep({ step, context, runtime, options }) {
       role: modelResolution.role,
       profile_id: options.profile_id || null,
       suitability,
+      switches: modelResolution.switches || [],
       durationMs: Date.now() - stepStart
     }
   };
