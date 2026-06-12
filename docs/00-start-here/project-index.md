@@ -17,6 +17,8 @@ Master index of important Locaily documentation.
 | [../01-architecture/orchestration-flow.md](../01-architecture/orchestration-flow.md) | Multi-step workflows | current | coding-agent |
 | [../01-architecture/api-contract.md](../01-architecture/api-contract.md) | HTTP API contract | current | coding-agent |
 | [../02-workflows/lighthouse-handoff.md](../02-workflows/lighthouse-handoff.md) | First workflow | current | coding-agent |
+| [../02-workflows/lighthouse-handoff-validation.md](../02-workflows/lighthouse-handoff-validation.md) | L1 validation evidence | current | evaluation-agent |
+| [../02-workflows/lighthouse-handoff-extension-integration.md](../02-workflows/lighthouse-handoff-extension-integration.md) | Extension bridge spec | draft | coding-agent |
 | [../02-workflows/workflow-template.md](../02-workflows/workflow-template.md) | New workflow template | draft | documentation-agent |
 | [../02-workflows/task-track-template.md](../02-workflows/task-track-template.md) | Pit Crew track template | draft | documentation-agent |
 | [../02-workflows/validation-template.md](../02-workflows/validation-template.md) | Validation template | draft | evaluation-agent |

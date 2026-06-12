@@ -64,6 +64,26 @@ Linked from `docs/02-workflows/lighthouse-handoff.md`.
 
 ---
 
+## 2026-06-12 — Lighthouse Handoff L1 Validation Passed
+
+### Decision
+
+Record **L1 (Local Brain contract)** validation as passed based on `node scripts/contract-test.js` and `node scripts/smoke-test.js` (28/28 checks) on 2026-06-12.
+
+### Why
+
+Priority A after docs reorg: prove the first workflow test bench with evidence, not claims.
+
+### Status
+
+Confirmed for L1 only. L2–L4 (Ollama live, extension standalone, extension bridge) remain open.
+
+### Notes
+
+See `docs/02-workflows/lighthouse-handoff-validation.md`. Extension ↔ Local Brain HTTP bridge is not implemented.
+
+---
+
 ## 2026-06-12 — Root README and Agent Files Aligned to Locaily
 
 ### Decision

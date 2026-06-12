@@ -91,23 +91,37 @@ POST /analyze
 }
 ```
 
-3. Run `node scripts/smoke-test.js` for automated coverage.
+3. Run automated validation: `node scripts/smoke-test.js` (see [lighthouse-handoff-validation.md](./lighthouse-handoff-validation.md))
+
+## Validation Status
+
+| Tier | Scope | Status |
+|---|---|---|
+| L1 | Local Brain automated tests | **Passed** (28/28 smoke + contract helpers) |
+| L2 | Live Ollama orchestration | Open |
+| L3 | Extension standalone Markdown | Open (external repo) |
+| L4 | Extension ↔ Local Brain HTTP | **Not implemented** |
+
+Details: [lighthouse-handoff-validation.md](./lighthouse-handoff-validation.md)
+
+Integration spec (when wiring extension): [lighthouse-handoff-extension-integration.md](./lighthouse-handoff-extension-integration.md)
 
 ## What Is Confirmed vs Experimental
 
-**Confirmed**
+**Confirmed (Local Brain — L1)**
 
-- Tool registered and callable
+- Tool registered and callable via `/analyze` and `/tasks/run`
 - Deterministic path without Ollama
-- Orchestrated multi-step path in code
+- Orchestrated and baseline paths on mock provider (smoke-tested)
+- Input validation, unsafe input blocking, audit + scoreboard hooks
 - Prompt template at `companion/prompts/lighthouse-handoff.md`
 
 **Experimental / incomplete**
 
-- Chrome extension integration validation against this Local Brain repo (extension repo exists separately)
-- Validated quality comparison vs human-written handoffs
+- Extension ↔ Local Brain HTTP bridge (extension works standalone today)
+- Live Ollama orchestration sign-off on target hardware (L2)
+- Validated Markdown quality vs human-written handoffs (L3)
 - Benchmarks vs monolithic large-model pass
-- Full Markdown export pipeline as a separate artifact
 
 ## Related Code and Repos
 
@@ -120,6 +134,7 @@ POST /analyze
 **Chrome extension client**
 
 - https://github.com/mnfrdrsh/lighthouse-handoff
+- Standalone PSI → Markdown today; Local Brain bridge spec: [lighthouse-handoff-extension-integration.md](./lighthouse-handoff-extension-integration.md)
 
 ## Do Not
 

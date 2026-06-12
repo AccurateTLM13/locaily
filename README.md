@@ -175,7 +175,7 @@ node scripts/smoke-test.js
 Expected current result:
 
 ```txt
-Smoke test summary: 27/27 checks passed.
+Smoke test summary: 28/28 checks passed.
 ```
 
 ## Example `/tasks/run`
@@ -230,6 +230,7 @@ Start at [docs/00-start-here/README.md](docs/00-start-here/README.md).
 - [Architecture overview](docs/01-architecture/locaily-overview.md)
 - [API contract](docs/01-architecture/api-contract.md)
 - [Lighthouse Handoff workflow](docs/02-workflows/lighthouse-handoff.md)
+- [Lighthouse validation record](docs/02-workflows/lighthouse-handoff-validation.md)
 - [Client integration guide](docs/05-agents/client-integration-guide.md)
 - [Agent context](docs/05-agents/agent-context.md)
 - [Roadmap](docs/04-product/roadmap.md)

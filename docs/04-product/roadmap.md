@@ -16,10 +16,11 @@ Practical sequencing for Locaily. **Dates omitted**—order reflects dependency,
 
 ## Now — Stabilize First Workflow
 
-- [ ] Document and harden Lighthouse Handoff validation path
-- [ ] Example client folder for extension bridge
-- [ ] Persistent provider / model role config
-- [ ] CORS policy for extension testing
+- [x] Document Lighthouse Handoff L1 validation (smoke + contract)
+- [x] Extension integration spec (bridge not implemented)
+- [ ] Implement extension ↔ Local Brain HTTP bridge (extension repo + CORS/proxy)
+- [ ] L2: live Ollama orchestration evidence on target hardware
+- [ ] Example normalized fixture in `examples/lighthouse-handoff/`
 
 ## Next — Pit Crew Mechanics
 

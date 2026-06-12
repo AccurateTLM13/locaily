@@ -932,7 +932,7 @@ async function main() {
   await runCheck("DealSniper input validation", checkDealSniperInputValidation);
   await runCheck("unsafe input blocked", checkUnsafeInputBlocked);
   await runCheck("risky input warning", checkRiskyInputWarning);
-  await runCheck("Lighthouse Handoff stub success", checkLighthouseStubSuccess);
+  await runCheck("Lighthouse Handoff deterministic success", checkLighthouseStubSuccess);
   await runCheck("tasks run Lighthouse success", checkTasksRunLighthouseSuccess);
   await runCheck("tasks run DealSniper provider failure", checkTasksRunDealSniperProviderFailure);
   await runCheck("tasks run unsafe input blocked", checkTasksRunUnsafeInputBlocked);
