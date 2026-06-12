@@ -210,13 +210,18 @@ Smoke test summary: 27/27 checks passed.
 
 ## Documentation
 
-- [Architecture](docs/architecture.md)
-- [API contract](docs/api-contract.md)
-- [Tool integration guide](docs/tool-integration-guide.md)
-- [Current-to-engine implementation plan](docs/current-to-local-ai-engine-implementation-plan.md)
-- [Packaging plan](docs/packaging-plan.md)
-- [Desktop companion decision](docs/desktop-companion-decision.md)
-- [Publish readiness checklist](docs/publish-readiness-checklist.md)
+Start at [docs/00-start-here/README.md](docs/00-start-here/README.md).
+
+- [Current vision](docs/00-start-here/current-vision.md)
+- [Project index](docs/00-start-here/project-index.md)
+- [Architecture overview](docs/01-architecture/locaily-overview.md)
+- [API contract](docs/01-architecture/api-contract.md)
+- [Lighthouse Handoff workflow](docs/02-workflows/lighthouse-handoff.md)
+- [Client integration guide](docs/05-agents/client-integration-guide.md)
+- [Agent context](docs/05-agents/agent-context.md)
+- [Roadmap](docs/04-product/roadmap.md)
+- [Packaging plan](docs/04-product/packaging-plan.md)
+- [Publish readiness checklist](docs/04-product/publish-readiness-checklist.md)
 
 ## Amendment: Tiny Model Garage / Track-Based Clustering
 

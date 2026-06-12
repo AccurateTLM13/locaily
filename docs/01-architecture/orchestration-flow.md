@@ -1,0 +1,92 @@
+# Orchestration Flow
+
+## What It Is
+
+**Orchestration** is multi-step execution inside a workflow track: breaking work into steps, running each step with the right role/tool, validating intermediates, and assembling a final result.
+
+## What It Owns
+
+- Step sequencing and intermediate schemas
+- Per-step model role assignment
+- Step timing metadata
+- Combining step outputs into final workflow result
+
+## What It Does Not Own
+
+- Global API auth or CORS
+- Pack installation
+- NearbyNode delegation (future)
+
+## High-Level Shape
+
+```txt
+Workflow input
+    │
+    ▼
+Step 1 (e.g. extract)     → fast_worker
+    │ validate intermediate
+    ▼
+Step 2 (e.g. classify)    → default_worker
+    │ validate intermediate
+    ▼
+Step 3 (e.g. prioritize)  → reasoning_worker
+    │ validate final
+    ▼
+Workflow result
+```
+
+## Implemented Example: Lighthouse Handoff
+
+`companion/core/orchestrator.js` defines `executeLighthouseHandoffTrack`:
+
+| Step | Purpose | Typical role |
+|---|---|---|
+| `extract_metrics` | Pull scores and URL | `fast_worker` |
+| `classify_issues` | Group issues by category/severity | `default_worker` |
+| `prioritize_fixes` | Rank fixes with reasoning | `reasoning_worker` |
+
+The tool handler in `companion/tools/lighthouse-handoff.js` chooses orchestrated vs baseline vs deterministic demo paths.
+
+## Inputs
+
+- Normalized workflow input (e.g. Lighthouse JSON fields)
+- Runtime adapter with `generateJson(prompt, schema, options)`
+- Options: `execution_mode`, model overrides, `resolveModelForRole`
+
+## Outputs
+
+- Final schema-constrained result for the workflow
+- `stepsRun` metadata where recorded (for evaluation / scoreboard)
+
+## Communicates With
+
+- Tool handler
+- Provider runtime
+- Result validator (per step and final)
+- Scoreboard (experimental metrics capture)
+
+## Design Principle
+
+Core orchestration mechanics should stay **boring and stable**. Weird, domain-specific logic belongs in tool packs and workflow modules—not in the server monolith.
+
+## Target Direction (Not Fully Built)
+
+From evolution notes:
+
+```txt
+User → Track Classifier → Orchestrator → Model + Tool Pack → Local Brain
+```
+
+Today, the client or tool id effectively acts as the classifier (e.g. calling `lighthouse-handoff`).
+
+## Still Undecided
+
+- Generic orchestration DSL vs per-workflow code
+- Persisting partial workflow state across failures
+- Human-in-the-loop review steps
+- Running steps on NearbyNode hardware
+
+## Archive
+
+- `docs/99-archive/raw-conversation-captures/Local AI Engine Evolution.txt`
+- `docs/99-archive/deprecated-plans/new-local-ai-engine-dev-docs/01-architecture-overview.md`

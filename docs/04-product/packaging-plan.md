@@ -97,7 +97,7 @@ The current server prints this same information in a compact status block. Port 
 
 This is the real user version.
 
-Status: planned but not started. The implementation decision is documented in `docs/desktop-companion-decision.md`.
+Status: planned but not started. The implementation decision is documented in `docs/04-product/desktop-companion-decision.md`.
 
 Current direction: Tauri-first, with Electron as a fallback if prototype work proves Tauri is a poor fit.
 
