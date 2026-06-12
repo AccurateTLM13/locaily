@@ -144,6 +144,25 @@ Suggested states:
 | `running` | Request is in progress |
 | `fallback` | Tool execution failed and client fallback is active |
 
+## Lighthouse Handoff (first workflow client)
+
+Extension repo: https://github.com/mnfrdrsh/lighthouse-handoff
+
+The extension currently generates Markdown client-side from PSI. Optional Local Brain enhancement uses the same tool id:
+
+```js
+await runTool("lighthouse-handoff", {
+  url: auditedUrl,
+  scores: { performance, accessibility, bestPractices, seo },
+  opportunities,
+  diagnostics
+}, {
+  execution_mode: "orchestrated" // or "baseline" or omit for deterministic
+});
+```
+
+Bridge spec and validation tiers: [../02-workflows/lighthouse-handoff-extension-integration.md](../02-workflows/lighthouse-handoff-extension-integration.md), [../02-workflows/lighthouse-handoff-validation.md](../02-workflows/lighthouse-handoff-validation.md).
+
 ## Compatibility Rule
 
 Treat `/tasks/run` as canonical and `/analyze` as compatibility. Do not rely on raw model prose; always consume structured JSON envelopes.

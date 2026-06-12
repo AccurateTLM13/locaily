@@ -110,11 +110,11 @@ MVP requires:
 - [x] `AGENT.md` exists.
 - [x] `AGENTS.md` exists.
 - [x] `README.md` exists.
-- [x] `docs/architecture.md` exists.
-- [x] `docs/api-contract.md` exists.
-- [x] `docs/implementation-plan.md` exists.
-- [x] `docs/tool-integration-guide.md` exists.
-- [x] `docs/packaging-plan.md` exists.
+- [x] `docs/01-architecture/locaily-overview.md` exists.
+- [x] `docs/01-architecture/api-contract.md` exists.
+- [x] `docs/00-start-here/project-index.md` exists.
+- [x] `docs/05-agents/client-integration-guide.md` exists.
+- [x] `docs/04-product/packaging-plan.md` exists.
 - [x] Docs do not claim unbuilt features as finished.
 
 ## Repo Hygiene

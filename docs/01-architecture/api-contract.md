@@ -17,8 +17,11 @@ Canonical engine API:
 ```txt
 GET  /health
 GET  /tools
+GET  /tracks
+POST /tracks/run
 POST /tasks/run
 GET  /audit
+GET  /scoreboard
 GET  /providers/status
 POST /providers/set
 GET  /models/roles
