@@ -2,34 +2,41 @@
 
 This file mirrors the intent of `AGENT.md` for editors and coding tools that look for `AGENTS.md`.
 
+**Read first:** [docs/00-start-here/README.md](docs/00-start-here/README.md) and [docs/05-agents/agent-context.md](docs/05-agents/agent-context.md)
+
 ## Role of the Coding Agent
 
-You are helping develop a reusable local-first AI platform. Your job is to keep the architecture clean, practical, and publishable.
+You are helping develop **Locaily**—a reusable local-first AI coordination stack. Your job is to keep the architecture clean, practical, and publishable.
 
-The platform should run locally, expose a small HTTP API, connect to a local model runtime such as Ollama, and allow multiple tools to plug into it.
+The **Local Brain** (companion server in this repo) should run locally, expose a small HTTP API, connect to local model runtimes such as Ollama, and allow tools and workflows to plug in through a registry.
 
 ## Core Mental Model
 
 ```txt
-Local AI Platform = main project
-DealSniper AI = required MVP working tool
-Lighthouse Handoff = MVP stub/demo tool, full support post-MVP
-Future tools = integrations/plugins
+Locaily = umbrella project
+Local Brain = coordinator / orchestrator (companion/server.js)
+NearbyNode = nearby device / capability layer (planned, not fully built)
+AI Pit Crew = specialized model / tool / task-track strategy
+Lighthouse Handoff = first practical workflow / validation test bench
+DealSniper = showcase model-backed tool (not the whole product)
+Tool packs = plugin-style capabilities (e.g. standard-text-pack)
 ```
 
-Do not treat DealSniper as the entire product.
+Do not treat DealSniper or Lighthouse Handoff as the entire product.
+
+**Device = capability.** Not every node needs a model; every node needs a connector.
 
 ## Primary Goal
 
-Create a local companion server that can:
+Maintain a local coordinator that can:
 
 - Run on the user's machine
 - Listen on `127.0.0.1:31313`
 - Report status through `/health`
-- Accept structured requests through `/analyze`
-- Talk to Ollama on `127.0.0.1:11434`
-- Return structured JSON responses
-- Support multiple tools through a registry
+- Accept structured requests through `/tasks/run` (canonical) and `/analyze` (legacy)
+- Talk to Ollama on `127.0.0.1:11434` via the provider router
+- Return structured JSON envelopes
+- Support tools through a manifest-backed registry
 
 ## Build Constraints
 
@@ -39,6 +46,7 @@ Create a local companion server that can:
 - Avoid premature desktop-app complexity.
 - Keep client integrations separate from platform core.
 - Keep prompts, schemas, and tool handlers organized.
+- Do not default to bigger models as the answer; prefer roles, tracks, tools, and validators.
 
 ## Contract Source of Truth
 
@@ -46,7 +54,8 @@ Create a local companion server that can:
 - Tool handlers return raw result objects only.
 - Runtime adapters expose `generateJson(prompt, schema, options = {})`.
 - Errors use the same envelope as successes, with `ok: false`, `result: null`, and an `error` object.
-- MVP requires DealSniper as the working tool and Lighthouse Handoff as a stub/demo tool.
+- New clients use `/tasks/run`; legacy clients may use `/analyze`.
+- Full contract: [docs/01-architecture/api-contract.md](docs/01-architecture/api-contract.md)
 
 ## Endpoint Requirements
 
@@ -57,14 +66,17 @@ Must tell clients:
 - Companion server is running
 - Runtime provider
 - Whether runtime is available
-- Selected model name
-- Whether model is ready
+- Selected model name / role readiness
 - Registered tools
-- Platform version
+- Platform version and canonical endpoint hints
 
-### `POST /analyze`
+### `POST /tasks/run` (canonical)
 
-Must accept:
+Preferred endpoint for new tools and clients. Accepts tool id, input, context, and options. Returns the engine result envelope documented in the API contract.
+
+### `POST /analyze` (legacy)
+
+Must remain compatible for existing clients. Accepts:
 
 ```json
 {
@@ -125,30 +137,16 @@ Each tool should define:
 - Supported tasks
 - Input expectations
 - Output schema
-- Prompt/template
+- Prompt/template (when model-backed)
 - Handler function that returns a raw result object
 
-Example:
+Tool handlers must not return partial API envelopes. The platform wraps handler output into the final response.
 
-```js
-export const dealSniperTool = {
-  id: "deal-sniper",
-  name: "DealSniper AI",
-  tasks: ["analyze-listing"],
-  async handle({ task, input, runtime, options }) {
-    // validate input
-    // build prompt
-    // call runtime
-    // normalize and return raw result only
-  }
-};
-```
-
-Tool handlers must not return partial API envelopes. The platform wraps handler output into the final `/analyze` response.
+Tool packs load from `tool-packs/*/tool.json` manifests via `companion/tools/registry.js`.
 
 ## Runtime Adapter Pattern
 
-Keep Ollama-specific code in a runtime adapter.
+Keep provider-specific code in runtime adapters and the provider router.
 
 Do not spread Ollama calls throughout the app.
 
@@ -160,31 +158,13 @@ Suggested responsibilities:
 - `generate(prompt, options = {})`
 - `generateJson(prompt, schema, options = {})`
 
-For `generateJson(prompt, schema, options = {})`:
-
-- `prompt` is the final model prompt.
-- `schema` is the expected JSON shape or validation schema.
-- `options` includes model, temperature, timeout, provider settings, and task metadata.
+Tools should request **model roles** (`fast_worker`, `default_worker`, …), not hardcode raw model names when avoidable.
 
 ## Response Rules
 
 Clients need predictable responses. Do not return random prose unless wrapped in a known result field.
 
-Every `/analyze` response should include:
-
-- `ok`
-- `tool`
-- `task`
-- `provider`
-- `model`
-- `result`
-- `meta`
-
-Errors should also include:
-
-- `error.code`
-- `error.message`
-- `error.nextStep` when useful
+Every response should include `ok`, tool/task identifiers, provider/model context where applicable, `result` or `error`, and `meta`.
 
 ## Security and Privacy Rules
 
@@ -195,38 +175,29 @@ This is a local server. Still treat it seriously.
 - Add CORS carefully.
 - Only allow approved origins during browser-extension testing.
 - Do not log sensitive user data by default.
-- Make tool permissions explicit in future versions.
+- Enforce tool permissions through the permission manager.
 
-## First Integrations
+## Key Integrations
 
-### DealSniper AI
+### DealSniper AI (showcase tool)
 
-Purpose: Analyze marketplace listings.
+Purpose: Analyze marketplace listings. Model-backed showcase—not the product centerpiece.
 
-Expected output may include:
+### Lighthouse Handoff (first workflow)
 
-- Deal score
-- Risk level
-- Summary
-- Red flags
-- Negotiation tip
-- Suggested next action
+Purpose: Convert Lighthouse/PageSpeed data into developer handoff notes. This is Locaily's **first workflow test bench**, not a throwaway stub.
 
-DealSniper is the required fully working MVP tool.
+**Current behavior:**
 
-### Lighthouse Handoff
+- Deterministic fallback when no usable runtime is available
+- Multi-step orchestrated path when runtime is available (`companion/core/orchestrator.js`)
+- Chrome extension client: https://github.com/mnfrdrsh/lighthouse-handoff
 
-Purpose: Convert Lighthouse/PageSpeed data into useful developer handoff notes.
+Do not describe Lighthouse Handoff as "stub only" in new docs. Do not claim production validation for the full extension workflow without evidence.
 
-For MVP, Lighthouse Handoff only needs to exist as a stub/demo tool that proves the registry supports a second integration. Full production logic is post-MVP.
+### Standard Text Pack
 
-Expected future output may include:
-
-- Priority fixes
-- Client-friendly summary
-- Developer checklist
-- Estimated impact
-- Recommended next steps
+Engine-native manifest-backed pack (`text.clean`, `text.summarize`, etc.).
 
 ## Quality Bar
 
@@ -234,19 +205,19 @@ The project should feel like a serious open-source tool, not a messy one-off scr
 
 Before considering the project ready to publish, make sure:
 
-- README is clear.
-- Architecture docs are present.
-- API contract is documented.
-- Example clients are included or referenced.
-- Smoke tests exist.
-- Errors are readable.
-- Setup flow is not confusing.
+- README and agent docs point to `docs/00-start-here/`
+- Architecture docs are present and match code
+- API contract is documented
+- Clients/workflows are referenced (Lighthouse extension repo linked)
+- Smoke and contract tests exist
+- Errors are readable
+- Setup flow is not confusing
 
 ## Agent Behavior
 
 When making changes:
 
-1. Preserve the platform-first architecture.
+1. Preserve the platform-first / Local Brain architecture.
 2. Avoid unnecessary dependencies.
 3. Keep files organized.
 4. Update docs when changing behavior.
@@ -254,35 +225,40 @@ When making changes:
 6. Keep schemas stable.
 7. Do not silently change client response formats.
 8. Do not invent unimplemented capabilities in docs.
-
-## Current MVP Target
-
-MVP requires:
-
-1. Local companion server
-2. `/health` endpoint
-3. `/analyze` endpoint
-4. Ollama runtime adapter
-5. Tool registry
-6. One fully working tool: DealSniper
-7. One stub/demo second tool: Lighthouse Handoff
-8. Consistent response envelopes
-9. README setup instructions
-10. Basic smoke test script
+9. Do not claim benchmark results without data.
+10. Document decisions in [docs/06-decisions/decision-log.md](docs/06-decisions/decision-log.md).
 
 ## Current Implementation Status
 
-Core phases, including the dynamic manifest-backed Tool Pack registry (Phase L), are fully implemented.
+Core engine modules and manifest-backed tool packs are implemented.
 
 Implemented:
-- `companion/server.js` (core companion server)
-- `companion/runtime/ollama.js` (runtime adapter)
-- `companion/tools/registry.js` (dynamic manifest-backed tool pack registry loader)
-- `companion/tools/deal-sniper.js` (showcase tool)
-- `companion/tools/lighthouse-handoff.js` (showcase tool)
-- `tool-packs/standard-text-pack/` (first official manifest-backed tool pack containing manifest, schemas, implementations, and examples)
-- `scripts/smoke-test.js` & `scripts/contract-test.js` (test suites)
-- `start-windows.bat` & `start-dev.ps1` (Windows startup scripts)
 
-Next phase:
-- Development of Locaily V2 Track-Based Orchestration and Model Suitability Profiles.
+- `companion/server.js` (Local Brain / companion server)
+- `companion/core/*` (input gate, context, permissions, validator, audit, orchestrator)
+- `companion/providers/router.js` (Ollama + mock)
+- `companion/runtime/ollama.js`
+- `companion/tools/registry.js` (manifest-backed tool pack loader)
+- `companion/tools/deal-sniper.js`, `companion/tools/lighthouse-handoff.js`
+- `tool-packs/standard-text-pack/`
+- `scripts/smoke-test.js`, `scripts/contract-test.js`
+- `start-windows.bat`, `start-dev.ps1`
+
+Next focus areas (see [docs/04-product/roadmap.md](docs/04-product/roadmap.md)):
+
+- Harden Lighthouse Handoff validation end-to-end with the extension client
+- NearbyNode capability connectors (spec + prototype)
+- AI Pit Crew track classifier and model suitability profiles
+- Desktop Companion UI (deferred; see desktop companion decision doc)
+
+## Documentation Map
+
+| Need | Path |
+|---|---|
+| Start here | [docs/00-start-here/README.md](docs/00-start-here/README.md) |
+| Vision / glossary | [docs/00-start-here/current-vision.md](docs/00-start-here/current-vision.md) |
+| Architecture | [docs/01-architecture/locaily-overview.md](docs/01-architecture/locaily-overview.md) |
+| Lighthouse workflow | [docs/02-workflows/lighthouse-handoff.md](docs/02-workflows/lighthouse-handoff.md) |
+| Agent rules | [docs/05-agents/agent-context.md](docs/05-agents/agent-context.md) |
+| Decisions | [docs/06-decisions/decision-log.md](docs/06-decisions/decision-log.md) |
+| Archive (context only) | [docs/99-archive/README.md](docs/99-archive/README.md) |

@@ -64,6 +64,26 @@ Linked from `docs/02-workflows/lighthouse-handoff.md`.
 
 ---
 
+## 2026-06-12 — Root README and Agent Files Aligned to Locaily
+
+### Decision
+
+Reframe root `README.md`, `AGENTS.md`, and `AGENT.md` to use Locaily naming, point to `docs/00-start-here/`, and describe Lighthouse Handoff as the first workflow (not a stub-only integration).
+
+### Why
+
+Owner chose priority **B** after docs reorganization: reduce confusion for builders and coding agents reading repo-root files first.
+
+### Status
+
+Confirmed
+
+### Notes
+
+Legacy alias "Local AI Platform" may still appear in archived docs and older checklists.
+
+---
+
 ## 2026-06-12 — Docs Reorganized Around Locaily Vision
 
 ### Decision

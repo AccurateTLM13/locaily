@@ -1,59 +1,67 @@
-# AGENT.md - Local AI Platform Development Guide
+# AGENT.md - Locaily Development Guide
+
+This file is the human-oriented development guide. Coding tools that look for `AGENTS.md` should use that file too—it mirrors this intent with agent-specific rules.
+
+**Read first:** [docs/00-start-here/README.md](docs/00-start-here/README.md)
 
 ## Project Mission
 
-Build a reusable **local-first AI platform** that runs on a user's machine and allows approved tools, browser extensions, websites, and apps to make structured local AI requests.
-
-The platform is not just for one Chrome extension. DealSniper AI and Lighthouse Handoff are the first proof-of-concept tools, but the core goal is a reusable local AI layer.
+Build **Locaily**: a reusable **local-first AI coordination stack** that runs on a user's machine and lets approved tools, browser extensions, websites, and apps make structured local AI requests through the **Local Brain**.
 
 Core idea:
 
 ```txt
-One local AI companion. Many tools can plug into it.
+One local coordinator. Many tools and workflows can plug into it.
 ```
 
 ## Product Positioning
 
-This project should be treated as the **main open-source platform**.
-
-Example tools such as DealSniper AI and Lighthouse Handoff should be treated as clients/integrations that call into the platform.
+Locaily is the **umbrella project**. The companion server in this repo is the **Local Brain**.
 
 Do not frame the project as:
 
 ```txt
 AI inside a Chrome extension
+One demo tool
+A chatbot
 ```
 
 Frame it as:
 
 ```txt
-A local AI companion platform that powers private AI calls for browser extensions, websites, apps, and developer tools.
+A local-first coordination layer (Local Brain) that powers structured AI workflows
+for browser extensions, websites, apps, and developer tools—using capability-first
+routing, tool packs, and AI Pit Crew orchestration instead of one giant model by default.
 ```
+
+Public architecture terms: **Local Brain**, **NearbyNode**, **AI Pit Crew**, **Lighthouse Handoff**.
 
 ## Architecture Summary
 
 ```txt
-Client Tool
-  - Chrome extension
+Client / Workflow
+  - Chrome extension (Lighthouse Handoff)
   - Website helper
-  - Static site assistant
   - Dev tool
-  - Internal app
-        ->
-Local AI Platform / Companion Server
+  - CLI
+        │
+        ▼
+Local Brain (companion server)
   - localhost API
-  - permissions
-  - tool registry
-  - schemas
-  - prompt routing
-  - model runtime adapter
-        ->
-Local AI Runtime
-  - Ollama first
-  - other runtimes later
-        ->
-Local Model
+  - input gate / context / permissions
+  - tool registry + tool packs
+  - orchestrator + AI Pit Crew roles
+  - provider router
+  - audit log
+        │
+        ▼
+Local providers + capabilities
+  - Ollama (implemented)
+  - mock (implemented)
+  - NearbyNode connectors (planned)
 ```
+
+Full docs: [docs/01-architecture/locaily-overview.md](docs/01-architecture/locaily-overview.md)
 
 ## Initial Technical Direction
 
@@ -71,21 +79,15 @@ Primary Ollama port:
 11434
 ```
 
-The first runtime adapter should target Ollama.
+The first runtime adapter targets Ollama. The project should remain easy to run on Windows.
 
-The project should remain easy to run on Windows.
-
-Development-first command should eventually be as simple as:
+Development command:
 
 ```bash
 node companion/server.js
 ```
 
-Later production packaging can become:
-
-```txt
-LocalAICompanion.exe
-```
+Later packaging may add a Desktop Companion control panel—not a replacement for the Local Brain server.
 
 ## Contract Source of Truth
 
@@ -93,138 +95,105 @@ LocalAICompanion.exe
 - Tool handlers return raw result objects only.
 - Runtime adapters expose `generateJson(prompt, schema, options = {})`.
 - Errors use the same envelope as successes, with `ok: false`, `result: null`, and an `error` object.
-- MVP requires DealSniper as the working tool and Lighthouse Handoff as a stub/demo tool.
+- New clients use `POST /tasks/run`; legacy clients use `POST /analyze`.
+- Canonical spec: [docs/01-architecture/api-contract.md](docs/01-architecture/api-contract.md)
 
 ## Non-Negotiable Product Principles
 
-1. **Local-first**
-   AI requests should be processed locally whenever the local runtime is available.
-2. **Tool-agnostic**
-   The platform should not be hardcoded only for DealSniper.
-3. **Structured I/O**
-   Tools should send predictable JSON and receive predictable JSON.
-4. **Graceful fallback**
-   Clients should be able to continue in standard/non-AI mode if the companion or model is unavailable.
-5. **Low setup friction**
-   Early versions may require terminal commands. Real user versions should move toward a desktop companion.
-6. **Privacy-aware by default**
-   The system should make it obvious when data is processed locally and what tool is requesting access.
-7. **Extensible without chaos**
-   New tools should plug in through a registry/config/schema approach, not random one-off endpoints everywhere.
+1. **Local-first** — process locally when the runtime is available.
+2. **Capability-first** — route by capability and track, not "biggest model wins."
+3. **Tool-agnostic** — do not hardcode the core around one integration.
+4. **Structured I/O** — predictable JSON in and out.
+5. **Graceful fallback** — deterministic paths when runtime is missing.
+6. **Low setup friction** — terminal-first now; Desktop Companion later.
+7. **Privacy-aware by default** — localhost binding, minimal logging.
+8. **Extensible without chaos** — registry, manifests, schemas—not one-off endpoints.
 
 ## Suggested Repo Structure
 
 ```txt
-local-ai-platform/
+locailly/
   AGENT.md
   AGENTS.md
   README.md
   companion/
     server.js
-    config.json
+    core/
+    providers/
     runtime/
-      ollama.js
     tools/
-      deal-sniper.js
-      lighthouse-handoff.js
-    schemas/
-      deal-sniper.schema.json
-      lighthouse-handoff.schema.json
-    prompts/
-      deal-sniper.md
-      lighthouse-handoff.md
+  tool-packs/
+    standard-text-pack/
   docs/
-    architecture.md
-    api-contract.md
-    implementation-plan.md
-    packaging-plan.md
-    tool-integration-guide.md
-    publish-readiness-checklist.md
-  examples/
-    deal-sniper-extension/
-    lighthouse-handoff-client/
+    00-start-here/
+    01-architecture/
+    02-workflows/
+    03-research/
+    04-product/
+    05-agents/
+    06-decisions/
+    99-archive/
   scripts/
     smoke-test.js
+    contract-test.js
 ```
 
-## MVP Scope
+## Showcase Tools and First Workflow
 
-MVP requires:
+| Integration | Role today |
+|---|---|
+| **DealSniper** | Showcase model-backed listing analysis tool |
+| **Lighthouse Handoff** | First workflow test bench; deterministic + orchestrated paths |
+| **Standard Text Pack** | First manifest-backed engine pack |
 
-1. Local companion server
-2. `/health` endpoint
-3. `/analyze` endpoint
-4. Ollama runtime adapter
-5. Tool registry
-6. One fully working tool: DealSniper
-7. One stub/demo second tool: Lighthouse Handoff
-8. Consistent response envelopes
-9. README setup instructions
-10. Basic smoke test script
+Lighthouse extension client repo: https://github.com/mnfrdrsh/lighthouse-handoff
 
-DealSniper is required for MVP. Lighthouse Handoff only needs to exist as a stub/demo integration for MVP; full Lighthouse Handoff production logic is post-MVP.
+Workflow doc: [docs/02-workflows/lighthouse-handoff.md](docs/02-workflows/lighthouse-handoff.md)
 
 ## Current Implementation Status
 
-Phases 1 through 8 are implemented. Phase 9 documentation synchronization is in progress/completing.
+Engine core, provider router, permissions, audit log, manifest-backed tool packs, and Lighthouse orchestration are implemented.
 
 Implemented:
 
-- `companion/server.js`
-- `companion/runtime/ollama.js`
-- `companion/tools/registry.js`
-- `companion/tools/deal-sniper.js`
-- `companion/tools/lighthouse-handoff.js`
-- prompt and schema files for both tools
-- `scripts/smoke-test.js`
+- `companion/server.js` and `companion/core/*`
+- `companion/providers/router.js`, `companion/runtime/ollama.js`
+- `companion/tools/registry.js`, showcase tools, `tool-packs/standard-text-pack/`
+- `scripts/smoke-test.js`, `scripts/contract-test.js`
+- Windows/PowerShell launch helpers
 
-Next phase:
-
-- Phase 10 packaging preparation with Windows-friendly launch helpers and clearer tester setup.
+Next phases: see [docs/04-product/roadmap.md](docs/04-product/roadmap.md)
 
 ## Expected Client Behavior
 
-Client tools should not assume local AI exists.
+Clients should not assume local AI exists.
 
 They should:
 
-1. Call `/health`.
-2. Show connected/unavailable/model-not-ready states.
-3. Call `/analyze` only when the companion and selected model are ready.
-4. Fall back to standard mode when unavailable.
-5. Never crash because local AI is missing.
+1. Call `GET /health`.
+2. Call `GET /tools` for discovery.
+3. Prefer `POST /tasks/run`; use legacy `POST /analyze` only when required.
+4. Show connected / unavailable / model-not-ready states.
+5. Fall back gracefully when runtime or model is missing.
+6. Never crash because local AI is missing.
+
+Integration guide: [docs/05-agents/client-integration-guide.md](docs/05-agents/client-integration-guide.md)
 
 ## Core Endpoints
 
 ### `GET /health`
 
-Checks whether the companion is running and whether the local runtime/model is available.
+Reports companion, provider, model, and tool readiness. See API contract for full shape.
 
-Expected response shape:
+### `POST /tasks/run` (canonical)
 
-```json
-{
-  "ok": true,
-  "service": "local-ai-platform",
-  "version": "0.1.0",
-  "runtime": {
-    "provider": "ollama",
-    "available": true,
-    "baseUrl": "http://127.0.0.1:11434"
-  },
-  "model": {
-    "name": "llama3.2",
-    "ready": true
-  },
-  "tools": ["deal-sniper", "lighthouse-handoff"]
-}
-```
+Generic tool execution for new clients.
 
-### `POST /analyze`
+### `POST /analyze` (legacy)
 
-Generic tool analysis endpoint.
+Legacy tool/task endpoint. Must remain compatible.
 
-Expected request shape:
+Example legacy request:
 
 ```json
 {
@@ -235,52 +204,9 @@ Expected request shape:
 }
 ```
 
-Expected success response shape:
-
-```json
-{
-  "ok": true,
-  "tool": "deal-sniper",
-  "task": "analyze-listing",
-  "provider": "ollama",
-  "model": "llama3.2",
-  "result": {},
-  "meta": {
-    "requestId": "string",
-    "durationMs": 0,
-    "createdAt": "ISO-8601 string"
-  }
-}
-```
-
-Expected error response shape:
-
-```json
-{
-  "ok": false,
-  "tool": "deal-sniper",
-  "task": "analyze-listing",
-  "provider": "ollama",
-  "model": "llama3.2",
-  "result": null,
-  "error": {
-    "code": "MODEL_NOT_READY",
-    "message": "The local model is not ready.",
-    "nextStep": "Start Ollama and pull the configured model."
-  },
-  "meta": {
-    "requestId": "string",
-    "durationMs": 0,
-    "createdAt": "ISO-8601 string"
-  }
-}
-```
-
 ## Runtime Adapter Pattern
 
-Keep Ollama-specific code in a runtime adapter.
-
-Runtime adapters should expose:
+Keep provider-specific code in adapters. Expose:
 
 - `isAvailable()`
 - `listModels()`
@@ -288,77 +214,53 @@ Runtime adapters should expose:
 - `generate(prompt, options = {})`
 - `generateJson(prompt, schema, options = {})`
 
-For `generateJson(prompt, schema, options = {})`:
-
-- `prompt` is the final model prompt.
-- `schema` is the expected JSON shape or validation schema.
-- `options` includes model, temperature, timeout, provider settings, and task metadata.
-
 ## Error Philosophy
 
-Errors should be understandable to normal builders and use the standard full `/analyze` envelope.
-
-Avoid vague responses like:
-
-```txt
-500 Internal Server Error
-```
-
-Prefer an envelope with a clear `error` object and useful `nextStep`.
+Return structured envelopes with clear `error.code`, `error.message`, and `error.nextStep` when useful—not opaque 500s.
 
 ## Development Priorities
 
-Build in this order:
+Build and maintain in this order:
 
-1. Companion server boots.
-2. `/health` returns useful state.
-3. Ollama detection works.
-4. `/analyze` accepts generic tool requests.
-5. Tool registry loads known tools.
-6. DealSniper tool works.
-7. Lighthouse Handoff stub/demo works through the same pattern.
-8. Responses match client expectations.
-9. Add tests/smoke tests.
-10. Improve docs and packaging.
+1. Local Brain boots and `/health` is truthful.
+2. Tool registry and `/tools` work.
+3. `/tasks/run` and legacy `/analyze` stay compatible.
+4. Permissions, validation, and audit logging stay intact.
+5. Lighthouse Handoff workflow stays stable (deterministic + orchestrated).
+6. Tool packs extend capability without forking core.
+7. Tests pass; docs match code.
+8. Packaging and Desktop Companion only after the above are solid.
 
 ## What Not To Do Yet
 
-Do not overbuild a desktop app before the local server core works.
-
-Do not hardcode the entire platform around one Chrome extension.
-
-Do not require external accounts or cloud APIs for the first local-first version.
-
-Do not introduce heavy frameworks unless the project clearly needs them.
-
-Do not bake prompts directly into random route handlers. Keep prompts organized.
-
-Do not return freeform AI text when the client expects structured JSON.
-
-Do not let tool handlers return partial API envelopes.
+- Do not overbuild a desktop app before the Local Brain is stable.
+- Do not hardcode the platform around one Chrome extension or one model.
+- Do not require cloud APIs for the default local-first path.
+- Do not introduce heavy frameworks without clear need.
+- Do not return freeform AI text when the client expects structured JSON.
+- Do not claim benchmark wins without measured data.
 
 ## Definition of Almost Publish-Ready
 
 The project is close to publish-ready when:
 
-- A new developer can clone and run it from the README.
-- `/health` clearly reports companion/runtime/model state.
-- DealSniper works through `/analyze`.
-- Lighthouse Handoff exists as a stub/demo integration and can be expanded post-MVP.
-- Client integrations gracefully handle offline/unavailable states.
-- The repo has clear docs, examples, and smoke tests.
-- The project name, positioning, and architecture are obvious within 60 seconds.
+- A new developer can clone, read `docs/00-start-here/`, and run the server.
+- `/health` and `/tools` clearly report state.
+- Lighthouse Handoff and DealSniper work through documented paths.
+- The extension repo is linked and integration expectations are clear.
+- Smoke and contract tests pass.
+- Locaily positioning is obvious within 60 seconds.
+
+Checklist: [docs/04-product/publish-readiness-checklist.md](docs/04-product/publish-readiness-checklist.md)
 
 ## Tone for User-Facing Copy
 
-Keep copy practical, direct, and builder-friendly.
-
-Avoid corporate AI fluff.
+Keep copy practical, direct, and builder-friendly. Avoid corporate AI fluff.
 
 Good:
 
 ```txt
-Run one local AI companion. Power many tools.
+Run one local AI coordinator. Power many tools and workflows.
 ```
 
 Bad:

@@ -45,8 +45,9 @@ Master index of important Locaily documentation.
 | [../06-decisions/assumptions.md](../06-decisions/assumptions.md) | Assumptions | current | documentation-agent |
 | [../99-archive/README.md](../99-archive/README.md) | Archive guide | archived | documentation-agent |
 | [../DOCS_CLEANUP_REPORT.md](../DOCS_CLEANUP_REPORT.md) | Latest cleanup report | current | documentation-agent |
-| [../../AGENTS.md](../../AGENTS.md) | Repo agent instructions | needs-review | coding-agent |
-| [../../README.md](../../README.md) | Repo overview | needs-review | documentation-agent |
+| [../../AGENTS.md](../../AGENTS.md) | Repo agent instructions | current | coding-agent |
+| [../../AGENT.md](../../AGENT.md) | Human dev guide | current | coding-agent |
+| [../../README.md](../../README.md) | Repo overview | current | documentation-agent |
 
 ## Archived (Reference Only)
 
