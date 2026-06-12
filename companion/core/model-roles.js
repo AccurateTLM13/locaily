@@ -63,6 +63,36 @@ function createModelRoleManager(config = {}) {
         model
       };
     },
+    clear({ role, provider = null }) {
+      const roleId = normalizeRoleId(role);
+
+      if (!roleId) {
+        return {
+          ok: false,
+          error: {
+            code: "INVALID_INPUT",
+            message: "Role clear requires a role.",
+            nextStep: "Send role to clear."
+          }
+        };
+      }
+
+      if (provider) {
+        const providerId = String(provider).trim();
+        if (providerRoles[providerId]) {
+          providerRoles[providerId][roleId] = null;
+        }
+      } else if (Object.prototype.hasOwnProperty.call(baseRoles, roleId)) {
+        baseRoles[roleId] = null;
+      }
+
+      return {
+        ok: true,
+        role: roleId,
+        model: null,
+        provider: provider || null
+      };
+    },
     set({ role, model, provider = null }) {
       const roleId = normalizeRoleId(role);
 

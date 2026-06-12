@@ -97,6 +97,8 @@ async function runTrack({
       task: stepResult.meta.task || null,
       model: stepResult.meta.model || stepResult.meta.tool || "rule_based_checker",
       role: stepResult.meta.role || step.executor.role || "tool",
+      profile_id: stepResult.meta.profile_id || options.profile_id || null,
+      suitability: stepResult.meta.suitability || null,
       durationMs: stepResult.meta.durationMs,
       output: stepResult.output
     });

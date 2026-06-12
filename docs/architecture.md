@@ -108,15 +108,18 @@ The server talks to providers through the router. Current providers:
 - `ollama`
 - `mock`
 
-### Model Roles
+### Model Roles And Suitability Profiles
 
 Implemented in:
 
 ```txt
 companion/core/model-roles.js
+companion/core/model-profiles.js
 ```
 
 Tools request roles such as `default_worker`; the role manager resolves those roles to concrete provider models.
+
+Model suitability profiles (`lightweight`, `balanced`, `developer`) apply role mappings and memory policies. Track orchestration records profile and suitability metadata on model steps.
 
 ### Permissions
 
@@ -159,6 +162,8 @@ GET  /providers/status
 POST /providers/set
 GET  /models/roles
 POST /models/roles/set
+GET  /models/profiles
+POST /models/profiles/set
 POST /analyze       legacy compatibility
 ```
 

@@ -33,6 +33,9 @@ const {
   createModelRoleManager
 } = require("../companion/core/model-roles");
 const {
+  createModelProfileManager
+} = require("../companion/core/model-profiles");
+const {
   createPermissionManager
 } = require("../companion/core/permissions");
 const {
@@ -454,6 +457,64 @@ async function testProviderRouter() {
   assert(router.getActiveProviderId() === "ollama", "Expected Ollama active provider.");
 }
 
+function testModelProfileManager() {
+  const roleManager = createModelRoleManager({
+    defaultModel: "base-model",
+    roles: {
+      default_worker: "base-model"
+    },
+    providers: {
+      mock: {
+        default_worker: "mock-local-model"
+      }
+    }
+  });
+  const manager = createModelProfileManager({
+    defaultModel: "base-model",
+    active: "balanced",
+    profiles: {
+      balanced: {
+        roles: {
+          fast_worker: "fast-model",
+          default_worker: "default-model",
+          reasoning_worker: "reasoning-model"
+        },
+        providers: {
+          mock: {
+            fast_worker: "mock-fast-model",
+            default_worker: "mock-local-model",
+            reasoning_worker: "mock-reasoning-model"
+          }
+        }
+      },
+      lightweight: {
+        roles: {
+          reasoning_worker: null
+        }
+      }
+    }
+  });
+
+  const list = manager.list();
+  const active = manager.getActive();
+  const fastSuitability = manager.getRoleSuitability("fast_worker");
+  const apply = manager.applyProfileRoles(roleManager, "balanced");
+  const mockFast = roleManager.resolve("fast_worker", "mock");
+  const switchResult = manager.setActive("lightweight");
+  const lightweightApply = manager.applyProfileRoles(roleManager, "lightweight", ["mock"]);
+  const lightweightReasoning = roleManager.resolve("reasoning_worker", "mock");
+
+  assert(list.length >= 3, "Expected built-in model profiles.");
+  assert(active.id === "balanced", "Expected balanced active profile.");
+  assert(active.active === true, "Expected active profile flag.");
+  assert(fastSuitability.strengths.includes("classification"), "Expected fast worker suitability.");
+  assert(apply.ok === true, "Expected profile role application.");
+  assert(mockFast.model === "mock-fast-model", "Expected mock fast worker from profile.");
+  assert(switchResult.ok === true, "Expected profile switch success.");
+  assert(lightweightApply.ok === true, "Expected lightweight profile application.");
+  assert(lightweightReasoning.ok === false, "Expected lightweight reasoning worker disabled.");
+}
+
 function testModelRoleManager() {
   const manager = createModelRoleManager({
     defaultModel: "base-model",
@@ -612,6 +673,7 @@ async function main() {
   await testStandardTextPack();
   await testAuditLog();
   await testProviderRouter();
+  testModelProfileManager();
   testModelRoleManager();
   testPermissionManager();
   await testResultValidator();

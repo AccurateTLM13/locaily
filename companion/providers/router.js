@@ -3,6 +3,11 @@ const { createOllamaRuntime } = require("../runtime/ollama");
 const DEFAULT_PROVIDER = "ollama";
 const DEFAULT_MODEL = "llama3.2";
 const MOCK_MODEL = "mock-local-model";
+const MOCK_MODELS = new Set([
+  "mock-local-model",
+  "mock-fast-model",
+  "mock-reasoning-model"
+]);
 
 function createProviderRouter(config = {}) {
   const activeProvider = normalizeProviderId(config.provider || config.activeProvider || DEFAULT_PROVIDER);
@@ -159,8 +164,8 @@ function createMockRuntime() {
     baseUrl: "local-memory",
     model: MOCK_MODEL,
     isAvailable: async () => true,
-    listModels: async () => [MOCK_MODEL],
-    hasModel: async (modelName = MOCK_MODEL) => modelName === MOCK_MODEL,
+    listModels: async () => Array.from(MOCK_MODELS),
+    hasModel: async (modelName = MOCK_MODEL) => MOCK_MODELS.has(modelName),
     generate: async (prompt) => `Mock response for: ${String(prompt || "").slice(0, 80)}`,
     generateJson: async (prompt, schema) => buildMockJson(schema, prompt)
   };

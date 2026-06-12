@@ -1,6 +1,6 @@
 # Pit Crew Platform — Gap Analysis
 
-Status: Phase 4 extraction (in progress)
+Status: Phase 4 extraction (complete); Model Suitability Profiles (in progress)
 
 ## Summary
 
@@ -18,7 +18,7 @@ The repo contains a **proof-of-concept pit crew** embedded inside the `lighthous
 | StatusReporter | — | Progress to clients | **New module** |
 | TrackOrchestrator | `companion/core/orchestrator.js` (LH-only) | `companion/pit-crew/orchestrator.js` | **Extract + generalize** |
 | TaskDecomposer | Inline prompts | `tracks/*.track.json` | **Extract** |
-| ModelRouter | `model-roles.js` via options callback | Dedicated router + garage | **New module** |
+| ModelRouter | `model-roles.js` via options callback | Dedicated router + garage | **Done** (`pit-crew/model-router.js`) |
 | ToolRouter | `registry.js` only | Step → tool invocation | **New module** |
 | OutputValidator | `result-validator.js` | Per-step + final | **Extend** |
 | FallbackHandler | `retry_same_model_once` only | Full escalation ladder | **Future** |
@@ -81,5 +81,6 @@ INTERIM (this milestone):
 - [x] `extract_metrics` uses deterministic parser tool (`lighthouse.parse`, no LLM)
 - [x] `write_handoff` invokes `lighthouse-handoff` `compose-handoff` task via ToolRouter
 - [x] `lighthouse-handoff` orchestrated mode uses same pit-crew runner (no duplicate inline logic)
-- [ ] Smoke tests pass including new `/tracks/run` check (pending CI/local run)
+- [x] Smoke tests pass including new `/tracks/run` check
+- [x] Model suitability profiles (`GET/POST /models/profiles`) with role suitability metadata
 - [x] Gap doc reflects completed items

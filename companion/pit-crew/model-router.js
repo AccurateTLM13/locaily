@@ -43,6 +43,10 @@ async function executeModelStep({ step, context, runtime, options }) {
     temperature: 0.2
   });
 
+  const suitability = typeof options.getRoleSuitability === "function"
+    ? options.getRoleSuitability(modelResolution.role)
+    : null;
+
   return {
     output,
     meta: {
@@ -50,6 +54,8 @@ async function executeModelStep({ step, context, runtime, options }) {
       executor_type: "model",
       model: modelResolution.model,
       role: modelResolution.role,
+      profile_id: options.profile_id || null,
+      suitability,
       durationMs: Date.now() - stepStart
     }
   };

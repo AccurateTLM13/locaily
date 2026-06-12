@@ -99,6 +99,8 @@ function assertHealthShape(body) {
   assert(typeof body.runtime.available === "boolean", "Expected runtime availability boolean.");
   assert(body.model && typeof body.model.name === "string", "Expected selected model name.");
   assert(typeof body.model.ready === "boolean", "Expected model readiness boolean.");
+  assert(body.model_profile && typeof body.model_profile.id === "string", "Expected active model profile.");
+  assert(typeof body.model_profile.policy === "string", "Expected model profile policy.");
   assert(Array.isArray(body.tools), "Expected registered tools array.");
   assert(body.tools.includes("deal-sniper"), "Expected deal-sniper tool registration.");
   assert(body.tools.includes("lighthouse-handoff"), "Expected lighthouse-handoff tool registration.");
@@ -217,6 +219,56 @@ async function checkModelRoleSet() {
   assert(setRole.body.model === "mock-local-model", "Expected mock role model.");
 }
 
+async function checkModelProfilesEndpoint() {
+  const profiles = await request("/models/profiles");
+  assert(profiles.response.status === 200, "Expected /models/profiles to return HTTP 200.");
+  assertJsonObject(profiles.body, "/models/profiles response");
+  assert(profiles.body.ok === true, "Expected /models/profiles ok true.");
+  assert(profiles.body.active_profile === "balanced", "Expected balanced default profile.");
+  assert(Array.isArray(profiles.body.profiles), "Expected profiles array.");
+
+  const balanced = profiles.body.profiles.find((profile) => profile.id === "balanced");
+  assert(balanced, "Expected balanced profile.");
+  assert(balanced.active === true, "Expected balanced profile active flag.");
+  assert(balanced.policy === "smart_load", "Expected balanced smart_load policy.");
+  assert(Array.isArray(balanced.roles), "Expected profile roles array.");
+
+  const fastWorker = balanced.roles.find((role) => role.role === "fast_worker");
+  assert(fastWorker && fastWorker.suitability, "Expected fast_worker suitability metadata.");
+  assert(Array.isArray(fastWorker.suitability.strengths), "Expected suitability strengths.");
+}
+
+async function checkModelProfileSet() {
+  await request("/providers/set", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      provider: "mock"
+    })
+  });
+
+  const setProfile = await request("/models/profiles/set", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      profile: "balanced"
+    })
+  });
+
+  assert(setProfile.response.status === 200, "Expected /models/profiles/set to return HTTP 200.");
+  assertJsonObject(setProfile.body, "/models/profiles/set response");
+  assert(setProfile.body.ok === true, "Expected /models/profiles/set ok true.");
+  assert(setProfile.body.active_profile === "balanced", "Expected balanced profile selection.");
+  assert(Array.isArray(setProfile.body.applied_roles), "Expected applied role mappings.");
+
+  const mockFast = setProfile.body.roles.find((role) => role.role === "fast_worker");
+  assert(mockFast && mockFast.model === "mock-fast-model", "Expected mock fast worker from profile.");
+}
+
 async function checkTasksRunMockProviderDealSniper() {
   await request("/providers/set", {
     method: "POST",
@@ -254,7 +306,7 @@ async function checkTasksRunMockProviderDealSniper() {
     assert(dealSniper.response.status === 200, "Expected mock-backed DealSniper HTTP 200.");
     assertTaskRunSuccess(dealSniper.body, "deal-sniper", "analyze-listing");
     assert(dealSniper.body.provider === "mock", "Expected mock provider in task result.");
-    assert(dealSniper.body.model === "mock-local-model", "Expected mock model in task result.");
+    assert(dealSniper.body.model === "mock-fast-model", "Expected profile-mapped mock fast_worker model.");
     assert(dealSniper.body.model_role === "fast_worker", "Expected fast_worker model role in task result.");
     assert(dealSniper.body.meta.permissions.used.includes("model.run"), "Expected model.run permission usage.");
     assert(typeof dealSniper.body.result.summary === "string", "Expected mock DealSniper summary.");
@@ -976,6 +1028,8 @@ async function main() {
   await runCheck("POST /providers/set", checkProviderSwitch);
   await runCheck("GET /models/roles", checkModelRolesEndpoint);
   await runCheck("POST /models/roles/set", checkModelRoleSet);
+  await runCheck("GET /models/profiles", checkModelProfilesEndpoint);
+  await runCheck("POST /models/profiles/set", checkModelProfileSet);
   await runCheck("tasks run DealSniper mock provider", checkTasksRunMockProviderDealSniper);
   await runCheck("tasks run text.clean mock provider", checkTasksRunTextCleanMockProvider);
   await runCheck("tasks run text.validate_schema", checkTasksRunTextValidateSchema);

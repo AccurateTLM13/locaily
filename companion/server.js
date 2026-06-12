@@ -20,6 +20,7 @@ const {
   buildAnalyzeError: createAnalyzeError
 } = require("./core/envelope");
 const { createModelRoleManager } = require("./core/model-roles");
+const { createModelProfileManager } = require("./core/model-profiles");
 const { createPermissionManager } = require("./core/permissions");
 const { runToolWithValidation } = require("./core/result-validator");
 const { createProviderRouter } = require("./providers/router");
@@ -55,6 +56,9 @@ const DEFAULT_CONFIG = {
       }
     }
   },
+  modelProfiles: {
+    active: "balanced"
+  },
   tools: {
     enabled: ["deal-sniper", "lighthouse-handoff"]
   },
@@ -75,6 +79,27 @@ const modelRoleManager = createModelRoleManager({
   defaultModel: config.runtime.model,
   ...config.modelRoles
 });
+const modelProfileManager = createModelProfileManager({
+  defaultModel: config.runtime.model,
+  active: config.modelProfiles.active,
+  profiles: config.modelProfiles.profiles
+});
+function getConfiguredProviderIds() {
+  return Array.from(new Set([
+    providerRouter.getActiveProviderId(),
+    ...Object.keys(config.modelRoles.providers || {})
+  ]));
+}
+
+const initialProfileApply = modelProfileManager.applyProfileRoles(
+  modelRoleManager,
+  modelProfileManager.resolveActiveProfileId(),
+  getConfiguredProviderIds()
+);
+
+if (!initialProfileApply.ok) {
+  console.warn(`[Model Profiles] Warning: ${initialProfileApply.error.message}`);
+}
 const toolRegistry = createToolRegistry({
   enabledTools: config.tools.enabled
 });
@@ -182,6 +207,27 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, setResult.ok ? 200 : 400, setResult);
     }
 
+    if (request.method === "GET" && url.pathname === "/models/profiles") {
+      return sendJson(response, 200, buildModelProfilesResponse());
+    }
+
+    if (request.method === "POST" && url.pathname === "/models/profiles/set") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with profile or profile_id."
+        });
+      }
+
+      const setResult = setModelProfile(bodyResult.body);
+
+      return sendJson(response, setResult.ok ? 200 : 400, setResult);
+    }
+
     if (request.method === "POST" && url.pathname === "/tasks/run") {
       const bodyResult = await readJsonBody(request);
 
@@ -255,7 +301,7 @@ const server = http.createServer(async (request, response) => {
       ok: false,
       code: "NOT_FOUND",
       message: `No route matched ${request.method} ${url.pathname}.`,
-      nextStep: "Use GET /health, GET /tools, GET /tracks, POST /tracks/run, POST /tasks/run, or legacy POST /analyze."
+      nextStep: "Use GET /health, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, POST /tasks/run, or legacy POST /analyze."
     });
   } catch (error) {
     console.error("Unexpected server error.");
@@ -326,6 +372,14 @@ function mergeConfig(base, override) {
         ...((override.modelRoles && override.modelRoles.providers) || {})
       }
     },
+    modelProfiles: {
+      ...base.modelProfiles,
+      ...(override.modelProfiles || {}),
+      profiles: {
+        ...((base.modelProfiles && base.modelProfiles.profiles) || {}),
+        ...((override.modelProfiles && override.modelProfiles.profiles) || {})
+      }
+    },
     audit: {
       ...base.audit,
       ...(override.audit || {})
@@ -378,6 +432,7 @@ async function buildHealthResponse() {
       name: runtimeState.model,
       ready: runtimeState.modelReady
     },
+    model_profile: modelProfileManager.getActive(),
     tools: toolRegistry.listIds()
   };
 
@@ -411,6 +466,8 @@ async function printStartupStatus() {
 
     console.log(`Provider status: ${availability}`);
     console.log(`Provider endpoint: ${runtimeState.endpoint}`);
+    const activeProfile = modelProfileManager.getActive();
+    console.log(`Model profile: ${activeProfile.label} (${activeProfile.policy})`);
     console.log(`Default model role: default_worker`);
     console.log(`Selected model: ${defaultRole.ok ? defaultRole.model : runtimeState.model} (${readiness})`);
 
@@ -452,6 +509,7 @@ async function buildProvidersStatusResponse() {
   return {
     ok: true,
     active_provider: providerRouter.getActiveProviderId(),
+    active_profile: modelProfileManager.getActive(),
     providers: await providerRouter.listStatus(),
     roles: modelRoleManager.list(providerRouter.getActiveProviderId())
   };
@@ -528,6 +586,60 @@ function setModelRole(body) {
     model: result.model,
     provider: result.provider,
     roles: modelRoleManager.list(result.provider || providerRouter.getActiveProviderId())
+  };
+}
+
+function buildModelProfilesResponse() {
+  return {
+    ok: true,
+    active_profile: modelProfileManager.resolveActiveProfileId(),
+    profiles: modelProfileManager.list()
+  };
+}
+
+function setModelProfile(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return {
+      ok: false,
+      code: "INVALID_INPUT",
+      message: "Model profile update body must be a JSON object.",
+      nextStep: "Send profile or profile_id."
+    };
+  }
+
+  const profileId = body.profile || body.profile_id || body.id;
+  const setResult = modelProfileManager.setActive(profileId);
+
+  if (!setResult.ok) {
+    return {
+      ok: false,
+      code: setResult.error.code,
+      message: setResult.error.message,
+      nextStep: setResult.error.nextStep
+    };
+  }
+
+  const applyResult = modelProfileManager.applyProfileRoles(
+    modelRoleManager,
+    setResult.active_profile,
+    getConfiguredProviderIds()
+  );
+
+  if (!applyResult.ok) {
+    return {
+      ok: false,
+      code: applyResult.error.code,
+      message: applyResult.error.message,
+      nextStep: applyResult.error.nextStep
+    };
+  }
+
+  return {
+    ok: true,
+    active_profile: setResult.active_profile,
+    profile: setResult.profile,
+    applied_roles: applyResult.applied,
+    roles: modelRoleManager.list(providerRouter.getActiveProviderId())
   };
 }
 
@@ -628,6 +740,16 @@ function getActiveModel(modelOverride = null) {
 
 function resolveModelForRole(modelRole) {
   return modelRoleManager.resolve(modelRole, getActiveProviderId());
+}
+
+function buildModelRoutingOptions(extra = {}) {
+  return {
+    ...extra,
+    profile_id: modelProfileManager.resolveActiveProfileId(),
+    getRoleSuitability: (role) => modelProfileManager.getRoleSuitability(role),
+    resolveModelForRole: (role) => resolveModelForRole(role),
+    toolRegistry
+  };
 }
 
 function getModelUnavailableNextStep(runtimeState) {
@@ -786,13 +908,11 @@ async function executeAnalyzeRequest(body, context) {
         task: body.task,
         input: body.input,
         runtime: getActiveRuntime(),
-        options: {
+        options: buildModelRoutingOptions({
           ...(body.options || {}),
           model: selectedModel,
-          fallback: fallbackContext,
-          resolveModelForRole: (role) => resolveModelForRole(role),
-          toolRegistry
-        },
+          fallback: fallbackContext
+        }),
         meta: {
           requestId: context.identity.requestId,
           run_id: context.identity.run_id,
@@ -1041,13 +1161,11 @@ async function executeTaskRunRequest(body, context) {
         task,
         input: toolInput,
         runtime: getActiveRuntime(),
-        options: {
+        options: buildModelRoutingOptions({
           ...(body.options || {}),
           model: selectedModel,
-          fallback: fallbackContext,
-          resolveModelForRole: (role) => resolveModelForRole(role),
-          toolRegistry
-        },
+          fallback: fallbackContext
+        }),
         meta: {
           requestId: context.identity.requestId,
           run_id: context.identity.run_id,
@@ -1165,12 +1283,10 @@ async function executeTrackRunRequest(body, context) {
       input: body.input,
       runtime,
       toolRegistry,
-      options: {
+      options: buildModelRoutingOptions({
         ...(body.options || {}),
-        model: getActiveModel(),
-        resolveModelForRole: (role) => resolveModelForRole(role),
-        toolRegistry
-      },
+        model: getActiveModel()
+      }),
       meta: {
         requestId: context.identity.requestId,
         run_id: context.identity.run_id,
