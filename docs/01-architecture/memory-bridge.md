@@ -103,6 +103,8 @@ Users point Locaily at their vault path and configure `allowedPaths` for their l
 
 Memory endpoints and Lighthouse Handoff memory preflight write redacted audit events. Implementation: [companion/memory/audit-redaction.js](../../companion/memory/audit-redaction.js).
 
+- [../05-validation/memory-bridge-lighthouse-v0.md](../05-validation/memory-bridge-lighthouse-v0.md)
+
 ## Configuration
 
 Memory bridge settings live in [companion/config.json](../../companion/config.json) under `memoryBridge`. Optional vault-local overrides may exist at `.memory-bridge/config.json` inside the vault (allowlist tuning only).

@@ -1,0 +1,26 @@
+{
+  "memoryBridge": {
+    "enabled": true,
+    "vaultPath": "C:/path/to/your/second-brain",
+    "mode": "local_markdown_vault",
+    "readPolicy": "allowlist",
+    "writebackMode": "proposal_only",
+    "rawAccess": false,
+    "allowedPaths": [
+      "index.md",
+      "log.md",
+      "SCHEMA.md",
+      "wiki/projects/",
+      "wiki/topics/",
+      "wiki/concepts/",
+      "wiki/entities/"
+    ],
+    "blockedPaths": [
+      "raw/",
+      "private/",
+      "personal/",
+      ".git/",
+      ".memory-bridge/writeback-inbox/"
+    ]
+  }
+}
