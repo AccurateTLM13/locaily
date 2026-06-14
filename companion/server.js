@@ -26,11 +26,17 @@ const { runToolWithValidation } = require("./core/result-validator");
 const { createProviderRouter } = require("./providers/router");
 const { createToolRegistry } = require("./tools/registry");
 const { listTracks, runTrack, createJob, updateJob } = require("./pit-crew");
-const { recordScoreboardEntry } = require("./core/scoreboard");
+const { recordScoreboardEntry, getScoreboardSummary } = require("./core/scoreboard");
 const { createVaultAdapter } = require("./memory/vault-adapter");
+const { WIKI_ALLOWED_PATHS } = require("./memory/allowlist-presets");
 const { buildContextPack } = require("./memory/context-pack-builder");
 const { createWritebackProposal } = require("./memory/writeback-proposal");
 const { buildMemoryAuditEvent } = require("./core/audit-log");
+const { createConsoleController } = require("./console/controller");
+const { createRunStore } = require("./console/run-store");
+const { createValidationRunner } = require("./console/validation-runner");
+const { createLocalSetupStore } = require("./console/local-setup");
+const { configurePageSpeed, getPageSpeedStatus } = require("./console/pagespeed");
 
 const PLATFORM_VERSION = "0.1.0";
 const SERVICE_NAME = "local-ai-platform";
@@ -121,7 +127,62 @@ const auditLog = createAuditLog({
   filePath: config.audit.filePath
 });
 const permissionManager = createPermissionManager(config.permissions);
-const vaultAdapter = createVaultAdapter(config.memoryBridge);
+const localSetupStore = createLocalSetupStore({
+  dataDir: join(__dirname, "..", "data")
+});
+
+configurePageSpeed({
+  getApiKey: () => localSetupStore.getPageSpeedApiKey()
+});
+
+function buildConsoleMemoryBridgeConfig() {
+  const validationPath = localSetupStore.getMemoryValidationVaultPath();
+  const vaultPath = validationPath || config.memoryBridge.vaultPath;
+
+  if (!vaultPath) {
+    return {
+      ...config.memoryBridge,
+      enabled: false,
+      vaultPath: null
+    };
+  }
+
+  const base = {
+    ...config.memoryBridge,
+    enabled: true,
+    vaultPath
+  };
+
+  // Console validation targets wiki-style Second Brain vaults.
+  if (validationPath) {
+    return {
+      ...base,
+      allowedPaths: WIKI_ALLOWED_PATHS
+    };
+  }
+
+  return base;
+}
+
+let vaultAdapter = createVaultAdapter(buildConsoleMemoryBridgeConfig());
+
+function refreshVaultAdapterForConsoleSetup() {
+  vaultAdapter = createVaultAdapter(buildConsoleMemoryBridgeConfig());
+}
+const consoleRunStore = createRunStore();
+const consoleValidationRunner = createValidationRunner({
+  runStore: consoleRunStore,
+  runTask: executeConsoleTaskRun,
+  getStatusSnapshot: buildConsoleStatusResponse,
+  listAuditEvents: listConsoleAuditEvents
+});
+const consoleController = createConsoleController({
+  runStore: consoleRunStore,
+  validationRunner: consoleValidationRunner,
+  getStatusSnapshot: buildConsoleStatusResponse,
+  localSetupStore,
+  onSetupSaved: refreshVaultAdapterForConsoleSetup
+});
 
 const server = http.createServer(async (request, response) => {
   const startedAt = Date.now();
@@ -129,6 +190,75 @@ const server = http.createServer(async (request, response) => {
 
   try {
     const url = new URL(request.url, `http://${request.headers.host || "127.0.0.1"}`);
+    const consoleRunMatch = url.pathname.match(/^\/console\/runs\/([^/]+)$/);
+    const consoleAsset = await consoleController.serveStatic(url.pathname);
+
+    if (request.method === "GET" && consoleAsset) {
+      return sendContent(response, consoleAsset.statusCode, consoleAsset.contentType, consoleAsset.body);
+    }
+
+    if (request.method === "GET" && url.pathname === "/console/status") {
+      const consoleStatus = await consoleController.getStatus();
+      return sendJson(response, consoleStatus.statusCode, consoleStatus.body);
+    }
+
+    if (request.method === "POST" && url.pathname === "/console/run-validation") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with url and mode."
+        });
+      }
+
+      const startResult = await consoleController.startValidation(bodyResult.body);
+      return sendJson(response, startResult.statusCode, startResult.body);
+    }
+
+    if (request.method === "POST" && url.pathname === "/console/setup/pagespeed-key") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with apiKey."
+        });
+      }
+
+      const saveResult = await consoleController.savePageSpeedKey(bodyResult.body);
+      return sendJson(response, saveResult.statusCode, saveResult.body);
+    }
+
+    if (request.method === "POST" && url.pathname === "/console/setup/memory-vault") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with vaultPath."
+        });
+      }
+
+      const saveResult = await consoleController.saveMemoryVaultPath(bodyResult.body);
+      return sendJson(response, saveResult.statusCode, saveResult.body);
+    }
+
+    if (request.method === "GET" && url.pathname === "/console/runs") {
+      const runsResult = await consoleController.listRuns(url.searchParams);
+      return sendJson(response, runsResult.statusCode, runsResult.body);
+    }
+
+    if (request.method === "GET" && consoleRunMatch) {
+      const runResult = await consoleController.getRun(decodeURIComponent(consoleRunMatch[1]));
+      return sendJson(response, runResult.statusCode, runResult.body);
+    }
 
     if (request.method === "GET" && url.pathname === "/health") {
       return sendJson(response, 200, await buildHealthResponse());
@@ -143,7 +273,6 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.method === "GET" && url.pathname === "/scoreboard") {
-      const { getScoreboardSummary } = require("./core/scoreboard");
       return sendJson(response, 200, {
         ok: true,
         scoreboard: getScoreboardSummary()
@@ -434,7 +563,7 @@ const server = http.createServer(async (request, response) => {
       ok: false,
       code: "NOT_FOUND",
       message: `No route matched ${request.method} ${url.pathname}.`,
-      nextStep: "Use GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, POST /tasks/run, or legacy POST /analyze."
+      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, POST /tasks/run, or legacy POST /analyze."
     });
   } catch (error) {
     console.error("Unexpected server error.");
@@ -650,6 +779,130 @@ async function buildAuditResponse(searchParams) {
   return {
     ok: true,
     events
+  };
+}
+
+async function buildConsoleStatusResponse() {
+  const runtimeState = await checkRuntimeState();
+  const providers = await providerRouter.listStatus();
+  const memoryStatus = vaultAdapter.getStatus();
+  const pageSpeed = getPageSpeedStatus();
+  const auditStatus = await buildConsoleAuditStatus();
+  const toolIds = toolRegistry.listIds();
+  const ollama = providers.find((provider) => provider.id === "ollama") || null;
+  const warnings = [
+    ...(pageSpeed.warnings || []),
+    ...(memoryStatus.warnings || []),
+    ...(runtimeState.warning ? [runtimeState.warning.message] : []),
+    ...(auditStatus.ready ? [] : [auditStatus.warning])
+  ].filter(Boolean);
+
+  return {
+    ok: true,
+    generatedAt: new Date().toISOString(),
+    service: SERVICE_NAME,
+    version: PLATFORM_VERSION,
+    console: {
+      name: "LocAIly Workflow Validation",
+      localOnly: true,
+      workflow: "lighthouse_handoff_validation"
+    },
+    engine: {
+      running: true,
+      canonicalEndpoint: "/tasks/run"
+    },
+    provider: {
+      active: providerRouter.getActiveProviderId(),
+      statuses: providers
+    },
+    ollama: {
+      available: ollama ? ollama.status === "available" : false,
+      modelReady: ollama ? ollama.model_ready === true : false,
+      model: ollama ? ollama.model : runtimeState.model,
+      warning: ollama ? ollama.warning : null
+    },
+    model: {
+      name: runtimeState.model,
+      ready: runtimeState.modelReady,
+      profile: modelProfileManager.getActive()
+    },
+    tools: {
+      count: toolIds.length,
+      ids: toolIds,
+      lighthouseReady: toolIds.includes("lighthouse-handoff")
+        && toolIds.includes("lighthouse.verify_handoff")
+    },
+    pageSpeed,
+    setup: localSetupStore.getPublicSetup(),
+    memory: {
+      enabled: memoryStatus.enabled,
+      readable: memoryStatus.readable,
+      vaultPathConfigured: memoryStatus.vaultPathConfigured,
+      readPolicy: memoryStatus.readPolicy,
+      writebackMode: memoryStatus.writebackMode,
+      rawAccess: memoryStatus.rawAccess,
+      effectiveAllowedPaths: memoryStatus.effectiveAllowedPaths,
+      effectiveBlockedPaths: memoryStatus.effectiveBlockedPaths,
+      projectCount: memoryStatus.projectCount,
+      topicCount: memoryStatus.topicCount,
+      warnings: memoryStatus.warnings || []
+    },
+    auditLogging: auditStatus,
+    warnings
+  };
+}
+
+async function buildConsoleAuditStatus() {
+  try {
+    const events = await auditLog.list({ limit: 1 });
+
+    return {
+      ready: true,
+      recentEventCount: events.length
+    };
+  } catch (error) {
+    return {
+      ready: false,
+      recentEventCount: 0,
+      warning: "Audit log could not be read."
+    };
+  }
+}
+
+async function listConsoleAuditEvents(filters = {}) {
+  const events = await auditLog.list({
+    limit: filters.limit || 50,
+    run_id: filters.run_id || null,
+    tool: filters.tool || null,
+    source: filters.source || null
+  });
+
+  return {
+    ok: true,
+    events
+  };
+}
+
+async function executeConsoleTaskRun(body) {
+  const identity = createRunIdentity();
+  const startedAt = Date.now();
+  const taskRunResult = await executeTaskRunRequest(body, {
+    identity,
+    startedAt
+  });
+  const auditedBody = await recordTaskRunAndReturn({
+    identity,
+    startedAt,
+    statusCode: taskRunResult.statusCode,
+    body: taskRunResult.body,
+    contextPacket: taskRunResult.contextPacket,
+    tool: taskRunResult.tool,
+    permissionResult: taskRunResult.permissionResult
+  });
+
+  return {
+    statusCode: taskRunResult.statusCode,
+    body: auditedBody
   };
 }
 
@@ -2020,4 +2273,14 @@ function sendJson(response, statusCode, body) {
     "Content-Length": Buffer.byteLength(payload)
   });
   response.end(payload);
+}
+
+function sendContent(response, statusCode, contentType, body) {
+  response.writeHead(statusCode, {
+    "Content-Type": contentType,
+    "Content-Length": Buffer.byteLength(body),
+    "Cache-Control": "no-store",
+    "Content-Security-Policy": "default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'"
+  });
+  response.end(body);
 }

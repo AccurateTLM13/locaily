@@ -95,7 +95,11 @@
       "log.md",
       "SCHEMA.md",
       "projects/",
-      "topics/"
+      "topics/",
+      "wiki/projects/",
+      "wiki/topics/",
+      "wiki/concepts/",
+      "wiki/entities/"
     ],
     "blockedPaths": [
       "raw/",

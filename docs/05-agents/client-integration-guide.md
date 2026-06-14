@@ -1,4 +1,4 @@
-# Tool Integration Guide - Local AI Platform
+# Tool Integration Guide - Locaily
 
 ## Client Flow
 

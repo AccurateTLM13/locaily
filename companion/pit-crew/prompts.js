@@ -11,10 +11,22 @@ const PROMPT_TEMPLATES = {
   },
   prioritize_fixes(context) {
     const classified = context.artifacts.classify_issues || {};
+    const input = context.input || {};
+    const scores = input.scores || {};
     return [
       "Review the classified Lighthouse issues below.",
-      "Reason step-by-step to select the top critical priority fixes (max 3) and explain the reason for each.",
+      "Select the top critical priority fixes (max 3) and explain the reason for each.",
       "Return JSON only conforming to the schema.",
+      "",
+      'In "thinking", write a 2-4 sentence executive summary for a developer.',
+      "Include: page URL, weakest Lighthouse category/score, and the top priority theme.",
+      "Mention the top 2-3 fix areas by plain-language theme.",
+      'Do not use filler phrases like "Based on the severity of each issue".',
+      "Do not restate that you are analyzing the report.",
+      "Make it useful as the Executive Summary section of a coding-agent handoff.",
+      "",
+      `Page URL: ${input.url || "unknown"}`,
+      `Scores: ${JSON.stringify(scores)}`,
       `Classified Issues: ${JSON.stringify(classified.issues || [])}`
     ].join("\n");
   }

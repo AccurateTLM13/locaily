@@ -1,4 +1,4 @@
-# Packaging Plan - Local AI Platform
+# Packaging Plan - Locaily
 
 ## Goal
 
@@ -215,7 +215,7 @@ Before public open-source release:
 - Health endpoint works.
 - Ollama setup is documented.
 - DealSniper works as the required MVP tool.
-- Lighthouse Handoff exists as a stub/demo integration.
+- Lighthouse Handoff exists as a workflow test bench (deterministic + orchestrated paths; extension bridge not implemented).
 - Errors are readable and use the standard envelope.
 - License is chosen.
 - Security note explains localhost-only behavior.

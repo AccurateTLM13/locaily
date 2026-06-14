@@ -12,12 +12,23 @@ Master index of important Locaily documentation.
 | [../01-architecture/local-brain.md](../01-architecture/local-brain.md) | Coordinator / companion server | current | coding-agent |
 | [../01-architecture/nearby-node.md](../01-architecture/nearby-node.md) | Nearby device layer | experimental | coding-agent |
 | [../01-architecture/ai-pit-crew.md](../01-architecture/ai-pit-crew.md) | Track / role strategy | current | coding-agent |
+| [../01-architecture/model-scorecard-and-routing.md](../01-architecture/model-scorecard-and-routing.md) | Model Skill Sheets and routing data layer | spec | coding-agent |
 | [../01-architecture/capability-registry.md](../01-architecture/capability-registry.md) | Tool registry and packs | current | coding-agent |
 | [../01-architecture/task-routing.md](../01-architecture/task-routing.md) | Routing and fallbacks | current | coding-agent |
 | [../01-architecture/orchestration-flow.md](../01-architecture/orchestration-flow.md) | Multi-step workflows | current | coding-agent |
 | [../01-architecture/api-contract.md](../01-architecture/api-contract.md) | HTTP API contract | current | coding-agent |
+| [../01-architecture/memory-bridge.md](../01-architecture/memory-bridge.md) | Memory Bridge overview | current | coding-agent |
+| [../01-architecture/context-packs.md](../01-architecture/context-packs.md) | Context pack format | current | coding-agent |
+| [../01-architecture/memory-writeback.md](../01-architecture/memory-writeback.md) | Proposal-only writeback | current | coding-agent |
 | [../02-workflows/lighthouse-handoff.md](../02-workflows/lighthouse-handoff.md) | First workflow | current | coding-agent |
 | [../02-workflows/lighthouse-handoff-validation.md](../02-workflows/lighthouse-handoff-validation.md) | L1 validation evidence | current | evaluation-agent |
+| [../05-validation/README.md](../05-validation/README.md) | Validation docs index | current | evaluation-agent |
+| [../05-validation/l2-live-ollama-memory-bridge.md](../05-validation/l2-live-ollama-memory-bridge.md) | L2 live Ollama + Memory Bridge milestone | current | evaluation-agent |
+| [../05-validation/memory-bridge-lighthouse-v0.md](../05-validation/memory-bridge-lighthouse-v0.md) | Memory Bridge + Lighthouse controlled validation | current | evaluation-agent |
+| [../../examples/lighthouse-handoff/slim-mobile.fixture.json](../../examples/lighthouse-handoff/slim-mobile.fixture.json) | Slim Lighthouse fixture (L2 lemonteed.com) | current | evaluation-agent |
+| [../../scripts/lighthouse-memory-compose-regression.js](../../scripts/lighthouse-memory-compose-regression.js) | Memory compose regression script | current | evaluation-agent |
+| [../05-validation/memory-bridge-local-setup.md](../05-validation/memory-bridge-local-setup.md) | Private vault setup (local only) | current | evaluation-agent |
+| [../05-validation/memory-bridge-manual-test-path.md](../05-validation/memory-bridge-manual-test-path.md) | Manual Memory Bridge test path | current | evaluation-agent |
 | [../02-workflows/lighthouse-handoff-extension-integration.md](../02-workflows/lighthouse-handoff-extension-integration.md) | Extension bridge spec | draft | coding-agent |
 | [../02-workflows/workflow-template.md](../02-workflows/workflow-template.md) | New workflow template | draft | documentation-agent |
 | [../02-workflows/task-track-template.md](../02-workflows/task-track-template.md) | Pit Crew track template | draft | documentation-agent |
@@ -28,6 +39,8 @@ Master index of important Locaily documentation.
 | [../03-research/hardware-test-matrix.md](../03-research/hardware-test-matrix.md) | Test matrix | draft | evaluation-agent |
 | [../03-research/runtime-options.md](../03-research/runtime-options.md) | Provider options | current | coding-agent |
 | [../03-research/license-notes.md](../03-research/license-notes.md) | License reminders | draft | documentation-agent |
+| [../04-product/locaily-ui-constitution.md](../04-product/locaily-ui-constitution.md) | UI laws and product interface contract | current | documentation-agent |
+| [../04-product/screens/workflow-validation-screen-contract.md](../04-product/screens/workflow-validation-screen-contract.md) | Workflow Validation screen contract | current | documentation-agent |
 | [../04-product/ux-principles.md](../04-product/ux-principles.md) | UX principles | current | documentation-agent |
 | [../04-product/setup-flow.md](../04-product/setup-flow.md) | Setup instructions | current | coding-agent |
 | [../04-product/status-states.md](../04-product/status-states.md) | Health/runtime states | current | coding-agent |
@@ -43,10 +56,12 @@ Master index of important Locaily documentation.
 | [../05-agents/cleanup-rules.md](../05-agents/cleanup-rules.md) | Docs cleanup rules | current | documentation-agent |
 | [../05-agents/client-integration-guide.md](../05-agents/client-integration-guide.md) | Client integration | current | coding-agent |
 | [../06-decisions/decision-log.md](../06-decisions/decision-log.md) | Decisions | current | documentation-agent |
+| [../06-decisions/second-brain-as-memory-layer.md](../06-decisions/second-brain-as-memory-layer.md) | Second Brain memory layer decision | current | documentation-agent |
 | [../06-decisions/open-questions.md](../06-decisions/open-questions.md) | Open questions | current | documentation-agent |
 | [../06-decisions/assumptions.md](../06-decisions/assumptions.md) | Assumptions | current | documentation-agent |
 | [../99-archive/README.md](../99-archive/README.md) | Archive guide | archived | documentation-agent |
 | [../DOCS_CLEANUP_REPORT.md](../DOCS_CLEANUP_REPORT.md) | Latest cleanup report | current | documentation-agent |
+| [../LocAIly_ and_Second Brain_Alignment_and_Connection.md](../LocAIly_%20and_Second%20Brain_Alignment_and_Connection.md) | PM conversation capture (pre-v0) | needs-review | documentation-agent |
 | [../../AGENTS.md](../../AGENTS.md) | Repo agent instructions | current | coding-agent |
 | [../../AGENT.md](../../AGENT.md) | Human dev guide | current | coding-agent |
 | [../../README.md](../../README.md) | Repo overview | current | documentation-agent |

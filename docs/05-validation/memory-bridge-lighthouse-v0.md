@@ -100,7 +100,9 @@ Setup reference: [memory-bridge-local-setup.md](./memory-bridge-local-setup.md)
 1. **Stay Lighthouse-only** for one more cycle. Add `wiki/projects/Lighthouse Handoff.md` to the private vault with `## Constraints` and `## Decisions` before expanding to other workflows.
 2. Re-run validation after project page exists to confirm fewer warnings and richer constraints.
 3. Keep writeback proposal-only; review inbox manually before any future `/apply` work.
-4. Do **not** expand to embeddings/NearbyNode until Lighthouse+memory validation repeats cleanly on your hardware with Ollama (optional L2).
+4. Do **not** expand to embeddings/NearbyNode until a follow-up validation pass shows richer memory context from project pages.
+
+**L2 update (2026-06-13):** Live Ollama + Memory Bridge milestone recorded separately in [l2-live-ollama-memory-bridge.md](./l2-live-ollama-memory-bridge.md).
 
 ## Expansion Recommendation
 
@@ -108,7 +110,7 @@ Setup reference: [memory-bridge-local-setup.md](./memory-bridge-local-setup.md)
 
 - A dedicated `wiki/projects/Lighthouse Handoff.md` exists in the private vault
 - A second end-to-end validation run shows constraint extraction working
-- Live Ollama orchestration validation (L2) is recorded separately
+- ~~Live Ollama orchestration validation (L2) is recorded separately~~ **Done** — [l2-live-ollama-memory-bridge.md](./l2-live-ollama-memory-bridge.md)
 
 ## Evidence Commands
 

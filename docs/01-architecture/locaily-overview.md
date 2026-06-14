@@ -15,18 +15,20 @@ Clients (extension, CLI, desktop UI, web widget)
 │  (orchestrator)   │
 └─────────┬─────────┘
           │
-    ┌─────┴─────┬──────────────┐
-    ▼           ▼              ▼
-Tool Packs   AI Pit Crew    Providers
-& Tools      (roles/tracks)  (Ollama, mock, …)
-    │                           │
-    └───────────┬───────────────┘
+    ┌─────┴─────┬──────────────┬─────────────┐
+    ▼           ▼              ▼             ▼
+Tool Packs   AI Pit Crew    Providers   Memory Bridge
+& Tools      (roles/tracks)  (Ollama…)   (optional vault)
+    │                           │             │
+    └───────────┬───────────────┴─────────────┘
                 ▼
          Workflows (e.g. Lighthouse Handoff)
                 │
                 ▼
       NearbyNode capabilities (future)
 ```
+
+**Memory Bridge** is optional. Locaily runs without a vault. When configured, it reads a user-owned private Markdown vault and supplies Context Packs; only **Lighthouse Handoff** `compose-handoff` is wired to optional memory preflight in v0.
 
 ## Request Flow (Implemented)
 
@@ -59,14 +61,20 @@ Client
 companion/
   server.js
   core/           # context, input-gate, permissions, orchestrator, …
+  memory/         # vault adapter, context packs, writeback, audit redaction
   providers/      # provider router
   runtime/        # ollama adapter
   tools/          # registry + showcase handlers
 tool-packs/
   standard-text-pack/
+  lighthouse-parser-pack/
+templates/
+  memory-vault/
+  memory-vault-wiki/
 scripts/
   smoke-test.js
   contract-test.js
+  memory-bridge-lighthouse-validation.js
 ```
 
 ## API Surfaces
@@ -76,12 +84,18 @@ Canonical:
 ```txt
 GET  /health
 GET  /tools
+GET  /tracks
+POST /tracks/run
 POST /tasks/run
 GET  /audit
+GET  /scoreboard
 GET  /providers/status
 POST /providers/set
 GET  /models/roles
 POST /models/roles/set
+GET  /memory/status
+POST /memory/context-pack
+POST /memory/writeback/propose
 ```
 
 Legacy:
@@ -98,9 +112,13 @@ New features should extend `/tasks/run` and engine endpoints. Legacy `/analyze` 
 
 ## Related Docs
 
+- [memory-bridge.md](./memory-bridge.md)
+- [context-packs.md](./context-packs.md)
+- [memory-writeback.md](./memory-writeback.md)
 - [local-brain.md](./local-brain.md)
 - [nearby-node.md](./nearby-node.md)
 - [ai-pit-crew.md](./ai-pit-crew.md)
+- [model-scorecard-and-routing.md](./model-scorecard-and-routing.md)
 - [capability-registry.md](./capability-registry.md)
 - [task-routing.md](./task-routing.md)
 - [orchestration-flow.md](./orchestration-flow.md)

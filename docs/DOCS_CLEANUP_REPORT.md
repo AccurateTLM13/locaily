@@ -150,3 +150,13 @@ No exact-duplicate files were deleted.
 2. **NearbyNode** and **AI Pit Crew** — confirmed as public terms
 3. **Next work priority** — owner asked for clarification (see explanation in PR/issue thread)
 4. **Lighthouse extension repo** — https://github.com/mnfrdrsh/lighthouse-handoff (linked in workflow doc)
+
+## Docs Sync Pass (2026-06-13)
+
+Aligned active docs with Memory Bridge v0, privacy stabilization, Lighthouse memory preflight, and **47/47** smoke baseline.
+
+**Updated:** `00-start-here/` (README, project-index, glossary), `01-architecture/` (locaily-overview, local-brain, api-contract title), `02-workflows/` (lighthouse-handoff, validation addendum), `04-product/` (roadmap, publish-readiness, packaging-plan), `05-agents/` (agent-context, documentation-agent-rules, client-integration-guide), `06-decisions/` (decision-log, open-questions), `docs/README.md`, root `README.md` (endpoints, smoke count, memory modules).
+
+**Added:** `.cursor/commands/sync-docs.md` — repeatable `/sync-docs` agent command.
+
+**Still needs-review:** `docs/LocAIly_ and_Second Brain_Alignment_and_Connection.md` (raw PM conversation; pre-v0). Archive or summarize when convenient.

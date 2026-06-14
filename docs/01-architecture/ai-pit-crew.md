@@ -11,7 +11,7 @@ Research shorthand: **"treat every task as a track and every model as a vehicle.
 - Model **roles** rather than raw model names in tools
 - Per-step decomposition inside a track (orchestrated workflows)
 - Escalation and fallback between roles
-- Future **model suitability profiles** (fast, structured-output, classification, etc.)
+- **Model Scorecards / Skill Sheets** for suitability profiles (fast, structured-output, classification, hardware fit, fallback rules)
 - Scoreboard / evaluation hooks for comparing orchestration modes (early: `companion/core/scoreboard.js`)
 
 ## What It Does Not Own
@@ -39,7 +39,7 @@ A rally car, drift car, and work truck each win on different tracks. Similarly, 
 | Track catalog API (`GET /tracks`) | Implemented |
 | Provider router (Ollama, mock) | Implemented |
 | Automatic track classifier | Not implemented |
-| Model suitability profile registry | Not implemented |
+| Model Scorecard registry | Spec documented; not implemented |
 | Pit crew across many concurrent models | Partial / workflow-specific only |
 
 ## Lighthouse Example Track
@@ -83,6 +83,8 @@ When runtime is unavailable, the tool falls back to deterministic demo output.
 - When to escalate vs fail vs return partial results
 - How to store and publish model suitability benchmarks
 - Whether Pit Crew naming ships publicly or stays internal
+
+See [model-scorecard-and-routing.md](./model-scorecard-and-routing.md) for the target Model Skill Sheet schema and routing rules.
 
 ## Archive Context
 

@@ -1,0 +1,15 @@
+{
+  "url": "https://lemonteed.com/",
+  "scores": {
+    "performance": 76,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100
+  },
+  "opportunities": [
+    { "title": "Improve image delivery", "id": "image-delivery-insight" },
+    { "title": "Time to Interactive", "id": "interactive" },
+    { "title": "Speed Index", "id": "speed-index" }
+  ],
+  "diagnostics": []
+}

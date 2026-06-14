@@ -19,8 +19,8 @@ Practical sequencing for Locaily. **Dates omitted**—order reflects dependency,
 - [x] Document Lighthouse Handoff L1 validation (smoke + contract)
 - [x] Extension integration spec (bridge not implemented)
 - [ ] Implement extension ↔ Local Brain HTTP bridge (extension repo + CORS/proxy)
-- [ ] L2: live Ollama orchestration evidence on target hardware
-- [ ] Example normalized fixture in `examples/lighthouse-handoff/`
+- [x] L2: live Ollama orchestration evidence on target hardware — see [l2-live-ollama-memory-bridge.md](../05-validation/l2-live-ollama-memory-bridge.md)
+- [x] Example normalized fixture in `examples/lighthouse-handoff/slim-mobile.fixture.json`
 - [ ] Persistent provider / model role config across restarts
 - [ ] CORS policy (or MV3 background proxy pattern) for extension testing
 
@@ -34,14 +34,16 @@ Practical sequencing for Locaily. **Dates omitted**—order reflects dependency,
 - [x] Smoke tests (disabled + template-enabled module checks, blockedPaths override)
 - [x] Wire Context Pack into Lighthouse Handoff compose-handoff (optional memory preflight)
 - [x] Audit redaction for memory endpoints and handoff memory metadata
-- [ ] Live private Second Brain vault validation (user-local only)
+- [x] Controlled validation against real wiki-style private vault (user-local; see `docs/05-validation/`)
+- [x] L2: live Ollama + Lighthouse Handoff + Memory Bridge on target hardware — [l2-live-ollama-memory-bridge.md](../05-validation/l2-live-ollama-memory-bridge.md)
 
 ## Next — Pit Crew Mechanics
 
+- [x] Model Scorecard / Skill Sheet architecture spec — see [model-scorecard-and-routing.md](../01-architecture/model-scorecard-and-routing.md)
 - [ ] Model evaluation harness using templates in `03-research/`
 - [ ] Scoreboard / comparison baselines with logged evidence
 - [ ] Track classifier design (spec only until proven)
-- [ ] Model suitability profiles (experimental)
+- [ ] Model Scorecard registry and selector implementation (experimental)
 
 ## Later — Product Surface
 
@@ -76,4 +78,5 @@ Prefer this file and code for current direction; consult archives for historical
 ## Related
 
 - [publish-readiness-checklist.md](./publish-readiness-checklist.md)
+- [../05-validation/README.md](../05-validation/README.md)
 - [../06-decisions/decision-log.md](../06-decisions/decision-log.md)

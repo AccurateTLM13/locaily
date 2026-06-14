@@ -148,6 +148,10 @@ Make sure to return JSON only conforming to the schema.`;
 };
 
 async function shouldUseRuntime(runtime, options) {
+  if (options && (options.use_runtime === false || options.useRuntime === false)) {
+    return false;
+  }
+
   if (!runtime) {
     return false;
   }
@@ -194,6 +198,227 @@ function validateComposeInput(input) {
   return null;
 }
 
+function dedupeChecklistSteps(steps) {
+  const seen = new Set();
+  const unique = [];
+
+  for (const step of steps) {
+    if (typeof step !== "string") {
+      continue;
+    }
+
+    const normalized = step.trim();
+
+    if (!normalized || seen.has(normalized)) {
+      continue;
+    }
+
+    seen.add(normalized);
+    unique.push(normalized);
+  }
+
+  return unique;
+}
+
+const GENERIC_EXECUTIVE_SUMMARY_PATTERNS = [
+  /^based on the severity/i,
+  /^based on the analysis/i,
+  /^this report identifies/i,
+  /^the issues should be prioritized/i
+];
+
+const MIN_EXECUTIVE_SUMMARY_LENGTH = 80;
+
+function isGenericOrThinExecutiveSummary(text) {
+  const value = String(text || "").trim();
+
+  if (!value) {
+    return true;
+  }
+
+  if (value.length < MIN_EXECUTIVE_SUMMARY_LENGTH) {
+    return true;
+  }
+
+  return GENERIC_EXECUTIVE_SUMMARY_PATTERNS.some((pattern) => pattern.test(value));
+}
+
+function inferPriorityTheme(priorityFixes, fallbackCategory) {
+  const firstFix = Array.isArray(priorityFixes) ? priorityFixes[0] : null;
+
+  if (!firstFix || !firstFix.title) {
+    return `${formatScoreName(fallbackCategory)} improvements`;
+  }
+
+  const title = String(firstFix.title).toLowerCase();
+
+  if (/network|payload|javascript|image|render|main-thread|speed|load|latency/.test(title)) {
+    return "performance and loading";
+  }
+
+  if (/accessib|contrast|alt |aria|heading/.test(title)) {
+    return "accessibility";
+  }
+
+  if (/seo|meta|index|canonical|crawl/.test(title)) {
+    return "SEO";
+  }
+
+  if (/console|https|security|deprecated|best practice/.test(title)) {
+    return "best practices";
+  }
+
+  return firstFix.title;
+}
+
+function buildExecutiveSummaryFallback({ url, weakest, priorityFixes }) {
+  const category = formatScoreName(weakest.name);
+  const score = weakest.value;
+  const fixes = (priorityFixes || []).map((fix) => fix.title).filter(Boolean).slice(0, 3);
+  const theme = inferPriorityTheme(priorityFixes, weakest.name);
+
+  if (fixes.length === 0) {
+    return `For ${url}, the weakest Lighthouse area is ${category} at ${score}. The highest-priority work is ${theme}. Start with the fixes most likely to improve user-perceived loading speed while preserving layout, tracking, and existing behavior.`;
+  }
+
+  if (fixes.length === 1) {
+    return `For ${url}, the weakest Lighthouse area is ${category} at ${score}. The highest-priority work is ${theme}, starting with ${fixes[0]}. Start with the fixes most likely to improve user-perceived loading speed while preserving layout, tracking, and existing behavior.`;
+  }
+
+  const fixList = fixes.length === 2
+    ? `${fixes[0]} and ${fixes[1]}`
+    : `${fixes[0]}, ${fixes[1]}, and ${fixes[2]}`;
+
+  return `For ${url}, the weakest Lighthouse area is ${category} at ${score}. The highest-priority work is ${theme}, led by ${fixList}. Start with the fixes most likely to improve user-perceived loading speed while preserving layout, tracking, and existing behavior.`;
+}
+
+function resolveExecutiveSummary(input, weakest, priorityFixes, metrics) {
+  const thinking = input.prioritizedFixes?.thinking;
+  const baseSummary = !isGenericOrThinExecutiveSummary(thinking)
+    ? thinking
+    : buildExecutiveSummaryFallback({
+      url: input.url,
+      weakest,
+      priorityFixes
+    });
+
+  return ensureExecutiveSummaryLead({
+    summary: baseSummary,
+    url: input.url,
+    weakest,
+    metrics
+  });
+}
+
+const WRONG_CATEGORY_LABELS = {
+  performance: [/\baccessibility\b/gi, /\bseo\b/gi, /\bbest practices?\b/gi],
+  accessibility: [/\bperformance\b/gi, /\bseo\b/gi, /\bbest practices?\b/gi],
+  seo: [/\bperformance\b/gi, /\baccessibility\b/gi, /\bbest practices?\b/gi],
+  bestPractices: [/\bperformance\b/gi, /\baccessibility\b/gi, /\bseo\b/gi]
+};
+
+function inferFixCategoryFromTitle(title) {
+  const value = String(title || "").toLowerCase();
+
+  if (/render|network|payload|javascript|image|main-thread|latency|speed|load|size|kib|execution|document request/.test(value)) {
+    return "performance";
+  }
+
+  if (/accessib|contrast|alt |aria|heading|interactive/.test(value)) {
+    return "accessibility";
+  }
+
+  if (/seo|meta|index|canonical|crawl/.test(value)) {
+    return "seo";
+  }
+
+  if (/console|https|security|deprecated|best practice/.test(value)) {
+    return "bestPractices";
+  }
+
+  return null;
+}
+
+function sanitizePriorityFixReason(fix) {
+  if (!fix || typeof fix !== "object") {
+    return fix;
+  }
+
+  const category = inferFixCategoryFromTitle(fix.title);
+  const reason = typeof fix.reason === "string" ? fix.reason : "";
+
+  if (!category || !reason) {
+    return fix;
+  }
+
+  const replacements = WRONG_CATEGORY_LABELS[category] || [];
+  let sanitizedReason = reason;
+  let changed = false;
+
+  for (const pattern of replacements) {
+    if (pattern.test(sanitizedReason)) {
+      changed = true;
+      sanitizedReason = sanitizedReason.replace(pattern, formatScoreName(category));
+    }
+  }
+
+  if (!changed) {
+    return fix;
+  }
+
+  return {
+    ...fix,
+    reason: sanitizedReason.replace(/\s+/g, " ").trim()
+  };
+}
+
+function sanitizePriorityFixes(priorityFixes) {
+  return (priorityFixes || []).map(sanitizePriorityFixReason);
+}
+
+function buildOtherScoresPhrase(metrics, weakestName) {
+  const parts = [];
+
+  for (const [name, value] of Object.entries(metrics || {})) {
+    if (name === weakestName || typeof value !== "number") {
+      continue;
+    }
+
+    parts.push(`${formatScoreName(name)} at ${value}`);
+  }
+
+  return parts.join(", ");
+}
+
+function executiveSummaryHasLead(summary, url, weakest) {
+  const value = String(summary || "").trim().toLowerCase();
+  const category = formatScoreName(weakest.name).toLowerCase();
+
+  return value.includes(String(url).toLowerCase())
+    && value.includes(category)
+    && value.includes(String(weakest.value));
+}
+
+function ensureExecutiveSummaryLead({ summary, url, weakest, metrics }) {
+  const trimmed = String(summary || "").trim();
+
+  if (executiveSummaryHasLead(trimmed, url, weakest)) {
+    return trimmed;
+  }
+
+  const category = formatScoreName(weakest.name);
+  const otherScores = buildOtherScoresPhrase(metrics, weakest.name);
+  const lead = otherScores
+    ? `For ${url}, the weakest Lighthouse category is ${category} at ${weakest.value}, while ${otherScores}.`
+    : `For ${url}, the weakest Lighthouse category is ${category} at ${weakest.value}.`;
+
+  if (!trimmed) {
+    return lead;
+  }
+
+  return `${lead} ${trimmed}`.trim();
+}
+
 function buildComposedHandoff(input, memoryPreflight = null) {
   const metrics = input.metrics || {};
   const priorityFixes = Array.isArray(input.prioritizedFixes?.priorityFixes)
@@ -207,7 +432,7 @@ function buildComposedHandoff(input, memoryPreflight = null) {
     seo: metrics.seo
   });
 
-  const checklist = matchedFixes.flatMap((fix) => fix.steps || []).slice(0, 5);
+  const checklist = dedupeChecklistSteps(matchedFixes.flatMap((fix) => fix.steps || [])).slice(0, 5);
 
   if (checklist.length === 0) {
     checklist.push(
@@ -217,11 +442,16 @@ function buildComposedHandoff(input, memoryPreflight = null) {
     );
   }
 
+  const resolvedPriorityFixes = sanitizePriorityFixes(
+    priorityFixes.length > 0
+      ? priorityFixes
+      : buildPriorityFixes(weakest, { opportunities: [] })
+  );
+
   const handoff = {
     clientSummary: `Handoff for ${input.url}: lowest score is ${formatScoreName(weakest.name)} at ${weakest.value}.`,
-    developerSummary: input.prioritizedFixes?.thinking
-      || "Prioritized Lighthouse fixes assembled by the pit crew orchestrator for coding agent implementation.",
-    priorityFixes: priorityFixes.length > 0 ? priorityFixes : buildPriorityFixes(weakest, { opportunities: [] }),
+    developerSummary: resolveExecutiveSummary(input, weakest, resolvedPriorityFixes, metrics),
+    priorityFixes: resolvedPriorityFixes,
     handoffChecklist: checklist,
     estimatedImpact: estimateImpact(weakest.value)
   };

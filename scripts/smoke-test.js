@@ -1,6 +1,7 @@
 const BASE_URL = process.env.LOCAL_AI_BASE_URL || "http://127.0.0.1:31313";
 const path = require("node:path");
 const { cpSync, mkdtempSync, rmSync, existsSync } = require("node:fs");
+const { spawnSync } = require("node:child_process");
 const { tmpdir } = require("node:os");
 const { createVaultAdapter, isBlockedPath, isAllowedPath } = require("../companion/memory/vault-adapter");
 const { buildContextPack } = require("../companion/memory/context-pack-builder");
@@ -146,6 +147,33 @@ async function checkToolsEndpoint() {
   assert(Array.isArray(lighthouse.tasks), "Expected Lighthouse tasks array.");
   assert(textClean.pack === "standard-text-pack", "Expected text.clean standard text pack.");
   assert(textValidateSchema.runtime_required === false, "Expected text.validate_schema runtime-free metadata.");
+}
+
+async function checkConsoleEndpoints() {
+  const consoleResponse = await fetch(`${BASE_URL}/console`);
+  const consoleHtml = await consoleResponse.text();
+  assert(consoleResponse.status === 200, "Expected /console HTTP 200.");
+  assert(
+    (consoleResponse.headers.get("content-type") || "").includes("text/html"),
+    "Expected /console HTML content type."
+  );
+  assert(consoleHtml.includes("LocAIly") && consoleHtml.includes("Workflow Validation"), "Expected console HTML branding.");
+
+  const status = await request("/console/status");
+  assert(status.response.status === 200, "Expected /console/status HTTP 200.");
+  assertJsonObject(status.body, "/console/status response");
+  assert(status.body.ok === true, "Expected /console/status ok true.");
+  assert(status.body.console && status.body.console.localOnly === true, "Expected localOnly console flag.");
+  assert(status.body.engine && status.body.engine.running === true, "Expected engine running.");
+  assert(status.body.pageSpeed && typeof status.body.pageSpeed.apiKeyConfigured === "boolean", "Expected safe PageSpeed key status.");
+  assert(status.body.memory && !Object.prototype.hasOwnProperty.call(status.body.memory, "vaultPath"), "Console status must not expose vaultPath.");
+  assert(!JSON.stringify(status.body).includes("PAGESPEED_API_KEY"), "Console status must not expose API key names or values.");
+
+  const runs = await request("/console/runs");
+  assert(runs.response.status === 200, "Expected /console/runs HTTP 200.");
+  assertJsonObject(runs.body, "/console/runs response");
+  assert(runs.body.ok === true, "Expected /console/runs ok true.");
+  assert(Array.isArray(runs.body.runs), "Expected console runs array.");
 }
 
 async function checkProvidersStatus() {
@@ -1493,11 +1521,21 @@ async function checkTasksRunLighthouseComposeMemoryDisabledHttp() {
   assert(response.body.result.clientSummary.includes("45"), "PageSpeed metrics must remain authoritative.");
 }
 
+async function checkLighthouseMemoryComposeRegressionScript() {
+  const regression = spawnSync(process.execPath, ["scripts/lighthouse-memory-compose-regression.js"], {
+    cwd: path.join(__dirname, ".."),
+    encoding: "utf8"
+  });
+
+  assert(regression.status === 0, "Expected lighthouse-memory-compose-regression.js to pass.");
+}
+
 async function main() {
   console.log(`Smoke testing Local AI Platform at ${BASE_URL}`);
 
   await runCheck("GET /health", checkHealth);
   await runCheck("GET /tools", checkToolsEndpoint);
+  await runCheck("GET /console endpoints", checkConsoleEndpoints);
   await runCheck("GET /providers/status", checkProvidersStatus);
   await runCheck("POST /providers/set", checkProviderSwitch);
   await runCheck("GET /models/roles", checkModelRolesEndpoint);
@@ -1543,6 +1581,7 @@ async function main() {
   await runCheck("Lighthouse memory handoff no full vault content", checkLighthouseComposeMemoryNoFullVaultContent);
   await runCheck("Lighthouse memory preserves PageSpeed metrics", checkLighthouseComposeMemoryMetricsPreserved);
   await runCheck("Lighthouse memory task-run audit redaction", checkLighthouseMemoryTaskRunAuditRedaction);
+  await runCheck("Lighthouse memory compose regression script", checkLighthouseMemoryComposeRegressionScript);
 
   const failed = results.filter((result) => !result.ok);
   const passed = results.length - failed.length;

@@ -41,6 +41,11 @@ In this repository it is implemented as the **companion server** plus **core mod
 | Orchestrator | `companion/core/orchestrator.js` | Multi-step workflow execution |
 | Provider router | `companion/providers/router.js` | Ollama / mock routing |
 | Tool registry | `companion/tools/registry.js` | Manifest-backed tool loading |
+| Vault adapter | `companion/memory/vault-adapter.js` | Allowlisted Markdown vault reads |
+| Context pack builder | `companion/memory/context-pack-builder.js` | Task-specific context packs |
+| Writeback proposal | `companion/memory/writeback-proposal.js` | Inbox proposals only |
+| Memory audit redaction | `companion/memory/audit-redaction.js` | Safe memory metadata in audit |
+| Memory preflight | `companion/memory/preflight.js` | Optional workflow memory hook |
 
 ## Inputs
 
@@ -68,6 +73,7 @@ Tool handlers return **raw result objects only**; the server wraps them.
 - **Clients** via HTTP on localhost
 - **Providers** (Ollama, mock) for model-backed tools
 - **Tool packs** via registry manifests and handler modules
+- **Optional Memory Bridge** vault (user-configured local Markdown; disabled by default)
 - **Future NearbyNode** connectors (not wired yet)
 
 ## Still Undecided

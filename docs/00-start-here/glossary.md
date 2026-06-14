@@ -96,6 +96,28 @@ Abstract assignment such as `fast_worker` or `default_worker` instead of hardcod
 
 Backend that executes model calls (e.g. `ollama`, `mock`). Routed via `companion/providers/router.js`.
 
+## Memory Terms
+
+### Second Brain
+
+Private, user-owned memory vault (typically a local Markdown wiki). Stays **outside** the Locaily repo. Locaily connects via Memory Bridge only when the user configures a local `vaultPath`.
+
+### Memory Bridge
+
+Locaily's optional integration layer for reading a private Markdown vault and supplying **Context Packs** to tasks. v0 is local-file adapter only — no embeddings, no vector DB.
+
+**Endpoints:** `GET /memory/status`, `POST /memory/context-pack`, `POST /memory/writeback/propose`
+
+**Status:** v0 implemented; disabled by default in `companion/config.json`.
+
+### Context Pack
+
+Structured bundle of project memory for a task: summaries, heading extraction, limited excerpts, and `filesUsed` metadata. Does **not** include full vault file dumps by default.
+
+### Writeback (proposal-only)
+
+Memory Bridge v0 writes reviewable Markdown proposals to `{vault}/.memory-bridge/writeback-inbox/`. No automatic wiki edits; no `/memory/writeback/apply` in v0.
+
 ## Status Labels Used In Docs
 
 | Label | Meaning |

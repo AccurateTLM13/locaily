@@ -42,7 +42,9 @@ Important framing:
 | Vision and terminology | [current-vision.md](./current-vision.md), [glossary.md](./glossary.md) |
 | Full doc index | [project-index.md](./project-index.md) |
 | Architecture | [../01-architecture/locaily-overview.md](../01-architecture/locaily-overview.md) |
+| Memory Bridge | [../01-architecture/memory-bridge.md](../01-architecture/memory-bridge.md) |
 | First workflow | [../02-workflows/lighthouse-handoff.md](../02-workflows/lighthouse-handoff.md) |
+| Validation evidence | [../05-validation/README.md](../05-validation/README.md) |
 | Research notes | [../03-research/](../03-research/) |
 | Product / setup / roadmap | [../04-product/](../04-product/) |
 | Agent rules | [../05-agents/agent-context.md](../05-agents/agent-context.md) |
@@ -54,15 +56,17 @@ Important framing:
 These are implemented or documented with evidence in the repo:
 
 - Local companion HTTP server on `127.0.0.1:31313` (`companion/server.js`)
-- Engine endpoints: `/health`, `/tools`, `/tasks/run`, `/audit`, provider and model-role endpoints
+- Engine endpoints: `/health`, `/tools`, `/tracks`, `/tracks/run`, `/tasks/run`, `/audit`, provider and model-role endpoints
 - Legacy `/analyze` compatibility endpoint
 - Ollama and mock providers via provider router
-- Manifest-backed tool pack loading (`tool-packs/standard-text-pack/`)
+- Manifest-backed tool pack loading (`tool-packs/standard-text-pack/`, `tool-packs/lighthouse-parser-pack/`)
 - Showcase tools: `deal-sniper`, `lighthouse-handoff`
 - Standard Text Pack tools (`text.clean`, `text.summarize`, etc.)
 - Input gate, context handler, permissions, result validation, audit log (core modules)
 - Lighthouse Handoff multi-step orchestration path when a runtime is available
-- Smoke and contract test scripts
+- **Memory Bridge v0** — `/memory/status`, `/memory/context-pack`, `/memory/writeback/propose` (disabled by default)
+- Lighthouse Handoff optional memory preflight on `compose-handoff` (only wired workflow)
+- Smoke and contract test scripts (`48/48` smoke checks including memory compose regression)
 
 See [../04-product/publish-readiness-checklist.md](../04-product/publish-readiness-checklist.md) for a detailed implementation checklist.
 

@@ -47,12 +47,17 @@ POST /analyze
 ```txt
 GET  /health
 GET  /tools
+GET  /tracks
+POST /tracks/run
 POST /tasks/run
 GET  /audit
 GET  /providers/status
 POST /providers/set
 GET  /models/roles
 POST /models/roles/set
+GET  /memory/status
+POST /memory/context-pack
+POST /memory/writeback/propose
 POST /analyze       legacy compatibility
 ```
 
@@ -81,6 +86,12 @@ companion/
     lighthouse-handoff.js
     registry.js
     standard-text.js
+  memory/
+    vault-adapter.js
+    context-pack-builder.js
+    writeback-proposal.js
+    audit-redaction.js
+    preflight.js
 tool-packs/
   standard-text-pack/
 scripts/
@@ -175,8 +186,10 @@ node scripts/smoke-test.js
 Expected current result:
 
 ```txt
-Smoke test summary: 28/28 checks passed.
+Smoke test summary: 48/48 checks passed.
 ```
+
+(Memory Bridge checks pass with memory disabled in default `companion/config.json`.)
 
 ## Example `/tasks/run`
 
@@ -228,6 +241,7 @@ Start at [docs/00-start-here/README.md](docs/00-start-here/README.md).
 - [Current vision](docs/00-start-here/current-vision.md)
 - [Project index](docs/00-start-here/project-index.md)
 - [Architecture overview](docs/01-architecture/locaily-overview.md)
+- [Memory Bridge](docs/01-architecture/memory-bridge.md)
 - [API contract](docs/01-architecture/api-contract.md)
 - [Lighthouse Handoff workflow](docs/02-workflows/lighthouse-handoff.md)
 - [Lighthouse validation record](docs/02-workflows/lighthouse-handoff-validation.md)

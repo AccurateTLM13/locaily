@@ -20,6 +20,7 @@ Use the numbered folders under `docs/`:
 03-research
 04-product
 05-agents
+05-validation
 06-decisions
 99-archive
 ```
@@ -49,6 +50,8 @@ Use [../00-start-here/glossary.md](../00-start-here/glossary.md). Note non-final
 ## Index Maintenance
 
 Update [../00-start-here/project-index.md](../00-start-here/project-index.md) when adding or archiving files.
+
+For periodic alignment passes, use the project command `/sync-docs` (`.cursor/commands/sync-docs.md`).
 
 ## Cleanup
 

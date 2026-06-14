@@ -97,7 +97,7 @@ POST /analyze
 
 | Tier | Scope | Status |
 |---|---|---|
-| L1 | Local Brain automated tests | **Passed** (28/28 smoke + contract helpers) |
+| L1 | Local Brain automated tests | **Passed** (core checks; suite now **48/48** including Memory Bridge + compose regression) |
 | L2 | Live Ollama orchestration | Open |
 | L3 | Extension standalone Markdown | Open (external repo) |
 | L4 | Extension ↔ Local Brain HTTP | **Not implemented** |

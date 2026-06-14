@@ -17,7 +17,10 @@ The **Local Brain** `lighthouse-handoff` tool returns schema-valid handoff JSON 
 | Evidence | Command | Result |
 |---|---|---|
 | Contract helpers | `node scripts/contract-test.js` | `Contract helpers passed.` |
-| Full smoke suite | `node companion/server.js` then `node scripts/smoke-test.js` | `28/28 checks passed` |
+| Full smoke suite | `node companion/server.js` then `node scripts/smoke-test.js` | `28/28 checks passed` (2026-06-12 L1 baseline) |
+
+**Suite expansion (2026-06-13):** Memory Bridge v0, privacy stabilization, and Lighthouse memory preflight added checks. **2026-06-13 follow-up:** memory compose regression script (`48/48` total with memory disabled in default config). L1 Lighthouse checks remain passing. See [../05-validation/memory-bridge-lighthouse-v0.md](../05-validation/memory-bridge-lighthouse-v0.md).
+
 | Lighthouse deterministic (`/analyze`) | smoke: `Lighthouse Handoff stub success` | PASS |
 | Lighthouse deterministic (`/tasks/run`) | smoke: `tasks run Lighthouse success` | PASS |
 | Lighthouse input validation | smoke: `Lighthouse Handoff input validation` | PASS |
@@ -78,7 +81,7 @@ Invalid fixture (missing `scores`): expects `INVALID_INPUT` / HTTP 400.
 |---|---|---|
 | Extension Markdown report quality | Not measured in this repo | Client repo: https://github.com/mnfrdrsh/lighthouse-handoff |
 | Extension → Local Brain HTTP bridge | **Not implemented** | Extension uses PSI + client-side `report-builder.js` today |
-| Ollama orchestrated path on real hardware | Environment-dependent | Smoke passes without Ollama via deterministic path; live Ollama orchestration needs separate run with `ollama pull` |
+| Ollama orchestrated path on real hardware | **Passed (2026-06-13)** | See [../05-validation/l2-live-ollama-memory-bridge.md](../05-validation/l2-live-ollama-memory-bridge.md) |
 | Human usefulness vs hand-written handoffs | Not measured | No golden set in repo |
 | Production PageSpeed analysis accuracy | Not claimed | PSI + parsing live in extension, not validated here |
 
@@ -93,7 +96,7 @@ Use these labels in docs and PRs:
 | **L3 — Extension standalone** | Extension repo golden URLs + agent-usable Markdown review |
 | **L4 — Extension ↔ Local Brain** | Extension POSTs normalized Lighthouse JSON to `/tasks/run`; CORS + UX verified |
 
-**Current project status:** **L1 passed.** L2–L4 open.
+**Current project status:** **L1 passed.** **L2 passed** (live Ollama + Memory Bridge — 2026-06-13). L3–L4 open.
 
 ## Reproduce Locally
 
@@ -120,11 +123,12 @@ ollama pull llama3.2
 ## Next Step
 
 1. Implement extension ↔ Local Brain bridge per [lighthouse-handoff-extension-integration.md](./lighthouse-handoff-extension-integration.md)
-2. Add L2 evidence row after Ollama orchestration run on target hardware
-3. Add golden URL set under `examples/lighthouse-handoff/` when maintainer approves
+2. ~~Add L2 evidence row after Ollama orchestration run on target hardware~~ — recorded in [../05-validation/l2-live-ollama-memory-bridge.md](../05-validation/l2-live-ollama-memory-bridge.md)
+3. Enrich private vault `wiki/projects/Lighthouse Handoff.md` and re-run memory compose for stronger context
 
 ## Related
 
 - [lighthouse-handoff.md](./lighthouse-handoff.md)
 - [lighthouse-handoff-extension-integration.md](./lighthouse-handoff-extension-integration.md)
-- `scripts/smoke-test.js` — checks listed above
+- [../05-validation/l2-live-ollama-memory-bridge.md](../05-validation/l2-live-ollama-memory-bridge.md)
+- `scripts/lighthouse-memory-compose-regression.js` — memory compose regression (no live Ollama)

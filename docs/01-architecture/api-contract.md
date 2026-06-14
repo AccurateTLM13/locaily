@@ -1,4 +1,4 @@
-# API Contract - Local AI Platform
+# API Contract - Locaily Local Brain
 
 ## Base URL
 
@@ -29,6 +29,16 @@ POST /models/roles/set
 GET  /memory/status
 POST /memory/context-pack
 POST /memory/writeback/propose
+```
+
+Local validation console:
+
+```txt
+GET  /console
+GET  /console/status
+POST /console/run-validation
+GET  /console/runs
+GET  /console/runs/:runId
 ```
 
 Legacy compatibility API:
@@ -146,6 +156,91 @@ Success:
 ```
 
 `POST /memory/writeback/apply` is **not** implemented in v0.
+
+## Local Test Bench Console
+
+The console is a localhost-only operator UI for Lighthouse Handoff validation. It is not a SaaS dashboard and does not validate multi-model routing.
+
+### GET /console
+
+Serves the static `LocAIly Test Bench` cockpit.
+
+### GET /console/status
+
+Aggregates safe readiness data for the UI. It reports provider/model readiness, PageSpeed configuration, Memory Bridge status, relative memory allowlist policy, and audit logging readiness. It does **not** expose API keys, raw vault paths, memory excerpts, or audit file paths.
+
+```json
+{
+  "ok": true,
+  "console": { "name": "LocAIly Test Bench", "localOnly": true },
+  "engine": { "running": true, "canonicalEndpoint": "/tasks/run" },
+  "provider": { "active": "ollama" },
+  "ollama": { "available": true, "modelReady": true, "model": "llama3.2" },
+  "model": { "name": "llama3.2", "ready": true },
+  "tools": { "count": 10, "lighthouseReady": true },
+  "pageSpeed": { "strategy": "mobile", "apiKeyConfigured": false, "ready": true },
+  "memory": {
+    "enabled": true,
+    "readable": true,
+    "vaultPathConfigured": true,
+    "effectiveAllowedPaths": ["index.md", "projects/"]
+  },
+  "auditLogging": { "ready": true, "recentEventCount": 1 },
+  "warnings": []
+}
+```
+
+### POST /console/run-validation
+
+Starts an asynchronous Lighthouse Handoff validation run and returns immediately.
+
+Request:
+
+```json
+{
+  "url": "https://example.com/",
+  "mode": "l2_ollama_memory"
+}
+```
+
+Supported `mode` values:
+
+- `standard` — deterministic/no AI path
+- `l2_ollama` — live Ollama `analyze-report`, memory disabled
+- `l2_ollama_memory` — live Ollama `analyze-report`, Memory Bridge `compose-handoff`
+
+Success:
+
+```json
+{
+  "ok": true,
+  "runId": "validation_20260614T012345Z_ab12cd34ef",
+  "status": "queued"
+}
+```
+
+The validation chain is:
+
+```txt
+Live PageSpeed capture
+→ slim Lighthouse input
+→ lighthouse-handoff/analyze-report
+→ lighthouse-handoff/compose-handoff
+→ schema validation
+→ metric preservation check
+→ privacy/audit check
+→ saved local artifacts
+```
+
+Artifacts are saved under gitignored `data/validation/` and returned as repo-relative paths only.
+
+### GET /console/runs
+
+Lists recent local validation summaries from `data/validation/console-runs.index.local.json`.
+
+### GET /console/runs/:runId
+
+Returns the full local run record, including pipeline steps, warnings, result summary, validation evidence, generated Markdown, memory `filesUsed`, and repo-relative artifact paths.
 
 ## GET /health
 

@@ -43,12 +43,23 @@ Rules for coding agents, documentation agents, and evaluation agents working on 
 ```txt
 Locaily
 ├─ Local Brain      (companion server — implemented)
+├─ Memory Bridge    (optional vault adapter — v0 implemented)
 ├─ NearbyNode       (conceptual)
 ├─ AI Pit Crew      (roles/tracks — partial)
-└─ Lighthouse Handoff (first workflow)
+└─ Lighthouse Handoff (first workflow; only memory-wired workflow in v0)
 ```
 
 Device = capability. Not every node needs a model.
+
+## Memory Bridge Reminder
+
+- Disabled by default; user configures private `vaultPath` locally.
+- Context packs = summaries/excerpts, not full vault dumps.
+- Writeback = proposal-only; no `/memory/writeback/apply` in v0.
+- Do not commit private vault content or absolute vault paths.
+- System improvement is through memory, context, routing, validation, and reviewed writeback — not model learning claims.
+
+See [../01-architecture/memory-bridge.md](../01-architecture/memory-bridge.md).
 
 ## Code Truth Hierarchy
 

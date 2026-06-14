@@ -13,23 +13,7 @@ const REPORT_PATH = process.env.LIGHTHOUSE_REPORT_INPUT_PATH
   || path.join(__dirname, "..", "data", "validation", "lighthouse-handoff-input.local.json");
 const OUTPUT_PATH = path.join(__dirname, "..", "data", "validation", "memory-bridge-lighthouse-results.local.json");
 
-const WIKI_ALLOWED_PATHS = [
-  "index.md",
-  "log.md",
-  "SCHEMA.md",
-  "wiki/projects/",
-  "wiki/topics/",
-  "wiki/concepts/",
-  "wiki/entities/"
-];
-
-const WIKI_BLOCKED_PATHS = [
-  "raw/",
-  "private/",
-  "personal/",
-  ".git/",
-  ".memory-bridge/writeback-inbox/"
-];
+const { WIKI_ALLOWED_PATHS, DEFAULT_BLOCKED_PATHS } = require("../companion/memory/allowlist-presets");
 
 const MEMORY_OPTIONS = {
   enabled: "auto",
@@ -92,7 +76,7 @@ function createWikiAdapter() {
     enabled: true,
     vaultPath: VAULT_PATH,
     allowedPaths: WIKI_ALLOWED_PATHS,
-    blockedPaths: WIKI_BLOCKED_PATHS
+    blockedPaths: DEFAULT_BLOCKED_PATHS
   });
 }
 

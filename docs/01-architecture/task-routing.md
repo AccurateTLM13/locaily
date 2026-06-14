@@ -10,6 +10,7 @@
 - Task id validation inside a tool
 - Permission checks against declared tool permissions
 - Model role selection when a tool requires inference
+- Future model scorecard selection when multiple models can fill the same role
 - Workflow execution mode (e.g. orchestrated vs baseline monolithic pass)
 - Fallback triggers on schema failure, timeout, or missing runtime
 
@@ -66,6 +67,7 @@ Default policy: retry same model once on schema fail; escalate role only when co
 - Client request body
 - Server config (`companion/config.json`)
 - Active provider and role map
+- Future Model Scorecards / Skill Sheets for model suitability and fallback rules
 
 ## Outputs
 
@@ -79,9 +81,12 @@ Default policy: retry same model once on schema fail; escalate role only when co
 ## Still Undecided
 
 - Automatic **track classifier** before tool selection
+- Model Scorecard registry and model selector
 - User-visible routing explanations in UI
 - Cross-tool chains in one `/tasks/run` call
 - MCP vs native pack routing
+
+See [model-scorecard-and-routing.md](./model-scorecard-and-routing.md) for the target scorecard schema and routing decision flow.
 
 ## Archived Detail
 

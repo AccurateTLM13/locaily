@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LocAIly — Workflow Validation</title>
+    <link rel="stylesheet" href="/console/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="top-bar" aria-label="Application header">
+        <div class="top-bar__brand">
+          <img
+            src="/console/assets/locaily-logo.svg"
+            alt="LocAIly"
+            class="top-bar__logo"
+            width="120"
+            height="28"
+          >
+          <span class="top-bar__divider" aria-hidden="true">|</span>
+          <span class="top-bar__screen">Workflow Validation</span>
+        </div>
+        <div class="top-bar__actions">
+          <span id="localBrainStatus" class="status-pill status-pill--needs-check" aria-live="polite">
+            <span class="status-pill__dot" aria-hidden="true"></span>
+            <span class="status-pill__label">Needs Check</span>
+          </span>
+          <button id="refreshStatusButton" type="button" class="btn btn--ghost">Refresh</button>
+        </div>
+      </header>
+
+      <div class="app-shell__body">
+        <nav class="side-rail" aria-label="Primary navigation">
+          <ul class="side-rail__list">
+            <li><a class="side-rail__link side-rail__link--active" href="/console" aria-current="page">Run</a></li>
+            <li><span class="side-rail__link side-rail__link--disabled">Workflows</span></li>
+            <li><span class="side-rail__link side-rail__link--disabled">Activity</span></li>
+            <li><span class="side-rail__link side-rail__link--disabled">System</span></li>
+            <li><span class="side-rail__link side-rail__link--disabled">Engine Room</span></li>
+          </ul>
+        </nav>
+
+        <main class="main-work-area">
+          <div class="workflow-grid">
+            <section class="surface workflow-launcher" aria-labelledby="launcherTitle">
+              <h2 id="launcherTitle" class="section-title">Lighthouse Handoff</h2>
+              <p class="section-subtitle">Turn PageSpeed data into an agent-ready handoff.</p>
+
+              <form id="runForm" class="launcher-form">
+                <div class="field">
+                  <label for="urlInput" class="field__label">URL</label>
+                  <input id="urlInput" name="url" type="url" class="field__input" placeholder="https://example.com/" required>
+                </div>
+
+                <fieldset class="mode-selector">
+                  <legend class="field__label">Mode</legend>
+                  <div class="mode-selector__options" role="radiogroup" aria-label="Workflow mode">
+                    <button type="button" class="mode-option mode-option--active" data-mode="standard" aria-pressed="true">Standard</button>
+                    <button type="button" class="mode-option" data-mode="l2_ollama" aria-pressed="false">Local AI</button>
+                    <button type="button" class="mode-option" data-mode="l2_ollama_memory" aria-pressed="false">Local AI + Memory</button>
+                  </div>
+                  <input type="hidden" name="mode" id="modeInput" value="standard">
+                </fieldset>
+
+                <div class="setup-actions">
+                  <button id="setupPageSpeedButton" type="button" class="btn btn--setup">Add PageSpeed API key</button>
+                  <button id="setupMemoryButton" type="button" class="btn btn--setup">Add Memory vault path</button>
+                </div>
+
+                <div class="launcher-actions">
+                  <button id="runButton" type="submit" class="btn btn--primary">Run Validation</button>
+                  <button id="pasteReportButton" type="button" class="btn btn--secondary">Use pasted report</button>
+                </div>
+                <p id="runnerMessage" class="form-message" role="status"></p>
+              </form>
+            </section>
+
+            <section class="surface readiness-checklist" aria-labelledby="readinessTitle">
+              <div class="section-header">
+                <h2 id="readinessTitle" class="section-title">Readiness</h2>
+                <span id="statusTimestamp" class="meta-text">Not loaded</span>
+              </div>
+              <ul id="readinessList" class="readiness-list" aria-live="polite"></ul>
+              <div id="preflightWarnings" class="readiness-warnings" aria-live="polite"></div>
+            </section>
+
+            <section class="surface run-timeline" aria-labelledby="timelineTitle">
+              <div class="section-header">
+                <h2 id="timelineTitle" class="section-title">Run Timeline</h2>
+                <span id="activeRunLabel" class="meta-text">No active run</span>
+              </div>
+              <ol id="pipelineSteps" class="timeline" aria-live="polite"></ol>
+            </section>
+
+            <section class="surface result-summary" aria-labelledby="resultTitle">
+              <div class="section-header">
+                <h2 id="resultTitle" class="section-title">Result</h2>
+                <span id="resultStatus" class="status-pill status-pill--pending">
+                  <span class="status-pill__dot" aria-hidden="true"></span>
+                  <span class="status-pill__label">Waiting</span>
+                </span>
+              </div>
+              <dl id="resultsSummary" class="result-fields"></dl>
+            </section>
+          </div>
+
+          <details id="advancedDisclosure" class="advanced-disclosure">
+            <summary>Advanced details</summary>
+            <div class="advanced-disclosure__body">
+              <div id="setupPanels" class="setup-panels">
+                <section id="pasteReportPanel" class="setup-panel" hidden>
+                  <h3>Pasted PageSpeed report</h3>
+                  <p class="meta-text">Paste raw PageSpeed JSON to skip live capture when the API key is missing or quota is limited.</p>
+                  <label for="pastedReportInput" class="field__label">Report JSON</label>
+                  <textarea id="pastedReportInput" class="field__textarea" rows="8" placeholder="{ &quot;lighthouseResult&quot;: ... }"></textarea>
+                  <div class="launcher-actions">
+                    <button id="runPastedReportButton" type="button" class="btn btn--primary">Run with pasted report</button>
+                    <button id="clearPastedReportButton" type="button" class="btn btn--secondary">Clear</button>
+                  </div>
+                  <p id="pasteReportMessage" class="form-message" role="status"></p>
+                </section>
+                <section id="pageSpeedSetupPanel" class="setup-panel" hidden>
+                  <h3>PageSpeed API key</h3>
+                  <p class="meta-text">Saved locally for this machine only. The key is never shown after save.</p>
+                  <form id="pageSpeedSetupForm" class="setup-form">
+                    <label for="pageSpeedKeyInput" class="field__label">API key</label>
+                    <input id="pageSpeedKeyInput" type="password" class="field__input" autocomplete="off" placeholder="Enter PageSpeed Insights API key">
+                    <button type="submit" class="btn btn--primary">Save key</button>
+                  </form>
+                  <p id="pageSpeedSetupMessage" class="form-message" role="status"></p>
+                </section>
+                <section id="memorySetupPanel" class="setup-panel" hidden>
+                  <h3>Memory vault path</h3>
+                  <p class="meta-text">Local path for validation memory. Only configured/not configured is shown in the main view.</p>
+                  <form id="memorySetupForm" class="setup-form">
+                    <label for="memoryPathInput" class="field__label">Vault path</label>
+                    <input id="memoryPathInput" type="text" class="field__input" autocomplete="off" placeholder="Path to memory vault">
+                    <button type="submit" class="btn btn--primary">Save path</button>
+                  </form>
+                  <p id="memorySetupMessage" class="form-message" role="status"></p>
+                </section>
+              </div>
+              <div id="validationEvidence" class="advanced-blocks"></div>
+              <pre id="markdownPreview" class="code-block">Run a validation to preview the generated handoff.</pre>
+              <div id="historySection" class="history-section">
+                <div class="section-header">
+                  <h3>Run history</h3>
+                  <button id="refreshRunsButton" type="button" class="btn btn--ghost">Refresh</button>
+                </div>
+                <div id="historyList" class="history-list" aria-live="polite"></div>
+              </div>
+            </div>
+          </details>
+        </main>
+      </div>
+    </div>
+
+    <script src="/console/app.js"></script>
+  </body>
+</html>

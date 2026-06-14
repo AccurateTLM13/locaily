@@ -1,4 +1,4 @@
-# Publish Readiness Checklist - Local AI Platform
+# Publish Readiness Checklist - Locaily
 
 Use this before publishing the repo or inviting testers.
 
@@ -26,14 +26,16 @@ MVP requires:
 4. Ollama runtime adapter
 5. Tool registry
 6. One fully working tool: DealSniper
-7. One stub/demo second tool: Lighthouse Handoff
+7. One workflow test bench: Lighthouse Handoff (deterministic + orchestrated paths)
 8. Consistent response envelopes
 9. README setup instructions
 10. Basic smoke test script
 
 - [x] DealSniper works as the required MVP tool when Ollama/model are available.
-- [x] Lighthouse Handoff exists as a stub/demo tool.
-- [x] Full Lighthouse Handoff support is documented as post-MVP.
+- [x] Lighthouse Handoff exists with deterministic fallback and orchestrated AI path.
+- [x] Lighthouse Handoff optional Memory Bridge preflight on `compose-handoff` (Lighthouse-only in v0).
+- [x] Memory Bridge v0 endpoints and modules (disabled by default).
+- [ ] Full Lighthouse Handoff extension ↔ Local Brain bridge is documented but not implemented.
 
 ## Core Functionality
 
@@ -64,7 +66,8 @@ MVP requires:
 - [x] Unknown tools return useful errors.
 - [x] Unknown tasks return useful errors.
 - [x] DealSniper tool exists.
-- [x] Lighthouse Handoff stub/demo tool exists.
+- [x] Lighthouse Handoff workflow tool exists.
+- [x] Memory Bridge v0 modules and endpoints exist (optional; off by default).
 - [x] Tool handlers return raw result objects only.
 - [x] The platform wraps raw results into API envelopes.
 
@@ -112,6 +115,8 @@ MVP requires:
 - [x] `README.md` exists.
 - [x] `docs/01-architecture/locaily-overview.md` exists.
 - [x] `docs/01-architecture/api-contract.md` exists.
+- [x] `docs/01-architecture/memory-bridge.md` exists.
+- [x] `docs/05-validation/README.md` exists.
 - [x] `docs/00-start-here/project-index.md` exists.
 - [x] `docs/05-agents/client-integration-guide.md` exists.
 - [x] `docs/04-product/packaging-plan.md` exists.

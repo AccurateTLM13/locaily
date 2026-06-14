@@ -10,7 +10,7 @@ Writeback stays **disabled** for the first validation (`writeback: false`).
 node scripts/smoke-test.js
 ```
 
-Expect `47/47` checks passed.
+Expect `48/48` checks passed.
 
 ## 2. Memory status
 

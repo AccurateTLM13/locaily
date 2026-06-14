@@ -22,7 +22,7 @@ Separated from [assumptions.md](./assumptions.md). Items here are **not decided*
 1. How strict should prompt injection detection be in v1?
 2. Delay website widget clients until origin/auth is mature?
 3. Disable network permissions for community tools by default?
-4. Audit redaction policy for sensitive fields?
+4. Audit redaction policy for sensitive fields? **Partially resolved for Memory Bridge v0** — see `companion/memory/audit-redaction.js` and `docs/05-validation/memory-bridge-lighthouse-v0.md`. Broader audit policy still open.
 
 ## Models and Providers
 
@@ -47,6 +47,7 @@ Separated from [assumptions.md](./assumptions.md). Items here are **not decided*
 
 1. What evidence bar promotes Lighthouse from experimental to confirmed for real client handoffs?
 2. Hardware test matrix population—who runs and where are results stored?
+3. L2 live Ollama validation with Memory Bridge enabled — when and on which hardware?
 
 ## Archive Source
 

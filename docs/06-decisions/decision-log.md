@@ -1,5 +1,25 @@
 # Decision Log
 
+## 2026-06-13 — Model Skill Sheets as Routing Data Layer
+
+### Decision
+
+Use **Model Scorecards / Skill Sheets** as the target data layer for model suitability, hardware fit, task-track strengths, failure modes, and fallback rules.
+
+### Why
+
+The Local Brain should route by task track and capability, not by generic model size or a single benchmark score. Scorecards make the AI Pit Crew model-selection thesis concrete while preserving rules, tools, validators, and human review as first-class handler types.
+
+### Status
+
+Confirmed direction; implementation remains experimental
+
+### Notes
+
+Spec: `docs/01-architecture/model-scorecard-and-routing.md`. Do not treat scorecard fields as measured facts unless backed by evaluation artifacts, scoreboard entries, or documented local runs.
+
+---
+
 ## 2026-06-12 — Locaily Confirmed as Public Product Name
 
 ### Decision
@@ -261,6 +281,106 @@ Confirmed — v0 implemented
 ### Notes
 
 See `docs/06-decisions/second-brain-as-memory-layer.md`, `docs/01-architecture/memory-bridge.md`.
+
+---
+
+## 2026-06-13 — Memory Bridge Privacy and Audit Redaction
+
+### Decision
+
+Memory endpoint and Lighthouse memory-preflight audits store **redacted metadata only** — no excerpts, proposal bodies, summaries, or vault paths. `companion/memory/audit-redaction.js` enforces this.
+
+### Why
+
+Private Second Brain content must not persist in Locaily audit logs when context packs are built over HTTP.
+
+### Status
+
+Confirmed — implemented and smoke-tested
+
+### Notes
+
+Part of privacy stabilization before controlled validation. Smoke suite: 47/47.
+
+---
+
+## 2026-06-13 — Lighthouse Handoff Only Workflow Wired to Memory Bridge v0
+
+### Decision
+
+Only `lighthouse-handoff` task `compose-handoff` receives optional memory preflight in v0. No other workflows call Memory Bridge until L2 validation repeats cleanly.
+
+### Why
+
+Prove one integration path before expanding surface area.
+
+### Status
+
+Confirmed
+
+### Notes
+
+`options.memory.enabled: "auto"`. Metrics from Lighthouse/PageSpeed remain authoritative.
+
+---
+
+## 2026-06-13 — Memory Bridge + Lighthouse Controlled Validation
+
+### Decision
+
+Record controlled validation as passed for Memory Bridge + Lighthouse `compose-handoff` against a real wiki-style private vault and real Lighthouse CLI capture (user-local). Public evidence in `docs/05-validation/`; commit `f4551b9`.
+
+### Why
+
+Confirm bridge works outside public starter templates without metric regression or privacy leaks.
+
+### Status
+
+Confirmed for controlled local validation. L2 live Ollama path remains open.
+
+### Notes
+
+See `docs/05-validation/memory-bridge-lighthouse-v0.md`. Do not commit private vault paths or validation artifacts.
+
+---
+
+## 2026-06-13 — L2 Live Ollama + Memory Bridge Validated
+
+### Decision
+
+Record **L2 (live Ollama orchestration + Memory Bridge compose)** as passed on target hardware (2026-06-13) for the Lighthouse Handoff chain: live PageSpeed capture → slim input → Ollama `analyze-report` → schema-valid result → memory-enabled `compose-handoff` → metric-preserving Markdown.
+
+### Why
+
+Closes the open L2 milestone with evidence on a real site (`https://lemonteed.com/`, performance 76 weakest) without claiming multi-model routing, extension bridge, or handoff quality benchmarks.
+
+### Status
+
+Confirmed for documented manual validation. Automated regression: `scripts/lighthouse-memory-compose-regression.js`.
+
+### Notes
+
+Evidence doc: `docs/05-validation/l2-live-ollama-memory-bridge.md`. Local artifacts under `data/validation/` (gitignored). Checklist deduplication added in `companion/tools/lighthouse-handoff.js`. Private vault project page enrichment remains a follow-up.
+
+---
+
+## 2026-06-13 — Local Test Bench Console
+
+### Decision
+
+Add a localhost-only `LocAIly Test Bench` at `GET /console` for Lighthouse Handoff validation runs, with status preflight, browser-triggered runs, live pipeline status, result review, and local run history.
+
+### Why
+
+Manual PowerShell validation proved the L2 chain, but normal validation should be runnable by a non-technical user without hand-calling endpoints or copying artifacts.
+
+### Status
+
+Implemented as a simple static HTML/CSS/JS console served by the existing companion server. Validation artifacts remain local and gitignored under `data/validation/`.
+
+### Notes
+
+The console validates the Lighthouse Handoff L2 workflow only. It does not claim Chrome extension validation, multi-model routing validation, benchmark quality, or score improvement. Memory paths stay redacted; only vault-relative `filesUsed` may appear in run evidence.
 
 ---
 
