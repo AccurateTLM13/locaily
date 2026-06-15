@@ -4,11 +4,11 @@ How track steps receive input from the original request and prior step artifacts
 
 ## Current Implementation
 
-Tool steps resolve `input_map` in `companion/pit-crew/input-map-resolver.js` via `companion/pit-crew/tool-router.js`.
+Tool and model steps resolve `input_map` in `companion/pit-crew/input-map-resolver.js` via `companion/pit-crew/step-input.js` (`buildStepInput` for tools, `buildModelStepInput` for models).
 
-The Lighthouse proof track (`website_audit.lighthouse_handoff`) declares `input_map` on every tool step in `companion/pit-crew/tracks/lighthouse-handoff.track.json`.
+The Lighthouse proof track declares `input_map` on every step in `companion/pit-crew/tracks/lighthouse-handoff.track.json`, including the `prioritize_fixes` model step.
 
-Tracks without `input_map` fall back to deprecated step-id logic in `buildLegacyStepInput()` inside `tool-router.js`.
+Tracks without `input_map` fall back to deprecated step-id logic in `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` inside `step-input.js`.
 
 ### Reference syntax (implemented)
 
@@ -17,6 +17,12 @@ Tracks without `input_map` fall back to deprecated step-id logic in `buildLegacy
 - `$artifacts.<step_id>` — full prior step output
 - `$artifacts.<step_id>.<path>` — nested field from a prior step artifact
 - Array values — coalesce first non-null/non-undefined reference; final array item is literal default
+
+### Lighthouse model steps
+
+| Step ID | Input source |
+|---|---|
+| `prioritize_fixes` | `$input.url`, `$input.scores`, `$artifacts.classify_issues.rankedOpportunities`, `$artifacts.classify_issues.issues` |
 
 ### Lighthouse tool steps
 
@@ -88,7 +94,8 @@ Deprecated step-id branches remain in `buildLegacyStepInput()` for tracks that o
 | **Done** | Optional `input_map` on tool steps; resolver in `input-map-resolver.js` |
 | **Done** | Migrate `website_audit.lighthouse_handoff` to declarative maps |
 | **Done** | Add `marketplace.dealsniper` with declarative maps only |
-| **Next** | Remove legacy fallback when no tracks omit `input_map` |
+| **Done** | Model-step `input_map` via `buildModelStepInput()` |
+| **Next** | Remove legacy fallbacks when no tracks omit `input_map` |
 
 ## Do Not
 
@@ -98,4 +105,4 @@ Deprecated step-id branches remain in `buildLegacyStepInput()` for tracks that o
 
 - [track-definition-schema.md](./track-definition-schema.md)
 - [../07-progress/current-sprint.md](../07-progress/current-sprint.md)
-- Code: `companion/pit-crew/tool-router.js`
+- Code: `companion/pit-crew/step-input.js`, `companion/pit-crew/tool-router.js`, `companion/pit-crew/model-router.js`

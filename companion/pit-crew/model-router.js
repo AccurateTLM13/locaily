@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const { buildModelStepInput } = require("./step-input");
 const { buildPrompt } = require("./prompts");
 
 function resolveModel(role, resolveModelForRole) {
@@ -51,7 +52,8 @@ async function executeModelStep({ step, context, runtime, options }) {
   const role = executor.role || "default_worker";
   const modelResolution = resolveStepModel(role, options);
   const schema = loadStepSchema(executor.schema);
-  const prompt = buildPrompt(executor.prompt_template, context);
+  const stepInput = buildModelStepInput(step, context);
+  const prompt = buildPrompt(executor.prompt_template, context, stepInput);
   const stepStart = Date.now();
 
   const output = await runtime.generateJson(prompt, schema, {
@@ -82,5 +84,6 @@ async function executeModelStep({ step, context, runtime, options }) {
 module.exports = {
   resolveModel,
   resolveStepModel,
+  buildModelStepInput,
   executeModelStep
 };

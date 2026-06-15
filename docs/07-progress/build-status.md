@@ -4,15 +4,16 @@
 
 ## Current Stage
 
-Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, declarative tool-step `input_map`, two workflow tracks.
+Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, declarative `input_map` on tool and model steps, two workflow tracks.
 
 ## Milestones
 
 | Milestone | Status |
 |---|---|
 | **1A — Track system explicit (docs)** | Complete |
-| **1B — Declarative track input mapping** | **Complete** |
+| **1B — Declarative track input mapping (tools)** | **Complete** |
 | **2 — Second workflow track** | **Complete** |
+| **3 — Model-step input mapping** | **Complete** |
 
 ## Current Proof
 
@@ -29,7 +30,7 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 - Manifest-backed tool registry
 - Lighthouse proof track (7 steps)
 - DealSniper workflow track (3 steps)
-- **Declarative tool-step `input_map`** (`input-map-resolver.js` + track JSON)
+- **Declarative step `input_map`** (`input-map-resolver.js` + `step-input.js` for tool and model steps)
 - Model roles + provider router (Ollama, mock)
 - Input gate, permissions, audit, result validation
 - Memory Bridge v0 endpoints (disabled by default)
@@ -43,7 +44,7 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 - Scoreboard (records runs; no full rubric harness)
 - Memory Bridge (v0; compose preflight only on Lighthouse)
 - Fallback ladder (retry only)
-- Legacy `buildLegacyStepInput()` fallback for tracks without `input_map`
+- Legacy `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` fallbacks for unmigrated steps
 - Validation console (early UI)
 
 ## Not Built
@@ -58,7 +59,7 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 
 ## Current Priority
 
-**Next:** Remove legacy `buildLegacyStepInput()` (both tracks now declare `input_map`); normalize model-step input mapping; Model Garage evaluation harness (spec only until evidence).
+**Next:** Remove legacy step-input fallbacks (all catalog steps now declare `input_map`); Model Garage evaluation harness (spec only until evidence).
 
 ## Evidence Pointers
 

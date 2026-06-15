@@ -943,12 +943,14 @@ async function checkLighthouseInputValidation() {
 async function checkTrackDeclarativeInputMap() {
   for (const trackId of ["website_audit.lighthouse_handoff", "marketplace.dealsniper"]) {
     const track = loadTrack(trackId);
-    const toolSteps = track.steps.filter((step) => step.executor.type === "tool");
 
-    assert(toolSteps.length >= 1, `Expected tool steps in track '${trackId}'.`);
+    for (const step of track.steps) {
+      assert(step.input_map !== undefined && step.input_map !== null, `Expected input_map on step '${step.id}' in '${trackId}'.`);
+    }
 
-    for (const step of toolSteps) {
-      assert(step.input_map !== undefined && step.input_map !== null, `Expected input_map on tool step '${step.id}' in '${trackId}'.`);
+    if (trackId === "website_audit.lighthouse_handoff") {
+      const prioritizeStep = track.steps.find((step) => step.id === "prioritize_fixes");
+      assert(prioritizeStep && prioritizeStep.executor.type === "model", "Expected prioritize_fixes model step.");
     }
   }
 }
