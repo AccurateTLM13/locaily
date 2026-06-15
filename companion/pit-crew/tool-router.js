@@ -1,4 +1,10 @@
-function buildStepInput(step, context) {
+const { resolveInputMap } = require("./input-map-resolver");
+
+/**
+ * @deprecated Legacy Lighthouse step-id mapping for tracks that do not declare input_map.
+ * Remove once all track files use declarative input_map (see docs/02-track-system/step-input-mapping.md).
+ */
+function buildLegacyStepInput(step, context) {
   const input = context.input || {};
   const artifacts = context.artifacts || {};
 
@@ -48,6 +54,14 @@ function buildStepInput(step, context) {
   }
 
   return input;
+}
+
+function buildStepInput(step, context) {
+  if (step.input_map !== undefined && step.input_map !== null) {
+    return resolveInputMap(step.input_map, context);
+  }
+
+  return buildLegacyStepInput(step, context);
 }
 
 async function executeToolStep({ step, context, toolRegistry, runtime, options, meta }) {
@@ -103,5 +117,6 @@ async function executeToolStep({ step, context, toolRegistry, runtime, options, 
 
 module.exports = {
   buildStepInput,
+  buildLegacyStepInput,
   executeToolStep
 };

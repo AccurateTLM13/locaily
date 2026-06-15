@@ -7,6 +7,7 @@
   "steps": [
     {
       "id": "extract_metrics",
+      "input_map": "$input",
       "executor": {
         "type": "tool",
         "tool": "lighthouse.parse",
@@ -15,6 +16,9 @@
     },
     {
       "id": "classify_issues",
+      "input_map": {
+        "opportunities": ["$input.opportunities", []]
+      },
       "executor": {
         "type": "tool",
         "tool": "lighthouse.classify_audits",
@@ -32,6 +36,11 @@
     },
     {
       "id": "validate_priority_fixes",
+      "input_map": {
+        "opportunities": ["$input.opportunities", []],
+        "priorityFixes": ["$artifacts.prioritize_fixes.priorityFixes", []],
+        "thinking": ["$artifacts.prioritize_fixes.thinking", ""]
+      },
       "executor": {
         "type": "tool",
         "tool": "lighthouse.validate_priority_fixes",
@@ -40,6 +49,10 @@
     },
     {
       "id": "match_fixes",
+      "input_map": {
+        "issues": ["$artifacts.classify_issues.issues", []],
+        "priorityFixes": ["$artifacts.validate_priority_fixes.priorityFixes", []]
+      },
       "executor": {
         "type": "tool",
         "tool": "lighthouse.match_fixes",
@@ -48,6 +61,19 @@
     },
     {
       "id": "write_handoff",
+      "input_map": {
+        "url": "$input.url",
+        "metrics": ["$artifacts.extract_metrics", {}],
+        "classifiedIssues": ["$artifacts.classify_issues", {}],
+        "prioritizedFixes": ["$artifacts.validate_priority_fixes", "$artifacts.prioritize_fixes", {}],
+        "matchedFixes": ["$artifacts.match_fixes", {}],
+        "opportunities": ["$input.opportunities", []],
+        "rankedOpportunities": [
+          "$artifacts.classify_issues.rankedOpportunities",
+          "$artifacts.extract_metrics.rankedOpportunities",
+          []
+        ]
+      },
       "executor": {
         "type": "tool",
         "tool": "lighthouse-handoff",
@@ -56,6 +82,9 @@
     },
     {
       "id": "verify_output",
+      "input_map": {
+        "handoff": ["$artifacts.write_handoff", {}]
+      },
       "executor": {
         "type": "tool",
         "tool": "lighthouse.verify_handoff",

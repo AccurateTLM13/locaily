@@ -13,6 +13,7 @@ const {
 } = require("../companion/memory/audit-redaction");
 const { normalizeAuditEvent, buildAuditEvent } = require("../companion/core/audit-log");
 const { lighthouseHandoffTool } = require("../companion/tools/lighthouse-handoff");
+const { loadTrack } = require("../companion/pit-crew/decomposer");
 
 const TEMPLATE_VAULT_PATH = path.join(__dirname, "..", "templates", "memory-vault");
 const WIKI_VAULT_PATH = path.join(__dirname, "..", "templates", "memory-vault-wiki");
@@ -939,6 +940,17 @@ async function checkLighthouseInputValidation() {
   assertAnalyzeError(invalidLighthouse.body, "lighthouse-handoff", "analyze-report", "INVALID_INPUT");
 }
 
+async function checkTrackDeclarativeInputMap() {
+  const track = loadTrack("website_audit.lighthouse_handoff");
+  const toolSteps = track.steps.filter((step) => step.executor.type === "tool");
+
+  assert(toolSteps.length >= 6, "Expected lighthouse tool steps in track definition.");
+
+  for (const step of toolSteps) {
+    assert(step.input_map !== undefined && step.input_map !== null, `Expected input_map on tool step '${step.id}'.`);
+  }
+}
+
 async function checkTracksCatalog() {
   const tracks = await request("/tracks");
   assert(tracks.response.status === 200, "Expected GET /tracks to return HTTP 200.");
@@ -1563,6 +1575,7 @@ async function main() {
   await runCheck("GET /audit run filter", checkAuditEndpoint);
   await runCheck("GET /audit failure event", checkAuditFailureEvent);
   await runCheck("Lighthouse Handoff input validation", checkLighthouseInputValidation);
+  await runCheck("track declarative input_map", checkTrackDeclarativeInputMap);
   await runCheck("GET /tracks", checkTracksCatalog);
   await runCheck("POST /tracks/run mock provider", checkTracksRunMockProvider);
   await runCheck("Lighthouse orchestrated and scoreboard", checkLighthouseOrchestratedAndScoreboard);

@@ -4,17 +4,21 @@ How track steps receive input from the original request and prior step artifacts
 
 ## Current Implementation
 
-Step input mapping is **hardcoded by step id** in `companion/pit-crew/tool-router.js`:
+Tool steps resolve `input_map` in `companion/pit-crew/input-map-resolver.js` via `companion/pit-crew/tool-router.js`.
 
-```javascript
-function buildStepInput(step, context) {
-  // branches on step.id === "extract_metrics", "classify_issues", etc.
-}
-```
+The Lighthouse proof track (`website_audit.lighthouse_handoff`) declares `input_map` on every tool step in `companion/pit-crew/tracks/lighthouse-handoff.track.json`.
 
-The model router uses similar context access patterns for model-backed steps.
+Tracks without `input_map` fall back to deprecated step-id logic in `buildLegacyStepInput()` inside `tool-router.js`.
 
-### Lighthouse Step IDs With Custom Mapping
+### Reference syntax (implemented)
+
+- `$input` — full track run input
+- `$input.<field>` — field from original input
+- `$artifacts.<step_id>` — full prior step output
+- `$artifacts.<step_id>.<path>` — nested field from a prior step artifact
+- Array values — coalesce first non-null/non-undefined reference; final array item is literal default
+
+### Lighthouse tool steps
 
 | Step ID | Input source |
 |---|---|
@@ -65,19 +69,21 @@ Resolver rules (target behavior):
 - `$artifacts.<step_id>` — full output object from a prior step
 - `$artifacts.<step_id>.<path>` — nested field (optional v2)
 
+## Legacy Fallback
+
+Deprecated step-id branches remain in `buildLegacyStepInput()` for tracks that omit `input_map`. Do not add new step ids there.
+
 ## Transition Plan
 
 | Phase | Action |
 |---|---|
-| **Now** | Document hardcoded mapping (this file); do not add new step ids to router without tracking debt |
-| **Next** | Add optional `input_map` to track JSON schema; resolver in tool-router reads map when present |
-| **Next** | Migrate `website_audit.lighthouse_handoff` to declarative maps |
-| **Later** | Remove Lighthouse-specific branches from router once all tracks use maps |
+| **Done** | Optional `input_map` on tool steps; resolver in `input-map-resolver.js` |
+| **Done** | Migrate `website_audit.lighthouse_handoff` to declarative maps |
+| **Next** | Require `input_map` on new workflow tracks; remove legacy fallback when catalog is migrated |
 
 ## Do Not
 
-- Claim declarative `input_map` is implemented — it is the target shape only
-- Add DealSniper or other workflows by extending the `if (step.id === ...)` chain without a plan to migrate
+- Add new workflows by extending `buildLegacyStepInput()` step-id branches
 
 ## Related
 
