@@ -1,0 +1,46 @@
+{
+  "_fixture_status": "draft example — not validated against a runner",
+  "track_id": "memory.context_selection",
+  "description": "Query matches two of three candidate docs within token budget",
+  "input": {
+    "query": "render-blocking CSS lighthouse fixes",
+    "candidates": [
+      {
+        "id": "doc-css",
+        "path": "wiki/performance/css-blocking.md",
+        "snippet": "Minify CSS and defer non-critical stylesheets.",
+        "score_hint": 0.9
+      },
+      {
+        "id": "doc-js",
+        "path": "wiki/performance/unused-javascript.md",
+        "snippet": "Reduce unused JavaScript bundles.",
+        "score_hint": 0.3
+      },
+      {
+        "id": "doc-seo",
+        "path": "wiki/seo/meta-tags.md",
+        "snippet": "Title and meta description best practices.",
+        "score_hint": 0.1
+      }
+    ],
+    "limits": {
+      "max_documents": 2,
+      "max_tokens": 4000
+    },
+    "vault_ref": "templates/memory-vault"
+  },
+  "expected_output_shape": {
+    "selected": [
+      {
+        "id": "doc-css",
+        "path": "wiki/performance/css-blocking.md",
+        "reason": "keyword_match|rank_score"
+      }
+    ],
+    "excluded_count": "number >= 1",
+    "thin_context_warning": false,
+    "valid": true
+  },
+  "notes": "Ranker should prefer css-blocking doc. Exact selected set may vary by implementation; at least doc-css should appear. Not wired to live Memory Bridge compose-handoff path."
+}

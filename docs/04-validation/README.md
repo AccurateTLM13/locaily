@@ -11,6 +11,7 @@ Evidence records for Locaily **tracks** and **workflows**.
 | [memory-bridge-manual-test-path.md](./memory-bridge-manual-test-path.md) | Manual Memory Bridge + Lighthouse integration steps |
 | [memory-bridge-lighthouse-v0.md](./memory-bridge-lighthouse-v0.md) | Memory Bridge + Lighthouse controlled validation (2026-06-13) |
 | [l2-live-ollama-memory-bridge.md](./l2-live-ollama-memory-bridge.md) | L2 live Ollama + Memory Bridge milestone (2026-06-13) |
+| [fixtures/tracks/](./fixtures/tracks/) | Draft track fixture examples (not validated — spec scaffolding) |
 
 ## Local Test Bench Console
 

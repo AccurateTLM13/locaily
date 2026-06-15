@@ -1,0 +1,35 @@
+{
+  "_fixture_status": "draft example — not validated against a runner",
+  "track_id": "routing.escalation_ladder",
+  "description": "fast_worker fails prioritization schema; ladder escalates to default_worker",
+  "input": {
+    "failed_step": {
+      "id": "prioritize_fixes",
+      "executor_type": "model",
+      "role": "fast_worker",
+      "error_code": "SCHEMA_VALIDATION_FAILED"
+    },
+    "attempt": 1,
+    "ladder": [
+      { "action": "retry_same_role", "max": 1 },
+      { "action": "escalate_role", "from": "fast_worker", "to": "default_worker" },
+      { "action": "escalate_role", "from": "default_worker", "to": "reasoning_worker" },
+      { "action": "fallback_tool_only" }
+    ],
+    "confidence": {
+      "recommendation": "escalate"
+    }
+  },
+  "expected_output_shape": {
+    "decision": "escalate",
+    "next_role": "default_worker",
+    "next_executor": {
+      "type": "model",
+      "tool": null,
+      "task": null
+    },
+    "reason": "string — schema failure after retry exhausted or skipped",
+    "attempt_next": 2
+  },
+  "notes": "Represents tiny-model-not-enough scenario from Model Garage research. FallbackHandler not implemented; fixture defines target behavior only."
+}
