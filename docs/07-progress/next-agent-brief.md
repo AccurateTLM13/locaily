@@ -24,13 +24,14 @@ Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../0
 
 ## Current Task
 
-**Milestone 4 candidate:** Remove legacy step-input fallbacks in `companion/pit-crew/step-input.js` now that both catalog tracks declare `input_map` on every step (including Lighthouse `prioritize_fixes` model step).
+**Milestone 5 candidate:** Remove legacy step-input fallbacks in `companion/pit-crew/step-input.js` now that both catalog tracks declare `input_map` on every step.
 
 See [../02-track-system/step-input-mapping.md](../02-track-system/step-input-mapping.md) and [milestone-map.md](./milestone-map.md).
 
 ## Architecture Reminder
 
 ```txt
+Workflow requests → run plans → track steps.
 Models plug into tracks.
 Tools plug into tracks.
 Track JSON declares input_map for tool and model steps.
@@ -45,6 +46,7 @@ Local Brain dispatches tracks — not raw model names.
 | Concern | Path |
 |---|---|
 | Server | `companion/server.js` |
+| Workflow orchestration | `companion/orchestration/` |
 | Track run | `companion/pit-crew/orchestrator.js` |
 | Track files | `companion/pit-crew/tracks/` |
 | Step input | `companion/pit-crew/step-input.js`, `input-map-resolver.js` |

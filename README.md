@@ -186,7 +186,7 @@ node scripts/smoke-test.js
 Expected current result (clean server, memory bridge disabled in config / local setup):
 
 ```txt
-Smoke test summary: 51/51 checks passed.
+Smoke test summary: 55/55 checks passed.
 ```
 
 (Memory Bridge checks pass with memory disabled in default `companion/config.json`. Clear `memoryValidationVaultPath` in `data/console/local-setup.json` for a clean-server run.)

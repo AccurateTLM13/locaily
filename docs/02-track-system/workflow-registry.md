@@ -2,7 +2,7 @@
 
 Workflows are **user-facing jobs** composed from core tracks and workflow-specific steps. A workflow may map to one track file or several tracks in the future.
 
-Status: **Documentation registry** — Lighthouse Handoff and DealSniper have implemented track files.
+Status: **Implemented** — workflow orchestration API + track files for Lighthouse Handoff and DealSniper.
 
 ---
 
@@ -32,8 +32,12 @@ Status: **Documentation registry** — Lighthouse Handoff and DealSniper have im
 
 **Entry points:**
 
+- `POST /workflows/run` with `workflow_id: "lighthouse_handoff"` (orchestration layer)
+- `POST /workflows/plan` to inspect the run plan without executing
 - `POST /tracks/run` with `track_id: "website_audit.lighthouse_handoff"`
 - `POST /tasks/run` / `POST /analyze` with `lighthouse-handoff` tool (orchestrated mode)
+
+**Run plan doc:** [../03-workflows/lighthouse-handoff-run-plan.md](../03-workflows/lighthouse-handoff-run-plan.md)
 
 **Validation evidence:** [../04-validation/](../04-validation/), [../03-workflows/lighthouse-handoff-validation.md](../03-workflows/lighthouse-handoff-validation.md)
 

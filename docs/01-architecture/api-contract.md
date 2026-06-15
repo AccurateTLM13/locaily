@@ -19,6 +19,10 @@ GET  /health
 GET  /tools
 GET  /tracks
 POST /tracks/run
+GET  /orchestration/tracks
+GET  /orchestration/workflows
+POST /workflows/plan
+POST /workflows/run
 POST /tasks/run
 GET  /audit
 GET  /scoreboard
@@ -399,6 +403,61 @@ Legacy success envelope:
 ```
 
 Legacy errors use the same shape with `ok: false`, `result: null`, and `error`.
+
+## Workflow Orchestration
+
+Track-based orchestration endpoints (Milestone 4):
+
+```txt
+GET  /orchestration/tracks
+GET  /orchestration/workflows
+POST /workflows/plan
+POST /workflows/run
+```
+
+### `GET /orchestration/tracks`
+
+Returns enriched track registry entries (purpose, input/output types, worker hints, validation expectations).
+
+### `GET /orchestration/workflows`
+
+Returns workflow ids mapped to track ids.
+
+### `POST /workflows/plan`
+
+Builds a run plan without executing steps.
+
+Request:
+
+```json
+{
+  "workflow_id": "lighthouse_handoff",
+  "input": {},
+  "task_id": "optional-correlation-id",
+  "options": {}
+}
+```
+
+Success result:
+
+```json
+{
+  "ok": true,
+  "tool": "workflow-orchestrator",
+  "task": "lighthouse_handoff",
+  "result": {
+    "plan": {}
+  }
+}
+```
+
+### `POST /workflows/run`
+
+Builds and executes a run plan step by step. Success responses include workflow result fields plus executed `plan` and step metadata in `meta`.
+
+Uses the same engine success/error envelope as `/tasks/run`. Audit log entries use `tool: "workflow-orchestrator"`.
+
+See [../02-track-system/run-plan-format.md](../02-track-system/run-plan-format.md).
 
 ## Other Engine Endpoints
 

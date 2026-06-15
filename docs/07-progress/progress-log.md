@@ -4,7 +4,32 @@ Dated record of meaningful build and planning sessions.
 
 ---
 
-## 2026-06-15 — Milestone 3 Complete: Model-Step Input Mapping
+## 2026-06-15 — Milestone 4 Complete: Track-Based Orchestration
+
+**Milestone 4: Track-based orchestration — complete.**
+
+### Changed
+
+- Added `companion/orchestration/` (track registry, workflow registry, run plan builder/executor/validator/logger)
+- New endpoints: `GET /orchestration/tracks`, `GET /orchestration/workflows`, `POST /workflows/plan`, `POST /workflows/run`
+- Lighthouse Handoff first workflow target with step-by-step run plan execution and audit logging
+- Unit test `scripts/orchestration-unit-test.js`; smoke suite expanded to **55/55**
+
+### Why
+
+Local Brain can now accept a workflow request, materialize a structured run plan from the track registry, execute it step by step, validate shapes, and log selected tracks/workers — without model swapping or NearbyNode routing.
+
+### Evidence
+
+- `node scripts/orchestration-unit-test.js` — PASS
+- `node scripts/contract-test.js` — PASS
+- Clean-server smoke: **55/55**
+
+### Next
+
+- Milestone 5: remove legacy step-input fallbacks in `step-input.js`
+
+---
 
 **Milestone 3: Model-step input mapping — complete.**
 
