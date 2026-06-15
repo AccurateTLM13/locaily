@@ -21,7 +21,7 @@ JSON shape for track files under `companion/pit-crew/tracks/`. Matches what `dec
 |---|---|---|
 | `id` | yes | Unique within track; becomes artifact key |
 | `executor` | yes | How the step runs |
-| `input_map` | no | Declarative tool-step input mapping (see [step-input-mapping.md](./step-input-mapping.md)) |
+| `input_map` | no | Declarative step input mapping for tool and model steps (see [step-input-mapping.md](./step-input-mapping.md)) |
 
 ## Executor: Tool Step
 

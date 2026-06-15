@@ -1,7 +1,12 @@
 const assert = require("node:assert/strict");
 const { loadTrack } = require("../companion/pit-crew/decomposer");
 const { buildStepInput, buildLegacyStepInput } = require("../companion/pit-crew/tool-router");
+const {
+  buildModelStepInput,
+  buildLegacyModelStepInput
+} = require("../companion/pit-crew/step-input");
 const { resolveInputMap } = require("../companion/pit-crew/input-map-resolver");
+const { buildPrompt } = require("../companion/pit-crew/prompts");
 
 const SAMPLE_CONTEXT = {
   input: {
@@ -155,10 +160,46 @@ function checkDealSniperTrackInputMaps() {
   );
 }
 
+function checkPrioritizeFixesModelInputMap() {
+  const track = loadTrack("website_audit.lighthouse_handoff");
+  const prioritizeStep = track.steps.find((step) => step.id === "prioritize_fixes");
+
+  assert(prioritizeStep, "Expected prioritize_fixes model step.");
+  assert(prioritizeStep.input_map, "Expected input_map on prioritize_fixes model step.");
+
+  const declarative = buildModelStepInput(prioritizeStep, SAMPLE_CONTEXT);
+  const legacy = buildLegacyModelStepInput(prioritizeStep, SAMPLE_CONTEXT);
+
+  assertDeepEqual(
+    declarative,
+    legacy,
+    "prioritize_fixes declarative input_map must match legacy model mapping."
+  );
+
+  const legacyPrompt = buildPrompt("prioritize_fixes", SAMPLE_CONTEXT);
+  const declarativePrompt = buildPrompt("prioritize_fixes", SAMPLE_CONTEXT, declarative);
+
+  assert.strictEqual(
+    declarativePrompt,
+    legacyPrompt,
+    "prioritize_fixes prompt from input_map must match legacy context prompt."
+  );
+}
+
+function checkLighthouseTrackInputMapCoverage() {
+  const track = loadTrack("website_audit.lighthouse_handoff");
+
+  for (const step of track.steps) {
+    assert(step.input_map !== undefined && step.input_map !== null, `Expected input_map on step '${step.id}'.`);
+  }
+}
+
 function main() {
   checkPassthroughInputReference();
   checkLegacyMatchesDeclarativeForTrack();
   checkWriteHandoffCoalesceFallback();
+  checkPrioritizeFixesModelInputMap();
+  checkLighthouseTrackInputMapCoverage();
   checkDealSniperTrackInputMaps();
   console.log("track-input-map-unit-test: all checks passed.");
 }

@@ -27,6 +27,12 @@
     },
     {
       "id": "prioritize_fixes",
+      "input_map": {
+        "url": "$input.url",
+        "scores": ["$input.scores", {}],
+        "rankedOpportunities": ["$artifacts.classify_issues.rankedOpportunities", []],
+        "classifiedIssues": ["$artifacts.classify_issues.issues", []]
+      },
       "executor": {
         "type": "model",
         "role": "priority_helper",

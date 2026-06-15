@@ -35,12 +35,13 @@ Layered planning — not a six-month prophecy.
 
 ---
 
-## Milestone 3 — Model-Step Input Mapping (Next)
+## Milestone 3 — Model-Step Input Mapping
 
-**Status:** Not started
+**Status:** **Complete**
 
-- Declarative inputs for model steps (not only tool steps)
-- Both Lighthouse and DealSniper tracks declare step data flow in JSON
+- Declarative `input_map` for model steps via shared `step-input.js`
+- Lighthouse `prioritize_fixes` migrated off broad context reads in prompts
+- Legacy prompt context fallback retained with deprecation comment
 
 ---
 
