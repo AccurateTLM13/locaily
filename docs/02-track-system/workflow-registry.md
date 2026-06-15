@@ -2,7 +2,7 @@
 
 Workflows are **user-facing jobs** composed from core tracks and workflow-specific steps. A workflow may map to one track file or several tracks in the future.
 
-Status: **Documentation registry** — only Lighthouse Handoff has a implemented track file.
+Status: **Documentation registry** — Lighthouse Handoff and DealSniper have implemented track files.
 
 ---
 
@@ -47,20 +47,28 @@ Status: **Documentation registry** — only Lighthouse Handoff has a implemented
 
 **Workflow type:** Marketplace listing analysis
 
-**Status:** **Partial** — showcase tool exists; no dedicated track file
+**Status:** **Implemented** as linear track
 
-**Tool:** `deal-sniper` (model-backed single-tool path via `/tasks/run`)
+**Track ID:** `marketplace.dealsniper`
 
-**Uses core tracks (planned):**
+**Uses core tracks:**
 
-- Extraction
-- Classification
-- Summarization
-- Validation
+- Extraction (`prepare_listing`)
+- Summarization / analysis (`analyze_listing`)
+- Validation (`validate_analysis`)
 
-**Current implementation:** Single-tool handler, not Pit Crew track.
+**Specialized steps:**
 
-**Doc:** Planned — [../03-workflows/dealsniper.md](../03-workflows/dealsniper.md) (stub)
+- Listing normalization (`deal-sniper` / `prepare-listing`)
+- Deal analysis (`deal-sniper` / `analyze-listing`)
+- Output schema validation (`deal-sniper` / `validate-analysis`)
+
+**Entry points:**
+
+- `POST /tracks/run` with `track_id: "marketplace.dealsniper"`
+- `POST /tasks/run` / `POST /analyze` with `deal-sniper` tool
+
+**Doc:** [../03-workflows/dealsniper.md](../03-workflows/dealsniper.md)
 
 ---
 

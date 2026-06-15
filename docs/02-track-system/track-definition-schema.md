@@ -11,6 +11,8 @@ JSON shape for track files under `companion/pit-crew/tracks/`. Matches what `dec
 | `name` | recommended | Display name |
 | `description` | recommended | Short summary |
 | `output_schema` | recommended | Path to final result JSON schema |
+| `result_step` | no | Step id whose artifact becomes the primary track result (non-Lighthouse tracks) |
+| `verification_step` | no | Step id whose artifact supplies `{ valid, errors }` verification meta |
 | `steps` | yes | Non-empty array of step objects |
 
 ## Step Object
@@ -50,13 +52,10 @@ JSON shape for track files under `companion/pit-crew/tracks/`. Matches what `dec
 
 Model steps request a **role**, not a hardcoded model name. The model router resolves role → provider model.
 
-## Reference: Proof Track
+## Reference: Proof Tracks
 
-Full example: `companion/pit-crew/tracks/lighthouse-handoff.track.json`
-
-Track id: `website_audit.lighthouse_handoff`
-
-Seven steps: extract → classify → prioritize → validate → match → write → verify
+- Lighthouse: `companion/pit-crew/tracks/lighthouse-handoff.track.json` — track id `website_audit.lighthouse_handoff` (7 steps)
+- DealSniper: `companion/pit-crew/tracks/dealsniper.track.json` — track id `marketplace.dealsniper` (3 steps)
 
 ## Validation Rules (Loader)
 

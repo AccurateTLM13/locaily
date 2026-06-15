@@ -1,0 +1,47 @@
+{
+  "track_id": "marketplace.dealsniper",
+  "version": "1.0.0",
+  "name": "DealSniper Listing Analysis",
+  "description": "Second proof track — marketplace listing to structured deal analysis with deterministic prep and validation.",
+  "output_schema": "companion/schemas/deal-sniper.schema.json",
+  "result_step": "analyze_listing",
+  "verification_step": "validate_analysis",
+  "steps": [
+    {
+      "id": "prepare_listing",
+      "input_map": {
+        "title": "$input.title",
+        "price": "$input.price",
+        "description": ["$input.description", ""],
+        "location": ["$input.location", ""],
+        "sellerInfo": ["$input.sellerInfo", ""],
+        "source": ["$input.source", ""]
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "deal-sniper",
+        "task": "prepare-listing"
+      }
+    },
+    {
+      "id": "analyze_listing",
+      "input_map": "$artifacts.prepare_listing",
+      "executor": {
+        "type": "tool",
+        "tool": "deal-sniper",
+        "task": "analyze-listing"
+      }
+    },
+    {
+      "id": "validate_analysis",
+      "input_map": {
+        "analysis": ["$artifacts.analyze_listing", {}]
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "deal-sniper",
+        "task": "validate-analysis"
+      }
+    }
+  ]
+}

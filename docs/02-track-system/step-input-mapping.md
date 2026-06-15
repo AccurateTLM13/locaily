@@ -31,6 +31,14 @@ Tracks without `input_map` fall back to deprecated step-id logic in `buildLegacy
 
 Any step id not listed falls through to `return input` (full original input).
 
+### DealSniper tool steps
+
+| Step ID | Input source |
+|---|---|
+| `prepare_listing` | `$input.title`, `$input.price`, optional listing fields |
+| `analyze_listing` | `$artifacts.prepare_listing` |
+| `validate_analysis` | `$artifacts.analyze_listing` |
+
 ## Problem
 
 This does **not** scale to more workflows:
@@ -79,7 +87,8 @@ Deprecated step-id branches remain in `buildLegacyStepInput()` for tracks that o
 |---|---|
 | **Done** | Optional `input_map` on tool steps; resolver in `input-map-resolver.js` |
 | **Done** | Migrate `website_audit.lighthouse_handoff` to declarative maps |
-| **Next** | Require `input_map` on new workflow tracks; remove legacy fallback when catalog is migrated |
+| **Done** | Add `marketplace.dealsniper` with declarative maps only |
+| **Next** | Remove legacy fallback when no tracks omit `input_map` |
 
 ## Do Not
 
