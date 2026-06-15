@@ -1,6 +1,6 @@
 # Build Status
 
-**Updated:** 2026-06-14
+**Updated:** 2026-06-15
 
 ## Current Stage
 
@@ -33,7 +33,7 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 - Model roles + provider router (Ollama, mock)
 - Input gate, permissions, audit, result validation
 - Memory Bridge v0 endpoints (disabled by default)
-- Smoke tests 50/50 (clean server); contract tests
+- Smoke tests 51/51 (clean server); contract tests
 - Windows launch helpers
 
 ## Partial
@@ -58,7 +58,7 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 
 ## Current Priority
 
-**Next:** Remove legacy `buildLegacyStepInput()` when all tracks declare `input_map`; Model Garage evaluation harness (spec only until evidence).
+**Next:** Remove legacy `buildLegacyStepInput()` (both tracks now declare `input_map`); normalize model-step input mapping; Model Garage evaluation harness (spec only until evidence).
 
 ## Evidence Pointers
 

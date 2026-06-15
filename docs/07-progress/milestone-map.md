@@ -2,32 +2,49 @@
 
 Layered planning — not a six-month prophecy.
 
-**Updated:** 2026-06-14
+**Updated:** 2026-06-15
 
-## Milestone 1 — Track System Explicit (Now)
+## Milestone 1A — Track System Explicit
 
-**Status:** In progress
+**Status:** **Complete**
 
 - Document core tracks, track registry, workflow registry
-- One proof track: `website_audit.lighthouse_handoff`
-- Identify step input mapping as transition debt
+- First proof track: `website_audit.lighthouse_handoff`
 - Validation evidence linked per workflow
 
 **Exit criteria:** Agent brief + track docs match code; no false DAG/classifier claims.
 
 ---
 
-## Milestone 3 — Second Workflow Track (Next)
+## Milestone 1B — Declarative Step Input
 
-**Status:** **Complete** — `marketplace.dealsniper` track added
+**Status:** **Complete**
+
+- `input_map` in track JSON + resolver in `input-map-resolver.js`
+- Lighthouse track migrated off hardcoded step ids
+
+---
+
+## Milestone 2 — Second Workflow Track
+
+**Status:** **Complete** — `marketplace.dealsniper` track merged (PR #7)
 
 - DealSniper track with declarative `input_map` only
+- Generic `result_step` / `verification_step` in orchestrator
 - Proves two tracks share runner without router forks
 
 ---
 
-## Milestone 4 — Model Garage Evidence (Later)
+## Milestone 3 — Model-Step Input Mapping (Next)
 
+**Status:** Not started
+
+- Declarative inputs for model steps (not only tool steps)
+- Both Lighthouse and DealSniper tracks declare step data flow in JSON
+
+---
+
+## Milestone 4 — Model Garage Evidence (Later)
 **Status:** Spec only
 
 - Evaluation harness using [../99-archive/research-notes/model-evaluation-template.md](../99-archive/research-notes/model-evaluation-template.md)
@@ -37,7 +54,6 @@ Layered planning — not a six-month prophecy.
 ---
 
 ## Milestone 5 — Simple Dependency Graph (Later)
-
 **Status:** Research gate
 
 - Topological runner for explicit `depends_on` in track files
