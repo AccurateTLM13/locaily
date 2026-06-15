@@ -1,5 +1,6 @@
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
+const { validateResult } = require("../core/result-validator");
 
 const promptTemplate = readFileSync(join(__dirname, "..", "prompts", "deal-sniper.md"), "utf8");
 const outputSchema = require("../schemas/deal-sniper.schema.json");
@@ -9,7 +10,7 @@ const dealSniperTool = {
   name: "DealSniper AI",
   pack: "showcase-tools",
   description: "Analyze marketplace listings for deal quality, risk, negotiation tips, and next actions.",
-  tasks: ["analyze-listing"],
+  tasks: ["analyze-listing", "prepare-listing", "validate-analysis"],
   permissions: ["model.run"],
   modelRole: "default_worker",
   requiresRuntime: true,
@@ -22,11 +23,19 @@ const dealSniperTool = {
   output: outputSchema,
   validateInput,
   async handle({ task, input, runtime, options }) {
+    if (task === "prepare-listing") {
+      return prepareListing(input);
+    }
+
+    if (task === "validate-analysis") {
+      return validateAnalysis(input);
+    }
+
     if (task !== "analyze-listing") {
       throwToolError("UNKNOWN_TASK", `Task '${task}' is not supported by DealSniper.`);
     }
 
-    const validationError = validateInput(input);
+    const validationError = validateListingInput(input);
 
     if (validationError) {
       throwToolError(validationError.code, validationError.message, validationError.nextStep);
@@ -43,6 +52,20 @@ const dealSniperTool = {
 };
 
 function validateInput(input) {
+  if (
+    input
+    && typeof input === "object"
+    && !Array.isArray(input)
+    && Object.prototype.hasOwnProperty.call(input, "analysis")
+    && !Object.prototype.hasOwnProperty.call(input, "title")
+  ) {
+    return null;
+  }
+
+  return validateListingInput(input);
+}
+
+function validateListingInput(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) {
     return {
       code: "INVALID_INPUT",
@@ -70,8 +93,43 @@ function validateInput(input) {
   return null;
 }
 
-function buildPrompt(input) {
-  const normalizedInput = {
+function prepareListing(input) {
+  const validationError = validateListingInput(input);
+
+  if (validationError) {
+    throwToolError(validationError.code, validationError.message, validationError.nextStep);
+  }
+
+  return normalizeListingInput(input);
+}
+
+function validateAnalysis(input) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throwToolError(
+      "INVALID_INPUT",
+      "DealSniper validate-analysis input must be an object.",
+      "Send analysis from the prior analyze_listing step."
+    );
+  }
+
+  if (!input.analysis || typeof input.analysis !== "object" || Array.isArray(input.analysis)) {
+    throwToolError(
+      "INVALID_INPUT",
+      "DealSniper validate-analysis input requires an analysis object.",
+      "Map analysis from $artifacts.analyze_listing in the track input_map."
+    );
+  }
+
+  const validation = validateResult(input.analysis, outputSchema);
+
+  return {
+    valid: validation.ok,
+    errors: validation.errors || []
+  };
+}
+
+function normalizeListingInput(input) {
+  return {
     title: String(input.title).trim(),
     price: Number(input.price),
     description: optionalString(input.description),
@@ -79,6 +137,10 @@ function buildPrompt(input) {
     sellerInfo: optionalString(input.sellerInfo),
     source: optionalString(input.source)
   };
+}
+
+function buildPrompt(input) {
+  const normalizedInput = normalizeListingInput(input);
 
   return [
     promptTemplate.trim(),

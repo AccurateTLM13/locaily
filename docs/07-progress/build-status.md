@@ -4,7 +4,7 @@
 
 ## Current Stage
 
-Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, declarative tool-step `input_map`, one proof track.
+Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, declarative tool-step `input_map`, two workflow tracks.
 
 ## Milestones
 
@@ -12,11 +12,13 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 |---|---|
 | **1A — Track system explicit (docs)** | Complete |
 | **1B — Declarative track input mapping** | **Complete** |
-| **2 — Second workflow track** | Not started |
+| **2 — Second workflow track** | **Complete** |
 
 ## Current Proof
 
 **Lighthouse Handoff** — track id `website_audit.lighthouse_handoff`
+
+**DealSniper** — track id `marketplace.dealsniper`
 
 ## Working
 
@@ -26,16 +28,17 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 - `POST /tracks/run` and `GET /tracks`
 - Manifest-backed tool registry
 - Lighthouse proof track (7 steps)
-- **Declarative tool-step `input_map`** (`input-map-resolver.js` + Lighthouse track JSON)
+- DealSniper workflow track (3 steps)
+- **Declarative tool-step `input_map`** (`input-map-resolver.js` + track JSON)
 - Model roles + provider router (Ollama, mock)
 - Input gate, permissions, audit, result validation
 - Memory Bridge v0 endpoints (disabled by default)
-- Smoke tests 50/50 (clean server); contract tests
+- Smoke tests 51/51 (clean server); contract tests
 - Windows launch helpers
 
 ## Partial
 
-- Track registry (one track file)
+- Track registry (two track files)
 - Model scorecards (spec; limited implementation)
 - Scoreboard (records runs; no full rubric harness)
 - Memory Bridge (v0; compose preflight only on Lighthouse)
@@ -55,7 +58,7 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 
 ## Current Priority
 
-**Milestone 2:** Add a second workflow track using declarative `input_map` (no new hardcoded step-id branches).
+**Next:** Remove legacy `buildLegacyStepInput()` (both tracks now declare `input_map`); normalize model-step input mapping; Model Garage evaluation harness (spec only until evidence).
 
 ## Evidence Pointers
 

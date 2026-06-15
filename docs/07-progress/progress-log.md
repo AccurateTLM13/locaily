@@ -4,6 +4,33 @@ Dated record of meaningful build and planning sessions.
 
 ---
 
+## 2026-06-15 — Milestone 2 Complete: Second Workflow Track
+
+**Milestone 2: Second workflow track — complete.**
+
+### Changed
+
+- Merged PR #7 (`ae0d03d`): `marketplace.dealsniper` track, DealSniper tool tasks, generic orchestrator result assembly, smoke + unit coverage.
+- Two workflow tracks now run through declarative `input_map` with no new `buildLegacyStepInput()` branches.
+
+### Why
+
+Prove the track system is reusable beyond Lighthouse Handoff — second workflow on the same linear runner without router forks.
+
+### Evidence
+
+- Squash merge on `main`: `feat: add DealSniper workflow track`
+- Clean-server validation: **51/51 smoke**, unit + contract tests pass
+- PR #7: 1 commit, 13 files
+- Lighthouse `write_handoff` path unchanged; DealSniper uses `result_step` / `verification_step`
+
+### Next
+
+- Remove `buildLegacyStepInput()` (both tracks declare `input_map`)
+- Milestone 3 candidate: declarative input mapping for model steps
+
+---
+
 ## 2026-06-14 — Draft Future Track Catalog (Docs Only)
 
 ### Changed
@@ -23,7 +50,6 @@ Parallel spec work while Milestone 2 runtime plumbing proceeds — gives impleme
 
 ### Next
 
-- Milestone 2 runtime track work continues on separate branch.
 - Implement Phase A governance tools when FallbackHandler milestone starts.
 
 ---
@@ -49,8 +75,8 @@ First platform refactor after docs restructure: tracks declare how data moves be
 
 ### Next
 
-- Milestone 2: second workflow track using declarative `input_map` only
-- Remove `buildLegacyStepInput()` when all tracks migrate
+- ~~Milestone 2: second workflow track~~ — done (2026-06-15, PR #7)
+- Remove `buildLegacyStepInput()` when ready
 
 ---
 
