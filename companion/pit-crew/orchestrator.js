@@ -104,6 +104,27 @@ async function runTrack({
     });
   }
 
+  const { result, schemaValid } = assembleTrackResult(track, context, input, outputSchema);
+
+  return {
+    track_id: track.track_id,
+    result,
+    steps: stepsRun,
+    durationMs: Date.now() - startTrack,
+    schemaValid,
+    fallbacks_used: []
+  };
+}
+
+function assembleTrackResult(track, context, input, outputSchema) {
+  if (context.artifacts.write_handoff) {
+    return assembleLighthouseTrackResult(track, context, input, outputSchema);
+  }
+
+  return assembleGenericTrackResult(track, context, outputSchema);
+}
+
+function assembleLighthouseTrackResult(track, context, input, outputSchema) {
   const handoff = context.artifacts.write_handoff || {};
   const verification = context.artifacts.verify_output || { valid: true, errors: [] };
   const markdown = formatHandoffMarkdown({
@@ -127,14 +148,36 @@ async function runTrack({
     schemaValid = validation.ok && schemaValid;
   }
 
-  return {
-    track_id: track.track_id,
-    result,
-    steps: stepsRun,
-    durationMs: Date.now() - startTrack,
-    schemaValid,
-    fallbacks_used: []
+  return { result, schemaValid };
+}
+
+function assembleGenericTrackResult(track, context, outputSchema) {
+  const lastStepId = track.steps[track.steps.length - 1].id;
+  const resultStepId = track.result_step || lastStepId;
+  const verificationStepId = track.verification_step
+    || (context.artifacts.verify_output ? "verify_output" : null)
+    || (context.artifacts.validate_analysis ? "validate_analysis" : null);
+  const primaryOutput = context.artifacts[resultStepId] || {};
+  const verification = verificationStepId
+    ? (context.artifacts[verificationStepId] || { valid: true, errors: [] })
+    : { valid: true, errors: [] };
+
+  const result = {
+    ...primaryOutput,
+    meta: {
+      track_id: track.track_id,
+      verification
+    }
   };
+
+  let schemaValid = verification.valid !== false;
+
+  if (outputSchema) {
+    const validation = validateResult(primaryOutput, outputSchema);
+    schemaValid = validation.ok && schemaValid;
+  }
+
+  return { result, schemaValid };
 }
 
 module.exports = {

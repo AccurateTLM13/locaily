@@ -31,8 +31,8 @@ The track system is how Locaily breaks work into steps, dispatches capabilities,
 ## Current Stage
 
 ```txt
-Implemented:  linear track pipeline (one proof track)
-Next:         declarative step input mapping in track files
+Implemented:  linear track pipeline (two workflow tracks)
+Next:         remove legacy buildLegacyStepInput(); optional result_step docs in schema
 Future:       DAG planner generated from request
 Not built:    automatic track classification, graph runner
 ```

@@ -941,13 +941,15 @@ async function checkLighthouseInputValidation() {
 }
 
 async function checkTrackDeclarativeInputMap() {
-  const track = loadTrack("website_audit.lighthouse_handoff");
-  const toolSteps = track.steps.filter((step) => step.executor.type === "tool");
+  for (const trackId of ["website_audit.lighthouse_handoff", "marketplace.dealsniper"]) {
+    const track = loadTrack(trackId);
+    const toolSteps = track.steps.filter((step) => step.executor.type === "tool");
 
-  assert(toolSteps.length >= 6, "Expected lighthouse tool steps in track definition.");
+    assert(toolSteps.length >= 1, `Expected tool steps in track '${trackId}'.`);
 
-  for (const step of toolSteps) {
-    assert(step.input_map !== undefined && step.input_map !== null, `Expected input_map on tool step '${step.id}'.`);
+    for (const step of toolSteps) {
+      assert(step.input_map !== undefined && step.input_map !== null, `Expected input_map on tool step '${step.id}' in '${trackId}'.`);
+    }
   }
 }
 
@@ -961,6 +963,11 @@ async function checkTracksCatalog() {
   assert(lighthouseTrack, "Expected website_audit.lighthouse_handoff track.");
   assert(Array.isArray(lighthouseTrack.steps), "Expected lighthouse track steps.");
   assert(lighthouseTrack.steps.includes("write_handoff"), "Expected write_handoff step.");
+
+  const dealSniperTrack = tracks.body.tracks.find((track) => track.track_id === "marketplace.dealsniper");
+  assert(dealSniperTrack, "Expected marketplace.dealsniper track.");
+  assert(Array.isArray(dealSniperTrack.steps), "Expected DealSniper track steps.");
+  assert(dealSniperTrack.steps.includes("analyze_listing"), "Expected analyze_listing step.");
 }
 
 async function checkTracksRunMockProvider() {
@@ -999,6 +1006,50 @@ async function checkTracksRunMockProvider() {
     assert(Array.isArray(trackRun.body.meta.steps), "Expected track step metadata.");
     assert(trackRun.body.meta.steps.length >= 7, "Expected seven track steps.");
     assert(trackRun.body.meta.job_id, "Expected job_id in track run metadata.");
+  } finally {
+    await request("/providers/set", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider: "ollama" })
+    });
+  }
+}
+
+async function checkTracksRunDealSniperMockProvider() {
+  await request("/providers/set", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ provider: "mock" })
+  });
+
+  try {
+    const trackRun = await request("/tracks/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        track_id: "marketplace.dealsniper",
+        input: {
+          title: "Used Honda Generator",
+          price: 450,
+          description: "Runs good, pickup only.",
+          location: "Jackson, TN",
+          sellerInfo: "Seller joined 2021",
+          source: "facebook-marketplace"
+        },
+        context: { source: "smoke-test" },
+        options: { execution_mode: "orchestrated" }
+      })
+    });
+
+    assert(trackRun.response.status === 200, "Expected DealSniper POST /tracks/run to return HTTP 200.");
+    assertTaskRunSuccess(trackRun.body, "track-orchestrator", "marketplace.dealsniper");
+    assert(typeof trackRun.body.result.summary === "string", "Expected DealSniper summary in track result.");
+    assert(typeof trackRun.body.result.dealScore === "number", "Expected DealSniper dealScore in track result.");
+    assert(trackRun.body.result.meta && trackRun.body.result.meta.verification, "Expected DealSniper verification meta.");
+    assert(trackRun.body.result.meta.verification.valid === true, "Expected DealSniper schema validation to pass.");
+    assert(Array.isArray(trackRun.body.meta.steps), "Expected DealSniper track step metadata.");
+    assert(trackRun.body.meta.steps.length === 3, "Expected three DealSniper track steps.");
+    assert(trackRun.body.meta.job_id, "Expected job_id in DealSniper track run metadata.");
   } finally {
     await request("/providers/set", {
       method: "POST",
@@ -1578,6 +1629,7 @@ async function main() {
   await runCheck("track declarative input_map", checkTrackDeclarativeInputMap);
   await runCheck("GET /tracks", checkTracksCatalog);
   await runCheck("POST /tracks/run mock provider", checkTracksRunMockProvider);
+  await runCheck("POST /tracks/run DealSniper mock provider", checkTracksRunDealSniperMockProvider);
   await runCheck("Lighthouse orchestrated and scoreboard", checkLighthouseOrchestratedAndScoreboard);
   await runCheck("GET /memory/status disabled", checkMemoryStatusDisabled);
   await runCheck("POST /memory/context-pack disabled", checkMemoryContextPackDisabled);

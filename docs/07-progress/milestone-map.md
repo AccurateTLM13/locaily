@@ -17,23 +17,12 @@ Layered planning — not a six-month prophecy.
 
 ---
 
-## Milestone 2 — Declarative Step Input (Next)
-
-**Status:** Not started
-
-- `input_map` in track JSON
-- Generic resolver in tool-router
-- Lighthouse track migrated off hardcoded step ids
-- Smoke tests unchanged or expanded
-
----
-
 ## Milestone 3 — Second Workflow Track (Next)
 
-**Status:** Not started
+**Status:** **Complete** — `marketplace.dealsniper` track added
 
-- Choose workflow (DealSniper track or Repo Review stub)
-- Prove two tracks share core track patterns without router forks
+- DealSniper track with declarative `input_map` only
+- Proves two tracks share runner without router forks
 
 ---
 
