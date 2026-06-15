@@ -1,0 +1,35 @@
+{
+  "_fixture_status": "draft example — not validated against a runner",
+  "track_id": "content.doc_diff",
+  "description": "Two short text versions with one modified line",
+  "input": {
+    "baseline": {
+      "label": "v1",
+      "content": "Line one\nLine two\nLine three"
+    },
+    "candidate": {
+      "label": "v2",
+      "content": "Line one\nLine two updated\nLine three"
+    },
+    "options": {
+      "granularity": "line",
+      "ignore_whitespace": true
+    }
+  },
+  "expected_output_shape": {
+    "summary": "string — optional natural-language summary",
+    "changes": [
+      {
+        "type": "modified",
+        "path": "line:2",
+        "detail": "string"
+      }
+    ],
+    "stats": {
+      "added": 0,
+      "removed": 0,
+      "modified": 1
+    }
+  },
+  "notes": "Structural diff must match stats. Model-generated summary field is optional and may be omitted in deterministic-only runs."
+}

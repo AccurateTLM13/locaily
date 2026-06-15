@@ -1,0 +1,40 @@
+{
+  "_fixture_status": "draft example — not validated against a runner",
+  "track_id": "governance.confidence_score",
+  "description": "Valid schema but only half of sources referenced in output",
+  "input": {
+    "output_artifact": {
+      "recommendations": [
+        { "id": "r1", "text": "Fix render-blocking CSS", "cites": ["opp-1"] }
+      ]
+    },
+    "sources": [
+      { "id": "opp-1", "title": "Render-blocking requests" },
+      { "id": "opp-2", "title": "Unused JavaScript" }
+    ],
+    "signals": {
+      "schema_valid": true,
+      "evidence_valid": true,
+      "source_coverage_ratio": 0.5,
+      "model_self_reported_confidence": 0.82
+    },
+    "thresholds": {
+      "accept": 0.75,
+      "escalate": 0.45
+    }
+  },
+  "expected_output_shape": {
+    "score": "number in [0, 1] — expect below accept threshold",
+    "band": "medium|low",
+    "factors": [
+      {
+        "name": "source_coverage",
+        "weight": "number",
+        "value": 0.5
+      }
+    ],
+    "recommendation": "review|escalate",
+    "valid": true
+  },
+  "notes": "Exercises partial coverage without hard-failing schema validation. Escalation Track may consume recommendation: escalate when score < accept."
+}

@@ -4,6 +4,30 @@ Dated record of meaningful build and planning sessions.
 
 ---
 
+## 2026-06-14 — Draft Future Track Catalog (Docs Only)
+
+### Changed
+
+- Added `docs/02-track-system/future-tracks.md`, `future-track-catalog.md`, and `track-catalog-expansion-plan.md`.
+- Added draft fixtures under `docs/04-validation/fixtures/tracks/` for Evidence, Diff, Confidence, Escalation, Context Selection, and Model Profiling tracks.
+- Updated track system README read order with future catalog links.
+
+### Why
+
+Parallel spec work while Milestone 2 runtime plumbing proceeds — gives implementers contracts and example fixtures without touching the linear runner.
+
+### Evidence
+
+- Docs-only branch `docs/track-catalog-expansion`; no changes to `companion/server.js`, orchestrators, or routers.
+- All catalog tracks marked draft / not implemented; Capability Discovery marked future / NearbyNode-adjacent.
+
+### Next
+
+- Milestone 2 runtime track work continues on separate branch.
+- Implement Phase A governance tools when FallbackHandler milestone starts.
+
+---
+
 ## 2026-06-15 — Milestone 1B Complete: Declarative Track Input Mapping
 
 **Milestone 1B: Declarative track input mapping — complete.**

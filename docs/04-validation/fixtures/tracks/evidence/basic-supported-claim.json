@@ -1,0 +1,38 @@
+{
+  "_fixture_status": "draft example — not validated against a runner",
+  "track_id": "governance.evidence_check",
+  "description": "Single claim directly supported by a source snippet",
+  "input": {
+    "claims": [
+      {
+        "id": "c1",
+        "text": "Performance score was 76.",
+        "source_refs": ["s1"]
+      }
+    ],
+    "sources": [
+      {
+        "id": "s1",
+        "type": "input",
+        "content": "Lighthouse performance score: 76"
+      }
+    ],
+    "policy": {
+      "min_support_level": "direct",
+      "allow_unsupported": false
+    }
+  },
+  "expected_output_shape": {
+    "supported": [
+      {
+        "claim_id": "c1",
+        "source_ids": ["s1"],
+        "support_level": "direct"
+      }
+    ],
+    "unsupported": [],
+    "valid": true,
+    "errors": []
+  },
+  "notes": "Deterministic matcher should pass without a model. Use as first Evidence Track harness case after tool implementation."
+}

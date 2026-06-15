@@ -15,6 +15,9 @@ The track system is how Locaily breaks work into steps, dispatches capabilities,
 | [step-input-mapping.md](./step-input-mapping.md) | How steps receive input — current gap |
 | [track-graph-planning.md](./track-graph-planning.md) | Linear → declarative → DAG evolution |
 | [fallback-and-validation.md](./fallback-and-validation.md) | Validation and fallback today |
+| [future-tracks.md](./future-tracks.md) | Draft catalog — post–Milestone 2 tracks |
+| [future-track-catalog.md](./future-track-catalog.md) | Per-track contracts (draft / not implemented) |
+| [track-catalog-expansion-plan.md](./track-catalog-expansion-plan.md) | Rollout plan for future tracks |
 | [future-dag-runner.md](./future-dag-runner.md) | Research — not implemented |
 
 ## Code Map

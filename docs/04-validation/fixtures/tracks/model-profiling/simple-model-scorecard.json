@@ -1,0 +1,38 @@
+{
+  "_fixture_status": "draft example — not validated against a runner",
+  "track_id": "garage.model_profiling",
+  "description": "Single mock run against Lighthouse prioritize_fixes step",
+  "input": {
+    "model_ref": {
+      "provider": "mock",
+      "model": "mock-priority-helper"
+    },
+    "role": "priority_helper",
+    "target_step": {
+      "track_id": "website_audit.lighthouse_handoff",
+      "step_id": "prioritize_fixes"
+    },
+    "fixture_ref": "data/validation/live-lighthouse-slim.local.json",
+    "repeat": 1
+  },
+  "expected_output_shape": {
+    "scorecard": {
+      "model": "mock-priority-helper",
+      "role": "priority_helper",
+      "schema_valid_rate": 1.0,
+      "latency_ms_p50": "number >= 0",
+      "latency_ms_p95": "number >= 0",
+      "task_rubric_score": null,
+      "passed": true
+    },
+    "runs": [
+      {
+        "attempt": 1,
+        "schema_valid": true,
+        "duration_ms": "number >= 0"
+      }
+    ],
+    "valid": true
+  },
+  "notes": "Harness-only fixture. Does not imply Model Garage or scorecard registry is implemented. Rubric scoring deferred to Milestone 4."
+}
