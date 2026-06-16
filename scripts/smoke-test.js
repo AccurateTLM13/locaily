@@ -1595,6 +1595,106 @@ async function checkLighthouseMemoryComposeRegressionScript() {
   assert(regression.status === 0, "Expected lighthouse-memory-compose-regression.js to pass.");
 }
 
+async function checkOrchestrationTrackRegistry() {
+  const response = await request("/orchestration/tracks");
+  assert(response.response.status === 200, "Expected GET /orchestration/tracks HTTP 200.");
+  assertJsonObject(response.body, "/orchestration/tracks response");
+  assert(response.body.ok === true, "Expected orchestration tracks ok true.");
+  assert(Array.isArray(response.body.tracks), "Expected orchestration tracks array.");
+
+  const lighthouse = response.body.tracks.find((track) => track.track_id === "website_audit.lighthouse_handoff");
+  assert(lighthouse, "Expected lighthouse orchestration track entry.");
+  assert(lighthouse.input_type === "lighthouse_report", "Expected lighthouse input_type.");
+  assert(lighthouse.output_type === "developer_handoff", "Expected lighthouse output_type.");
+  assert(lighthouse.requires_model === true, "Expected lighthouse requires_model true.");
+}
+
+async function checkOrchestrationWorkflowRegistry() {
+  const response = await request("/orchestration/workflows");
+  assert(response.response.status === 200, "Expected GET /orchestration/workflows HTTP 200.");
+  assertJsonObject(response.body, "/orchestration/workflows response");
+  assert(response.body.ok === true, "Expected orchestration workflows ok true.");
+  assert(Array.isArray(response.body.workflows), "Expected orchestration workflows array.");
+
+  const lighthouse = response.body.workflows.find((workflow) => workflow.workflow_id === "lighthouse_handoff");
+  assert(lighthouse, "Expected lighthouse_handoff workflow.");
+  assert(lighthouse.track_id === "website_audit.lighthouse_handoff", "Expected workflow track mapping.");
+}
+
+async function checkWorkflowPlanLighthouse() {
+  const response = await request("/workflows/plan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      workflow_id: "lighthouse_handoff",
+      input: {
+        url: "https://example.com",
+        scores: {
+          performance: 72,
+          accessibility: 96,
+          bestPractices: 100,
+          seo: 92
+        },
+        opportunities: [{ title: "Reduce render-blocking resources" }],
+        diagnostics: []
+      }
+    })
+  });
+
+  assert(response.response.status === 200, "Expected POST /workflows/plan HTTP 200.");
+  assertTaskRunSuccess(response.body, "workflow-orchestrator", "lighthouse_handoff");
+  assert(response.body.result.plan, "Expected run plan in response.");
+  assert(response.body.result.plan.workflow_id === "lighthouse_handoff", "Expected workflow_id on plan.");
+  assert(response.body.result.plan.steps.length === 7, "Expected seven plan steps.");
+  assert(response.body.result.plan.steps.every((step) => step.status === "pending"), "Expected pending plan steps.");
+}
+
+async function checkWorkflowRunLighthouseMockProvider() {
+  await request("/providers/set", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ provider: "mock" })
+  });
+
+  try {
+    const response = await request("/workflows/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        workflow_id: "lighthouse_handoff",
+        input: {
+          url: "https://example.com",
+          scores: {
+            performance: 72,
+            accessibility: 96,
+            bestPractices: 100,
+            seo: 92
+          },
+          opportunities: [{ title: "Reduce render-blocking resources" }],
+          diagnostics: []
+        },
+        options: { execution_mode: "workflow_orchestrated" }
+      })
+    });
+
+    assert(response.response.status === 200, "Expected POST /workflows/run HTTP 200.");
+    assertTaskRunSuccess(response.body, "workflow-orchestrator", "lighthouse_handoff");
+    assert(typeof response.body.result.markdown === "string", "Expected markdown in workflow run result.");
+    assert(response.body.result.plan, "Expected executed run plan in workflow result.");
+    assert(response.body.result.plan.status === "completed", "Expected completed run plan.");
+    assert(response.body.result.plan.steps.length === 7, "Expected seven executed plan steps.");
+    assert(response.body.meta.workflow_id === "lighthouse_handoff", "Expected workflow_id in meta.");
+    assert(response.body.meta.plan_id, "Expected plan_id in meta.");
+    assert(Array.isArray(response.body.meta.steps), "Expected step status metadata.");
+  } finally {
+    await request("/providers/set", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider: "ollama" })
+    });
+  }
+}
+
 async function main() {
   console.log(`Smoke testing Local AI Platform at ${BASE_URL}`);
 
@@ -1632,6 +1732,10 @@ async function main() {
   await runCheck("GET /tracks", checkTracksCatalog);
   await runCheck("POST /tracks/run mock provider", checkTracksRunMockProvider);
   await runCheck("POST /tracks/run DealSniper mock provider", checkTracksRunDealSniperMockProvider);
+  await runCheck("GET /orchestration/tracks", checkOrchestrationTrackRegistry);
+  await runCheck("GET /orchestration/workflows", checkOrchestrationWorkflowRegistry);
+  await runCheck("POST /workflows/plan Lighthouse", checkWorkflowPlanLighthouse);
+  await runCheck("POST /workflows/run Lighthouse mock provider", checkWorkflowRunLighthouseMockProvider);
   await runCheck("Lighthouse orchestrated and scoreboard", checkLighthouseOrchestratedAndScoreboard);
   await runCheck("GET /memory/status disabled", checkMemoryStatusDisabled);
   await runCheck("POST /memory/context-pack disabled", checkMemoryContextPackDisabled);

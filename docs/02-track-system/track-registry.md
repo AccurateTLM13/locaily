@@ -34,7 +34,7 @@ Track definitions live as JSON files:
 companion/pit-crew/tracks/*.track.json
 ```
 
-Loaded by `companion/pit-crew/decomposer.js`. Listed via `GET /tracks`.
+Loaded by `companion/pit-crew/decomposer.js`. Listed via `GET /tracks` (basic) and `GET /orchestration/tracks` (enriched metadata from `companion/orchestration/track-registry.js`).
 
 ## Current Catalog
 
@@ -72,6 +72,13 @@ See [track-definition-schema.md](./track-definition-schema.md) for the shape tha
 ## Execution Model (Today)
 
 ```txt
+POST /workflows/run { workflow_id, input, options }
+  → Workflow registry → track_id
+  → Run plan builder
+  → Run plan executor (step by step)
+  → validate final output
+  → audit log + scoreboard
+
 POST /tracks/run { track_id, input, options }
   → SessionJobManager (in-memory job)
   → TrackOrchestrator
@@ -89,8 +96,8 @@ Steps run **sequentially** in array order. There is no dependency graph runner.
 | Registry | What it indexes | Status |
 |---|---|---|
 | **Tool registry** | Manifest-backed tools and packs | Implemented |
-| **Track registry** | Track JSON files | Implemented — two tracks |
-| **Workflow registry** | Named user-facing workflows → track plans | Documented only — see [workflow-registry.md](./workflow-registry.md) |
+| **Track registry** | Track JSON files + orchestration metadata | Implemented — see `GET /orchestration/tracks` |
+| **Workflow registry** | Named user-facing workflows → track plans | Implemented — see `GET /orchestration/workflows` |
 | **Capability registry** | All executable capabilities (tools + future nodes) | Partial — tools only |
 | **Worker registry** | Models/devices by role and scorecard | Planned |
 

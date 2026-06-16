@@ -26,6 +26,13 @@ const { runToolWithValidation } = require("./core/result-validator");
 const { createProviderRouter } = require("./providers/router");
 const { createToolRegistry } = require("./tools/registry");
 const { listTracks, runTrack, createJob, updateJob } = require("./pit-crew");
+const {
+  listTrackRegistry,
+  listWorkflows,
+  buildRunPlan,
+  executeRunPlan,
+  recordOrchestrationRun
+} = require("./orchestration");
 const { recordScoreboardEntry, getScoreboardSummary } = require("./core/scoreboard");
 const { createVaultAdapter } = require("./memory/vault-adapter");
 const { WIKI_ALLOWED_PATHS } = require("./memory/allowlist-presets");
@@ -311,6 +318,66 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, trackRunResult.statusCode, trackRunResult.body);
     }
 
+    if (request.method === "GET" && url.pathname === "/orchestration/tracks") {
+      return sendJson(response, 200, {
+        ok: true,
+        tracks: listTrackRegistry()
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/orchestration/workflows") {
+      return sendJson(response, 200, {
+        ok: true,
+        workflows: listWorkflows()
+      });
+    }
+
+    if (request.method === "POST" && url.pathname === "/workflows/plan") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        const errorBody = buildTaskRunError({
+          identity,
+          startedAt,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with workflow_id and input."
+        });
+
+        return sendJson(response, 400, errorBody);
+      }
+
+      const planResult = await executeWorkflowPlanRequest(bodyResult.body, {
+        identity,
+        startedAt
+      });
+
+      return sendJson(response, planResult.statusCode, planResult.body);
+    }
+
+    if (request.method === "POST" && url.pathname === "/workflows/run") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        const errorBody = buildTaskRunError({
+          identity,
+          startedAt,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with workflow_id and input."
+        });
+
+        return sendJson(response, 400, errorBody);
+      }
+
+      const workflowRunResult = await executeWorkflowRunRequest(bodyResult.body, {
+        identity,
+        startedAt
+      });
+
+      return sendJson(response, workflowRunResult.statusCode, workflowRunResult.body);
+    }
+
     if (request.method === "GET" && url.pathname === "/providers/status") {
       return sendJson(response, 200, await buildProvidersStatusResponse());
     }
@@ -565,7 +632,7 @@ const server = http.createServer(async (request, response) => {
       ok: false,
       code: "NOT_FOUND",
       message: `No route matched ${request.method} ${url.pathname}.`,
-      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, POST /tasks/run, or legacy POST /analyze."
+      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, or legacy POST /analyze."
     });
   } catch (error) {
     console.error("Unexpected server error.");
@@ -735,6 +802,7 @@ async function printStartupStatus() {
   console.log(`Server URL: ${serverUrl}`);
   console.log("Canonical API: POST /tasks/run");
   console.log("Track API: POST /tracks/run");
+  console.log("Workflow API: POST /workflows/plan, POST /workflows/run");
   console.log("Compatibility API: POST /analyze");
   console.log(`Active provider: ${activeProvider}`);
 
@@ -1809,6 +1877,369 @@ function validateTrackRunRequest(body) {
   }
 
   return null;
+}
+
+function validateWorkflowRequest(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return {
+      statusCode: 400,
+      code: "INVALID_INPUT",
+      message: "Workflow request must be a JSON object.",
+      nextStep: "Send workflow_id and input fields."
+    };
+  }
+
+  if (!body.workflow_id || typeof body.workflow_id !== "string" || !body.workflow_id.trim()) {
+    return {
+      statusCode: 400,
+      code: "INVALID_INPUT",
+      message: "Workflow request requires workflow_id.",
+      nextStep: "Use GET /orchestration/workflows to list available workflow ids."
+    };
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(body, "input")) {
+    return {
+      statusCode: 400,
+      code: "INVALID_INPUT",
+      message: "Workflow request requires input object.",
+      nextStep: "Send structured workflow input."
+    };
+  }
+
+  if (body.input === null || typeof body.input !== "object" || Array.isArray(body.input)) {
+    return {
+      statusCode: 400,
+      code: "INVALID_INPUT",
+      message: "Workflow request input must be an object.",
+      nextStep: "Send structured workflow input."
+    };
+  }
+
+  return null;
+}
+
+function mapWorkflowErrorStatus(code) {
+  if (code === "WORKFLOW_NOT_FOUND" || code === "TRACK_NOT_FOUND" || code === "TRACK_REGISTRY_NOT_FOUND") {
+    return 404;
+  }
+
+  if (code === "INVALID_INPUT" || code === "BAD_JSON" || code === "RUN_PLAN_INVALID") {
+    return 400;
+  }
+
+  if (code === "PROVIDER_UNAVAILABLE") {
+    return 503;
+  }
+
+  if (code === "STEP_SCHEMA_INVALID" || code === "STEP_VERIFICATION_FAILED") {
+    return 422;
+  }
+
+  return 500;
+}
+
+async function executeWorkflowPlanRequest(body, context) {
+  const validationError = validateWorkflowRequest(body);
+
+  if (validationError) {
+    return {
+      statusCode: validationError.statusCode || 400,
+      body: buildTaskRunError({
+        identity: context.identity,
+        startedAt: context.startedAt,
+        code: validationError.code,
+        message: validationError.message,
+        nextStep: validationError.nextStep,
+        tool: "workflow-orchestrator",
+        task: body && body.workflow_id ? body.workflow_id : null
+      })
+    };
+  }
+
+  try {
+    const plan = buildRunPlan({
+      workflowId: body.workflow_id,
+      input: body.input,
+      options: body.options || {},
+      taskId: body.task_id || context.identity.run_id
+    });
+
+    return {
+      statusCode: 200,
+      body: buildEngineSuccess({
+        run_id: context.identity.run_id,
+        trace_id: context.identity.trace_id,
+        tool: "workflow-orchestrator",
+        task: body.workflow_id,
+        provider: getActiveProviderId(),
+        model: getActiveModel(),
+        model_role: "default_worker",
+        result: {
+          plan
+        },
+        confidence: 1,
+        warnings: [],
+        fallbacks_used: [],
+        meta: buildTaskRunMeta(context, { warnings: [], risk_level: "low", flags: [] }, true, { ok: true })
+      })
+    };
+  } catch (error) {
+    const code = normalizeTaskRunErrorCode(error.code || "WORKFLOW_PLAN_FAILED");
+
+    return {
+      statusCode: mapWorkflowErrorStatus(code),
+      body: buildTaskRunError({
+        identity: context.identity,
+        startedAt: context.startedAt,
+        tool: "workflow-orchestrator",
+        task: body.workflow_id,
+        code,
+        message: error.message || "Workflow run plan could not be built.",
+        nextStep: error.nextStep || "Check workflow_id and input shape."
+      })
+    };
+  }
+}
+
+async function executeWorkflowRunRequest(body, context) {
+  const validationError = validateWorkflowRequest(body);
+
+  if (validationError) {
+    return {
+      statusCode: validationError.statusCode || 400,
+      body: buildTaskRunError({
+        identity: context.identity,
+        startedAt: context.startedAt,
+        code: validationError.code,
+        message: validationError.message,
+        nextStep: validationError.nextStep,
+        tool: "workflow-orchestrator",
+        task: body && body.workflow_id ? body.workflow_id : null
+      })
+    };
+  }
+
+  const job = createJob({
+    trackId: body.workflow_id,
+    input: body.input,
+    context: body.context || {},
+    options: body.options || {}
+  });
+
+  updateJob(job.job_id, { status: "running" });
+
+  const runtime = getActiveRuntime();
+  const runtimeState = await checkRuntimeState(getActiveModel());
+
+  if (!runtimeState.available) {
+    updateJob(job.job_id, {
+      status: "failed",
+      error: runtimeState.warning
+    });
+
+    return {
+      statusCode: 503,
+      body: buildTaskRunError({
+        identity: context.identity,
+        startedAt: context.startedAt,
+        tool: "workflow-orchestrator",
+        task: body.workflow_id,
+        code: "PROVIDER_UNAVAILABLE",
+        message: runtimeState.warning.message,
+        nextStep: runtimeState.warning.nextStep
+      })
+    };
+  }
+
+  let plan;
+
+  try {
+    plan = buildRunPlan({
+      workflowId: body.workflow_id,
+      input: body.input,
+      options: body.options || {},
+      taskId: body.task_id || context.identity.run_id
+    });
+  } catch (error) {
+    updateJob(job.job_id, {
+      status: "failed",
+      error: {
+        code: error.code || "WORKFLOW_PLAN_FAILED",
+        message: error.message
+      }
+    });
+
+    const code = normalizeTaskRunErrorCode(error.code || "WORKFLOW_PLAN_FAILED");
+
+    return {
+      statusCode: mapWorkflowErrorStatus(code),
+      body: buildTaskRunError({
+        identity: context.identity,
+        startedAt: context.startedAt,
+        tool: "workflow-orchestrator",
+        task: body.workflow_id,
+        code,
+        message: error.message || "Workflow run plan could not be built.",
+        nextStep: error.nextStep || "Check workflow_id and input shape."
+      })
+    };
+  }
+
+  try {
+    const execution = await executeRunPlan({
+      plan,
+      runtime,
+      toolRegistry,
+      options: buildModelRoutingOptions({
+        ...(body.options || {}),
+        model: getActiveModel()
+      }),
+      meta: {
+        requestId: context.identity.requestId,
+        run_id: context.identity.run_id,
+        trace_id: context.identity.trace_id,
+        job_id: job.job_id
+      }
+    });
+
+    await recordOrchestrationRun(auditLog, {
+      identity: context.identity,
+      plan: execution.plan,
+      provider: getActiveProviderId(),
+      model: getActiveModel(),
+      status: execution.plan.status,
+      durationMs: execution.durationMs
+    });
+
+    recordScoreboardEntry({
+      track: execution.plan.track_id,
+      mode: body.options?.execution_mode || "workflow_orchestrated",
+      durationMs: execution.durationMs,
+      schemaValid: execution.schemaValid !== false,
+      steps: execution.plan.steps.map((step) => ({
+        name: step.step_id,
+        executor: step.worker_type.type,
+        tool: step.worker_used?.tool || null,
+        model: step.worker_used?.model || null,
+        role: step.worker_used?.role || null,
+        durationMs: step.duration_ms
+      }))
+    });
+
+    updateJob(job.job_id, {
+      status: execution.plan.status === "completed" ? "completed" : "failed",
+      result: execution.result
+    });
+
+    if (execution.plan.status !== "completed") {
+      return {
+        statusCode: 422,
+        body: buildEngineError({
+          run_id: context.identity.run_id,
+          trace_id: context.identity.trace_id,
+          tool: "workflow-orchestrator",
+          task: body.workflow_id,
+          provider: getActiveProviderId(),
+          model: getActiveModel(),
+          model_role: "default_worker",
+          code: "WORKFLOW_VALIDATION_FAILED",
+          message: "Workflow completed with validation failures.",
+          next_step: "Inspect run plan step statuses and validation errors.",
+          meta: {
+            ...buildTaskRunMeta(context, { warnings: [], risk_level: "medium", flags: [] }, false, { ok: false }),
+            job_id: job.job_id,
+            workflow_id: body.workflow_id,
+            track_id: execution.plan.track_id,
+            plan_id: execution.plan.plan_id,
+            task_id: execution.plan.task_id,
+            plan: execution.plan,
+            validation: execution.validation
+          }
+        })
+      };
+    }
+
+    return {
+      statusCode: 200,
+      body: buildEngineSuccess({
+        run_id: context.identity.run_id,
+        trace_id: context.identity.trace_id,
+        tool: "workflow-orchestrator",
+        task: body.workflow_id,
+        provider: getActiveProviderId(),
+        model: getActiveModel(),
+        model_role: "default_worker",
+        result: {
+          ...normalizeToolResult(execution.result),
+          plan: execution.plan
+        },
+        confidence: 1,
+        warnings: [],
+        fallbacks_used: [],
+        meta: {
+          ...buildTaskRunMeta(context, { warnings: [], risk_level: "low", flags: [] }, execution.schemaValid !== false, { ok: true }),
+          job_id: job.job_id,
+          workflow_id: body.workflow_id,
+          track_id: execution.plan.track_id,
+          plan_id: execution.plan.plan_id,
+          task_id: execution.plan.task_id,
+          steps: execution.plan.steps.map((step) => ({
+            step_id: step.step_id,
+            track_id: step.track_id,
+            status: step.status,
+            worker_used: step.worker_used,
+            duration_ms: step.duration_ms
+          }))
+        }
+      })
+    };
+  } catch (error) {
+    updateJob(job.job_id, {
+      status: "failed",
+      error: {
+        code: error.code || "WORKFLOW_EXECUTION_FAILED",
+        message: error.message
+      }
+    });
+
+    await recordOrchestrationRun(auditLog, {
+      identity: context.identity,
+      plan,
+      provider: getActiveProviderId(),
+      model: getActiveModel(),
+      status: plan.status,
+      error,
+      durationMs: plan.duration_ms || Date.now() - context.startedAt
+    });
+
+    const code = normalizeTaskRunErrorCode(error.code || "WORKFLOW_EXECUTION_FAILED");
+
+    return {
+      statusCode: mapWorkflowErrorStatus(code),
+      body: buildEngineError({
+        run_id: context.identity.run_id,
+        trace_id: context.identity.trace_id,
+        tool: "workflow-orchestrator",
+        task: body.workflow_id,
+        provider: getActiveProviderId(),
+        model: getActiveModel(),
+        model_role: "default_worker",
+        code,
+        message: error.message || "Workflow execution failed.",
+        next_step: error.nextStep || "Inspect run plan step statuses.",
+        meta: {
+          ...buildTaskRunMeta(context, { warnings: [], risk_level: "medium", flags: [] }, false, { ok: false }),
+          job_id: job.job_id,
+          workflow_id: body.workflow_id,
+          track_id: plan.track_id,
+          plan_id: plan.plan_id,
+          task_id: plan.task_id,
+          plan
+        }
+      })
+    };
+  }
 }
 
 function validateTaskRunRequest(body) {

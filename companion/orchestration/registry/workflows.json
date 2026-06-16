@@ -1,0 +1,22 @@
+{
+  "workflows": [
+    {
+      "workflow_id": "lighthouse_handoff",
+      "name": "Lighthouse Handoff",
+      "description": "First workflow target for Local Brain track-based orchestration.",
+      "track_id": "website_audit.lighthouse_handoff",
+      "input_type": "lighthouse_report",
+      "output_type": "developer_handoff",
+      "status": "implemented"
+    },
+    {
+      "workflow_id": "dealsniper",
+      "name": "DealSniper",
+      "description": "Marketplace listing analysis workflow.",
+      "track_id": "marketplace.dealsniper",
+      "input_type": "marketplace_listing",
+      "output_type": "deal_analysis",
+      "status": "implemented"
+    }
+  ]
+}

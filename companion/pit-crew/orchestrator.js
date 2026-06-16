@@ -182,5 +182,8 @@ function assembleGenericTrackResult(track, context, outputSchema) {
 
 module.exports = {
   runTrack,
-  createTrackContext
+  createTrackContext,
+  executeStep,
+  assembleTrackResult,
+  loadOutputSchema
 };

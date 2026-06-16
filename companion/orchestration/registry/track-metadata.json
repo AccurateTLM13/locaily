@@ -1,0 +1,33 @@
+{
+  "website_audit.lighthouse_handoff": {
+    "purpose": "Convert Lighthouse or PageSpeed data into structured developer handoff notes for coding agents.",
+    "input_type": "lighthouse_report",
+    "output_type": "developer_handoff",
+    "preferred_worker_type": "priority_helper",
+    "fallback_behavior": "deterministic_tool_steps_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "companion/schemas/lighthouse-handoff.schema.json",
+      "verification_step": "verify_output",
+      "required_result_sections": [
+        "clientSummary",
+        "developerSummary",
+        "priorityFixes",
+        "handoffChecklist",
+        "estimatedImpact",
+        "markdown"
+      ]
+    }
+  },
+  "marketplace.dealsniper": {
+    "purpose": "Analyze marketplace listings and return a structured deal assessment.",
+    "input_type": "marketplace_listing",
+    "output_type": "deal_analysis",
+    "preferred_worker_type": "default_worker",
+    "fallback_behavior": "fail_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": null,
+      "verification_step": "validate_analysis",
+      "required_result_sections": ["summary", "dealScore", "meta"]
+    }
+  }
+}

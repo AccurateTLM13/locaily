@@ -14,7 +14,8 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 | **1B — Declarative track input mapping (tools)** | **Complete** |
 | **2 — Second workflow track** | **Complete** |
 | **3 — Model-step input mapping** | **Complete** |
-| **4 — Legacy fallback removal** | **Next** |
+| **4 — Track-based orchestration** | **Complete** |
+| **5 — Legacy fallback removal** | **Next** |
 
 ## Current Proof
 
@@ -28,6 +29,8 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 - `GET /health`, `GET /tools`, `GET /audit`, `GET /scoreboard`
 - `POST /tasks/run` and legacy `POST /analyze`
 - `POST /tracks/run` and `GET /tracks`
+- `GET /orchestration/tracks`, `GET /orchestration/workflows`, `POST /workflows/plan`, `POST /workflows/run`
+- Workflow orchestration layer (`companion/orchestration/`)
 - Manifest-backed tool registry
 - Lighthouse proof track (7 steps)
 - DealSniper workflow track (3 steps)
@@ -35,12 +38,12 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 - Model roles + provider router (Ollama, mock)
 - Input gate, permissions, audit, result validation
 - Memory Bridge v0 endpoints (disabled by default)
-- Smoke tests 51/51 (clean server); contract tests
+- Smoke tests 55/55 (clean server); contract tests
 - Windows launch helpers
 
 ## Partial
 
-- Track registry (two track files)
+- Track registry (orchestration metadata + two track files)
 - Model scorecards (spec; limited implementation)
 - Scoreboard (records runs; no full rubric harness)
 - Memory Bridge (v0; compose preflight only on Lighthouse)
@@ -60,7 +63,7 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 
 ## Current Priority
 
-**Next:** Remove legacy step-input fallbacks (all catalog steps now declare `input_map`); Model Garage evaluation harness (spec only until evidence).
+**Next:** Remove legacy step-input fallbacks; Model Garage evaluation harness (spec only until evidence).
 
 ## Evidence Pointers
 

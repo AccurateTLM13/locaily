@@ -248,12 +248,14 @@ Implemented:
 - `GET /memory/status`, `POST /memory/context-pack`, `POST /memory/writeback/propose`
 - `tool-packs/standard-text-pack/`, `tool-packs/lighthouse-parser-pack/`
 - `POST /tracks/run`, `GET /tracks` track APIs
-- `scripts/smoke-test.js`, `scripts/contract-test.js` (51/51 clean-server baseline)
+- `companion/orchestration/*` (track registry, workflow registry, run plan builder/executor)
+- `GET /orchestration/tracks`, `GET /orchestration/workflows`, `POST /workflows/plan`, `POST /workflows/run`
+- `scripts/smoke-test.js`, `scripts/contract-test.js` (55/55 clean-server baseline)
 - `start-windows.bat`, `start-dev.ps1`
 
 Next focus areas (see [docs/07-progress/milestone-map.md](docs/07-progress/milestone-map.md) and [docs/05-product/roadmap.md](docs/05-product/roadmap.md)):
 
-- **M4:** Remove legacy step-input fallbacks in `step-input.js` (all catalog steps declare `input_map`)
+- **M5:** Remove legacy step-input fallbacks in `step-input.js` (all catalog steps declare `input_map`)
 - Model Garage evaluation harness (Phase 2 — spec only until evidence)
 - Harden Lighthouse Handoff validation end-to-end with the extension client
 - NearbyNode capability connectors (spec + prototype — not implementation yet)

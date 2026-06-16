@@ -45,16 +45,28 @@ Layered planning — not a six-month prophecy.
 
 ---
 
-## Milestone 4 — Legacy Fallback Removal (Next)
+## Milestone 4 — Track-Based Orchestration
+
+**Status:** **Complete**
+
+- Workflow registry + enriched track registry (`companion/orchestration/`)
+- Run plan builder and step-by-step executor
+- `GET /orchestration/tracks`, `GET /orchestration/workflows`, `POST /workflows/plan`, `POST /workflows/run`
+- Lighthouse Handoff first workflow target with audit logging
+
+---
+
+## Milestone 5 — Legacy Fallback Removal (Next)
 
 **Status:** Not started
 
 - Remove `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` from `step-input.js`
 - All current catalog tracks declare `input_map` on every step
+- **Follow-up:** Improve `workflow-orchestrator` audit summaries so `GET /audit` exposes step-level orchestration status (step ids, statuses, workers, duration) without leaking raw task input/output
 
 ---
 
-## Milestone 5 — Model Garage Evidence (Later)
+## Milestone 6 — Model Garage Evidence (Later)
 **Status:** Spec only
 
 - Evaluation harness using [../99-archive/research-notes/model-evaluation-template.md](../99-archive/research-notes/model-evaluation-template.md)
@@ -63,7 +75,7 @@ Layered planning — not a six-month prophecy.
 
 ---
 
-## Milestone 6 — Simple Dependency Graph (Later)
+## Milestone 7 — Simple Dependency Graph (Later)
 **Status:** Research gate
 
 - Topological runner for explicit `depends_on` in track files
@@ -71,7 +83,7 @@ Layered planning — not a six-month prophecy.
 
 ---
 
-## Milestone 7 — NearbyNode (Future)
+## Milestone 8 — NearbyNode (Future)
 
 **Status:** Not built
 
@@ -80,7 +92,7 @@ Layered planning — not a six-month prophecy.
 
 ---
 
-## Milestone 8 — Planner-Generated DAG (Research)
+## Milestone 9 — Planner-Generated DAG (Research)
 
 **Status:** Archive-ready research
 
