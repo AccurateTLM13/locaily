@@ -62,6 +62,7 @@ Layered planning — not a six-month prophecy.
 
 - Remove `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` from `step-input.js`
 - All current catalog tracks declare `input_map` on every step
+- **Follow-up:** Improve `workflow-orchestrator` audit summaries so `GET /audit` exposes step-level orchestration status (step ids, statuses, workers, duration) without leaking raw task input/output
 
 ---
 
