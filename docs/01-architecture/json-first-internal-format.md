@@ -19,7 +19,7 @@ Markdown output support is **not removed**. It is reframed as an **export / rend
 | Workflow run plans | JSON | **Runtime-enforced at build** — `validateBuiltRunPlan()` loads `workflow-plan.schema.json` after `buildRunPlan()` |
 | Task track definitions | JSON | **Runtime-enforced at load** — `validateLoadedTrackFile()` loads `task-track.schema.json` in `decomposer.js` |
 | Step artifacts | JSON | Produced per step; model steps use step schemas; tool outputs often unchecked on `/tracks/run` |
-| Tool registry metadata | JSON | Manifest files **runtime-enforced at load**; internal/public schemas remain contract-test-only — see [tool-metadata-contract-audit.md](../04-validation/tool-metadata-contract-audit.md) |
+| Tool registry metadata | JSON | Manifest files **runtime-enforced at load**; internal registry metadata **runtime-enforced at registration**; public `/tools` schema remains contract-test-only — see [tool-metadata-contract-audit.md](../04-validation/tool-metadata-contract-audit.md) |
 | Model role resolution | JSON | In-memory role map + `model-profiles.js` — **not** `model-registry-entry.schema.json` |
 | Validation results | JSON | `{ valid, errors }` from `verify_output` only; **not** schema-validated; other steps use different shapes |
 | Audit / run logs | JSONL | Normalized in `audit-log.js`; **not** validated against `run-log-audit-record.schema.json` |

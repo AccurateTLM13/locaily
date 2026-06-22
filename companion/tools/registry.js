@@ -11,6 +11,7 @@ const toolPackManifestSchema = {
     manifestTool: toolPackManifestToolSchema
   }
 };
+const internalToolRegistryEntrySchema = require("../schemas/internal/internal-tool-registry-entry.schema.json");
 
 // Built-in compatibility tools
 const BUILT_IN_TOOLS = [
@@ -26,8 +27,7 @@ function createToolRegistry(options = {}) {
   // 1. Load built-in tools
   for (const tool of BUILT_IN_TOOLS) {
     if (enabledSet.size === 0 || enabledSet.has(tool.id)) {
-      validateTool(tool);
-      tools.set(tool.id, tool);
+      registerTool(tools, tool);
     }
   }
 
@@ -232,12 +232,7 @@ function loadToolPack(packDir, manifestPath, toolsMap, enabledSet) {
       handle
     };
 
-    try {
-      validateTool(tool);
-      toolsMap.set(toolId, tool);
-    } catch (err) {
-      console.warn(`[Registry Loader] Warning: Tool '${toolId}' failed registration validation: ${err.message}`);
-    }
+    registerTool(toolsMap, tool);
   }
 }
 
@@ -278,6 +273,68 @@ function generateDefaultValidator(requiredFields) {
 
     return null;
   };
+}
+
+function toInternalToolRegistryMetadata(tool) {
+  const metadata = {
+    id: tool.id,
+    name: tool.name,
+    description: typeof tool.description === "string" ? tool.description : "",
+    tasks: tool.tasks,
+    permissions: Array.isArray(tool.permissions) ? tool.permissions : [],
+    modelRole: tool.modelRole ?? null,
+    requiresRuntime: tool.requiresRuntime === true,
+    inputSchema: tool.inputSchema ?? null,
+    outputSchema: tool.outputSchema ?? null,
+    input: tool.input ?? null,
+    output: tool.output ?? null
+  };
+
+  if (typeof tool.pack === "string") {
+    metadata.pack = tool.pack;
+  }
+
+  if (typeof tool.trust === "string") {
+    metadata.trust = tool.trust;
+  }
+
+  if (typeof tool.packVersion === "string") {
+    metadata.packVersion = tool.packVersion;
+  }
+
+  if (typeof tool.prompt === "string") {
+    metadata.prompt = tool.prompt;
+  }
+
+  return metadata;
+}
+
+function validateInternalToolRegistryEntry(tool) {
+  const validation = validateResult(
+    toInternalToolRegistryMetadata(tool),
+    internalToolRegistryEntrySchema,
+    "tool"
+  );
+
+  if (validation.ok) {
+    return validation;
+  }
+
+  const error = new Error(`Registered tool '${tool.id}' did not match internal-tool-registry-entry.schema.json.`);
+  error.code = "INTERNAL_TOOL_REGISTRY_ENTRY_INVALID";
+  error.toolId = tool.id;
+  if (typeof tool.pack === "string") {
+    error.packId = tool.pack;
+  }
+  error.nextStep = "Fix tool registry normalization or update the internal registry schema.";
+  error.validation = validation;
+  throw error;
+}
+
+function registerTool(toolsMap, tool) {
+  validateTool(tool);
+  validateInternalToolRegistryEntry(tool);
+  toolsMap.set(tool.id, tool);
 }
 
 function toPublicToolMetadata(tool) {
@@ -336,5 +393,8 @@ module.exports = {
   createToolRegistry,
   loadToolPack,
   parseToolPackManifest,
-  validateLoadedToolPackManifest
+  validateLoadedToolPackManifest,
+  toInternalToolRegistryMetadata,
+  validateInternalToolRegistryEntry,
+  registerTool
 };

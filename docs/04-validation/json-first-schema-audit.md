@@ -5,11 +5,11 @@
 
 ## Executive Summary
 
-Six of eight internal JSON schemas remain **documentation-only**. **`workflow-plan.schema.json`** and **`task-track.schema.json`** are **runtime-enforced** at build/load boundaries.
+Five of eight internal JSON schemas remain **documentation-only**. **`workflow-plan.schema.json`**, **`task-track.schema.json`**, and tool metadata schemas (manifest + internal registry entry) are **runtime-enforced** at build/load/registration boundaries.
 
 JSON objects are produced throughout the stack. Enforcement uses **`validateResult()`** (now with `$ref` / `minItems` support for workflow plans), **imperative checks**, and **workflow-specific schemas** (`companion/schemas/`, `companion/pit-crew/schemas/`, `tool-packs/*/schemas/`).
 
-**Safest next implementation step:** validate **internal registry metadata** after registration (contract tests first), or contract-test **audit JSONL** lines.
+**Safest next implementation step:** contract-test **audit JSONL** lines, or validate **`toPublicToolMetadata()`** output before optional runtime in `listPublic()`.
 
 ---
 
@@ -17,7 +17,7 @@ JSON objects are produced throughout the stack. Enforcement uses **`validateResu
 
 | Finding | Detail |
 |---|---|
-| Internal schemas referenced in code | **`workflow-plan.schema.json`** in `run-plan-builder.js`; **`task-track.schema.json`** in `decomposer.js`; other internal schemas not yet wired |
+| Internal schemas referenced in code | **`workflow-plan.schema.json`** in `run-plan-builder.js`; **`task-track.schema.json`** in `decomposer.js`; **`tool-pack-manifest*.schema.json`** and **`internal-tool-registry-entry.schema.json`** in `registry.js`; other internal schemas not yet wired |
 | Shared validator | `companion/core/result-validator.js` — supports `$ref`, `minItems`, `oneOf`, `const`, `additionalProperties: false` |
 | `/tracks/run` vs `/workflows/run` | Workflow path adds per-step validation in `run-plan-validator.js`; direct track path does not validate intermediate tool outputs |
 | Lighthouse pipeline | JSON artifacts are real; `final-output-manifest` wrapper is **not** emitted; result is a flat handoff object + `markdown` + `meta.verification` |
@@ -60,18 +60,18 @@ JSON objects are produced throughout the stack. Enforcement uses **`validateResu
 
 ### 3. Tool metadata (split schemas)
 
-Manifest schemas are **runtime-enforced at load**. Internal registry and public metadata remain contract-test-only. See [tool-metadata-contract-audit.md](./tool-metadata-contract-audit.md).
+Manifest and internal registry schemas are **runtime-enforced** at load/registration. Public metadata remains contract-test-only. See [tool-metadata-contract-audit.md](./tool-metadata-contract-audit.md).
 
 | Schema | Runtime status |
 |---|---|
 | `tool-pack-manifest.schema.json` | **Runtime-enforced at load** — `validateLoadedToolPackManifest()` |
 | `tool-pack-manifest-tool.schema.json` | **Runtime-enforced at load** — via `#/$defs/manifestTool` |
-| `internal-tool-registry-entry.schema.json` | Contract tests only |
+| `internal-tool-registry-entry.schema.json` | **Runtime-enforced at registration** — `validateInternalToolRegistryEntry()` in `registerTool()` via `toInternalToolRegistryMetadata()` |
 | `public-tool-metadata.schema.json` | Contract tests only |
 
-**Parse vs schema errors:** JSON syntax → `TOOL_PACK_MANIFEST_PARSE_INVALID`; schema shape → `TOOL_PACK_MANIFEST_INVALID`.
+**Parse vs schema errors:** JSON syntax → `TOOL_PACK_MANIFEST_PARSE_INVALID`; schema shape → `TOOL_PACK_MANIFEST_INVALID`. Internal registry → `INTERNAL_TOOL_REGISTRY_ENTRY_INVALID`.
 
-**Recommended next enforcement boundary:** internal registry metadata snapshot after registration, or audit JSONL contract tests.
+**Recommended next enforcement boundary:** audit JSONL contract tests, or `toPublicToolMetadata()` output validation.
 
 ---
 
@@ -178,7 +178,7 @@ Manifest schemas are **runtime-enforced at load**. Internal registry and public 
 | ~~**1**~~ | ~~`validateResult(plan, workflowPlanSchema)` after `buildRunPlan()`~~ | — | **Done (2026-06-20)** |
 | ~~**1**~~ | ~~`validateResult(track, taskTrackSchema)` in `decomposer.loadTrackFile()`~~ | — | **Done (2026-06-20)** — `validateLoadedTrackFile()` |
 | ~~**1 (recommended)**~~ | Validate `tool-packs/*/tool.json` at load in `loadToolPack()` | — | **Done (2026-06-20)** |
-| **1 (recommended)** | Internal registry metadata snapshot after registration | Low | Contract tests exist; optional runtime next |
+| ~~**1 (recommended)**~~ | Internal registry metadata snapshot at registration | — | **Done (2026-06-20)** — `validateInternalToolRegistryEntry()` in `registerTool()` |
 | **2** | Contract test audit JSONL lines match `run-log-audit-record` core fields | Low | Read-only validation in tests |
 | ~~**2**~~ | ~~Align `tool-registry-entry` schema with `toPublicToolMetadata()`~~ | — | **Done (2026-06-20)** — split into four stage schemas |
 | **Defer** | `final-output-manifest` wrapper, `model-registry-entry`, `nearby-node-capability` | — | No producer code yet |

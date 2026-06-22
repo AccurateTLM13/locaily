@@ -6,8 +6,12 @@ const {
   createToolRegistry,
   loadToolPack,
   parseToolPackManifest,
-  validateLoadedToolPackManifest
+  validateLoadedToolPackManifest,
+  toInternalToolRegistryMetadata,
+  validateInternalToolRegistryEntry,
+  registerTool
 } = require("../companion/tools/registry");
+const { createMockRuntime } = require("../companion/providers/router");
 const { validateResult } = require("../companion/core/result-validator");
 
 const toolPackManifestToolSchema = require("../companion/schemas/internal/tool-pack-manifest-tool.schema.json");
@@ -21,37 +25,6 @@ const internalToolRegistryEntrySchema = require("../companion/schemas/internal/i
 const publicToolMetadataSchema = require("../companion/schemas/internal/public-tool-metadata.schema.json");
 
 const TOOL_PACKS_DIR = path.join(__dirname, "..", "tool-packs");
-
-function snapshotInternalToolMetadata(tool) {
-  const snapshot = {
-    id: tool.id,
-    name: tool.name,
-    pack: tool.pack,
-    description: tool.description || "",
-    tasks: tool.tasks,
-    permissions: Array.isArray(tool.permissions) ? tool.permissions : [],
-    modelRole: tool.modelRole ?? null,
-    requiresRuntime: tool.requiresRuntime !== false,
-    inputSchema: tool.inputSchema || null,
-    outputSchema: tool.outputSchema || null,
-    input: tool.input || null,
-    output: tool.output || null
-  };
-
-  if (typeof tool.trust === "string") {
-    snapshot.trust = tool.trust;
-  }
-
-  if (typeof tool.packVersion === "string") {
-    snapshot.packVersion = tool.packVersion;
-  }
-
-  if (typeof tool.prompt === "string") {
-    snapshot.prompt = tool.prompt;
-  }
-
-  return snapshot;
-}
 
 function loadToolPackManifests() {
   return fs.readdirSync(TOOL_PACKS_DIR, { withFileTypes: true })
@@ -95,11 +68,11 @@ function checkInternalRegistryEntries() {
 
   for (const tool of tools) {
     assert(typeof tool.handle === "function", `Tool '${tool.id}' must define handle at runtime.`);
-    assertSchemaValid(`internal:${tool.id}`, snapshotInternalToolMetadata(tool), internalToolRegistryEntrySchema);
+    assertSchemaValid(`internal:${tool.id}`, toInternalToolRegistryMetadata(tool), internalToolRegistryEntrySchema);
   }
 
   const showcase = registry.get("lighthouse-handoff");
-  assert(!Object.prototype.hasOwnProperty.call(snapshotInternalToolMetadata(showcase), "trust"),
+  assert(!Object.prototype.hasOwnProperty.call(toInternalToolRegistryMetadata(showcase), "trust"),
     "Showcase lighthouse-handoff may omit trust before public normalization.");
 }
 
@@ -241,13 +214,70 @@ function checkRuntimeManifestValidation() {
   assert.equal(textClean.pack, "standard-text-pack");
 }
 
+async function checkRuntimeInternalRegistryValidation() {
+  const invalidTool = {
+    id: "bad-internal",
+    name: "Bad Internal Tool",
+    pack: "test-pack",
+    tasks: ["run"],
+    modelRole: 123,
+    handle: () => ({})
+  };
+
+  assert.throws(
+    () => validateInternalToolRegistryEntry(invalidTool),
+    (error) => error.code === "INTERNAL_TOOL_REGISTRY_ENTRY_INVALID"
+      && error.toolId === "bad-internal"
+      && error.packId === "test-pack"
+      && error.validation && error.validation.ok === false
+      && Array.isArray(error.validation.errors)
+      && error.validation.errors.length > 0,
+    "Expected invalid internal metadata to throw INTERNAL_TOOL_REGISTRY_ENTRY_INVALID."
+  );
+
+  const toolsMap = new Map();
+  assert.throws(
+    () => registerTool(toolsMap, invalidTool),
+    (error) => error.code === "INTERNAL_TOOL_REGISTRY_ENTRY_INVALID",
+    "Expected registerTool to reject invalid metadata."
+  );
+  assert.equal(toolsMap.size, 0, "Invalid tool must not remain registered.");
+
+  const registry = createToolRegistry();
+  const textClean = registry.get("text.clean");
+  assert(typeof textClean.handle === "function", "Valid tool must retain handle function.");
+  assert(typeof textClean.validateInput === "function", "Valid tool must retain validateInput when provided.");
+
+  const validateTool = registry.get("text.validate_schema");
+  const output = await validateTool.handle({
+    task: "run",
+    input: {
+      data: { title: "Example" },
+      schema: {
+        type: "object",
+        required: ["title"],
+        properties: { title: { type: "string" } }
+      }
+    },
+    runtime: createMockRuntime(),
+    options: {}
+  });
+
+  assert(output && output.valid === true, "Registered handler should execute for valid tool.");
+}
+
 function main() {
   checkManifestFiles();
   checkRuntimeManifestValidation();
   checkInternalRegistryEntries();
   checkPublicToolsMetadata();
   checkMalformedRepresentatives();
-  console.log("Tool registry schema contract tests passed.");
+  return checkRuntimeInternalRegistryValidation().then(() => {
+    console.log("Tool registry schema contract tests passed.");
+  });
 }
 
-main();
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

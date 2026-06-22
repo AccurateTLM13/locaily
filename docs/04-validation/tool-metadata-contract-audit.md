@@ -11,7 +11,7 @@
 |---|---|---|
 | Tool pack manifest (root) | [tool-pack-manifest.schema.json](../../companion/schemas/internal/tool-pack-manifest.schema.json) | **Yes** — `validateLoadedToolPackManifest()` in `loadToolPack()` |
 | Tool pack manifest (tool entry) | [tool-pack-manifest-tool.schema.json](../../companion/schemas/internal/tool-pack-manifest-tool.schema.json) | **Yes** — via root manifest `#/$defs/manifestTool` (loaded from this file at module init) |
-| Internal registry entry | [internal-tool-registry-entry.schema.json](../../companion/schemas/internal/internal-tool-registry-entry.schema.json) | **No** — contract tests only |
+| Internal registry entry | [internal-tool-registry-entry.schema.json](../../companion/schemas/internal/internal-tool-registry-entry.schema.json) | **Yes** — `validateInternalToolRegistryEntry()` in `registerTool()` |
 | Public `/tools` metadata | [public-tool-metadata.schema.json](../../companion/schemas/internal/public-tool-metadata.schema.json) | **No** — contract tests only |
 
 Contract tests: `scripts/tool-registry-schema-test.js`
@@ -77,11 +77,11 @@ Representative manifest tool entry:
 
 **Producer:** `loadToolPack()` and showcase tools in `deal-sniper.js`, `lighthouse-handoff.js`  
 **Consumer:** `toolRegistry.get()` → `tool-router.js` → `executeToolStep()`  
-**Imperative validation today:** `validateTool()` (id, name, tasks, handle)
+**Imperative validation today:** `validateTool()` (id, name, tasks, handle) before schema; schema validates serializable metadata only
+
+**Runtime schema validation:** `registerTool()` calls `validateInternalToolRegistryEntry()` which validates `toInternalToolRegistryMetadata(tool)` against `internal-tool-registry-entry.schema.json`. Runtime-only fields (`handle`, `validateInput`, loaded modules, closures) are excluded from the snapshot. Failures throw `INTERNAL_TOOL_REGISTRY_ENTRY_INVALID` with `toolId`, `packId`, and `validation.errors`. Invalid entries are not inserted into the registry map.
 
 Tool router reads: `tool.id`, `tool.tasks`, `tool.validateInput`, `tool.handle` — not public metadata fields.
-
-JSON schema covers serializable metadata only (see `snapshotInternalToolMetadata()` in contract tests).
 
 Showcase tools may omit `trust` / `packVersion`; pack-loaded tools include both from manifest.
 
@@ -101,8 +101,8 @@ Showcase tools may omit `trust` / `packVersion`; pack-loaded tools include both 
 | Priority | Boundary | Why |
 |---|---|---|
 | ~~**1**~~ | **`tool-packs/*/tool.json` at load** | **Done (2026-06-20)** — `validateLoadedToolPackManifest()` in `loadToolPack()` |
-| **1 (recommended next)** | **Internal metadata snapshot after registration** | Validates normalization in contract tests; optional runtime next |
-| **2** | **`toPublicToolMetadata()` output** | Protects `/tools` contract before optional runtime in `listPublic()` |
+| ~~**1**~~ | **Internal metadata snapshot at registration** | **Done (2026-06-20)** — `validateInternalToolRegistryEntry()` in `registerTool()` |
+| **1 (recommended next)** | **`toPublicToolMetadata()` output** | Protects `/tools` contract before optional runtime in `listPublic()` |
 | **3** | Audit JSONL contract tests | Read-only validation |
 | **Defer** | Tool router | Already fails imperatively on missing tools/tasks/handlers |
 
@@ -112,11 +112,14 @@ Do **not** validate public metadata with the internal schema or vice versa.
 
 `scripts/tool-registry-schema-test.js` proves:
 
-- All on-disk pack manifests and tool entries pass stage schemas
-- All registered internal metadata snapshots pass `internal-tool-registry-entry.schema.json`
+- All on-disk pack manifests pass runtime validation via `loadToolPack()` / `validateLoadedToolPackManifest()`
+- Missing root fields and invalid tool entries throw `TOOL_PACK_MANIFEST_INVALID`
+- Invalid JSON syntax throws `TOOL_PACK_MANIFEST_PARSE_INVALID` (distinct from schema failures)
+- All registered internal metadata snapshots pass `internal-tool-registry-entry.schema.json` (contract tests + runtime in `registerTool()`)
+- Invalid internal metadata throws `INTERNAL_TOOL_REGISTRY_ENTRY_INVALID`; invalid entries are not retained in the registry
+- Runtime functions (`handle`, `validateInput`) remain on valid live entries; handler invocation unchanged
 - All `listPublic()` rows pass `public-tool-metadata.schema.json`
-- Representative malformed objects fail each schema
-- Showcase `lighthouse-handoff` omits internal `trust` but public `pack_trust` defaults to `"official"`
+- `text.clean` and other valid pack tools remain registered unchanged
 
 Also run: `node scripts/orchestration-unit-test.js`, `node scripts/smoke-test.js`
 
