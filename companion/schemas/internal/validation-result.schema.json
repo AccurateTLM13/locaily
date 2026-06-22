@@ -1,14 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://locaily.dev/schemas/internal/validation-result.schema.json",
-  "title": "Validation Result",
-  "description": "Outcome of a structural validation step (tool, schema, or final output check).",
+  "title": "Validation Result (Deprecated Alias)",
+  "description": "DEPRECATED — use workflow-verification-result.schema.json. Identical shape retained for backward-compatible references. validate_priority_fixes and validateResult() use different contracts — see docs/04-validation/validation-result-contract-audit.md.",
   "type": "object",
   "required": ["valid", "errors"],
+  "additionalProperties": false,
   "properties": {
-    "valid": {
-      "type": "boolean"
-    },
+    "valid": { "type": "boolean" },
     "errors": {
       "type": "array",
       "items": { "type": "string" }
@@ -16,28 +15,6 @@
     "warnings": {
       "type": "array",
       "items": { "type": "string" }
-    },
-    "validator_id": {
-      "type": "string",
-      "description": "Which validator produced this result (e.g. verify_output, validate_priority_fixes)"
-    },
-    "step_id": {
-      "type": "string",
-      "description": "Track step that produced or consumed this validation"
-    },
-    "schema_ref": {
-      "type": "string",
-      "description": "JSON schema path used when applicable"
-    },
-    "checked_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "details": {
-      "type": "object",
-      "description": "Optional structured detail (field paths, counts, etc.)",
-      "additionalProperties": true
     }
-  },
-  "additionalProperties": true
+  }
 }

@@ -5,7 +5,7 @@ Evidence records for Locaily **tracks** and **workflows**.
 | Document | Scope |
 |----------|-------|
 | [json-first-schema-audit.md](./json-first-schema-audit.md) | Gap analysis: internal JSON schemas vs runtime enforcement |
-| [tool-metadata-contract-audit.md](./tool-metadata-contract-audit.md) | Tool manifest / registry / public metadata schema alignment |
+| [validation-result-contract-audit.md](./validation-result-contract-audit.md) | Validation contract inventory — workflow verification vs engine checks vs content review |
 | [validation-strategy.md](./validation-strategy.md) | How we validate (tiers, good/bad claims) |
 | [evidence-log.md](./evidence-log.md) | Milestone evidence index |
 | [lighthouse-handoff-validation.md](../03-workflows/lighthouse-handoff-validation.md) | Lighthouse Handoff L1 (Local Brain contract) |

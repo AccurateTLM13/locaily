@@ -16,8 +16,8 @@
       "additionalProperties": true
     },
     "validation": {
-      "$ref": "validation-result.schema.json",
-      "description": "Final validation outcome when recorded"
+      "$ref": "workflow-verification-result.schema.json",
+      "description": "Final workflow verification outcome when recorded (meta.verification shape)"
     },
     "exports": {
       "type": "object",

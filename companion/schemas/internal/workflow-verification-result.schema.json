@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/workflow-verification-result.schema.json",
+  "title": "Workflow Verification Result",
+  "description": "Pass/fail outcome from a deterministic verification step (verify_output, validate_analysis) or generic schema-check tools such as text.validate_schema. Embedded in client results as meta.verification. Not used by validate_priority_fixes.",
+  "type": "object",
+  "required": ["valid", "errors"],
+  "additionalProperties": false,
+  "properties": {
+    "valid": {
+      "type": "boolean",
+      "description": "Whether the checked object passed verification"
+    },
+    "errors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Human-readable verification failures when valid is false"
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional non-blocking verification warnings (not emitted by current producers)"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/engine-schema-validation-result.schema.json",
+  "title": "Engine Schema Validation Result",
+  "description": "Internal return shape from validateResult() in companion/core/result-validator.js. Used by orchestration gates, tool output checks, manifest validation, and memory helpers. Not exposed directly on public API envelopes.",
+  "type": "object",
+  "required": ["ok", "errors"],
+  "additionalProperties": false,
+  "properties": {
+    "ok": {
+      "type": "boolean",
+      "description": "Whether the value matched the supplied JSON Schema"
+    },
+    "errors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "JSON Schema validation error messages with dotted paths"
+    }
+  }
+}

@@ -21,7 +21,7 @@ Markdown output support is **not removed**. It is reframed as an **export / rend
 | Step artifacts | JSON | Produced per step; model steps use step schemas; tool outputs often unchecked on `/tracks/run` |
 | Tool registry metadata | JSON | Manifest files **runtime-enforced at load**; internal registry metadata **runtime-enforced at registration**; public `/tools` schema remains contract-test-only — see [tool-metadata-contract-audit.md](../04-validation/tool-metadata-contract-audit.md) |
 | Model role resolution | JSON | In-memory role map + `model-profiles.js` — **not** `model-registry-entry.schema.json` |
-| Validation results | JSON | `{ valid, errors }` from `verify_output` only; **not** schema-validated; other steps use different shapes |
+| Validation results | JSON | Multiple contracts — see [validation-result-contract-audit.md](../04-validation/validation-result-contract-audit.md). `{ valid, errors }` verification gates; `{ ok, errors }` engine checks; priority-fix review is a separate shape |
 | Audit / run logs | JSONL | Normalized in `audit-log.js`; **runtime-enforced at write** for new records via `appendAuditRecord()` |
 | Routing decisions | JSON (partial) | Role → model mapping logged; full decision record spec only |
 | NearbyNode capability ads | JSON (spec) | Not implemented — schema defined for future connectors |
@@ -84,7 +84,7 @@ normalized JSON          ← extract_metrics (lighthouse.parse)
 issue extraction JSON    ← classify_issues (lighthouse.classify_audits)
     │
     ▼
-priority / task JSON     ← prioritize_fixes + validate_priority_fixes
+priority / task JSON     ← prioritize_fixes + validate_priority_fixes (content review, not verification gate)
     │
     ▼
 validation JSON          ← verify_output (lighthouse.verify_handoff)

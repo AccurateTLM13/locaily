@@ -1,6 +1,6 @@
 # Fallback and Validation
 
-How track runs validate output and recover from failures **today**. The `verify_output` step returns JSON `{ valid, errors }` (aligned with `validation-result.schema.json` core fields, but **not** validated against that schema file). See [../04-validation/json-first-schema-audit.md](../04-validation/json-first-schema-audit.md).
+How track runs validate output and recover from failures **today**. Verification steps return `{ valid, errors }` per [workflow-verification-result.schema.json](../../companion/schemas/internal/workflow-verification-result.schema.json) (contract-tested, not runtime-enforced). The `validate_priority_fixes` step returns a **content review** shape — not a verification gate. See [../04-validation/validation-result-contract-audit.md](../04-validation/validation-result-contract-audit.md).
 
 ## Per-Step Validation
 

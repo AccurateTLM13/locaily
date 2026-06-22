@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/priority-fix-review-result.schema.json",
+  "title": "Priority Fix Review Result",
+  "description": "Content review and enrichment output from lighthouse.validate_priority_fixes (validate_priority_fixes track step). Matches tool-packs/lighthouse-parser-pack/schemas/lighthouse.validate_priority_fixes.output.schema.json at a structural level. This is not a pass/fail verification gate.",
+  "type": "object",
+  "required": ["priorityFixes", "needsReview"],
+  "additionalProperties": false,
+  "properties": {
+    "thinking": {
+      "type": "string",
+      "description": "Optional model reasoning carried forward from prioritize_fixes"
+    },
+    "priorityFixes": {
+      "type": "array",
+      "description": "Audit-backed priority fixes accepted for downstream matching",
+      "items": { "$ref": "#/$defs/priorityFix" }
+    },
+    "needsReview": {
+      "type": "array",
+      "description": "Fixes that could not be matched or should not ship as high priority",
+      "items": { "$ref": "#/$defs/reviewItem" }
+    }
+  },
+  "$defs": {
+    "priorityFix": {
+      "type": "object",
+      "required": ["title", "priority", "reason"],
+      "additionalProperties": true,
+      "properties": {
+        "title": { "type": "string" },
+        "priority": { "type": "string" },
+        "reason": { "type": "string" },
+        "unsupported_priority_fix": { "type": "boolean" }
+      }
+    },
+    "reviewItem": {
+      "type": "object",
+      "required": ["title", "reason"],
+      "additionalProperties": true,
+      "properties": {
+        "title": { "type": "string" },
+        "priority": { "type": "string" },
+        "reason": { "type": "string" },
+        "unsupported_priority_fix": { "type": "boolean" }
+      }
+    }
+  }
+}

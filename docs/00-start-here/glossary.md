@@ -80,7 +80,7 @@ End-to-end user-facing flow spanning client, Local Brain, tools, and optional Ne
 
 ### Validator
 
-Component that checks outputs against schemas, confidence rules, or safety policies. Returns **JSON** validation results (`valid`, `errors`). See `companion/core/result-validator.js` and `companion/schemas/internal/validation-result.schema.json`.
+Component that checks outputs against schemas, confidence rules, or safety policies. Locaily uses **multiple validation contracts** — workflow verification `{ valid, errors }`, engine schema checks `{ ok, errors }` via `validateResult()`, and separate content-review shapes. See [../04-validation/validation-result-contract-audit.md](../04-validation/validation-result-contract-audit.md).
 
 ### JSON-First Internal Format
 

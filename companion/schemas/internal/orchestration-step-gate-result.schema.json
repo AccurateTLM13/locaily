@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/orchestration-step-gate-result.schema.json",
+  "title": "Orchestration Step Gate Result",
+  "description": "Return shape from validateStepOutput() in companion/orchestration/run-plan-validator.js. Controls whether a workflow plan step may complete. Distinct from workflow verification results returned by tool handlers.",
+  "type": "object",
+  "required": ["ok", "errors"],
+  "additionalProperties": false,
+  "properties": {
+    "ok": {
+      "type": "boolean",
+      "description": "Whether the step output passed orchestration validation"
+    },
+    "code": {
+      "type": ["string", "null"],
+      "description": "Machine-readable gate code such as STEP_SCHEMA_INVALID or STEP_VERIFICATION_FAILED"
+    },
+    "message": {
+      "type": ["string", "null"],
+      "description": "Human-readable gate failure summary"
+    },
+    "errors": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

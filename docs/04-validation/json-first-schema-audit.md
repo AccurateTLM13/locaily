@@ -9,7 +9,7 @@ Five of eight internal JSON schemas remain **documentation-only**. **`workflow-p
 
 JSON objects are produced throughout the stack. Enforcement uses **`validateResult()`** (now with `$ref` / `minItems` support for workflow plans), **imperative checks**, and **workflow-specific schemas** (`companion/schemas/`, `companion/pit-crew/schemas/`, `tool-packs/*/schemas/`).
 
-**Safest next implementation step:** validate **`toPublicToolMetadata()`** output before optional runtime in `listPublic()`, or contract-test intermediate step artifacts.
+**Safest next implementation step:** contract-test workflow verification outputs — see [validation-result-contract-audit.md](./validation-result-contract-audit.md).
 
 ---
 
@@ -103,19 +103,23 @@ Manifest and internal registry schemas are **runtime-enforced** at load/registra
 
 ---
 
-### 6. Validation Result (`validation-result.schema.json`)
+### 6. Validation contracts (split schemas)
 
-| | |
-|---|---|
-| **Runtime status** | **Partially aligned shape, not schema-validated** |
-| **Producer** | `lighthouse.verify_handoff` → `{ valid, errors }` (`tool-packs/lighthouse-parser-pack/index.js`) |
-| **Consumers** | `run-plan-validator.js` (checks `valid` boolean on `verify_output` / `validate_analysis` steps); `pit-crew/orchestrator.js` → `assembleLighthouseTrackResult()` embeds as `meta.verification` |
-| **Not a validation-result producer** | `lighthouse.validate_priority_fixes` returns `{ thinking, priorityFixes, needsReview }` — enrichment step, not `{ valid, errors }` |
-| **Internal validator shape** | `validateResult()` returns `{ ok, errors }` — different field names from schema |
-| **Validation coverage** | Behavioral check on `valid` flag for verify steps; **no** schema file load. Optional `warnings`, `validator_id`, `step_id`, `schema_ref`, `checked_at`, `details` are **never set**. |
-| **Partial vs complete** | **Partial** — only `verify_output` matches core `{ valid, errors }`; not validated against internal schema |
-| **Missing enforcement** | No wrapper standardizing validation outputs across steps; `validate_priority_fixes` misnamed relative to schema |
-| **Recommended next step** | Add `validator_id` + `step_id` to `lighthouse.verify_handoff` return; optionally normalize `validateResult()` failures to `{ valid: false, errors }` at verify step boundary |
+Locaily uses **multiple validation-related contracts**, not one generic schema. Full inventory: [validation-result-contract-audit.md](./validation-result-contract-audit.md).
+
+| Schema | Runtime status | Shape | Primary producers |
+|---|---|---|---|
+| `workflow-verification-result.schema.json` | Contract tests only | `{ valid, errors }` | `lighthouse.verify_handoff`, `deal-sniper` validate-analysis, `text.validate_schema`; embedded as `meta.verification` |
+| `engine-schema-validation-result.schema.json` | Internal primitive (not API-enforced) | `{ ok, errors }` | `validateResult()` in `result-validator.js` |
+| `priority-fix-review-result.schema.json` | Contract tests only | `{ thinking?, priorityFixes, needsReview }` | `lighthouse.validate_priority_fixes` — **not** a verification gate despite step name |
+| `orchestration-step-gate-result.schema.json` | Contract tests only | `{ ok, code?, message?, errors }` | `validateStepOutput()` in `run-plan-validator.js` |
+| `validation-result.schema.json` | **Deprecated alias** | Same as workflow verification | Legacy docs/refs only |
+
+**Naming trap:** `validate_priority_fixes` performs content review / audit-truth enrichment. It does **not** return `{ valid, errors }`.
+
+**Recommended next enforcement boundary:** Contract-test `{ valid, errors }` producers, then optionally validate in `validateStepOutput()` for `verify_output` / `validate_analysis` steps. Do **not** conflate with `validateResult()` `{ ok, errors }`.
+
+Contract tests: `scripts/validation-result-contract-test.js`
 
 ---
 
@@ -159,10 +163,10 @@ Manifest and internal registry schemas are **runtime-enforced** at load/registra
 | Normalize | `extract_metrics` | `{ url, performance, … }` | Input only (`validateInput`) | Tool pack output schema exists; **not** checked in `tool-router` |
 | Extract issues | `classify_issues` | `{ issues, rankedOpportunities, source }` | Input only | Same |
 | Prioritize | `prioritize_fixes` | `{ thinking, priorityFixes }` | Model JSON schema (`prioritize-fixes.schema.json`) on `/workflows/run` only | Not `validation-result` |
-| Validate priorities | `validate_priority_fixes` | `{ thinking, priorityFixes, needsReview }` | Input only | **Not** `validation-result` despite step name |
+| Validate priorities | `validate_priority_fixes` | `{ thinking, priorityFixes, needsReview }` | Input only | **Priority fix review** — not workflow verification |
 | Match | `match_fixes` | `{ fixes }` | Input only | Tool pack schema |
 | Compose | `write_handoff` | Handoff object (+ `markdown` added by orchestrator) | `lighthouse-handoff` input validation in tool | Flat result, not `final-output-manifest` |
-| Verify | `verify_output` | `{ valid, errors }` | Boolean gate in `run-plan-validator` | Aligns with `validation-result` (core fields only) |
+| Verify | `verify_output` | `{ valid, errors }` | Boolean gate in `run-plan-validator` | Aligns with `workflow-verification-result` |
 | Final assembly | `assembleLighthouseTrackResult` | Flat result + `markdown` + `meta.verification` | `lighthouse-handoff.schema.json` on handoff body | **Not** `final-output-manifest` |
 
 **Markdown export:** `formatHandoffMarkdown()` in `companion/pit-crew/markdown.js` — called from orchestrator after `write_handoff`, consistent with export-layer docs.
@@ -171,7 +175,7 @@ Manifest and internal registry schemas are **runtime-enforced** at load/registra
 
 ## Safest Next Implementation Step
 
-**Contract-test audit JSONL or align tool registry schema** (workflow plan and task track validation are done).
+**Contract-test workflow verification outputs** — see [validation-result-contract-audit.md](./validation-result-contract-audit.md). Audit JSONL write validation is done.
 
 | Priority | Action | Risk | Why |
 |---|---|---|---|
@@ -180,7 +184,8 @@ Manifest and internal registry schemas are **runtime-enforced** at load/registra
 | ~~**1 (recommended)**~~ | Validate `tool-packs/*/tool.json` at load in `loadToolPack()` | — | **Done (2026-06-20)** |
 | ~~**1 (recommended)**~~ | Internal registry metadata snapshot at registration | — | **Done (2026-06-20)** — `validateInternalToolRegistryEntry()` in `registerTool()` |
 | ~~**1 (recommended)**~~ | Validate audit JSONL lines at durable write | — | **Done (2026-06-20)** — `appendAuditRecord()` + `validateAuditRecord()` |
-| **1 (recommended)** | Validate `toPublicToolMetadata()` output | Low | Protects `/tools` contract before optional runtime |
+| **1 (recommended)** | Contract-test workflow verification outputs (`{ valid, errors }`) | Low | See [validation-result-contract-audit.md](./validation-result-contract-audit.md) |
+| **2** | Validate `toPublicToolMetadata()` output | Low | Protects `/tools` contract before optional runtime |
 | **2** | Contract test intermediate step artifacts on `/workflows/run` | Low | Read-only validation in tests |
 | ~~**2**~~ | ~~Align `tool-registry-entry` schema with `toPublicToolMetadata()`~~ | — | **Done (2026-06-20)** — split into four stage schemas |
 | **Defer** | `final-output-manifest` wrapper, `model-registry-entry`, `nearby-node-capability` | — | No producer code yet |

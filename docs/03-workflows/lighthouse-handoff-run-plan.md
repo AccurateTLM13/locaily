@@ -13,7 +13,7 @@ First workflow plan executed through Local Brain track-based orchestration.
 | Normalize | `extract_metrics` | JSON metrics object |
 | Extract issues | `classify_issues` | JSON classified issues |
 | Prioritize | `prioritize_fixes` | JSON priority fixes |
-| Validate priorities | `validate_priority_fixes` | JSON validation result |
+| Validate priorities | `validate_priority_fixes` | Priority fix **content review** (`priorityFixes`, `needsReview`) — not `{ valid, errors }` |
 | Match fixes | `match_fixes` | JSON matched mappings |
 | Export | `write_handoff` | JSON handoff object + Markdown export |
 | Final validation | `verify_output` | JSON `{ valid, errors }` |
@@ -51,7 +51,7 @@ Markdown is generated at the **export** stage from prior JSON artifacts. See [..
 | `extract_metrics` | tool `lighthouse.parse` | Normalize Lighthouse metrics |
 | `classify_issues` | tool `lighthouse.classify_audits` | Classify audit opportunities |
 | `prioritize_fixes` | model role `priority_helper` | Rank fixes for developers |
-| `validate_priority_fixes` | tool `lighthouse.validate_priority_fixes` | Schema/shape guard for priorities |
+| `validate_priority_fixes` | tool `lighthouse.validate_priority_fixes` | Audit-truth content review (not a verification gate) |
 | `match_fixes` | tool `lighthouse.match_fixes` | Match fixes to classified issues |
 | `write_handoff` | tool `lighthouse-handoff` / `compose-handoff` | Assemble JSON handoff object + render Markdown export |
 | `verify_output` | tool `lighthouse.verify_handoff` | Final structural verification |
