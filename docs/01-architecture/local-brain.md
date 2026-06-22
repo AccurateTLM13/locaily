@@ -20,7 +20,7 @@ In this repository it is implemented as the **companion server** plus **core mod
 - Tool registry resolution and handler dispatch
 - Provider router and model role resolution
 - Result validation and schema retries
-- Summary-only audit logging (`data/` JSONL)
+- Summary-only audit logging (`data/` JSONL) with schema validation on **new** writes only
 - Success and error response envelopes
 - JSON-first orchestration state (run plans, step artifacts, validation records)
 - Markdown export rendering for workflows that need human-readable handoffs (e.g. Lighthouse Handoff `write_handoff`)
@@ -43,7 +43,7 @@ In this repository it is implemented as the **companion server** plus **core mod
 | Permissions | `companion/core/permissions.js` | Tool permission checks |
 | Model roles | `companion/core/model-roles.js` | Role → model mapping |
 | Result validator | `companion/core/result-validator.js` | Schema validation / retry |
-| Audit log | `companion/core/audit-log.js` | Run summaries |
+| Audit log | `companion/core/audit-log.js` | Run summaries; durable writes validated via `appendAuditRecord()` |
 | Orchestrator | `companion/core/orchestrator.js` | Multi-step workflow execution |
 | Provider router | `companion/providers/router.js` | Ollama / mock routing |
 | Tool registry | `companion/tools/registry.js` | Manifest-backed tool loading |
@@ -97,3 +97,34 @@ Detailed engine-core specs from earlier planning live in:
 `docs/99-archive/deprecated-plans/new-local-ai-engine-dev-docs/`
 
 Use code and [api-contract.md](./api-contract.md) as truth when they disagree with archived specs.
+
+## Audit logging
+
+All durable audit records flow through a single write boundary:
+
+```txt
+Producers → auditLog.record() → normalizeAuditEvent() → validateAuditRecord() → appendAuditRecord() → JSONL file
+```
+
+**Producers today**
+
+| Producer | Builder | Entry path |
+|---|---|---|
+| Task runs | `buildAuditEvent()` in `audit-log.js` | `server.js` → `auditLog.record()` |
+| Memory Bridge HTTP | `buildMemoryAuditEvent()` in `audit-redaction.js` | `server.js` → `auditLog.record()` |
+| Workflow orchestration | `buildOrchestrationLogEvent()` in `run-logger.js` | `recordOrchestrationRun()` → `auditLog.record()` |
+
+**Write enforcement**
+
+- Normalized serializable records are validated against [run-log-audit-record.schema.json](../../companion/schemas/internal/run-log-audit-record.schema.json) immediately before disk append.
+- Invalid records throw `AUDIT_RECORD_INVALID` and are **not** written.
+- Filesystem failures throw `AUDIT_RECORD_WRITE_FAILED` (distinct from schema failures).
+- `status_code` and other non-durable request/response fields are excluded during normalization.
+
+**Read compatibility**
+
+- `GET /audit` reads existing JSONL lines without retroactive schema validation.
+- Legacy lines that predate enforcement (including older orchestration records with generic summaries) remain readable.
+- Malformed JSON lines are skipped silently, as before.
+
+Contract tests: `scripts/audit-record-schema-test.js`

@@ -2,21 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://locaily.dev/schemas/internal/run-log-audit-record.schema.json",
   "title": "Run Log / Audit Record",
-  "description": "Summary-only audit event written to JSONL by companion/core/audit-log.js.",
+  "description": "Summary-only audit event written to JSONL by companion/core/audit-log.js. Runtime-enforced for newly written records at appendAuditRecord(); historical JSONL lines are not retroactively validated on read.",
   "type": "object",
-  "required": ["event_id", "timestamp", "status"],
+  "required": ["event_id", "timestamp", "status", "source", "permissions_used", "fallbacks_used", "duration_ms"],
+  "additionalProperties": false,
   "properties": {
-    "event_id": { "type": "string" },
+    "event_id": { "type": "string", "minLength": 1 },
     "run_id": { "type": ["string", "null"] },
     "trace_id": { "type": ["string", "null"] },
-    "timestamp": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "source": {
-      "type": "object",
-      "description": "Summarized request source metadata"
-    },
+    "timestamp": { "type": "string", "minLength": 1 },
+    "source": { "$ref": "#/$defs/sourceSummary" },
     "tool": { "type": ["string", "null"] },
     "task": { "type": ["string", "null"] },
     "provider": { "type": ["string", "null"] },
@@ -27,23 +22,224 @@
       "items": { "type": "string" }
     },
     "input_summary": {
-      "type": "object",
-      "description": "Redacted / summarized input — not raw payloads"
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/toolRunInputSummary" },
+        { "$ref": "#/$defs/orchestrationInputSummary" },
+        { "$ref": "#/$defs/memoryRequestInputSummary" }
+      ]
     },
     "output_summary": {
-      "type": "object",
-      "description": "Redacted / summarized output — not raw payloads"
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/toolRunOutputSummary" },
+        { "$ref": "#/$defs/orchestrationOutputSummary" },
+        { "$ref": "#/$defs/memoryStatusOutputSummary" },
+        { "$ref": "#/$defs/memoryContextPackOutputSummary" },
+        { "$ref": "#/$defs/memoryWritebackOutputSummary" },
+        { "$ref": "#/$defs/memoryResponseFallbackSummary" }
+      ]
     },
     "fallbacks_used": {
       "type": "array",
       "items": { "type": "string" }
     },
-    "duration_ms": { "type": ["number", "null"] },
+    "duration_ms": { "type": "number" },
     "status": {
       "type": "string",
       "enum": ["success", "error"]
     },
     "error_code": { "type": ["string", "null"] }
   },
-  "additionalProperties": true
+  "$defs": {
+    "sourceSummary": {
+      "type": "object",
+      "required": ["app_id", "surface", "user_action", "client_version"],
+      "additionalProperties": false,
+      "properties": {
+        "app_id": { "type": ["string", "null"] },
+        "surface": { "type": ["string", "null"] },
+        "user_action": { "type": ["string", "null"] },
+        "client_version": { "type": ["string", "null"] }
+      }
+    },
+    "toolRunInputSummary": {
+      "type": "object",
+      "required": ["type", "chars", "attachments", "risk_level"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string" },
+        "chars": { "type": "number" },
+        "attachments": { "type": "number" },
+        "risk_level": { "type": "string" }
+      }
+    },
+    "orchestrationInputSummary": {
+      "type": "object",
+      "required": ["task_id", "workflow_id", "track_id", "plan_id", "selected_tracks"],
+      "additionalProperties": false,
+      "properties": {
+        "task_id": { "type": "string" },
+        "workflow_id": { "type": "string" },
+        "track_id": { "type": "string" },
+        "plan_id": { "type": "string" },
+        "selected_tracks": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "memoryRequestInputSummary": {
+      "type": "object",
+      "required": ["type", "endpoint"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "memory_request" },
+        "endpoint": { "type": "string" },
+        "project": { "type": "string" },
+        "task": { "type": "string" },
+        "taskId": { "type": "string" },
+        "maxFiles": { "type": "number" }
+      }
+    },
+    "toolRunOutputSummary": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string" },
+        "keys": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "memory": { "$ref": "#/$defs/memoryToolOutputMetadata" },
+        "contextPackId": { "type": "string" },
+        "project": { "type": ["string", "null"] },
+        "task": { "type": ["string", "null"] },
+        "filesUsed": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "memoryToolOutputMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "used": { "type": "boolean" },
+        "contextPackId": { "type": "string" },
+        "filesUsed": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "orchestrationOutputSummary": {
+      "type": "object",
+      "required": ["final_status", "step_statuses"],
+      "additionalProperties": false,
+      "properties": {
+        "final_status": { "type": "string" },
+        "step_statuses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/orchestrationStepStatus" }
+        }
+      }
+    },
+    "orchestrationStepStatus": {
+      "type": "object",
+      "required": ["step_id", "track_id", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "step_id": { "type": "string" },
+        "track_id": { "type": "string" },
+        "status": { "type": "string" },
+        "worker_used": { "type": ["string", "null"] },
+        "duration_ms": { "type": ["number", "null"] },
+        "error": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "object", "additionalProperties": true }
+          ]
+        }
+      }
+    },
+    "memoryStatusOutputSummary": {
+      "type": "object",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "mode": { "type": "string" },
+        "vaultPathConfigured": { "type": "boolean" },
+        "readable": { "type": "boolean" },
+        "readPolicy": { "type": "string" },
+        "writebackMode": { "type": "string" },
+        "rawAccess": { "type": "boolean" },
+        "effectiveAllowedPaths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "effectiveBlockedPaths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "projectCount": { "type": "number" },
+        "topicCount": { "type": "number" },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "memoryContextPackOutputSummary": {
+      "type": "object",
+      "required": ["contextPackId"],
+      "additionalProperties": false,
+      "properties": {
+        "contextPackId": { "type": "string" },
+        "project": { "type": "string" },
+        "task": { "type": "string" },
+        "filesUsed": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "memoryWritebackOutputSummary": {
+      "type": "object",
+      "required": ["proposalId"],
+      "additionalProperties": false,
+      "properties": {
+        "proposalId": { "type": "string" },
+        "proposalPath": { "type": "string" },
+        "requiresHumanReview": { "type": "boolean" }
+      }
+    },
+    "memoryResponseFallbackSummary": {
+      "type": "object",
+      "required": ["type", "ok"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "memory_response" },
+        "ok": { "type": "boolean" },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
 }

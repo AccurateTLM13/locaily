@@ -5,11 +5,11 @@
 
 ## Executive Summary
 
-Five of eight internal JSON schemas remain **documentation-only**. **`workflow-plan.schema.json`**, **`task-track.schema.json`**, and tool metadata schemas (manifest + internal registry entry) are **runtime-enforced** at build/load/registration boundaries.
+Five of eight internal JSON schemas remain **documentation-only**. **`workflow-plan.schema.json`**, **`task-track.schema.json`**, tool metadata schemas, and **`run-log-audit-record.schema.json`** are **runtime-enforced** at build/load/registration/write boundaries.
 
 JSON objects are produced throughout the stack. Enforcement uses **`validateResult()`** (now with `$ref` / `minItems` support for workflow plans), **imperative checks**, and **workflow-specific schemas** (`companion/schemas/`, `companion/pit-crew/schemas/`, `tool-packs/*/schemas/`).
 
-**Safest next implementation step:** contract-test **audit JSONL** lines, or validate **`toPublicToolMetadata()`** output before optional runtime in `listPublic()`.
+**Safest next implementation step:** validate **`toPublicToolMetadata()`** output before optional runtime in `listPublic()`, or contract-test intermediate step artifacts.
 
 ---
 
@@ -17,7 +17,7 @@ JSON objects are produced throughout the stack. Enforcement uses **`validateResu
 
 | Finding | Detail |
 |---|---|
-| Internal schemas referenced in code | **`workflow-plan.schema.json`** in `run-plan-builder.js`; **`task-track.schema.json`** in `decomposer.js`; **`tool-pack-manifest*.schema.json`** and **`internal-tool-registry-entry.schema.json`** in `registry.js`; other internal schemas not yet wired |
+| Internal schemas referenced in code | **`workflow-plan.schema.json`** in `run-plan-builder.js`; **`task-track.schema.json`** in `decomposer.js`; **`tool-pack-manifest*.schema.json`** and **`internal-tool-registry-entry.schema.json`** in `registry.js`; **`run-log-audit-record.schema.json`** in `audit-log.js`; other internal schemas not yet wired |
 | Shared validator | `companion/core/result-validator.js` — supports `$ref`, `minItems`, `oneOf`, `const`, `additionalProperties: false` |
 | `/tracks/run` vs `/workflows/run` | Workflow path adds per-step validation in `run-plan-validator.js`; direct track path does not validate intermediate tool outputs |
 | Lighthouse pipeline | JSON artifacts are real; `final-output-manifest` wrapper is **not** emitted; result is a flat handoff object + `markdown` + `meta.verification` |
@@ -123,15 +123,15 @@ Manifest and internal registry schemas are **runtime-enforced** at load/registra
 
 | | |
 |---|---|
-| **Runtime status** | **Produced, normalized, not schema-validated** |
-| **Producer** | `companion/core/audit-log.js` → `normalizeAuditEvent()`; `buildAuditEvent()`; `orchestration/run-logger.js` → `buildOrchestrationLogEvent()` |
+| **Runtime status** | **Runtime-enforced at write** — validated in `appendAuditRecord()` via `validateAuditRecord()` after `normalizeAuditEvent()` |
+| **Producer** | `companion/core/audit-log.js` → `buildAuditEvent()`; `companion/memory/audit-redaction.js` → `buildMemoryAuditEvent()`; `orchestration/run-logger.js` → `buildOrchestrationLogEvent()` |
 | **Consumers** | `GET /audit` via `auditLog.list()`; JSONL file under `data/` |
-| **Validation coverage** | Normalization (defaults for `event_id`, `timestamp`, `status` enum coercion). **No** schema validation on write or read. |
-| **Partial vs complete** | **Partial** — core fields populated; shapes vary by event type |
-| **Shape variance** | Generic tool runs: `input_summary` / `output_summary` are char/key summaries. Orchestration runs: `input_summary` has `task_id`, `workflow_id`, `track_id`, `plan_id`; `output_summary` has `step_statuses[]`. |
-| **Dropped fields** | `buildAuditEvent()` passes `status_code` but `normalizeAuditEvent()` does not persist it |
-| **Missing enforcement** | No validate-on-write; no contract test for audit JSONL lines |
-| **Recommended next step** | Validate normalized events in `record()` during test runs; document orchestration-specific `input_summary` / `output_summary` variants in schema as `oneOf` before enforcing |
+| **Validation coverage** | All producers pass through `auditLog.record()` → `appendAuditRecord()`. Schema loaded from `companion/schemas/internal/run-log-audit-record.schema.json`. Failures throw `AUDIT_RECORD_INVALID`; filesystem failures throw `AUDIT_RECORD_WRITE_FAILED`. **New writes only** — existing JSONL lines are not retroactively validated on read. |
+| **Partial vs complete** | **Enforced at durable write boundary only** — read path remains backward-compatible with legacy lines |
+| **Shape variance** | Generic tool runs: summarized `input_summary` / `output_summary` with type/chars/keys. Orchestration: preserved `task_id`, `workflow_id`, `plan_id`, `step_statuses[]` (via `workflow-orchestrator` normalization bypass). Memory Bridge: redacted request/response metadata. |
+| **Dropped fields** | `buildAuditEvent()` passes `status_code` but `normalizeAuditEvent()` does not persist it (non-durable) |
+| **Missing enforcement** | Post-read validation; contract test on HTTP error envelope for `AUDIT_RECORD_INVALID` in production paths |
+| **Recommended next step** | ~~Validate normalized events in `record()`~~ **Done (2026-06-20).** Next: optional public tool metadata validation at `listPublic()` |
 
 ---
 
@@ -179,7 +179,9 @@ Manifest and internal registry schemas are **runtime-enforced** at load/registra
 | ~~**1**~~ | ~~`validateResult(track, taskTrackSchema)` in `decomposer.loadTrackFile()`~~ | — | **Done (2026-06-20)** — `validateLoadedTrackFile()` |
 | ~~**1 (recommended)**~~ | Validate `tool-packs/*/tool.json` at load in `loadToolPack()` | — | **Done (2026-06-20)** |
 | ~~**1 (recommended)**~~ | Internal registry metadata snapshot at registration | — | **Done (2026-06-20)** — `validateInternalToolRegistryEntry()` in `registerTool()` |
-| **2** | Contract test audit JSONL lines match `run-log-audit-record` core fields | Low | Read-only validation in tests |
+| ~~**1 (recommended)**~~ | Validate audit JSONL lines at durable write | — | **Done (2026-06-20)** — `appendAuditRecord()` + `validateAuditRecord()` |
+| **1 (recommended)** | Validate `toPublicToolMetadata()` output | Low | Protects `/tools` contract before optional runtime |
+| **2** | Contract test intermediate step artifacts on `/workflows/run` | Low | Read-only validation in tests |
 | ~~**2**~~ | ~~Align `tool-registry-entry` schema with `toPublicToolMetadata()`~~ | — | **Done (2026-06-20)** — split into four stage schemas |
 | **Defer** | `final-output-manifest` wrapper, `model-registry-entry`, `nearby-node-capability` | — | No producer code yet |
 

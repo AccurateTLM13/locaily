@@ -216,6 +216,14 @@ function validateType(value, schema, path, errors) {
     return;
   }
 
+  if (schema.type === "null") {
+    if (value !== null) {
+      errors.push(`${path} must be null.`);
+    }
+
+    return;
+  }
+
   if (schema.type === "array") {
     if (!Array.isArray(value)) {
       errors.push(`${path} must be an array.`);
