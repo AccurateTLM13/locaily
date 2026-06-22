@@ -21,7 +21,7 @@ Status: **Implemented** — workflow orchestration API + track files for Lightho
 - Prioritization (`prioritize_fixes`)
 - Validation (`validate_priority_fixes`, `verify_output`)
 - Matching (`match_fixes`)
-- Markdown Assembly (`write_handoff`)
+- Markdown Export (`write_handoff`) — rendered from JSON artifacts
 
 **Specialized steps:**
 
@@ -87,7 +87,7 @@ Status: **Implemented** — workflow orchestration API + track files for Lightho
 - Extraction
 - Classification
 - Summarization
-- Markdown Assembly
+- Markdown Export
 - Validation
 
 **Current implementation:** Standard Text Pack tools only (`text.clean`, `text.summarize`, etc.) — no composed workflow track.
@@ -106,7 +106,7 @@ Status: **Implemented** — workflow orchestration API + track files for Lightho
 - Classification
 - Summarization
 - Prioritization
-- Markdown Assembly
+- Markdown Export
 - Validation
 
 **Current implementation:** None.
@@ -125,7 +125,7 @@ Status: **Implemented** — workflow orchestration API + track files for Lightho
 - Extraction
 - Classification
 - Validation
-- Markdown Assembly
+- Markdown Export
 
 **Current implementation:** None.
 

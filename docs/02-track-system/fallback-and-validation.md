@@ -1,6 +1,6 @@
 # Fallback and Validation
 
-How track runs validate output and recover from failures **today**.
+How track runs validate output and recover from failures **today**. The `verify_output` step returns JSON `{ valid, errors }` (aligned with `validation-result.schema.json` core fields, but **not** validated against that schema file). See [../04-validation/json-first-schema-audit.md](../04-validation/json-first-schema-audit.md).
 
 ## Per-Step Validation
 

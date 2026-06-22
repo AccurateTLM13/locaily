@@ -2,6 +2,10 @@
 
 JSON shape for track files under `companion/pit-crew/tracks/`. Matches what `decomposer.js` validates today.
 
+**JSON Schema:** [../../companion/schemas/internal/task-track.schema.json](../../companion/schemas/internal/task-track.schema.json)
+
+See also [../01-architecture/json-first-internal-format.md](../01-architecture/json-first-internal-format.md).
+
 ## Top-Level Fields
 
 | Field | Required | Description |
@@ -64,7 +68,7 @@ From `decomposer.js`:
 - `track_id` must be present
 - `steps` must be non-empty array
 - Each step needs `id` and `executor.type`
-- Invalid JSON or missing fields → `TRACK_CONFIG_INVALID`
+- Invalid JSON or schema validation failure → `TRACK_CONFIG_INVALID` (parse) or `TASK_TRACK_INVALID` (schema)
 
 ## Output Validation
 

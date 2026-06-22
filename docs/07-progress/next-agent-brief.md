@@ -37,6 +37,7 @@ Workflow requests → run plans → track steps.
 Models plug into tracks.
 Tools plug into tracks.
 Track JSON declares input_map for tool and model steps.
+Internal orchestration state is JSON; Markdown is export-only.
 NearbyNodes will provide track capabilities (future).
 Workflows compose tracks.
 Validation scores tracks.

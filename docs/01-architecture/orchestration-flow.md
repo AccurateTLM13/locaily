@@ -2,7 +2,9 @@
 
 ## What It Is
 
-**Orchestration** is multi-step execution inside a workflow track: breaking work into steps, running each step with the right role/tool, validating intermediates, and assembling a final result.
+**Orchestration** is multi-step execution inside a workflow track: breaking work into steps, running each step with the right role/tool, validating intermediates as JSON, and assembling a final structured result. Human-readable Markdown, when needed, is rendered from that JSON state at export time.
+
+See [json-first-internal-format.md](./json-first-internal-format.md).
 
 ## What It Owns
 
@@ -20,19 +22,22 @@
 ## High-Level Shape
 
 ```txt
-Workflow input
+Workflow input (JSON)
     │
     ▼
-Step 1 (e.g. extract)     → fast_worker
-    │ validate intermediate
+Step 1 (e.g. extract)     → JSON artifact
+    │ validate intermediate (JSON)
     ▼
-Step 2 (e.g. classify)    → default_worker
-    │ validate intermediate
+Step 2 (e.g. classify)    → JSON artifact
+    │ validate intermediate (JSON)
     ▼
-Step 3 (e.g. prioritize)  → reasoning_worker
-    │ validate final
+Step 3 (e.g. prioritize)  → JSON artifact
+    │ validate final (JSON)
     ▼
-Workflow result
+Structured workflow result (JSON)
+    │
+    ▼
+[optional] Markdown / other export render
 ```
 
 ## Implemented Example: Lighthouse Handoff

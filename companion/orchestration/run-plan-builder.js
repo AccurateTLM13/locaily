@@ -1,7 +1,10 @@
 const { randomUUID } = require("node:crypto");
 const { loadTrack } = require("../pit-crew/decomposer");
+const { validateResult } = require("../core/result-validator");
 const { getWorkflow } = require("./workflow-registry");
 const { getTrackRegistryEntry, getWorkerTypeForStep } = require("./track-registry");
+
+const workflowPlanSchema = require("../schemas/internal/workflow-plan.schema.json");
 
 function createPlanId() {
   return `plan_${randomUUID().replace(/-/g, "")}`;
@@ -85,6 +88,20 @@ function validateWorkflowInput(workflow, input) {
   return { ok: true };
 }
 
+function validateBuiltRunPlan(plan) {
+  const validation = validateResult(plan, workflowPlanSchema, "plan");
+
+  if (validation.ok) {
+    return validation;
+  }
+
+  const error = new Error("Built workflow plan did not match workflow-plan.schema.json.");
+  error.code = "WORKFLOW_PLAN_INVALID";
+  error.nextStep = "Fix run plan builder output or update companion/schemas/internal/workflow-plan.schema.json.";
+  error.validation = validation;
+  throw error;
+}
+
 function buildRunPlan({ workflowId, input, options = {}, taskId = null }) {
   const workflow = getWorkflow(workflowId);
   const inputValidation = validateWorkflowInput(workflow, input);
@@ -99,7 +116,7 @@ function buildRunPlan({ workflowId, input, options = {}, taskId = null }) {
   const track = loadTrack(workflow.track_id);
   const registryEntry = getTrackRegistryEntry(workflow.track_id);
 
-  return {
+  const plan = {
     plan_id: createPlanId(),
     task_id: createTaskId(taskId),
     workflow_id: workflow.workflow_id,
@@ -122,17 +139,18 @@ function buildRunPlan({ workflowId, input, options = {}, taskId = null }) {
       required_input: describeRequiredInput(step),
       expected_output: describeExpectedOutput(step),
       worker_type: getWorkerTypeForStep(step),
-      status: "pending",
-      output: null,
-      error: null,
-      duration_ms: null,
-      worker_used: null
+      status: "pending"
     }))
   };
+
+  validateBuiltRunPlan(plan);
+
+  return plan;
 }
 
 module.exports = {
   buildRunPlan,
+  validateBuiltRunPlan,
   validateWorkflowInput,
   describeRequiredInput,
   describeExpectedOutput

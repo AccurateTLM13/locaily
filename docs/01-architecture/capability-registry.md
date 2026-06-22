@@ -2,9 +2,11 @@
 
 ## What It Is
 
-The **capability registry** is how Local Brain discovers what can run: tools, packs, permissions, schemas, and runtime requirements.
+The **capability registry** is how Local Brain discovers what can run: tools, packs, permissions, schemas, and runtime requirements. Registry entries are **JSON metadata** — the internal operating format for capability discovery.
 
 **Implemented today** as the **tool registry** (`companion/tools/registry.js`) plus `GET /tools`.
+
+Schema: [internal-json-schemas.md](./internal-json-schemas.md) (manifest, internal registry, public metadata)
 
 ## What It Owns
 
@@ -18,7 +20,7 @@ The **capability registry** is how Local Brain discovers what can run: tools, pa
 
 - Executing model inference (providers)
 - Multi-step orchestration inside a tool (orchestrator / tool handler)
-- NearbyNode capability advertisements (future)
+- NearbyNode capability advertisements (future — see `nearby-node-capability.schema.json`)
 
 ## Tool Pack Shape (Implemented)
 

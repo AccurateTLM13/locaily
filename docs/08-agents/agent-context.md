@@ -51,6 +51,8 @@ Locaily
 
 Device = capability. Not every node needs a model.
 
+**JSON = how Locaily thinks. Markdown = how Locaily explains.** See [../01-architecture/json-first-internal-format.md](../01-architecture/json-first-internal-format.md).
+
 ## Memory Bridge Reminder
 
 - Disabled by default; user configures private `vaultPath` locally.

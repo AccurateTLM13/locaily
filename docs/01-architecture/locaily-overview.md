@@ -4,6 +4,15 @@
 
 High-level map of the Locaily stack and how the pieces relate. For component detail see the linked architecture docs.
 
+## Operating Format
+
+```txt
+JSON       = how Locaily thinks   (orchestration, validation, audit, registries)
+Markdown   = how Locaily explains (exports, docs, coding-agent handoffs)
+```
+
+Internal state is JSON. Markdown reports are generated from validated JSON — not manually assembled as the primary source of truth. Full detail: [json-first-internal-format.md](./json-first-internal-format.md).
+
 ## System Map
 
 ```txt
@@ -33,16 +42,17 @@ Tool Packs   AI Pit Crew    Providers   Memory Bridge
 ## Request Flow (Implemented)
 
 ```txt
-Client
+Client (JSON request)
   → POST /tasks/run (or legacy POST /analyze)
   → Input Gate
   → Context Handler
   → Tool Registry / handler
-  → [optional] Orchestrator steps
+  → [optional] Track orchestrator (JSON plans + step artifacts)
   → Provider Router + Model Role Manager
-  → Result Validator
-  → Audit Log
-  → Response envelope
+  → Result Validator (JSON validation results)
+  → Audit Log (JSONL summaries)
+  → Response envelope (JSON)
+  → [optional] Markdown export layer (e.g. Lighthouse handoff)
 ```
 
 ## What Lives Where
@@ -115,6 +125,8 @@ New features should extend `/tasks/run` and engine endpoints. Legacy `/analyze` 
 - [memory-bridge.md](./memory-bridge.md)
 - [context-packs.md](./context-packs.md)
 - [memory-writeback.md](./memory-writeback.md)
+- [json-first-internal-format.md](./json-first-internal-format.md)
+- [internal-json-schemas.md](./internal-json-schemas.md)
 - [local-brain.md](./local-brain.md)
 - [nearby-node.md](./nearby-node.md)
 - [ai-pit-crew.md](./ai-pit-crew.md)

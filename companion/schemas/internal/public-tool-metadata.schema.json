@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/public-tool-metadata.schema.json",
+  "title": "Public Tool Metadata",
+  "description": "Single tool object returned by GET /tools via toPublicToolMetadata(). Snake_case public contract — do not change without API migration.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "pack",
+    "pack_trust",
+    "pack_version",
+    "description",
+    "tasks",
+    "permissions",
+    "model_role",
+    "runtime_required",
+    "input_schema",
+    "output_schema",
+    "input",
+    "output"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "pack": { "type": "string", "minLength": 1 },
+    "pack_trust": {
+      "type": "string",
+      "enum": ["official", "verified", "community", "experimental", "local_private"]
+    },
+    "pack_version": { "type": "string" },
+    "description": { "type": "string" },
+    "tasks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "model_role": { "type": ["string", "null"] },
+    "runtime_required": { "type": "boolean" },
+    "input_schema": { "type": ["string", "null"] },
+    "output_schema": { "type": ["string", "null"] },
+    "input": {
+      "type": ["object", "null"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "optional": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "output": {
+      "type": ["object", "null"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "type": { "type": "string" }
+      },
+      "required": ["required", "type"],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

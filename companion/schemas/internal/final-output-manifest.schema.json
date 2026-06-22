@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/final-output-manifest.schema.json",
+  "title": "Final Output Manifest",
+  "description": "Structured workflow result with export references. JSON is source of truth; markdown and other formats are exports.",
+  "type": "object",
+  "required": ["workflow_id", "track_id", "structured_result", "exports"],
+  "properties": {
+    "workflow_id": { "type": "string" },
+    "track_id": { "type": "string" },
+    "plan_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "structured_result": {
+      "type": "object",
+      "description": "Validated JSON result object (workflow-specific schema)",
+      "additionalProperties": true
+    },
+    "validation": {
+      "$ref": "validation-result.schema.json",
+      "description": "Final validation outcome when recorded"
+    },
+    "exports": {
+      "type": "object",
+      "description": "Human- or agent-facing renderings generated from structured_result",
+      "properties": {
+        "markdown": {
+          "type": "string",
+          "description": "Rendered Markdown export (not orchestration source of truth)"
+        },
+        "client_summary": {
+          "type": "string",
+          "description": "Short plain-text summary for clients"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["markdown", "json", "html"],
+          "description": "Primary export format for display"
+        }
+      },
+      "additionalProperties": true
+    },
+    "artifacts": {
+      "type": "object",
+      "description": "Optional map of step_id → JSON artifact references",
+      "additionalProperties": true
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "verification": { "type": "object" },
+        "duration_ms": { "type": "number" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

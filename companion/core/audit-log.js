@@ -1,6 +1,8 @@
 const { randomUUID } = require("node:crypto");
 const { appendFile, mkdir, readFile } = require("node:fs/promises");
 const { dirname } = require("node:path");
+const { validateResult } = require("./result-validator");
+const runLogAuditRecordSchema = require("../schemas/internal/run-log-audit-record.schema.json");
 const {
   redactToolResultMemoryForAudit,
   buildMemoryAuditEvent
@@ -18,10 +20,7 @@ function createAuditLog(options = {}) {
 
   return {
     async record(event) {
-      const auditEvent = normalizeAuditEvent(event);
-      await mkdir(dirname(filePath), { recursive: true });
-      await appendFile(filePath, `${JSON.stringify(auditEvent)}\n`, "utf8");
-      return auditEvent;
+      return appendAuditRecord(filePath, event);
     },
     async list(filters = {}) {
       const events = await readEvents(filePath);
@@ -30,8 +29,43 @@ function createAuditLog(options = {}) {
   };
 }
 
+async function appendAuditRecord(filePath, event) {
+  const auditEvent = normalizeAuditEvent(event);
+  validateAuditRecord(auditEvent);
+
+  try {
+    await mkdir(dirname(filePath), { recursive: true });
+    await appendFile(filePath, `${JSON.stringify(auditEvent)}\n`, "utf8");
+  } catch (error) {
+    const writeError = new Error(`Failed to write audit record to ${filePath}.`);
+    writeError.code = "AUDIT_RECORD_WRITE_FAILED";
+    writeError.nextStep = "Check disk permissions and audit log path configuration.";
+    writeError.cause = error;
+    throw writeError;
+  }
+
+  return auditEvent;
+}
+
+function validateAuditRecord(record) {
+  const validation = validateResult(record, runLogAuditRecordSchema, "audit");
+
+  if (validation.ok) {
+    return validation;
+  }
+
+  const error = new Error("Audit record did not match run-log-audit-record.schema.json.");
+  error.code = "AUDIT_RECORD_INVALID";
+  error.eventType = record && typeof record.tool === "string" ? record.tool : null;
+  error.runId = record && typeof record.run_id === "string" ? record.run_id : null;
+  error.nextStep = "Fix audit record normalization or update the audit record schema.";
+  error.validation = validation;
+  throw error;
+}
+
 function normalizeAuditEvent(event) {
   const isMemoryAudit = event.tool === "memory-bridge";
+  const isOrchestrationAudit = event.tool === "workflow-orchestrator";
 
   return {
     event_id: event.event_id || createEventId(),
@@ -45,10 +79,10 @@ function normalizeAuditEvent(event) {
     model: event.model || null,
     model_role: event.model_role || null,
     permissions_used: normalizeStringArray(event.permissions_used),
-    input_summary: isMemoryAudit
+    input_summary: isMemoryAudit || isOrchestrationAudit
       ? event.input_summary
       : summarizeInput(event.input_summary),
-    output_summary: isMemoryAudit
+    output_summary: isMemoryAudit || isOrchestrationAudit
       ? event.output_summary
       : summarizeOutput(event.output_summary),
     fallbacks_used: normalizeStringArray(event.fallbacks_used),
@@ -278,7 +312,9 @@ function createEventId() {
 
 module.exports = {
   createAuditLog,
+  appendAuditRecord,
   buildAuditEvent,
   buildMemoryAuditEvent,
-  normalizeAuditEvent
+  normalizeAuditEvent,
+  validateAuditRecord
 };

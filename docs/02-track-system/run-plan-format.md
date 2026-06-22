@@ -2,6 +2,10 @@
 
 Structured execution plan produced by `companion/orchestration/run-plan-builder.js` and mutated by `run-plan-executor.js`.
 
+**JSON Schema:** [../../companion/schemas/internal/workflow-plan.schema.json](../../companion/schemas/internal/workflow-plan.schema.json)
+
+Run plans are **JSON orchestration state**. Markdown in workflow results is generated from final JSON artifacts at export time — not stored as the plan source of truth.
+
 ## Top-Level Fields
 
 | Field | Type | Description |
@@ -95,7 +99,7 @@ Success envelope includes workflow result fields plus executed plan:
   "task": "lighthouse_handoff",
   "result": {
     "clientSummary": "...",
-    "markdown": "# Developer Handoff: ...",
+    "markdown": "# Developer Handoff: ... (export — rendered from structured JSON)",
     "plan": { "status": "completed", "steps": [] }
   },
   "meta": {

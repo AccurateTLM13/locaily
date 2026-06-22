@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/internal-tool-registry-entry.schema.json",
+  "title": "Internal Tool Registry Entry",
+  "description": "JSON-serializable metadata for a registered tool in companion/tools/registry.js Map values. Non-serializable fields (handle, validateInput) are excluded. Used by tool-router via registry.get().",
+  "type": "object",
+  "required": ["id", "name", "tasks"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "pack": { "type": "string" },
+    "trust": {
+      "type": "string",
+      "enum": ["official", "verified", "community", "experimental", "local_private"],
+      "description": "Present on manifest-loaded tools; showcase built-ins may omit"
+    },
+    "packVersion": {
+      "type": "string",
+      "description": "Manifest version copied at load time (camelCase internal field)"
+    },
+    "description": { "type": "string" },
+    "tasks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "modelRole": {
+      "type": ["string", "null"],
+      "description": "camelCase internal field; maps to model_role in public metadata"
+    },
+    "requiresRuntime": {
+      "type": "boolean",
+      "description": "Derived from permissions.includes('model.run') unless overridden on showcase tools"
+    },
+    "inputSchema": {
+      "type": ["string", "null"],
+      "description": "Repo-relative path to input JSON schema"
+    },
+    "outputSchema": {
+      "type": ["string", "null"],
+      "description": "Repo-relative path to output JSON schema"
+    },
+    "input": {
+      "type": ["object", "null"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "optional": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "output": {
+      "type": "object",
+      "description": "Parsed output JSON schema object loaded from outputSchema path"
+    },
+    "prompt": {
+      "type": "string",
+      "description": "Optional showcase-tool prompt template; not exposed on GET /tools"
+    }
+  },
+  "additionalProperties": true
+}

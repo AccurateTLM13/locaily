@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/tool-pack-manifest-tool.schema.json",
+  "title": "Tool Pack Manifest Tool Entry",
+  "description": "Single tool declaration inside tool-packs/*/tool.json tools[] before registry normalization.",
+  "type": "object",
+  "required": ["id", "output_schema"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "model_role": { "type": ["string", "null"] },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tasks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Defaults to [\"run\"] when omitted at load time"
+    },
+    "input_schema": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Path relative to pack root"
+    },
+    "output_schema": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Path relative to pack root"
+    }
+  },
+  "additionalProperties": true
+}

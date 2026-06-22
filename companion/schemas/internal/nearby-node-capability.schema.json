@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/nearby-node-capability.schema.json",
+  "title": "NearbyNode Capability Advertisement",
+  "description": "Capability record advertised by a nearby device. Spec-only — NearbyNode is not implemented.",
+  "type": "object",
+  "required": ["node_id", "capability_id", "connector_type", "status"],
+  "properties": {
+    "node_id": {
+      "type": "string",
+      "description": "Stable device identity on the local network"
+    },
+    "capability_id": {
+      "type": "string",
+      "description": "Stable capability identifier within the node"
+    },
+    "display_name": { "type": "string" },
+    "connector_type": {
+      "type": "string",
+      "description": "How Local Brain invokes this capability (e.g. http_local, file_bridge)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["available", "busy", "offline", "restricted"]
+    },
+    "requires_model": {
+      "type": "boolean",
+      "description": "Whether this capability needs a model runtime on the node"
+    },
+    "input_schema": {
+      "type": "string",
+      "description": "Path or URI to input JSON schema"
+    },
+    "output_schema": {
+      "type": "string",
+      "description": "Path or URI to output JSON schema"
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "track_affinity": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Task tracks this capability can serve"
+    },
+    "endpoint": {
+      "type": "object",
+      "description": "Connector-specific invocation details",
+      "additionalProperties": true
+    },
+    "advertised_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ttl_seconds": {
+      "type": "number",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": true
+}

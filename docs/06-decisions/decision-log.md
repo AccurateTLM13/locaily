@@ -1,5 +1,39 @@
 # Decision Log
 
+## 2026-06-20 — JSON-First Internal Operating Format
+
+### Decision
+
+Local Brain internals use **JSON** as the operating format. **Markdown** is reserved for human-facing exports, documentation, README content, and coding-agent handoffs.
+
+```txt
+JSON     = how Locaily thinks
+Markdown = how Locaily explains
+```
+
+Markdown output support is preserved but reframed as an **export / rendering layer**, not the orchestration source of truth.
+
+### Why
+
+Structured JSON makes workflow plans, routing decisions, validation results, retries, and audit records testable, composable, and machine-readable. Markdown remains valuable for humans and coding agents but should be generated from validated JSON state.
+
+### Consequences
+
+- Architecture docs and internal JSON schemas document the target format ([json-first-internal-format.md](../01-architecture/json-first-internal-format.md), [internal-json-schemas.md](../01-architecture/internal-json-schemas.md)).
+- Lighthouse Handoff pipeline is documented as JSON stages ending in Markdown export.
+- No claim that every schema is runtime-validated until code supports it.
+- Runtime changes are deferred unless matching code already exists.
+
+### Status
+
+Accepted (docs + schema alignment; no mandatory runtime refactor in this decision)
+
+### Notes
+
+Schemas: `companion/schemas/internal/`. Lighthouse `write_handoff` already produces JSON + Markdown export.
+
+---
+
 ## 2026-06-14 — Lighthouse Handoff Remains First Proof Workflow
 
 ### Decision

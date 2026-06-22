@@ -1,6 +1,6 @@
 # Track System
 
-The track system is how Locaily breaks work into steps, dispatches capabilities, and validates output.
+The track system is how Locaily breaks work into steps, dispatches capabilities, and validates output. **Tracks, plans, artifacts, and validation results are JSON.** Markdown exports, when present, are rendered from that JSON state.
 
 **A track is not a model.** A track is a unit of work with purpose, input/output contracts, required capabilities, preferred worker type, validation rules, and fallback policy.
 
@@ -12,6 +12,7 @@ The track system is how Locaily breaks work into steps, dispatches capabilities,
 | [core-tracks.md](./core-tracks.md) | Reusable base track types |
 | [workflow-registry.md](./workflow-registry.md) | Workflows composed from tracks |
 | [track-definition-schema.md](./track-definition-schema.md) | Track JSON file shape (matches code) |
+| [run-plan-format.md](./run-plan-format.md) | Workflow run plan JSON shape |
 | [step-input-mapping.md](./step-input-mapping.md) | Declarative step input mapping |
 | [track-graph-planning.md](./track-graph-planning.md) | Linear → declarative → DAG evolution |
 | [fallback-and-validation.md](./fallback-and-validation.md) | Validation and fallback today |

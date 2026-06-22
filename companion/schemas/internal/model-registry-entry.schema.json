@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/model-registry-entry.schema.json",
+  "title": "Model Registry Entry",
+  "description": "Model scorecard / skill sheet row for routing. Spec-only until a file-backed registry is implemented.",
+  "type": "object",
+  "required": ["model_id", "status"],
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "description": "Provider-local model identifier"
+    },
+    "display_name": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["candidate", "approved", "deprecated", "blocked"]
+    },
+    "provider": {
+      "type": "string",
+      "description": "Runtime provider (e.g. ollama, mock)"
+    },
+    "license": { "type": "string" },
+    "roles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Model roles this entry can satisfy"
+    },
+    "suitability": {
+      "type": "object",
+      "description": "Task-track strengths and limits",
+      "properties": {
+        "structured_output": { "type": "string", "enum": ["low", "medium", "high"] },
+        "classification": { "type": "string", "enum": ["low", "medium", "high"] },
+        "reasoning": { "type": "string", "enum": ["low", "medium", "high"] },
+        "summarization": { "type": "string", "enum": ["low", "medium", "high"] }
+      },
+      "additionalProperties": true
+    },
+    "hardware_fit": {
+      "type": "object",
+      "properties": {
+        "min_vram_gb": { "type": "number" },
+        "cpu_only_ok": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "failure_modes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "fallback_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "condition": { "type": "string" },
+          "action": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Links to validation artifacts — not benchmark claims",
+      "properties": {
+        "last_evaluated_at": { "type": "string", "format": "date-time" },
+        "artifact_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

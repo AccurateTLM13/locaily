@@ -202,28 +202,30 @@ Status key: **Implemented** = used in a shipped track file | **Planned** = defin
 
 ---
 
-## Markdown Assembly Track
+## Markdown Export Track
 
 **Status:** Implemented (Lighthouse `write_handoff` step)
 
-**Purpose:** Compose final human- or agent-facing Markdown from structured artifacts.
+**Purpose:** Render final human- or agent-facing Markdown from validated JSON artifacts. This is an **export layer**, not orchestration state.
 
-**Input:** Metrics, classifications, priorities, matched fixes, URL.
+**Input:** JSON artifacts — metrics, classifications, priorities, matched fixes, URL.
 
-**Output:** Handoff object + rendered Markdown.
+**Output:** Handoff JSON object + rendered Markdown export field.
 
 **Preferred handlers:** Workflow tool (`lighthouse-handoff` `compose-handoff`).
 
-**Can be deterministic:** Partial — template assembly deterministic; enhancement may use model.
+**Can be deterministic:** Partial — template rendering from JSON is deterministic; enhancement may use model.
 
 **Requires model:** Optional (Memory Bridge preflight when enabled).
 
-**Validation:** Output schema + verify step.
+**Validation:** JSON output schema + JSON verify step before export.
 
 **Used by:**
 
 - Lighthouse Handoff
 - Repo Review (planned)
+
+Previously documented as "Markdown Assembly Track." Renamed to reflect JSON-first orchestration: Markdown is generated **from** JSON, not assembled as the primary source of truth.
 
 ---
 

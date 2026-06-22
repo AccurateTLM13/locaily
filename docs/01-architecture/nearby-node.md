@@ -38,11 +38,11 @@ Examples of capabilities that might live on a NearbyNode:
 
 ## Inputs / Outputs (Planned)
 
-Not standardized in this repo yet. Expect something like:
+Not standardized in this repo yet. Capability advertisements should be **structured JSON** records (see `companion/schemas/internal/nearby-node-capability.schema.json`). Expect something like:
 
-- Register capability manifest
-- Accept delegated sub-tasks from orchestrator
-- Return structured capability results or errors
+- Register capability manifest (JSON)
+- Accept delegated sub-tasks from orchestrator (JSON in / JSON out)
+- Return structured capability results or errors (JSON)
 
 ## Status
 

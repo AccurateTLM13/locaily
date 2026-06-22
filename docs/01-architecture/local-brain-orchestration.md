@@ -9,14 +9,18 @@ Track-based orchestration layer for turning workflow requests into structured ru
 The Pit Crew track runner (`POST /tracks/run`) executes a known `track_id` directly. The orchestration layer adds a workflow-facing path:
 
 ```txt
-Workflow request
+Workflow request (JSON)
   → Workflow registry lookup
   → Track registry metadata
-  → Run plan builder
-  → Run plan executor
-  → Validation + audit logging
-  → Structured response envelope
+  → Run plan builder (JSON workflow plan)
+  → Run plan executor (JSON step artifacts + statuses)
+  → Validation (JSON validation results)
+  → Audit logging (JSONL run records)
+  → Structured response envelope (JSON)
+  → [optional] Markdown export from final JSON state
 ```
+
+All orchestration state is JSON. Markdown handoffs, when present, are **exports** — see [json-first-internal-format.md](./json-first-internal-format.md).
 
 This milestone does **not** implement:
 
@@ -83,6 +87,7 @@ Both paths share the same underlying track definitions in `companion/pit-crew/tr
 
 ## Related Docs
 
+- [json-first-internal-format.md](./json-first-internal-format.md)
 - [../02-track-system/track-registry.md](../02-track-system/track-registry.md)
 - [../02-track-system/run-plan-format.md](../02-track-system/run-plan-format.md)
 - [../03-workflows/lighthouse-handoff-run-plan.md](../03-workflows/lighthouse-handoff-run-plan.md)

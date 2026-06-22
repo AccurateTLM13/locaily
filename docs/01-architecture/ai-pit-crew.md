@@ -6,6 +6,8 @@
 
 The **AI Pit Crew** is Locaily's strategy for coordinating multiple small specialists—models, tools, rules, and validators—across a task instead of defaulting to one large general model.
 
+Track steps produce and consume **JSON artifacts**. Model steps enforce JSON schemas; validators return JSON results. Human-readable Markdown, when needed, is an export from that JSON pipeline.
+
 Research shorthand: **"treat every task as a track and every model as a vehicle."**
 
 ## What It Owns

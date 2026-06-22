@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/task-track.schema.json",
+  "title": "Task Track Definition",
+  "description": "JSON shape for track files under companion/pit-crew/tracks/.",
+  "type": "object",
+  "required": ["track_id", "steps"],
+  "properties": {
+    "track_id": {
+      "type": "string",
+      "description": "Stable identifier returned by GET /tracks"
+    },
+    "version": { "type": "string" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "output_schema": {
+      "type": "string",
+      "description": "Path to final result JSON schema"
+    },
+    "result_step": {
+      "type": "string",
+      "description": "Step id whose artifact becomes the primary track result"
+    },
+    "verification_step": {
+      "type": "string",
+      "description": "Step id whose artifact supplies validation meta"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/trackStep"
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "trackStep": {
+      "type": "object",
+      "required": ["id", "executor"],
+      "properties": {
+        "id": { "type": "string" },
+        "input_map": {
+          "description": "Declarative step input mapping"
+        },
+        "executor": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["type", "tool", "task"],
+              "properties": {
+                "type": { "const": "tool" },
+                "tool": { "type": "string" },
+                "task": { "type": "string" }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["type", "role"],
+              "properties": {
+                "type": { "const": "model" },
+                "role": { "type": "string" },
+                "schema": { "type": "string" },
+                "prompt_template": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

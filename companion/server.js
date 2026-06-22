@@ -1928,6 +1928,10 @@ function mapWorkflowErrorStatus(code) {
     return 400;
   }
 
+  if (code === "WORKFLOW_PLAN_INVALID") {
+    return 500;
+  }
+
   if (code === "PROVIDER_UNAVAILABLE") {
     return 503;
   }

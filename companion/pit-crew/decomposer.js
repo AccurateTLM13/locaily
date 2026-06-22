@@ -1,7 +1,9 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const { validateResult } = require("../core/result-validator");
 
 const TRACKS_DIR = path.join(__dirname, "tracks");
+const taskTrackSchema = require("../schemas/internal/task-track.schema.json");
 
 function listTracks() {
   if (!fs.existsSync(TRACKS_DIR)) {
@@ -50,24 +52,37 @@ function loadTrack(trackId) {
   );
 }
 
+function validateLoadedTrackFile(track, filePath) {
+  const validation = validateResult(track, taskTrackSchema, "track");
+
+  if (validation.ok) {
+    return validation;
+  }
+
+  const trackName = path.basename(filePath);
+  const error = new Error(`Track file '${trackName}' did not match task-track.schema.json.`);
+  error.code = "TASK_TRACK_INVALID";
+  error.trackPath = filePath;
+  error.trackName = trackName;
+  error.nextStep = "Fix the track JSON file or update companion/schemas/internal/task-track.schema.json.";
+  error.validation = validation;
+  throw error;
+}
+
 function loadTrackFile(filePath) {
   let track;
 
   try {
     track = JSON.parse(fs.readFileSync(filePath, "utf8"));
   } catch (err) {
-    throw trackError("TRACK_CONFIG_INVALID", `Failed to parse track config: ${err.message}`, "Fix the track JSON file.");
+    throw trackError(
+      "TRACK_CONFIG_INVALID",
+      `Failed to parse track config '${path.basename(filePath)}': ${err.message}`,
+      "Fix the track JSON file."
+    );
   }
 
-  if (!track.track_id || !Array.isArray(track.steps) || track.steps.length === 0) {
-    throw trackError("TRACK_CONFIG_INVALID", "Track config requires track_id and a non-empty steps array.", "Fix the track JSON file.");
-  }
-
-  for (const step of track.steps) {
-    if (!step.id || !step.executor || !step.executor.type) {
-      throw trackError("TRACK_CONFIG_INVALID", "Each track step requires id and executor.type.", "Fix the track JSON file.");
-    }
-  }
+  validateLoadedTrackFile(track, filePath);
 
   return track;
 }
@@ -81,5 +96,6 @@ function trackError(code, message, nextStep) {
 
 module.exports = {
   listTracks,
-  loadTrack
+  loadTrack,
+  validateLoadedTrackFile
 };

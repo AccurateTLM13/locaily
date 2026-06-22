@@ -6,6 +6,20 @@ First workflow plan executed through Local Brain track-based orchestration.
 **Track id:** `website_audit.lighthouse_handoff`  
 **Track file:** `companion/pit-crew/tracks/lighthouse-handoff.track.json`
 
+## JSON Pipeline Stages
+
+| Stage | Step | Output type |
+|---|---|---|
+| Normalize | `extract_metrics` | JSON metrics object |
+| Extract issues | `classify_issues` | JSON classified issues |
+| Prioritize | `prioritize_fixes` | JSON priority fixes |
+| Validate priorities | `validate_priority_fixes` | JSON validation result |
+| Match fixes | `match_fixes` | JSON matched mappings |
+| Export | `write_handoff` | JSON handoff object + Markdown export |
+| Final validation | `verify_output` | JSON `{ valid, errors }` |
+
+Markdown is generated at the **export** stage from prior JSON artifacts. See [../01-architecture/json-first-internal-format.md](../01-architecture/json-first-internal-format.md).
+
 ## Request
 
 ```json
@@ -39,7 +53,7 @@ First workflow plan executed through Local Brain track-based orchestration.
 | `prioritize_fixes` | model role `priority_helper` | Rank fixes for developers |
 | `validate_priority_fixes` | tool `lighthouse.validate_priority_fixes` | Schema/shape guard for priorities |
 | `match_fixes` | tool `lighthouse.match_fixes` | Match fixes to classified issues |
-| `write_handoff` | tool `lighthouse-handoff` / `compose-handoff` | Assemble handoff object + markdown |
+| `write_handoff` | tool `lighthouse-handoff` / `compose-handoff` | Assemble JSON handoff object + render Markdown export |
 | `verify_output` | tool `lighthouse.verify_handoff` | Final structural verification |
 
 Each step declares `input_map` in the track file. The run plan surfaces those maps as `required_input`.
@@ -61,7 +75,7 @@ Each step declares `input_map` in the track file. The run plan surfaces those ma
 - `priorityFixes`
 - `handoffChecklist`
 - `estimatedImpact`
-- `markdown`
+- `markdown` (export — rendered from structured JSON)
 - `meta.verification`
 
 Output schema: `companion/schemas/lighthouse-handoff.schema.json`

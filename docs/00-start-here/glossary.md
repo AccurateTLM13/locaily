@@ -12,9 +12,11 @@ Legacy aliases still appearing in some repo files: Local AI Platform, Local AI E
 
 ### Local Brain **(working name)**
 
-Coordinator / orchestrator layer. Owns API, routing, permissions, validation, audit, and provider/model role resolution.
+Coordinator / orchestrator layer. Owns API, routing, permissions, validation, audit, and provider/model role resolution. **Internal operating format: JSON.** Markdown is reserved for exports and documentation.
 
 **Code mapping today:** `companion/server.js`, `companion/core/*`.
+
+See [../01-architecture/json-first-internal-format.md](../01-architecture/json-first-internal-format.md).
 
 ### NearbyNode
 
@@ -78,7 +80,15 @@ End-to-end user-facing flow spanning client, Local Brain, tools, and optional Ne
 
 ### Validator
 
-Component that checks outputs against schemas, confidence rules, or safety policies. See `companion/core/result-validator.js`.
+Component that checks outputs against schemas, confidence rules, or safety policies. Returns **JSON** validation results (`valid`, `errors`). See `companion/core/result-validator.js` and `companion/schemas/internal/validation-result.schema.json`.
+
+### JSON-First Internal Format
+
+Architecture decision: Local Brain orchestration state (plans, tracks, artifacts, validation, audit) is JSON. Markdown is an export/rendering layer for human-facing output — not the orchestration source of truth.
+
+### Markdown Export
+
+Human- or agent-readable report rendered from validated JSON state (e.g. Lighthouse Handoff `markdown` field). Distinct from internal orchestration artifacts.
 
 ## Runtime Terms
 
