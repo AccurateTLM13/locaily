@@ -1,6 +1,8 @@
 # Internal JSON Schemas
 
-Canonical JSON Schema files for Local Brain internal state. These document the **target operating format**; not every schema is validated by runtime code yet.
+Canonical JSON Schema files for Local Brain internal state. These document the **target operating format**; runtime enforcement status is listed per schema below.
+
+**Integration summary:** [../04-validation/json-first-runtime-integration.md](../04-validation/json-first-runtime-integration.md)
 
 **Location:** `companion/schemas/internal/`
 
@@ -9,7 +11,7 @@ Canonical JSON Schema files for Local Brain internal state. These document the *
 | Schema | File | Runtime validation | Description |
 |---|---|---|---|
 | Workflow plan | [workflow-plan.schema.json](../../companion/schemas/internal/workflow-plan.schema.json) | **Runtime-enforced at build** — `validateBuiltRunPlan()` in `run-plan-builder.js` after `buildRunPlan()` | Run plan from `POST /workflows/plan` and `/workflows/run` |
-| Task track | [task-track.schema.json](../../companion/schemas/internal/task-track.schema.json) | **Runtime-enforced at load** — `validateLoadedTrackFile()` in `decomposer.js` when track files are loaded | Track definition files under `companion/pit-crew/tracks/` |
+| Task track | [task-track.schema.json](../../companion/schemas/internal/task-track.schema.json) | **Runtime-enforced at load** — `validateLoadedTrackFile()` in `companion/pit-crew/decomposer.js` when track files are loaded | Track definition files under `companion/pit-crew/tracks/` |
 | Tool pack manifest | [tool-pack-manifest.schema.json](../../companion/schemas/internal/tool-pack-manifest.schema.json) | **Runtime-enforced at load** — `validateLoadedToolPackManifest()` in `loadToolPack()`; `$defs.manifestTool` loaded from [tool-pack-manifest-tool.schema.json](../../companion/schemas/internal/tool-pack-manifest-tool.schema.json) | Pack root manifest |
 | Tool pack manifest tool | [tool-pack-manifest-tool.schema.json](../../companion/schemas/internal/tool-pack-manifest-tool.schema.json) | **Runtime-enforced at load** — validated via root manifest `$ref` to `#/$defs/manifestTool` | Pre-registration tool declaration |
 | Internal registry entry | [internal-tool-registry-entry.schema.json](../../companion/schemas/internal/internal-tool-registry-entry.schema.json) | **Runtime-enforced at registration** — `validateInternalToolRegistryEntry()` in `registerTool()` validates `toInternalToolRegistryMetadata()` snapshot (excludes `handle`, `validateInput`) | camelCase in-process registry object |
@@ -24,7 +26,7 @@ Canonical JSON Schema files for Local Brain internal state. These document the *
 | Run log / audit record | [run-log-audit-record.schema.json](../../companion/schemas/internal/run-log-audit-record.schema.json) | **Runtime-enforced at write** — `validateAuditRecord()` in `appendAuditRecord()` before JSONL append; applies to **newly written records only** | Summary-only audit JSONL event |
 | Final output manifest | [final-output-manifest.schema.json](../../companion/schemas/internal/final-output-manifest.schema.json) | **Spec only** — runtime emits flat handoff + `markdown`, not manifest wrapper | Target export contract; not current API shape |
 
-**Validation contracts:** [../04-validation/validation-result-contract-audit.md](../04-validation/validation-result-contract-audit.md) · **Audit:** [../04-validation/json-first-schema-audit.md](../04-validation/json-first-schema-audit.md) · **Tool metadata:** [../04-validation/tool-metadata-contract-audit.md](../04-validation/tool-metadata-contract-audit.md)
+**See also:** [validation-result-contract-audit.md](../04-validation/validation-result-contract-audit.md) · [json-first-schema-audit.md](../04-validation/json-first-schema-audit.md) · [tool-metadata-contract-audit.md](../04-validation/tool-metadata-contract-audit.md)
 
 ## Usage Rules
 

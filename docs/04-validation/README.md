@@ -4,6 +4,7 @@ Evidence records for Locaily **tracks** and **workflows**.
 
 | Document | Scope |
 |----------|-------|
+| [json-first-runtime-integration.md](./json-first-runtime-integration.md) | **Integration branch** — enforcement matrix, ancestry, combined test commands |
 | [json-first-schema-audit.md](./json-first-schema-audit.md) | Gap analysis: internal JSON schemas vs runtime enforcement |
 | [validation-result-contract-audit.md](./validation-result-contract-audit.md) | Validation contract inventory — workflow verification vs engine checks vs content review |
 | [validation-strategy.md](./validation-strategy.md) | How we validate (tiers, good/bad claims) |

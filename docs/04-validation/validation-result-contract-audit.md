@@ -266,23 +266,27 @@ Rename concept references from generic "validation result" to the specific contr
 | **Deprecated** | `validation-result.schema.json` — alias doc only; points to workflow verification |
 | **Updated** | `final-output-manifest.schema.json` — `$ref` now targets workflow verification schema |
 
-No runtime enforcement added in this pass.
+| **Added** | Runtime enforcement in `validateStepOutput()` for designated verification steps |
+| **Updated** | `lighthouse-handoff.track.json` — explicit `verification_step: verify_output` |
+
+Runtime enforcement for workflow verification at the step gate: **done (2026-06-20)**. Other validation contracts remain contract-test-only.
 
 ---
 
 ## Safest Next Enforcement Boundary
 
-**Recommended first step:** contract-test verification tool outputs and `meta.verification` embeddings against `workflow-verification-result.schema.json`.
+Workflow verification runtime enforcement at the step gate is **done (2026-06-20)**.
 
 | Priority | Boundary | Risk | Why |
 |---|---|---|---|
-| **1 (recommended)** | Contract test `{ valid, errors }` producers (`verify_handoff`, `validate-analysis`, `text.validate_schema`) | Low | Shapes already stable; matches existing tool-pack output schemas |
-| **2** | Optional runtime in `validateStepOutput()` when `step_id` is `verify_output` or `validate_analysis` | Low | Adds schema check to existing imperative gate; should not change behavior if producers stay compliant |
-| **3** | Contract test `validate_priority_fixes` against `priority-fix-review-result.schema.json` | Low | Documents content-review contract separately |
-| **Defer** | Runtime-enforce `engine-schema-validation-result` at `validateResult()` return | Medium | Touches every caller; high blast radius for low immediate value |
-| **Defer** | Rename track step `validate_priority_fixes` | High | Track JSON + docs + input_map breaking change |
+| ~~**1**~~ | Contract test `{ valid, errors }` producers | — | **Done** — `scripts/validation-result-contract-test.js` |
+| ~~**2**~~ | Runtime in `validateStepOutput()` for designated verification steps | — | **Done (2026-06-20)** — `validateWorkflowVerificationOutput()` |
+| **1 (recommended)** | Contract test `validate_priority_fixes` against `priority-fix-review-result.schema.json` | Low | Separate content-review contract |
+| **2** | Validate `toPublicToolMetadata()` output | Low | Protects `/tools` contract |
+| **Defer** | Runtime-enforce `engine-schema-validation-result` at `validateResult()` return | Medium | High blast radius |
+| **Defer** | Rename track step `validate_priority_fixes` | High | Breaking track JSON change |
 
-Do **not** mark any validation schema runtime-enforced until production code loads and applies it.
+Only `workflow-verification-result.schema.json` is runtime-enforced in production for this contract family.
 
 ---
 

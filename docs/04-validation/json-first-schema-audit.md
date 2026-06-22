@@ -5,11 +5,13 @@
 
 ## Executive Summary
 
-Five of eight internal JSON schemas remain **documentation-only**. **`workflow-plan.schema.json`**, **`task-track.schema.json`**, tool metadata schemas, and **`run-log-audit-record.schema.json`** are **runtime-enforced** at build/load/registration/write boundaries.
+Seven internal schemas are **runtime-enforced** at documented production boundaries. Four remain **spec-only or contract-test-only** (`public-tool-metadata`, `model-registry-entry`, `nearby-node-capability`, `final-output-manifest`). Validation contract helper schemas document additional shapes without separate runtime gates.
 
-JSON objects are produced throughout the stack. Enforcement uses **`validateResult()`** (now with `$ref` / `minItems` support for workflow plans), **imperative checks**, and **workflow-specific schemas** (`companion/schemas/`, `companion/pit-crew/schemas/`, `tool-packs/*/schemas/`).
+**Integration branch:** [json-first-runtime-integration.md](./json-first-runtime-integration.md) — full enforcement matrix and test commands.
 
-**Safest next implementation step:** contract-test workflow verification outputs — see [validation-result-contract-audit.md](./validation-result-contract-audit.md).
+JSON objects are produced throughout the stack. Enforcement uses **`validateResult()`** (with `$ref` / `minItems` / `oneOf` support), **imperative checks**, and **workflow-specific schemas** (`companion/schemas/`, `companion/pit-crew/schemas/`, `tool-packs/*/schemas/`).
+
+**Safest next implementation step:** validate `toPublicToolMetadata()` output before optional runtime in `listPublic()`, or contract-test intermediate step artifacts on `/workflows/run`.
 
 ---
 
@@ -17,7 +19,7 @@ JSON objects are produced throughout the stack. Enforcement uses **`validateResu
 
 | Finding | Detail |
 |---|---|
-| Internal schemas referenced in code | **`workflow-plan.schema.json`** in `run-plan-builder.js`; **`task-track.schema.json`** in `decomposer.js`; **`tool-pack-manifest*.schema.json`** and **`internal-tool-registry-entry.schema.json`** in `registry.js`; **`run-log-audit-record.schema.json`** in `audit-log.js`; other internal schemas not yet wired |
+| Internal schemas referenced in code | **`workflow-plan.schema.json`** in `run-plan-builder.js`; **`task-track.schema.json`** in `companion/pit-crew/decomposer.js`; **`tool-pack-manifest*.schema.json`** and **`internal-tool-registry-entry.schema.json`** in `registry.js`; **`run-log-audit-record.schema.json`** in `audit-log.js`; **`workflow-verification-result.schema.json`** in `run-plan-validator.js`; spec-only schemas not yet wired |
 | Shared validator | `companion/core/result-validator.js` — supports `$ref`, `minItems`, `oneOf`, `const`, `additionalProperties: false` |
 | `/tracks/run` vs `/workflows/run` | Workflow path adds per-step validation in `run-plan-validator.js`; direct track path does not validate intermediate tool outputs |
 | Lighthouse pipeline | JSON artifacts are real; `final-output-manifest` wrapper is **not** emitted; result is a flat handoff object + `markdown` + `meta.verification` |
@@ -71,7 +73,7 @@ Manifest and internal registry schemas are **runtime-enforced** at load/registra
 
 **Parse vs schema errors:** JSON syntax → `TOOL_PACK_MANIFEST_PARSE_INVALID`; schema shape → `TOOL_PACK_MANIFEST_INVALID`. Internal registry → `INTERNAL_TOOL_REGISTRY_ENTRY_INVALID`.
 
-**Recommended next enforcement boundary:** audit JSONL contract tests, or `toPublicToolMetadata()` output validation.
+**Recommended next enforcement boundary:** `toPublicToolMetadata()` output validation. Audit JSONL and workflow verification step-gate enforcement are **done (2026-06-20)**.
 
 ---
 
@@ -175,7 +177,7 @@ Contract tests: `scripts/validation-result-contract-test.js`
 
 ## Safest Next Implementation Step
 
-**Contract-test workflow verification outputs** — see [validation-result-contract-audit.md](./validation-result-contract-audit.md). Audit JSONL write validation is done.
+JSON-first runtime enforcement for documented boundaries is **integrated** — see [json-first-runtime-integration.md](./json-first-runtime-integration.md).
 
 | Priority | Action | Risk | Why |
 |---|---|---|---|
