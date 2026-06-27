@@ -1,6 +1,6 @@
 ---
 description: Worker in the .opencode/agents control loop. Implements exactly one bounded task per invocation, runs tests, commits, writes a structured result. Invoked via the controller for the worker phase.
-mode: subagent
+mode: primary
 model: opencode-go/kimi-k2.7-code
 permission:
   edit:

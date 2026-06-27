@@ -271,25 +271,32 @@ function runCli(phase, prompt, cfg) {
 
 // ---------- reconciliation ----------
 
-function reconcileAfterPlan(state, cfg, cliOk) {
+function reconcileAfterPlan(state, cfg, cliOk, prevTaskText) {
   if (!cliOk) {
     state.consecutive_failures += 1;
     state.blocker = `plan_cli_failed`;
     return state;
   }
   const taskText = readText(ACTIVE_TASK_PATH);
-  if (!taskText || taskText.length < 20 || !/##\s*Objective/i.test(taskText)) {
+  const changed = taskText !== prevTaskText;
+  const looksReal = !!taskText
+    && taskText.length >= 20
+    && !/\(pending/i.test(taskText)
+    && /##\s*Objective/i.test(taskText)
+    && /##\s*Acceptance Criteria/i.test(taskText);
+  if (!changed || !looksReal) {
     state.consecutive_failures += 1;
-    state.blocker = `plan_artifact_missing`;
+    state.blocker = `plan_artifact_${!changed ? "unchanged" : "invalid_or_placeholder"}`;
     return state;
   }
   const objMatch = taskText.match(/##\s*Objective\s*\n+\s*(.+)/i);
   let id = state.current_task;
   if (objMatch) {
     const slug = objMatch[1].trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 60);
-    if (slug) id = slug;
+    if (slug && slug !== "pending-first-plan") id = slug;
   }
-  state.current_task = id || `task-${state.iteration}`;
+  if (!id || id === "pending-first-plan") id = `task-${state.iteration}`;
+  state.current_task = id;
   state.phase = "worker";
   state.last_worker_status = "pending";
   snapshotHistory("plan", state, null);
@@ -452,12 +459,13 @@ function main() {
       }
 
       const phase = state.phase || "plan";
+      const prevTaskText = phase === "plan" ? readText(ACTIVE_TASK_PATH) : null;
       clearArtifacts();
       const res = runCli(phase, phase === "worker" ? renderWorkerPrompt(state) : renderSupervisorPrompt(state, phase), cfg);
       const ok = res.ok;
       if (cfg.loop.seconds_between_steps) sleep((cfg.loop.seconds_between_steps || 1) * 1000);
 
-      if (phase === "plan") state = reconcileAfterPlan(state, cfg, ok);
+      if (phase === "plan") state = reconcileAfterPlan(state, cfg, ok, prevTaskText);
       else if (phase === "worker") state = reconcileAfterWorker(state, cfg, ok);
       else if (phase === "review") state = reconcileAfterReview(state, cfg, ok);
 

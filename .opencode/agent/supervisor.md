@@ -1,6 +1,6 @@
 ---
 description: Supervisor in the .opencode/agents control loop. Directs and reviews work; only writes files under .opencode/agents/. Invoked via the controller for plan/review phases.
-mode: subagent
+mode: primary
 model: opencode-go/kimi-k2.7-code
 permission:
   edit:
