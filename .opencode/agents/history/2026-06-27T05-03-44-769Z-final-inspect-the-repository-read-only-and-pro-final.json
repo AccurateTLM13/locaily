@@ -1,0 +1,23 @@
+{
+  "run_id": "1bdb6ee7fd14",
+  "iteration": 0,
+  "phase": "final",
+  "state": {
+    "objective": "controller-validation",
+    "status": "running",
+    "phase": "plan",
+    "iteration": 0,
+    "corrections_for_task": 1,
+    "consecutive_failures": 2,
+    "max_iterations": 3,
+    "max_corrections_per_task": 2,
+    "max_consecutive_failures": 2,
+    "current_task": "inspect-the-repository-read-only-and-produce-a-short-structu",
+    "worker_branch": "agents/worker/controller-validation",
+    "last_worker_status": "complete",
+    "last_review_status": "rejected",
+    "objective_complete": false,
+    "blocker": "plan_artifact_unchanged",
+    "run_id": "1bdb6ee7fd14"
+  }
+}

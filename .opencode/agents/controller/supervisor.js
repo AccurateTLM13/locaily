@@ -173,10 +173,19 @@ function detectForbiddenForceOrMerge(ref) {
 
 // ---------- artifact freshness ----------
 
-function clearArtifacts() {
-  // Prevent stale reuse between iterations.
-  try { fs.writeFileSync(REVIEW_PATH, JSON.stringify({ stale: true, task: null, iteration: -1, run_id: null }, null, 2) + "\n"); } catch {}
-  try { fs.writeFileSync(WORKER_RESULT_PATH, JSON.stringify({ stale: true, task: null, iteration: -1, run_id: null }, null, 2) + "\n"); } catch {}
+function clearArtifacts(phase) {
+  // Only clear the artifact the UPCOMING phase will REWRITE. Never wipe an
+  // artifact a phase must READ as input:
+  //   worker reads: tasks/active-task.md, state/run-state.json
+  //   review reads: state/latest-worker-result.json  <-- must NOT be wiped
+  //   plan   reads: state/latest-review.json         <-- must NOT be wiped on re-plan
+  const stale = { stale: true, task: null, iteration: -1, run_id: null, task_id: null, created_at: null };
+  if (phase === "worker") {
+    try { fs.writeFileSync(WORKER_RESULT_PATH, JSON.stringify({ ...stale }, null, 2) + "\n"); } catch {}
+  } else if (phase === "review") {
+    try { fs.writeFileSync(REVIEW_PATH, JSON.stringify({ ...stale }, null, 2) + "\n"); } catch {}
+  }
+  // plan: clear nothing (it writes active-task.md; unchanged is detected via prevTaskText)
 }
 function freshArtifact(art, expectedRunId, expectedIteration, expectedTask, label) {
   if (!art || art.stale) throw new ArtifactError("missing_artifact", `${label}: no artifact written`);
@@ -219,12 +228,14 @@ function renderSupervisorPrompt(state, phase) {
   const objective = readText(OBJECTIVE_PATH);
   const activeTask = readText(ACTIVE_TASK_PATH);
   const workerResult = phase === "review" ? JSON.stringify(readJson(WORKER_RESULT_PATH, {}), null, 2) : "(plan phase: no worker result yet)";
+  const review = (phase === "plan" && state.last_review_status === "rejected") ? JSON.stringify(readJson(REVIEW_PATH, {}), null, 2) : "(no prior rejection this task)";
   return tmpl
     .replace("{{PHASE}}", phase)
     .replace("{{RUN_STATE}}", JSON.stringify(state, null, 2))
     .replace("{{OBJECTIVE}}", objective.trim())
     .replace("{{ACTIVE_TASK}}", activeTask.trim())
     .replace("{{WORKER_RESULT}}", workerResult)
+    .replace("{{LAST_REVIEW}}", review)
     .replace("{{RUN_ID}}", state.run_id || "")
     .replace("{{ITERATION}}", String(state.iteration));
 }
@@ -379,6 +390,7 @@ function reconcileAfterReview(state, cfg, cliOk) {
   if (accepted) {
     state.iteration += 1;
     state.corrections_for_task = 0;
+    state.consecutive_failures = 0;
     state.last_worker_status = "idle";
   } else {
     state.consecutive_failures = state.consecutive_failures + 1;
@@ -464,7 +476,7 @@ function main() {
 
       const phase = state.phase || "plan";
       const prevTaskText = phase === "plan" ? readText(ACTIVE_TASK_PATH) : null;
-      clearArtifacts();
+      clearArtifacts(phase);
       const res = runCli(phase, phase === "worker" ? renderWorkerPrompt(state) : renderSupervisorPrompt(state, phase), cfg);
       const ok = res.ok;
       if (cfg.loop.seconds_between_steps) sleep((cfg.loop.seconds_between_steps || 1) * 1000);
