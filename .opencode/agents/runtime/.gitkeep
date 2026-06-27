@@ -1,0 +1,2 @@
+# Runtime scratch. transient artifacts, ignored by git.
+# Per-step captures that are too noisy to commit go here.

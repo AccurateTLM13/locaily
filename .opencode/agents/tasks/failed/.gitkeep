@@ -1,0 +1,2 @@
+# Failed/rejected tasks archive. Supervisor moves task records here on
+# rejection as <task-id>.md (with the correction captured in latest-review.json).

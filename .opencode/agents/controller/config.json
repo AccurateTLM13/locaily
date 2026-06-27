@@ -1,0 +1,41 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "cli": {
+    "executable": "opencode",
+    "args": ["run"],
+    "extra_args": [],
+    "timeout_ms": 600000
+  },
+  "agents": {
+    "supervisor": {
+      "agent": "supervisor",
+      "model": "opencode-go/kimi-k2.7-code"
+    },
+    "worker": {
+      "agent": "worker",
+      "model": "opencode-go/kimi-k2.7-code"
+    }
+  },
+  "loop": {
+    "max_iterations": 3,
+    "max_corrections_per_task": 2,
+    "max_consecutive_failures": 2,
+    "stop_on_blocker": true,
+    "seconds_between_steps": 1
+  },
+  "git": {
+    "protected_branches": ["main", "master"],
+    "worker_branch_prefix": "agents/worker",
+    "stop_on_dirty_startup": true,
+    "max_diff_files": 40,
+    "max_diff_lines": 2000,
+    "forbidden_worker_paths": [
+      ".opencode/agents/**",
+      "docs/06-decisions/decision-log.md"
+    ]
+  },
+  "paths": {
+    "root": "..",
+    "agents_dir": "."
+  }
+}

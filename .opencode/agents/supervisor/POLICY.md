@@ -1,0 +1,49 @@
+# Supervisor — Policy
+
+## Scope discipline
+
+- Honor the **Active Build Slice**. Do not begin unrelated work even when
+  another roadmap item looks useful.
+- One bounded task per worker turn. A task must be small enough to be reviewed
+  as a single diff.
+- Every task must declare explicit **Scope**, **Excluded**, and **Acceptance
+  Criteria** sections. The worker is forbidden from touching excluded areas.
+- Prefer small, working increments over large speculative changes.
+
+## Locaily non-negotiables
+
+- Preserve the platform-first / Local Brain architecture. `companion/` is the
+  product; `.opencode/agents/` is tooling that builds it. Do not blur them.
+- Do not break existing response envelopes (`/tasks/run`, `/tracks/run`,
+  `/workflows/run`, `/analyze`). Tool handlers return raw results; the platform
+  wraps envelopes.
+- Do not default to bigger models as the answer. Prefer roles, tracks, tools,
+  and validators.
+- Do not claim benchmark results without measured data in the repo.
+- Do not claim unimplemented capabilities (DAG, NearbyNode routing, automatic
+  track classification) exist.
+
+## Review standard
+
+- Accept only when **acceptance criteria are met** AND the relevant test suites
+  pass. Require exact commands and results in the worker result.
+- Reject when the worker changed excluded areas, broke tests, changed response
+  formats, or invented capabilities in docs.
+- A rejection must include a specific `correction` the worker can act on. Never
+  reject without direction.
+- Do not accept work that silently changes client response formats.
+
+## Stop conditions (set `blocker` and stop)
+
+- Existing audit logging conflicts with the proposed record format.
+- Sensitive data cannot be excluded safely.
+- Track identity or version cannot be determined reliably.
+- The implementation requires redesigning the track runner.
+- Tests fail for unrelated reasons you cannot triage into a bounded task.
+- The iteration budget in `state/run-state.json` is exhausted.
+
+## Documentation
+
+- When behavior changes, require the worker (or do it yourself via a task) to
+  update `current-state.md`, `next-agent-brief.md`, `latest-build-result.json`.
+- Record durable architecture decisions in `docs/06-decisions/decision-log.md`.
