@@ -48,12 +48,12 @@ if (workerAgent && workerAgent !== "build") args.push("--agent", workerAgent);
 if (worker.model) args.push("-m", worker.model);
 args.push("--dangerously-skip-permissions");
 if (cli.extra_args && cli.extra_args.length) args.push(...cli.extra_args);
-args.push(prompt);
-
-console.error("[worker-runner] launching:", cli.executable, args.filter((a) => a !== prompt).join(" "), "<prompt>");
+// Pass multi-line prompt via stdin (see supervisor.js for rationale).
+console.error("[worker-runner] launching:", cli.executable, args.join(" "), "<prompt-via-stdin>");
 const result = spawnSync(cli.executable, args, {
   cwd: PROJECT_ROOT, encoding: "utf8",
   maxBuffer: 1024 * 1024 * 64, timeout: cli.timeout_ms || 600000,
+  input: prompt,
   shell: process.platform === "win32"
 });
 fs.writeFileSync(logFile, `# worker-standalone ${new Date().toISOString()}\nexit: ${result.status}\n\nstderr:\n${result.stderr || ""}\n\nstdout:\n${result.stdout || ""}\n`);

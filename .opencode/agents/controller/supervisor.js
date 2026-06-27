@@ -249,15 +249,19 @@ function runCli(phase, prompt, cfg) {
   if (who.model) args.push("-m", who.model);
   args.push("--dangerously-skip-permissions");
   if (cfg.cli.extra_args && cfg.cli.extra_args.length) args.push(...cfg.cli.extra_args);
-  args.push(prompt);
+  // Pass the (multi-line) prompt via stdin, not as a positional arg: Windows
+  // cmd.exe splits embedded newlines into separate commands, mangling markdown
+  // prompts. opencode `run` reads the message from stdin when no positional is
+  // given, which preserves newlines faithfully.
 
   const timeoutMs = cfg.cli.timeout_ms || 600000;
-  console.error(`\n[controller] phase=${phase} launching ${cfg.cli.executable} ${args.filter((a) => a !== prompt).join(" ")} <prompt> (timeout ${timeoutMs}ms)`);
+  console.error(`\n[controller] phase=${phase} launching ${cfg.cli.executable} ${args.join(" ")} <prompt-via-stdin> (timeout ${timeoutMs}ms)`);
   const started = Date.now();
   const result = spawnSync(cfg.cli.executable, args, {
     cwd: PROJECT_ROOT, encoding: "utf8",
     maxBuffer: 1024 * 1024 * 64,
     timeout: timeoutMs,
+    input: prompt,
     shell: process.platform === "win32"
   });
   const elapsed = Date.now() - started;
