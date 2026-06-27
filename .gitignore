@@ -54,3 +54,13 @@ benchmark-lab/.tmp/
 benchmark-lab/**/*.trace
 benchmark-lab/**/*.ndjson
 !benchmark-lab/evidence/approved/**/*.ndjson
+
+# LocAIly runtime evidence
+companion/evidence/records/*.json
+companion/evidence/lessons/*.json
+
+# Preserve directory placeholders and sanitized fixtures
+!companion/evidence/records/.gitkeep
+!companion/evidence/lessons/.gitkeep
+!companion/evidence/records/fixtures/
+!companion/evidence/lessons/fixtures/

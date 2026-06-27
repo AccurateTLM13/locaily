@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "build_slice": "canonical-track-run-records",
+  "status": "not_started",
+  "branch": null,
+  "commit": null,
+  "objective": "Create the canonical evidence record emitted by every track execution.",
+  "files_changed": [],
+  "validation": {
+    "passed": false,
+    "commands": [],
+    "results": []
+  },
+  "acceptance_criteria": {
+    "passed": [],
+    "failed": [],
+    "not_tested": []
+  },
+  "decisions": [],
+  "known_gaps": [],
+  "blockers": [],
+  "scope_changes": [],
+  "recommended_next_slice": null,
+  "updated_at": null
+}
