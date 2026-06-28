@@ -1,5 +1,33 @@
 # Decision Log
 
+## 2026-06-27 - North Star Local Capability Network
+
+### Decision
+
+Document Locaily's North Star as a local capability network: Local Brain decomposes work into track contracts, routes each track to the smallest qualified capability, validates outputs, and records structured evidence for future routing and track design.
+
+### Why
+
+The June 2026 direction document clarified that Locaily is not a model launcher, single chatbot, or generic agent framework. It is a local-first orchestration system where devices, tools, models, validators, scripts, and future nodes are treated as capabilities under track contracts and policy.
+
+### Consequences
+
+- Added [north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md) as the durable summary.
+- The current evidence-record slice is framed as the first step toward the compounding evidence loop.
+- NearbyNode remains future local capability dispatch, not implemented behavior.
+- RelayNode is recorded as a future approved remote execution target, not a control plane.
+- New docs should avoid hardware, model, node, or provider additions unless they name the track need, qualification method, and evidence required.
+
+### Status
+
+Accepted direction; implementation remains incremental.
+
+### Notes
+
+Source: attached project direction document, "LocAIly North Star", June 2026.
+
+---
+
 ## 2026-06-20 — JSON-First Internal Operating Format
 
 ### Decision

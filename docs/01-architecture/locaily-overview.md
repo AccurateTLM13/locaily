@@ -4,6 +4,8 @@
 
 High-level map of the Locaily stack and how the pieces relate. For component detail see the linked architecture docs.
 
+The long-term North Star is a **local capability network**: Local Brain decomposes work into track contracts, routes each track to the smallest qualified capability, validates outputs, and records evidence that improves future routing and track design. See [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md).
+
 ## Operating Format
 
 ```txt
@@ -55,6 +57,22 @@ Client (JSON request)
   → [optional] Markdown export layer (e.g. Lighthouse handoff)
 ```
 
+## Target Architecture Spine
+
+```txt
+User Task
+  -> Workflow Contract
+  -> Task Decomposer
+  -> Track Router
+  -> Qualified Worker
+  -> Validation
+  -> Output Assembly
+  -> Final Validation
+  -> Result + Evidence Record
+```
+
+Only part of this spine is implemented today. Current code supports explicit workflow/track execution, model roles, provider routing, tool routing, validation, audit summaries, Benchmark Lab qualification scaffolding, and Memory Bridge v0. Automatic task decomposition, DAG planning, NearbyNode dispatch, RelayNode dispatch, and adaptive routing are future work.
+
 ## What Lives Where
 
 | Layer | Owns | Does not own |
@@ -62,8 +80,15 @@ Client (JSON request)
 | Local Brain | API, security gates, routing, envelopes, audit | Extension UI, pack business logic |
 | Tool Pack | Tool definitions, schemas, prompts | Server lifecycle |
 | Workflow | Track steps, handoff format | Global provider config |
-| NearbyNode (future) | Device connectors, local capabilities | Central model policy |
+| NearbyNode (future) | Device connectors, advertised capabilities, health, availability | Central routing authority |
+| RelayNode (future) | Approved remote execution capacity | Control plane ownership |
 | Client | Capture input, display results | Direct model calls |
+
+## Routing Principle
+
+Tracks request capabilities, not permanent model names. A mature router should ask whether a worker is qualified, available, appropriate for privacy/latency/context/tool constraints, and efficient enough to be the smallest practical option that satisfies the contract.
+
+Current implementation uses model roles and qualification-record loading as the narrow runtime surface. A unified capability registry, worker registry, node scheduler, and automatic model swapping are not built.
 
 ## Implemented Repo Layout
 

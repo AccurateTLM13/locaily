@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-06-26
+**Updated:** 2026-06-27
 
 ## Read First
 
@@ -10,20 +10,23 @@ Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 2. [milestone-5-checkpoint.md](./milestone-5-checkpoint.md) - M5 Benchmark Lab checkpoint
 3. [build-status.md](./build-status.md)
 4. [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md)
+5. [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md)
 
 Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../08-agents/agent-context.md)
 
 ## Current Task
 
-Milestone 5 is active and scoped to Benchmark Lab.
+The active build slice is Canonical Track Run Records, the first Track Learning Evidence Loop slice.
 
 Primary work:
 
-1. Keep Benchmark Lab in-repo while its evidence and qualification records are coupled to Locaily track/model-role contracts.
-2. Keep runtime integration narrow: Local Brain may read compact qualification records and approved evidence, but must not import `benchmark-lab/engine/`.
-3. Validate qualification records before model routing consumes them.
-4. Preserve `/tasks/run`, `/tracks/run`, and `/workflows/run` response envelopes.
-5. Re-run smoke, contract, schema, and Benchmark Lab tests after branch updates.
+1. Define a canonical track-run record schema.
+2. Emit a valid summary-safe record after successful and failed track executions.
+3. Record track version, steps, workers, validation results, retries, timing, and routing context without raw sensitive inputs/outputs by default.
+4. Support optional human correction records associated with existing runs.
+5. Prove Lighthouse Handoff and DealSniper produce valid evidence records.
+6. Preserve `/tasks/run`, `/tracks/run`, and `/workflows/run` response envelopes.
+7. Re-run relevant smoke, contract, schema, and track evidence tests after changes.
 
 ## Do Not
 
@@ -32,6 +35,7 @@ Primary work:
 - Claim DAG support, NearbyNode routing, or automatic track classification exists
 - Claim broad model benchmark wins from narrow fixture evidence
 - Break existing Local Brain endpoints or response envelopes
+- Implement RelayNode routing, hardware recommendations, or remote execution dispatch in this slice
 
 ## Follow-On After Benchmark Lab
 
@@ -49,11 +53,14 @@ Tools plug into tracks.
 Track JSON declares input_map for tool and model steps.
 Internal orchestration state is JSON; Markdown is export-only.
 Benchmark Lab produces evidence and qualification records.
+Canonical track-run records are the first evidence loop artifact.
 Local Brain consumes compact qualification records, not raw benchmark runs.
 NearbyNodes will provide track capabilities (future).
+RelayNodes are future approved remote execution targets, not control planes.
 Workflows compose tracks.
 Validation scores tracks.
 Local Brain dispatches tracks - not raw model names.
+Target routing principle: smallest qualified capability.
 ```
 
 ## Quick Code Map

@@ -1,25 +1,56 @@
 {
   "schema_version": "1.0.0",
   "build_slice": "canonical-track-run-records",
-  "status": "not_started",
-  "branch": null,
+  "status": "partial",
+  "branch": "codex/docs-north-star-capability-network",
   "commit": null,
   "objective": "Create the canonical evidence record emitted by every track execution.",
-  "files_changed": [],
+  "files_changed": [
+    "docs/00-start-here/north-star-local-capability-network.md",
+    "docs/00-start-here/README.md",
+    "docs/00-start-here/current-vision.md",
+    "docs/00-start-here/current-state.md",
+    "docs/00-start-here/glossary.md",
+    "docs/01-architecture/locaily-overview.md",
+    "docs/05-product/roadmap.md",
+    "docs/07-progress/active-build-slice.md",
+    "docs/07-progress/build-status.md",
+    "docs/07-progress/next-agent-brief.md",
+    "docs/07-progress/progress-log.md",
+    "docs/07-progress/latest-build-result.json",
+    "docs/06-decisions/decision-log.md"
+  ],
   "validation": {
-    "passed": false,
-    "commands": [],
-    "results": []
+    "passed": true,
+    "commands": [
+      "Get-Content -Raw docs/07-progress/latest-build-result.json | ConvertFrom-Json | Out-Null",
+      "rg \"north-star-local-capability-network|RelayNode|Smallest Qualified Capability|Canonical Track Run Records\" docs",
+      "PowerShell touched-doc markdown link check"
+    ],
+    "results": [
+      "latest-build-result.json parsed successfully.",
+      "North Star terms and links were found in the expected docs.",
+      "Touched-doc markdown links resolved successfully."
+    ]
   },
   "acceptance_criteria": {
     "passed": [],
     "failed": [],
-    "not_tested": []
+    "not_tested": [
+      "Canonical track-run record schema",
+      "Track-run record emission",
+      "Lighthouse Handoff evidence record production",
+      "DealSniper evidence record production"
+    ]
   },
-  "decisions": [],
+  "decisions": [
+    "North Star direction documented as local capability network and smallest-qualified-capability routing principle."
+  ],
   "known_gaps": [],
   "blockers": [],
-  "scope_changes": [],
-  "recommended_next_slice": null,
-  "updated_at": null
+  "scope_changes": [
+    "Docs-only update from June 2026 North Star document; no runtime behavior changed."
+  ],
+  "recommended_next_slice": "Implement canonical track-run record schema and emission.",
+  "updated_at": "2026-06-27"
 }

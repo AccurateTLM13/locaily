@@ -1,10 +1,12 @@
 # Build Status
 
-**Updated:** 2026-06-26
+**Updated:** 2026-06-27
 
 ## Current Stage
 
 Pipeline-stage **Local Brain** with **Pit Crew track runner**, JSON-first internal contracts, workflow orchestration, Memory Bridge v0, and Benchmark Lab evidence/qualification scaffolding.
+
+North Star direction is now documented as a local capability network: route track contracts to the smallest qualified capability, validate results, and preserve structured evidence for future routing and track improvement.
 
 ## Milestones
 
@@ -70,14 +72,15 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner**, JSON-first intern
 
 ## Current Priority
 
-**Now:** Land Milestone 5 Benchmark Lab with strict evidence boundaries. Runtime may consume compact qualification records and approved summaries, but must not import Benchmark Lab runner internals.
+**Now:** Build Canonical Track Run Records as the first Track Learning Evidence Loop slice. Records must stay summary-safe and must not store raw sensitive inputs or outputs by default.
 
-**Next:** Resume Lighthouse canonical-path and legacy step-input fallback hardening after Benchmark Lab acceptance.
+**Next:** Resume Lighthouse canonical-path and legacy step-input fallback hardening after the evidence-record slice lands.
 
 ## Evidence Pointers
 
 - M5 checkpoint: [milestone-5-checkpoint.md](./milestone-5-checkpoint.md)
 - Benchmark Lab architecture: [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md)
+- North Star: [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md)
 - M4 completion: [milestone-4-completion.md](./milestone-4-completion.md)
 - Pit Crew extraction: [../01-architecture/pit-crew-gap-analysis.md](../01-architecture/pit-crew-gap-analysis.md)
 - L2 Ollama + Memory: [../04-validation/l2-live-ollama-memory-bridge.md](../04-validation/l2-live-ollama-memory-bridge.md)

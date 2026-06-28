@@ -6,6 +6,8 @@ Build the first Track Learning Evidence Loop.
 
 A completed track run should produce structured evidence that can later help improve existing tracks and reduce the cost of creating new ones.
 
+This slice is the first implementation step toward the North Star evidence loop: `Run -> Observe -> Validate -> Record -> Compare -> Qualify -> Route Better -> Improve the Track`.
+
 ## Current Slice
 
 Canonical Track Run Records.
@@ -30,6 +32,8 @@ Canonical Track Run Records.
 - New showcase workflows
 - Major console redesign
 - Adapter training or model fine-tuning
+- RelayNode or remote execution routing
+- Hardware purchase recommendations
 
 ## Acceptance Criteria
 

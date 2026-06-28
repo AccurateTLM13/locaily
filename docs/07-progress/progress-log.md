@@ -4,6 +4,24 @@ Dated record of meaningful build and planning sessions.
 
 ---
 
+## 2026-06-27 - North Star Direction Added
+
+### Changed
+
+- Added `docs/00-start-here/north-star-local-capability-network.md` from the June 2026 project direction document.
+- Updated start-here, current vision, architecture overview, glossary, roadmap, build status, active slice, next-agent brief, current state, latest build result, and decision log to reflect the local capability network direction.
+- Framed Canonical Track Run Records as the first implementation step toward the compounding evidence loop.
+
+### Evidence
+
+- Docs-only change; runtime validation not required.
+
+### Next
+
+- Implement the canonical track-run record schema and emission path.
+
+---
+
 ## 2026-06-26 - Milestone 5 Accepted: Benchmark Lab
 
 ### Changed

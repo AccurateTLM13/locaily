@@ -44,9 +44,29 @@ Any callable ability the system can route to: model inference, deterministic tra
 
 **Principle:** device = capability; device ≠ model.
 
+### Smallest Qualified Capability
+
+Target routing rule: choose the least expensive model, tool, rule, validator, script, or node that consistently satisfies the track contract and policy constraints. This is a direction, not full automatic runtime behavior today.
+
 ### Capability Registry **(non-final)**
 
 Index of available capabilities across Local Brain and connected nodes. Today this is approximated by the tool registry and `/tools` endpoint.
+
+### Worker Registry **(non-final)**
+
+Future index of dispatchable workers: models, tools, scripts, rule engines, validators, and service endpoints. Today Locaily has model roles, tool manifests, provider routing, and Benchmark Lab qualification records, not a complete worker registry.
+
+### Qualification Registry **(non-final)**
+
+Future source of truth for which workers are approved for which tracks and under what tested conditions. Today this is represented by Benchmark Lab qualification records and runtime qualification-record loading.
+
+### Evidence Store **(non-final)**
+
+Structured run records used for regression, routing improvement, debugging, and system learning. The active build slice, Canonical Track Run Records, is the first step toward this.
+
+### RelayNode **(non-final)**
+
+Approved remote execution target for burst capacity, hosted models, scheduled automation, or external benchmarking. RelayNodes remain execution targets; Local Brain remains the control plane. Not implemented.
 
 ### Tool Pack
 
@@ -69,6 +89,8 @@ Component that runs multi-step workflows inside a track. Example: `companion/cor
 ### Task Track **(non-final)**
 
 A classified workflow type (e.g. website audit, marketplace analysis). Tracks decompose into steps with per-step model roles and tools.
+
+In the North Star direction, a track is an execution contract with inputs, outputs, required capabilities, permissions, validation rules, retry/fallback policy, and evidence requirements.
 
 ### Task Routing
 

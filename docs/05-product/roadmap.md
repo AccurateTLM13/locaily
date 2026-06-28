@@ -24,6 +24,14 @@ Practical sequencing for Locaily. **Dates omitted**—order reflects dependency,
 - [ ] Persistent provider / model role config across restarts
 - [ ] CORS policy (or MV3 background proxy pattern) for extension testing
 
+## Now - Track Learning Evidence Loop
+
+- [ ] Canonical track-run record schema
+- [ ] Emit a valid record after successful and failed track executions
+- [ ] Store summary-safe evidence without raw sensitive inputs or outputs by default
+- [ ] Associate optional human correction records with existing runs
+- [ ] Prove Lighthouse Handoff and DealSniper produce valid evidence records
+
 ## Now — Memory Bridge v0
 
 - [x] Architecture docs: memory-bridge, context-packs, memory-writeback
@@ -56,12 +64,20 @@ Practical sequencing for Locaily. **Dates omitted**—order reflects dependency,
 - [ ] Capability connector protocol
 - [ ] Device pairing and discovery
 - [ ] Delegate non-model capabilities to nearby devices
+- [ ] Capability advertisements with node health, availability, constraints, and evidence history
+- [ ] Two-computer proof: laptop and desktop registered as distinct nodes in one coordinated execution system
+
+## Future - RelayNode
+
+- [ ] Spec approved remote execution targets as policy-controlled execution capacity
+- [ ] Keep Local Brain as the control plane when remote execution is used
+- [ ] Require qualification, privacy policy, and evidence records before remote dispatch affects routing
 
 ## Explicitly Post-MVP / Research
 
 - Community tool marketplace
 - Voice/Mumble pack
-- Cloud fallback gateway
+- Cloud fallback gateway beyond explicit RelayNode experiments
 - Distributed local clusters
 - Memory embeddings / vector search
 - `POST /memory/writeback/apply`
