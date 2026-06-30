@@ -4,6 +4,27 @@ Dated record of meaningful build and planning sessions.
 
 ---
 
+## 2026-06-30 - Lighthouse Handoff HTTP Parity Extension
+
+### Changed
+
+- Extended `scripts/lighthouse-handoff-parity-test.js` to spawn Local Brain on a test port and assert behavioral parity for `POST /tracks/run` and `POST /workflows/run` using `slim-mobile.fixture.json` and the mock provider.
+- Added orchestrated-path alignment checks so workflow orchestration, track HTTP, and workflow HTTP produce the same priority-fix titles and checklist for the fixed fixture.
+- Added [next-human-steps.md](./next-human-steps.md) listing live Ollama, extension bridge, private vault, and legacy fallback removal as human-owned next lanes.
+
+### Evidence
+
+- `node scripts/lighthouse-handoff-parity-test.js` — PASS
+- `node scripts/contract-test.js` — PASS
+- `node scripts/orchestration-unit-test.js` — PASS
+
+### Next
+
+- Human review for legacy `step-input.js` fallback removal (parity now covers four Lighthouse paths).
+- Live Benchmark Lab Ollama suite or Chrome extension bridge (see next-human-steps.md).
+
+---
+
 ## 2026-06-26 - Milestone 5 Accepted: Benchmark Lab
 
 ### Changed
