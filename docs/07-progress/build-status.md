@@ -37,7 +37,7 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner**, JSON-first intern
 - Lighthouse proof track (7 steps)
 - DealSniper workflow track (3 steps)
 - Experimental Operator Log editorial tracks
-- Declarative step `input_map` (`input-map-resolver.js` + `step-input.js` for tool and model steps)
+- Declarative step `input_map` on all track steps (`input-map-resolver.js` + `step-input.js`)
 - Model roles + provider router (Ollama, mock)
 - Benchmark Lab schemas, mock run loop, evidence folders, reports, model cards, and qualification records
 - Qualification records schema-validated at `companion/core/model-qualification-loader.js`
@@ -54,7 +54,6 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner**, JSON-first intern
 - Scoreboard (records runs; no full rubric harness)
 - Memory Bridge (v0; compose preflight only on Lighthouse)
 - Fallback ladder (retry only)
-- Legacy `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` fallbacks for unmigrated steps
 - Validation console (early UI)
 
 ## Not Built
@@ -72,7 +71,7 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner**, JSON-first intern
 
 **Now:** Land Milestone 5 Benchmark Lab with strict evidence boundaries. Runtime may consume compact qualification records and approved summaries, but must not import Benchmark Lab runner internals.
 
-**Next:** Resume Lighthouse canonical-path and legacy step-input fallback hardening after Benchmark Lab acceptance.
+**Next:** Benchmark Lab live qualification depth, extension bridge, or Memory Bridge private vault validation.
 
 ## Evidence Pointers
 

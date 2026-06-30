@@ -256,7 +256,7 @@ Implemented:
 Next focus areas (see [docs/07-progress/milestone-map.md](docs/07-progress/milestone-map.md) and [docs/05-product/roadmap.md](docs/05-product/roadmap.md)):
 
 - **M5:** Benchmark Lab acceptance (schema-backed evidence, qualification records, read-only status)
-- Follow-on: remove legacy step-input fallbacks in `step-input.js` after Lighthouse path parity resumes
+- Follow-on: Lighthouse canonical-path documentation; workflow audit summary hardening
 - Model Garage evaluation harness (Phase 2 — spec only until evidence)
 - Harden Lighthouse Handoff validation end-to-end with the extension client
 - NearbyNode capability connectors (spec + prototype — not implementation yet)

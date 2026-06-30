@@ -4,6 +4,29 @@ Dated record of meaningful build and planning sessions.
 
 ---
 
+## 2026-06-30 - Lane D: Remove Legacy Step-Input Fallbacks
+
+### Changed
+
+- Removed `buildLegacyToolStepInput()` and `buildLegacyModelStepInput()` from `companion/pit-crew/step-input.js`; track steps without `input_map` now fail with `STEP_INPUT_MAP_MISSING`.
+- Removed deprecated `buildLegacyStepInput` re-export from `companion/pit-crew/tool-router.js`.
+- Removed `prioritize_fixes` broad-context prompt fallback from `companion/pit-crew/prompts.js`.
+- Updated `scripts/track-input-map-unit-test.js` to assert declarative mappings across all four catalog tracks without legacy comparisons.
+- Updated step-input and progress docs to reflect removal.
+
+### Evidence
+
+- `node scripts/track-input-map-unit-test.js` — PASS
+- `node scripts/lighthouse-handoff-parity-test.js` — PASS
+- `node scripts/contract-test.js` — PASS
+- `node scripts/orchestration-unit-test.js` — PASS
+
+### Next
+
+- Live Benchmark Lab Ollama suite, extension bridge, or private vault validation (see next-human-steps.md).
+
+---
+
 ## 2026-06-30 - Lighthouse Handoff HTTP Parity Extension
 
 ### Changed

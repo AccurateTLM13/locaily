@@ -28,7 +28,7 @@ Primary work:
 ## Do Not
 
 - Implement automatic model swapping / Model Garage auto-switching as part of M5
-- Remove legacy `step-input.js` fallbacks until Lighthouse parity work resumes
+- Remove legacy `step-input.js` fallbacks until Lighthouse parity work resumes — **done 2026-06-30**
 - Claim DAG support, NearbyNode routing, or automatic track classification exists
 - Claim broad model benchmark wins from narrow fixture evidence
 - Break existing Local Brain endpoints or response envelopes

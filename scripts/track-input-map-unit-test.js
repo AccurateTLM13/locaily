@@ -1,10 +1,7 @@
 const assert = require("node:assert/strict");
 const { loadTrack } = require("../companion/pit-crew/decomposer");
-const { buildStepInput, buildLegacyStepInput } = require("../companion/pit-crew/tool-router");
-const {
-  buildModelStepInput,
-  buildLegacyModelStepInput
-} = require("../companion/pit-crew/step-input");
+const { buildStepInput } = require("../companion/pit-crew/tool-router");
+const { buildModelStepInput } = require("../companion/pit-crew/step-input");
 const { resolveInputMap } = require("../companion/pit-crew/input-map-resolver");
 const { buildPrompt } = require("../companion/pit-crew/prompts");
 
@@ -48,21 +45,35 @@ function assertDeepEqual(actual, expected, message) {
   assert.deepEqual(actual, expected, message);
 }
 
-function checkLegacyMatchesDeclarativeForTrack() {
+function checkMissingInputMapErrors() {
+  assert.throws(
+    () => buildStepInput({ id: "missing_map" }, SAMPLE_CONTEXT),
+    (error) => error.code === "STEP_INPUT_MAP_MISSING",
+    "Expected missing input_map to throw STEP_INPUT_MAP_MISSING."
+  );
+
+  assert.throws(
+    () => buildModelStepInput({ id: "missing_map" }, SAMPLE_CONTEXT),
+    (error) => error.code === "STEP_INPUT_MAP_MISSING",
+    "Expected missing model input_map to throw STEP_INPUT_MAP_MISSING."
+  );
+}
+
+function checkLighthouseToolStepInputMaps() {
   const track = loadTrack("website_audit.lighthouse_handoff");
   const toolSteps = track.steps.filter((step) => step.executor.type === "tool");
 
   for (const step of toolSteps) {
     assert(step.input_map !== undefined && step.input_map !== null, `Expected input_map on tool step '${step.id}'.`);
-
-    const declarative = buildStepInput(step, SAMPLE_CONTEXT);
-    const legacy = buildLegacyStepInput(step, SAMPLE_CONTEXT);
-    assertDeepEqual(
-      declarative,
-      legacy,
-      `Declarative input_map for '${step.id}' must match legacy mapping.`
-    );
+    assert(typeof buildStepInput(step, SAMPLE_CONTEXT) === "object", `Expected resolved input for '${step.id}'.`);
   }
+
+  const classifyStep = track.steps.find((step) => step.id === "classify_issues");
+  assertDeepEqual(
+    buildStepInput(classifyStep, SAMPLE_CONTEXT),
+    { opportunities: SAMPLE_CONTEXT.input.opportunities },
+    "classify_issues should map opportunities from track input."
+  );
 }
 
 function checkWriteHandoffCoalesceFallback() {
@@ -78,11 +89,10 @@ function checkWriteHandoffCoalesceFallback() {
   };
 
   const declarative = resolveInputMap(writeStep.input_map, withoutValidated);
-  const legacy = buildLegacyStepInput(writeStep, withoutValidated);
 
   assertDeepEqual(
     declarative.prioritizedFixes,
-    legacy.prioritizedFixes,
+    withoutValidated.artifacts.prioritize_fixes,
     "write_handoff prioritizedFixes coalesce should fall back to prioritize_fixes artifact."
   );
 }
@@ -167,22 +177,29 @@ function checkPrioritizeFixesModelInputMap() {
   assert(prioritizeStep, "Expected prioritize_fixes model step.");
   assert(prioritizeStep.input_map, "Expected input_map on prioritize_fixes model step.");
 
+  const expected = {
+    url: SAMPLE_CONTEXT.input.url,
+    scores: SAMPLE_CONTEXT.input.scores,
+    rankedOpportunities: SAMPLE_CONTEXT.artifacts.classify_issues.rankedOpportunities,
+    classifiedIssues: SAMPLE_CONTEXT.artifacts.classify_issues.issues
+  };
   const declarative = buildModelStepInput(prioritizeStep, SAMPLE_CONTEXT);
-  const legacy = buildLegacyModelStepInput(prioritizeStep, SAMPLE_CONTEXT);
 
   assertDeepEqual(
     declarative,
-    legacy,
-    "prioritize_fixes declarative input_map must match legacy model mapping."
+    expected,
+    "prioritize_fixes input_map should map url, scores, and classify_issues artifacts."
   );
 
-  const legacyPrompt = buildPrompt("prioritize_fixes", SAMPLE_CONTEXT);
   const declarativePrompt = buildPrompt("prioritize_fixes", SAMPLE_CONTEXT, declarative);
 
-  assert.strictEqual(
-    declarativePrompt,
-    legacyPrompt,
-    "prioritize_fixes prompt from input_map must match legacy context prompt."
+  assert(
+    declarativePrompt.includes(SAMPLE_CONTEXT.input.url),
+    "prioritize_fixes prompt should include page URL from input_map."
+  );
+  assert(
+    declarativePrompt.includes("Classified ranked"),
+    "prioritize_fixes prompt should include ranked opportunities from input_map."
   );
 }
 
@@ -194,13 +211,32 @@ function checkLighthouseTrackInputMapCoverage() {
   }
 }
 
+function checkAllTrackFilesDeclareInputMap() {
+  const trackIds = [
+    "website_audit.lighthouse_handoff",
+    "marketplace.dealsniper",
+    "publishing.operator_log_discovery",
+    "publishing.operator_log_draft"
+  ];
+
+  for (const trackId of trackIds) {
+    const track = loadTrack(trackId);
+
+    for (const step of track.steps) {
+      assert(step.input_map !== undefined && step.input_map !== null, `Expected input_map on '${trackId}' step '${step.id}'.`);
+    }
+  }
+}
+
 function main() {
+  checkMissingInputMapErrors();
   checkPassthroughInputReference();
-  checkLegacyMatchesDeclarativeForTrack();
+  checkLighthouseToolStepInputMaps();
   checkWriteHandoffCoalesceFallback();
   checkPrioritizeFixesModelInputMap();
   checkLighthouseTrackInputMapCoverage();
   checkDealSniperTrackInputMaps();
+  checkAllTrackFilesDeclareInputMap();
   console.log("track-input-map-unit-test: all checks passed.");
 }
 

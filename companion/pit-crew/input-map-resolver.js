@@ -91,7 +91,7 @@ function resolveInputMap(inputMap, context) {
   if (!inputMap || typeof inputMap !== "object" || Array.isArray(inputMap)) {
     const error = new Error("Step input_map must be a reference string or an object map.");
     error.code = "INPUT_MAP_INVALID";
-    error.nextStep = "Declare input_map on the track step or rely on the legacy fallback.";
+    error.nextStep = "Declare input_map on the track step (see docs/02-track-system/step-input-mapping.md).";
     throw error;
   }
 

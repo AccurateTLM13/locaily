@@ -8,7 +8,7 @@ Tool and model steps resolve `input_map` in `companion/pit-crew/input-map-resolv
 
 The Lighthouse proof track declares `input_map` on every step in `companion/pit-crew/tracks/lighthouse-handoff.track.json`, including the `prioritize_fixes` model step.
 
-Tracks without `input_map` fall back to deprecated step-id logic in `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` inside `step-input.js`.
+All catalog tracks declare `input_map` on every step. Steps without `input_map` fail with `STEP_INPUT_MAP_MISSING` from `step-input.js`.
 
 ### Reference syntax (implemented)
 
@@ -35,7 +35,11 @@ Tracks without `input_map` fall back to deprecated step-id logic in `buildLegacy
 | `write_handoff` | URL, metrics, classifications, priorities, matches, opportunities |
 | `verify_output` | `artifacts.write_handoff` |
 
-Any step id not listed falls through to `return input` (full original input).
+## Remaining Debt
+
+- `prompts.js` `classify_issues` template still reads broad context if invoked (unused by current tracks)
+
+Adding new workflows must declare `input_map` in track JSON — legacy step-id branches were removed in 2026-06-30.
 
 ### DealSniper tool steps
 
@@ -44,16 +48,6 @@ Any step id not listed falls through to `return input` (full original input).
 | `prepare_listing` | `$input.title`, `$input.price`, optional listing fields |
 | `analyze_listing` | `$artifacts.prepare_listing` |
 | `validate_analysis` | `$artifacts.analyze_listing` |
-
-## Remaining Debt
-
-For **current catalog tracks**, input mapping is fully declarative. Legacy fallbacks remain for unmigrated steps only:
-
-- `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` in `step-input.js` (remove in Milestone 4)
-- `prompts.js` `classify_issues` template still reads broad context if invoked (unused by current tracks)
-- `prioritize_fixes` legacy prompt path when `stepInput` is null (deprecated)
-
-Adding new workflows should **not** extend legacy branches — declare `input_map` in track JSON.
 
 ## Historical Problem (pre–Milestone 1B)
 
@@ -91,10 +85,6 @@ Resolver rules (target behavior):
 - `$artifacts.<step_id>` — full output object from a prior step
 - `$artifacts.<step_id>.<path>` — nested field (optional v2)
 
-## Legacy Fallback
-
-Deprecated step-id branches remain in `buildLegacyToolStepInput()` and `buildLegacyModelStepInput()` inside `step-input.js`. Do not add new step ids there.
-
 ## Transition Plan
 
 | Phase | Action |
@@ -103,11 +93,11 @@ Deprecated step-id branches remain in `buildLegacyToolStepInput()` and `buildLeg
 | **Done** | Migrate `website_audit.lighthouse_handoff` to declarative maps |
 | **Done** | Add `marketplace.dealsniper` with declarative maps only |
 | **Done** | Model-step `input_map` via `buildModelStepInput()` |
-| **Next** | Remove legacy fallbacks when no tracks omit `input_map` |
+| **Done** | Remove legacy fallbacks — all catalog tracks declare `input_map` |
 
 ## Do Not
 
-- Add new workflows by extending legacy step-id branches in `step-input.js`
+- Add track steps without `input_map` in track JSON
 
 ## Related
 

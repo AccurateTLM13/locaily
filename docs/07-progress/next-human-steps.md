@@ -4,19 +4,18 @@
 
 Work that requires your machine, credentials, browser, or judgment before Locaily can move to the next validation tier.
 
-## Already handled autonomously (2026-06-30)
+## Completed autonomously
 
-- Extended `scripts/lighthouse-handoff-parity-test.js` to cover:
-  - legacy console core sequence (tool handlers)
-  - in-process workflow orchestration
-  - `POST /tracks/run` over HTTP (mock provider)
-  - `POST /workflows/run` over HTTP (mock provider)
-- Orchestrated paths now assert identical priority-fix titles and checklists for the fixed `slim-mobile.fixture.json`.
+- **Lighthouse parity (PR #14):** `scripts/lighthouse-handoff-parity-test.js` covers legacy tools, workflow orchestration, `POST /tracks/run`, and `POST /workflows/run`.
+- **Lane D — legacy step-input removal:** `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` removed from `companion/pit-crew/step-input.js`. All catalog tracks require declarative `input_map`.
 
-Run:
+Verification:
 
 ```bash
 node scripts/lighthouse-handoff-parity-test.js
+node scripts/track-input-map-unit-test.js
+node scripts/contract-test.js
+node scripts/orchestration-unit-test.js
 ```
 
 ## Your turn — pick one lane
@@ -70,31 +69,17 @@ npm run benchmark:run -- --suite benchmark-lab/locaily/tracks/intent-classificat
 
 ---
 
-### Lane D — Remove legacy step-input fallbacks (after you confirm parity is enough)
-
-**Why:** Parity now covers legacy tools, workflow orchestration, and both HTTP orchestration endpoints for Lighthouse.
-
-**You provide:**
-
-1. Review parity test output and intentional-difference list
-2. Approve removing `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` from `companion/pit-crew/step-input.js`
-3. Re-run full test suite on your machine
-
-**Unlocks:** Cleaner track runner; no deprecated step-id branches.
-
----
-
 ## Suggested order
 
-1. **Lane D** — quick review; low setup if parity test passes locally
-2. **Lane A** — if you already run Ollama day-to-day
-3. **Lane B** — if extension UX is the priority
-4. **Lane C** — if memory/context packs are the priority
+1. **Lane A** — if you already run Ollama day-to-day
+2. **Lane B** — if extension UX is the priority
+3. **Lane C** — if memory/context packs are the priority
 
 ## Full verification after your lane
 
 ```bash
 node scripts/lighthouse-handoff-parity-test.js
+node scripts/track-input-map-unit-test.js
 node scripts/contract-test.js
 node scripts/benchmark-lab-schema-test.js
 node scripts/benchmark-lab-run-test.js

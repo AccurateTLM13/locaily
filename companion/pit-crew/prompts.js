@@ -68,24 +68,12 @@ const PROMPT_TEMPLATES = {
       `Diagnostics: ${JSON.stringify(input.diagnostics || [])}`
     ].join("\n");
   },
-  prioritize_fixes(context, stepInput) {
-    if (stepInput && typeof stepInput === "object") {
-      return buildPrioritizeFixesPrompt(stepInput);
+  prioritize_fixes(_context, stepInput) {
+    if (!stepInput || typeof stepInput !== "object") {
+      throw new Error("prioritize_fixes requires step input resolved from input_map.");
     }
 
-    /**
-     * @deprecated Legacy path reads broad track context directly.
-     * Remove when all model steps declare input_map in track JSON.
-     */
-    const classified = context.artifacts.classify_issues || {};
-    const input = context.input || {};
-
-    return buildPrioritizeFixesPrompt({
-      url: input.url,
-      scores: input.scores || {},
-      rankedOpportunities: classified.rankedOpportunities || [],
-      classifiedIssues: classified.issues || []
-    });
+    return buildPrioritizeFixesPrompt(stepInput);
   },
   rank_editorial_opportunities(_context, stepInput) {
     return buildRankEditorialOpportunitiesPrompt(stepInput || {});

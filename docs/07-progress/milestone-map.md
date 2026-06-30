@@ -74,11 +74,10 @@ Layered planning, not a six-month prophecy.
 
 ## Follow-On Hardening - Lighthouse Path / Step Fallbacks
 
-**Status:** After Benchmark Lab acceptance
+**Status:** Step-input legacy fallbacks removed (2026-06-30); remaining items below
 
 - Confirm canonical Lighthouse path (tool vs track vs workflow orchestration)
-- Extend parity checks across `/tasks/run`, `/tracks/run`, and `/workflows/run`
-- Remove `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` from `step-input.js` after parity tests
+- Extend parity checks across `/tasks/run`, `/tracks/run`, and `/workflows/run` — parity test covers workflow + HTTP track/workflow paths
 - Improve `workflow-orchestrator` audit summaries without leaking raw task input/output
 
 ---

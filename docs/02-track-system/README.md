@@ -37,7 +37,7 @@ The track system is how Locaily breaks work into steps, dispatches capabilities,
 
 ```txt
 Implemented:  linear track pipeline (two workflow tracks, declarative input_map on all steps)
-Next:         remove legacy step-input fallbacks in step-input.js
+Next:         Lighthouse canonical-path doc; workflow audit summary hardening
 Future:       DAG planner generated from request
 Not built:    automatic track classification, graph runner
 ```
