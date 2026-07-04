@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "benchmark.comparison.v1",
+  "comparisonId": "",
+  "createdAt": "not-a-date",
+  "leftRunId": "run-left",
+  "rightRunId": "run-right",
+  "comparable": "yes",
+  "differences": [],
+  "metrics": {
+    "left": {},
+    "right": {},
+    "delta": {}
+  },
+  "caseDeltas": []
+}

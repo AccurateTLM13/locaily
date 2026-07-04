@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/hardware-profile.schema.json",
+  "title": "Benchmark Lab Hardware Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "hardwareProfileId",
+    "displayName",
+    "capturedAt",
+    "operatingSystem",
+    "cpu",
+    "memory",
+    "privacy"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "benchmark.hardware_profile.v1"
+    },
+    "hardwareProfileId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capturedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "operatingSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platform",
+        "architecture"
+      ],
+      "properties": {
+        "platform": {
+          "type": "string"
+        },
+        "release": {
+          "type": "string"
+        },
+        "architecture": {
+          "type": "string"
+        }
+      }
+    },
+    "cpu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model",
+        "logicalCores"
+      ],
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "logicalCores": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalBytes"
+      ],
+      "properties": {
+        "totalBytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "gpu": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "vramBytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "driverVersion": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "containsPrivatePaths",
+        "containsUsernames"
+      ],
+      "properties": {
+        "containsPrivatePaths": {
+          "type": "boolean"
+        },
+        "containsUsernames": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

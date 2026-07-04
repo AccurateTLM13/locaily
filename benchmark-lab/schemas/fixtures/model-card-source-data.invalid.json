@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "benchmark.model_card_source.v1",
+  "modelId": "",
+  "generatedAt": "not-a-date",
+  "evidenceIds": [
+    "evidence-fixture"
+  ],
+  "trackQualifications": [
+    {
+      "trackId": "intent-classification",
+      "status": "magic"
+    }
+  ]
+}

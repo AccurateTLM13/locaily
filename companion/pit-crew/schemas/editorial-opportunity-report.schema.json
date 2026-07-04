@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "required": ["summary", "recommendedOpportunity", "opportunities"],
+  "properties": {
+    "summary": { "type": "string" },
+    "recommendedOpportunity": { "type": "integer", "minimum": 0 },
+    "opportunities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["headlineDirection", "postType", "zone", "status", "problem", "whatChanged", "weirdPart", "supportingFiles", "missingFacts", "publishabilityScore", "duplicateRisk", "selectionReason"],
+        "properties": {
+          "headlineDirection": { "type": "string" },
+          "postType": { "type": "string", "enum": ["BUILD NOTES", "CONCEPT LOG", "PARKING NOTICE", "FIELD REPORT"] },
+          "zone": { "type": "string" },
+          "status": { "type": "string", "enum": ["SHIPPED", "IN PROGRESS", "PARKED"] },
+          "problem": { "type": "string" },
+          "whatChanged": { "type": "string" },
+          "weirdPart": { "type": "string" },
+          "supportingFiles": { "type": "array", "items": { "type": "string" } },
+          "missingFacts": { "type": "array", "items": { "type": "string" } },
+          "publishabilityScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "duplicateRisk": { "type": "string", "enum": ["low", "medium", "high"] },
+          "selectionReason": { "type": "string" }
+        }
+      }
+    }
+  }
+}

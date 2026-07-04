@@ -1,0 +1,65 @@
+{
+  "intent-001": {
+    "type": "success",
+    "durationMs": 10,
+    "output": {
+      "track": "classification",
+      "label": "extract",
+      "confidence": "high"
+    }
+  },
+  "intent-002": {
+    "type": "success",
+    "durationMs": 11,
+    "output": {
+      "track": "classification",
+      "label": "summarize",
+      "confidence": "high"
+    }
+  },
+  "intent-003": {
+    "type": "success",
+    "durationMs": 12,
+    "output": {
+      "track": "classification",
+      "label": "classify",
+      "confidence": "high"
+    }
+  },
+  "intent-004": {
+    "type": "success",
+    "durationMs": 13,
+    "output": {
+      "track": "classification",
+      "label": "route",
+      "confidence": "medium"
+    }
+  },
+  "intent-005": {
+    "type": "success",
+    "durationMs": 14,
+    "output": {
+      "track": "classification",
+      "label": "classify",
+      "confidence": "low"
+    }
+  },
+  "intent-006": {
+    "type": "success",
+    "durationMs": 15,
+    "output": {
+      "track": "classification",
+      "label": "unknown",
+      "confidence": "low"
+    }
+  },
+  "intent-007": {
+    "type": "success",
+    "durationMs": 16,
+    "output": {
+      "track": "classification",
+      "label": "unknown",
+      "confidence": "low"
+    }
+  }
+}

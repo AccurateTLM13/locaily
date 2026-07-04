@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "benchmark.model_manifest.v1",
+  "modelId": "lfm25-1p2b-instruct-local",
+  "displayName": "LFM2.5 1.2B Instruct Local",
+  "provider": "Liquid AI",
+  "runtime": "ollama",
+  "runtimeModelName": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF:latest",
+  "status": "available",
+  "capabilities": [
+    "structured-output",
+    "intent-classification"
+  ],
+  "notes": [
+    "Local Ollama manifest generated from installed Hugging Face GGUF model."
+  ]
+}

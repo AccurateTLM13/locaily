@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "benchmark.model_manifest.v1",
+  "modelId": "",
+  "displayName": "Mock Intent Classifier",
+  "provider": "benchmark-lab",
+  "runtime": "unknown",
+  "runtimeModelName": "",
+  "status": "magic"
+}

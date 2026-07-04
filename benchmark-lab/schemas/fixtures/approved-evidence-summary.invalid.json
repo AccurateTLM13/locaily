@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "benchmark.approved_evidence_summary.v1",
+  "evidenceId": "",
+  "sourceRunId": "run-fixture",
+  "approvedAt": "not-a-date",
+  "approvedBy": "",
+  "summaryPath": "",
+  "claims": [
+    123
+  ]
+}

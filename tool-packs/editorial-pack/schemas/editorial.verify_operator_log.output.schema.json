@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "required": ["valid", "errors", "warnings", "proseWordCount"],
+  "properties": {
+    "valid": { "type": "boolean" },
+    "errors": { "type": "array", "items": { "type": "string" } },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "proseWordCount": { "type": "integer" }
+  }
+}

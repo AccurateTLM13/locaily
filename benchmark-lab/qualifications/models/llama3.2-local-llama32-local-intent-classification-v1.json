@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "llama3.2-local-llama32-local-intent-classification-v1",
+  "subject": {
+    "type": "model",
+    "id": "llama3.2-local",
+    "provider": "ollama",
+    "runtimeModelName": "llama3.2",
+    "digest": "unknown"
+  },
+  "status": "candidate",
+  "qualifiedFor": [
+    {
+      "role": "fast_worker",
+      "trackId": "intent-classification",
+      "contractId": "intent-classifier-worker-v1",
+      "status": "conditional",
+      "score": 1,
+      "conditions": [
+        "Generated from explicit promoted evidence; review conditions before routing."
+      ]
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "llama32-local-intent-classification-v1"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/evidence/summaries/llama32-local-intent-classification-v1.json"
+    ]
+  },
+  "modelProfileId": "llama3.2-local",
+  "notes": [
+    "Generated from explicitly promoted Benchmark Lab evidence.",
+    "Conditional qualification from one approved local Benchmark Lab run."
+  ],
+  "generatedAt": "2026-06-24T02:35:10.714Z"
+}

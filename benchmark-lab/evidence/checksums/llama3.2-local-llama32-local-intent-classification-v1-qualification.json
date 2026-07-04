@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "llama3.2-local-llama32-local-intent-classification-v1-qualification",
+  "artifactType": "qualification_record",
+  "artifactPath": "benchmark-lab/qualifications/models/llama3.2-local-llama32-local-intent-classification-v1.json",
+  "algorithm": "sha256",
+  "checksum": "sha256:2cdda08a6037adae5b612bfbecbaac83db8a6096ebc8c825a00fdb9d43509569",
+  "generatedAt": "2026-06-24T02:35:10.719Z"
+}

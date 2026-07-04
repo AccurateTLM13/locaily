@@ -4,6 +4,111 @@ Dated record of meaningful build and planning sessions.
 
 ---
 
+## 2026-06-27 - North Star Direction Added
+
+### Changed
+
+- Added `docs/00-start-here/north-star-local-capability-network.md` from the June 2026 project direction document.
+- Updated start-here, current vision, architecture overview, glossary, roadmap, build status, active slice, next-agent brief, current state, latest build result, and decision log to reflect the local capability network direction.
+- Framed Canonical Track Run Records as the first implementation step toward the compounding evidence loop.
+
+### Evidence
+
+- Docs-only change; runtime validation not required.
+
+### Next
+
+- Implement the canonical track-run record schema and emission path.
+
+---
+
+## 2026-06-26 - Milestone 5 Accepted: Benchmark Lab
+
+### Changed
+
+- Rebasing complete: `codex/feat-benchmark-lab` now sits on current `origin/main` / JSON-first runtime integration.
+- Milestone 5 scope changed from Lighthouse fallback removal to Benchmark Lab acceptance.
+- Updated `current-sprint.md`, `milestone-5-checkpoint.md`, `next-agent-brief.md`, and `build-status.md`.
+- Qualification records now validate against `benchmark-lab/schemas/qualification-record.schema.json` before `model-qualification-loader` exposes them to runtime routing.
+- Audit schema and redaction paths now accept richer workflow worker summaries and nullable redacted memory metadata.
+- Disabled/error memory audit responses fall back to a valid compact `memory_response` summary instead of an empty object.
+
+### Evidence
+
+- `node scripts/contract-test.js` - PASS
+- `node scripts/benchmark-lab-schema-test.js` - PASS
+- `node scripts/benchmark-lab-run-test.js` - PASS
+- `node scripts/audit-record-schema-test.js` - PASS
+- `node scripts/tool-registry-schema-test.js` - PASS
+- `node scripts/validation-result-contract-test.js` - PASS
+- `node scripts/orchestration-unit-test.js` - PASS
+- `node scripts/editorial-pack-unit-test.js` - PASS
+- `node scripts/lighthouse-handoff-parity-test.js` - PASS
+- `node scripts/benchmark-status-smoke-test.js` - PASS
+- Clean-server `node scripts/smoke-test.js` - **56/56 PASS**
+
+### Next
+
+- Merge/publish the rebased Benchmark Lab branch.
+- Close patch-equivalent stale branches that are already represented on `main`.
+- Keep automatic model swapping and legacy `step-input.js` fallback removal out of M5 unless a follow-on milestone explicitly opens them.
+
+---
+
+## 2026-06-17 — Milestone 5: Lighthouse Handoff Parity Characterization
+
+**First M5 hardening change:** behavioral parity test between validation-console core sequence and workflow-orchestrated execution.
+
+### Changed
+
+- Added `scripts/lighthouse-handoff-parity-test.js` — fixed `slim-mobile.fixture.json` input; legacy path runs `analyze-report` → `compose-handoff` → `lighthouse.verify_handoff` (same interfaces as `validation-runner.js`); workflow path runs `buildRunPlan` + `executeRunPlan` with mock provider; asserts schema, URL/score preservation, priority fixes, markdown sections, and verification validity
+
+### Evidence
+
+- `node scripts/lighthouse-handoff-parity-test.js` — PASS
+- `node scripts/orchestration-unit-test.js` — PASS
+- `node scripts/contract-test.js` — PASS
+- `node scripts/smoke-test.js` — **55/55** PASS
+
+### Intentional differences documented
+
+- Execution topology (3 tool tasks vs 7 track steps)
+- Legacy `buildDemoResult` analyze stub vs workflow classify/prioritize/validate pipeline
+- Prose and priority-fix/checklist provenance differ by design; both paths remain schema-valid
+
+### Next
+
+- Extend parity test to `POST /tracks/run`; then remove `step-input.js` legacy fallbacks when all three paths agree
+
+---
+
+## 2026-06-16 — Milestone 4 Merged + M5 Planning Checkpoint
+
+**Milestone 4: Track-based orchestration — merged and closed.**
+
+### Final status
+
+- Merged PR #9 into `main` — merge commit `c89db65`
+- Post-merge smoke on `main`: **55/55 PASS**
+- Local Brain track-based orchestration is implemented; no model swapping, NearbyNode routing, or LLM-generated planning
+
+### Architectural outcome
+
+Workflow registries, track metadata, run plan builder/executor/validator, and workflow audit logging. Lighthouse Handoff can be planned and executed as a structured workflow via `POST /workflows/plan` and `POST /workflows/run`.
+
+### Documentation
+
+- Completion note: [milestone-4-completion.md](./milestone-4-completion.md)
+- M5 planning checkpoint: [milestone-5-checkpoint.md](./milestone-5-checkpoint.md)
+
+### Next (planning only — not started)
+
+- Milestone 5: legacy fallback removal / workflow hardening
+- Review PR #10 `ai-models/` on `main` before M5 code
+- M5 audit-summary follow-up; keep Model Swap Manager spec separate
+
+---
+
 ## 2026-06-15 — Milestone 4 Complete: Track-Based Orchestration
 
 **Milestone 4: Track-based orchestration — complete.**
@@ -158,6 +263,30 @@ Current implementation is already pipeline-stage orchestration (`POST /tracks/ru
 
 ## 2026-06-13 — L2 Live Ollama + Memory Bridge
 See [../06-decisions/decision-log.md](../06-decisions/decision-log.md) and [../04-validation/l2-live-ollama-memory-bridge.md](../04-validation/l2-live-ollama-memory-bridge.md).
+
+---
+
+## 2026-06-18 — Operator Log editorial tracks
+
+### Changed
+
+- Added source-audited Second Brain editorial discovery and human-selected Operator Log drafting tracks.
+- Added manifest-backed editorial tools, schemas, validators, workflow registry entries, and explicit track/workflow model overrides.
+- Ran VibeThinker-3B Q4 against 37 allowlisted files; discovery completed after hardening, but editorial ranking and the 80-word draft did not meet quality gates.
+- Added the six-file narrow extraction fixture, exact excerpt verification, grounding checks, duplicate metrics, and per-call timing.
+- Ran 18 narrow VibeThinker calls in 34.0 seconds: JSON/path gates passed, exact excerpts reached only 25%, and the automated extractor gate failed.
+
+### Evidence
+
+- `docs/04-validation/operator-log-vibethinker.md`
+- `ai-models/benchmark-results/operator-log/vibethinker-3b-narrow-extraction-v0.1.json`
+- Local artifact: `data/validation/operator-log-evaluation_*.local.json` (not committed)
+
+### Next
+
+- Compare another installed model against the identical frozen fixture.
+- Implement deterministic signal normalization, candidate packet building, scoring, and abstention before another broad workflow run.
+- Add an editorial history ledger before repeated scheduled discovery.
 
 ---
 

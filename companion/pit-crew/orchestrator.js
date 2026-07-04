@@ -73,7 +73,10 @@ async function runTrack({
       step,
       context,
       runtime,
-      options,
+      options: {
+        ...options,
+        track_id: track.track_id
+      },
       toolRegistry,
       meta
     });
@@ -99,6 +102,7 @@ async function runTrack({
       role: stepResult.meta.role || step.executor.role || "tool",
       profile_id: stepResult.meta.profile_id || options.profile_id || null,
       suitability: stepResult.meta.suitability || null,
+      qualification: stepResult.meta.qualification || null,
       durationMs: stepResult.meta.durationMs,
       output: stepResult.output
     });

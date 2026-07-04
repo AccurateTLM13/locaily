@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "benchmark.model_card_source.v1",
+  "modelId": "mock-model",
+  "runtimeModelName": "mock",
+  "generatedAt": "2026-06-23T00:00:00.000Z",
+  "evidenceIds": [
+    "evidence-fixture"
+  ],
+  "trackQualifications": [
+    {
+      "trackId": "intent-classification",
+      "status": "screening",
+      "evidenceIds": [
+        "evidence-fixture"
+      ]
+    }
+  ],
+  "limitations": [
+    "Fixture only."
+  ]
+}

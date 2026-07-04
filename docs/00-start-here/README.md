@@ -28,11 +28,12 @@ Locaily is **not** a chatbot product, a model marketplace, or a single Chrome ex
 | Topic | Path |
 |---|---|
 | **Blunt status (read this)** | [current-state.md](./current-state.md) |
-| Vision and terminology | [current-vision.md](./current-vision.md), [glossary.md](./glossary.md) |
+| Vision and terminology | [current-vision.md](./current-vision.md), [north-star-local-capability-network.md](./north-star-local-capability-network.md), [glossary.md](./glossary.md) |
 | Repo map | [repo-map.md](./repo-map.md), [project-index.md](./project-index.md) |
 | Architecture | [../01-architecture/locaily-overview.md](../01-architecture/locaily-overview.md) |
 | **JSON-first internals** | [../01-architecture/json-first-internal-format.md](../01-architecture/json-first-internal-format.md) |
 | **Track system** | [../02-track-system/README.md](../02-track-system/README.md) |
+| Benchmark Lab | [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md), [../../benchmark-lab/OPERATOR_GUIDE.md](../../benchmark-lab/OPERATOR_GUIDE.md) |
 | Workflows | [../03-workflows/lighthouse-handoff.md](../03-workflows/lighthouse-handoff.md) |
 | Validation evidence | [../04-validation/README.md](../04-validation/README.md) |
 | Product / setup / roadmap | [../05-product/](../05-product/) |
@@ -44,9 +45,9 @@ Locaily is **not** a chatbot product, a model marketplace, or a single Chrome ex
 
 ## Current Focus
 
-**Milestone 1:** Make Locaily's track system explicit.
+**Active slice:** Canonical Track Run Records.
 
-The Local Brain dispatches **tracks** (units of work with contracts), not raw models. See [../02-track-system/README.md](../02-track-system/README.md) and [../07-progress/current-sprint.md](../07-progress/current-sprint.md).
+The Local Brain dispatches **tracks** (units of work with contracts), not raw models. The current slice turns completed track runs into structured evidence that can support future routing, validation, and track improvement. See [../07-progress/active-build-slice.md](../07-progress/active-build-slice.md), [../02-track-system/README.md](../02-track-system/README.md), and [north-star-local-capability-network.md](./north-star-local-capability-network.md).
 
 ## Naming Note
 

@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/qualification-record.schema.json",
+  "title": "Benchmark Lab Qualification Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recordId",
+    "subject",
+    "status",
+    "evidence",
+    "generatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "benchmark.qualification.v1"
+    },
+    "recordId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "model",
+            "track",
+            "worker_contract",
+            "hardware_profile"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider": {
+          "type": "string"
+        },
+        "runtimeModelName": {
+          "type": "string"
+        },
+        "digest": {
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "enum": [
+        "untested",
+        "screening",
+        "candidate",
+        "qualified",
+        "conditional",
+        "rejected",
+        "revalidation_required"
+      ]
+    },
+    "qualifiedFor": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "trackId",
+          "contractId",
+          "status"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "trackId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contractId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "qualified",
+              "conditional",
+              "rejected",
+              "revalidation_required"
+            ]
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "limits": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "default": []
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceIds",
+        "summaryPaths"
+      ],
+      "properties": {
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "summaryPaths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "checksumPaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "hardwareProfileId": {
+      "type": "string"
+    },
+    "modelProfileId": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

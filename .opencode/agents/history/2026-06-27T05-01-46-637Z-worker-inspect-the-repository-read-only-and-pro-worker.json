@@ -1,0 +1,67 @@
+{
+  "run_id": "1bdb6ee7fd14",
+  "iteration": 0,
+  "phase": "worker",
+  "state": {
+    "objective": "controller-validation",
+    "status": "running",
+    "phase": "review",
+    "iteration": 0,
+    "corrections_for_task": 0,
+    "consecutive_failures": 0,
+    "max_iterations": 3,
+    "max_corrections_per_task": 2,
+    "max_consecutive_failures": 2,
+    "current_task": "inspect-the-repository-read-only-and-produce-a-short-structu",
+    "worker_branch": "agents/worker/controller-validation",
+    "last_worker_status": "complete",
+    "last_review_status": null,
+    "objective_complete": false,
+    "blocker": null,
+    "run_id": "1bdb6ee7fd14"
+  },
+  "artifact": {
+    "run_id": "1bdb6ee7fd14",
+    "iteration": 0,
+    "task_id": "inspect-the-repository-read-only-and-produce-a-short-structu",
+    "created_at": "2026-06-27T05:01:28.693Z",
+    "status": "complete",
+    "files_changed": [
+      ".opencode/agents/state/latest-worker-result.json"
+    ],
+    "commit": null,
+    "tests": {
+      "run": [],
+      "not_run_because": "Read-only inspection task; no product code modified."
+    },
+    "acceptance": [
+      {
+        "criterion": "state/latest-worker-result.json contains fresh run_id, iteration, task_id, and created_at fields matching the current loop state",
+        "met": true,
+        "evidence": "run_id=1bdb6ee7fd14, iteration=0, task_id=inspect-the-repository-read-only-and-produce-a-short-structu, created_at=2026-06-27T05:01:28.693Z"
+      },
+      {
+        "criterion": "The report explains what Locaily is in one or two sentences",
+        "met": true,
+        "evidence": "Locaily is a local-first AI coordination stack whose Local Brain (companion/server.js) dispatches manifest-backed tool packs and multi-step tracks on the user's machine, mixing small local models, deterministic tools, validators, and audit trails."
+      },
+      {
+        "criterion": "The report names the current active build slice",
+        "met": true,
+        "evidence": "Active build slice: 'Canonical Track Run Records' (first Track Learning Evidence Loop)."
+      },
+      {
+        "criterion": "The report lists the two proof workflow track ids",
+        "met": true,
+        "evidence": "website_audit.lighthouse_handoff and marketplace.dealsniper (both in companion/pit-crew/tracks)."
+      },
+      {
+        "criterion": "The report includes the exact read-only commands run and their summarized outputs",
+        "met": true,
+        "evidence": "Commands: git status --short; git branch --show-current (output: two untracked .opencode/agents/history files, branch agents/worker/controller-validation), Get-ChildItem companion/pit-crew/tracks (dealsniper.track.json, lighthouse-handoff.track.json, operator-log-discovery.track.json, operator-log-draft.track.json), Get-ChildItem tool-packs (editorial-pack, lighthouse-parser-pack, standard-text-pack)."
+      }
+    ],
+    "blocker": null,
+    "notes": "Read-only inspection completed. No product code or docs were modified. The companion/pit-crew/tracks directory contains four track files; the two active proof workflows are lighthouse-handoff and dealsniper. Tool-packs has three manifest-backed packs."
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/promoted-evidence.schema.json",
+  "title": "Benchmark Lab Promoted Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceId",
+    "sourceRunId",
+    "suiteId",
+    "trackId",
+    "contractId",
+    "approvedAt",
+    "approvedBy",
+    "summary"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "benchmark.promoted_evidence.v1"
+    },
+    "evidenceId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceRunId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "suiteId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trackId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contractId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approvedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approvedBy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "object"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

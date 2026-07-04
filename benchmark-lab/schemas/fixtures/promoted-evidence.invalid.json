@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "benchmark.promoted_evidence.v1",
+  "evidenceId": "",
+  "sourceRunId": "",
+  "suiteId": "intent-classification-v1",
+  "trackId": "intent-classification",
+  "contractId": "intent-classifier-worker-v1",
+  "approvedAt": "not-a-date",
+  "approvedBy": "",
+  "summary": {}
+}

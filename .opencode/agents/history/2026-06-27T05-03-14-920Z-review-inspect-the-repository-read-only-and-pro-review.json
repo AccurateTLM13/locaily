@@ -1,0 +1,47 @@
+{
+  "run_id": "1bdb6ee7fd14",
+  "iteration": 0,
+  "phase": "review",
+  "state": {
+    "objective": "controller-validation",
+    "status": "running",
+    "phase": "review",
+    "iteration": 0,
+    "corrections_for_task": 0,
+    "consecutive_failures": 0,
+    "max_iterations": 3,
+    "max_corrections_per_task": 2,
+    "max_consecutive_failures": 2,
+    "current_task": "inspect-the-repository-read-only-and-produce-a-short-structu",
+    "worker_branch": "agents/worker/controller-validation",
+    "last_worker_status": "complete",
+    "last_review_status": "rejected",
+    "objective_complete": false,
+    "blocker": null,
+    "run_id": "1bdb6ee7fd14"
+  },
+  "artifact": {
+    "run_id": "1bdb6ee7fd14",
+    "iteration": 0,
+    "task_id": "inspect-the-repository-read-only-and-produce-a-short-structu",
+    "created_at": "2026-06-27T05:02:00.000Z",
+    "task": "inspect-the-repository-read-only-and-produce-a-short-structu",
+    "status": "rejected",
+    "objective_complete": false,
+    "correction": "state/latest-worker-result.json is stale (stale:true, iteration:-1, run_id:null) and does not contain the required report. Re-write it fresh with run_id, iteration, task_id, and created_at matching the current loop, then include: (1) one or two sentences describing Locaily, (2) the active build slice name 'Canonical Track Run Records', (3) the two proof workflow track ids 'website_audit.lighthouse_handoff' and 'marketplace.dealsniper', and (4) the exact read-only commands run with summarized outputs.",
+    "blocker": null,
+    "evidence": {
+      "commands": [
+        "git status --short",
+        "git diff --stat",
+        "read .opencode/agents/state/latest-worker-result.json"
+      ],
+      "results": [
+        "Untracked history files only; no product code changes.",
+        "No tracked diff.",
+        "latest-worker-result.json is stale: {stale:true, task:null, iteration:-1, run_id:null}."
+      ]
+    },
+    "notes": "First review deliberately exercises the correction path. The worker history claims the file was written, but the actual state file is stale and must be rewritten fresh."
+  }
+}

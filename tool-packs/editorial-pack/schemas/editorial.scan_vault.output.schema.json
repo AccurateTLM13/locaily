@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "required": ["manifest", "signals", "warnings"],
+  "properties": {
+    "manifest": {
+      "type": "object",
+      "required": ["inventoryId", "scannedAt", "eligibleFileCount", "processedFileCount", "batchCount", "files"],
+      "properties": {
+        "inventoryId": { "type": "string" },
+        "scannedAt": { "type": "string" },
+        "eligibleFileCount": { "type": "integer" },
+        "processedFileCount": { "type": "integer" },
+        "batchCount": { "type": "integer" },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "sha256", "bytes", "modifiedAt"],
+            "properties": {
+              "path": { "type": "string" },
+              "sha256": { "type": "string" },
+              "bytes": { "type": "integer" },
+              "modifiedAt": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["headlineDirection", "postType", "zone", "status", "problem", "whatChanged", "weirdPart", "supportingFiles", "missingFacts", "publishabilityScore", "duplicateRisk"],
+        "properties": {
+          "headlineDirection": { "type": "string" },
+          "postType": { "type": "string", "enum": ["BUILD NOTES", "CONCEPT LOG", "PARKING NOTICE", "FIELD REPORT"] },
+          "zone": { "type": "string" },
+          "status": { "type": "string", "enum": ["SHIPPED", "IN PROGRESS", "PARKED"] },
+          "problem": { "type": "string" },
+          "whatChanged": { "type": "string" },
+          "weirdPart": { "type": "string" },
+          "supportingFiles": { "type": "array", "items": { "type": "string" } },
+          "missingFacts": { "type": "array", "items": { "type": "string" } },
+          "publishabilityScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "duplicateRisk": { "type": "string", "enum": ["low", "medium", "high"] }
+        }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

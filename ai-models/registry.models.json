@@ -91,6 +91,22 @@
       "knownWeaknesses": ["Slowest run (~18s)", "Still prioritized passing audits above measured opportunities", "Not default due to poor value ratio"]
     },
     {
+      "id": "mradermacher-vibethinker-3b-q4-k-m-gguf",
+      "provider": "ollama",
+      "runtimeModel": "hf.co/mradermacher/VibeThinker-3B-GGUF:Q4_K_M",
+      "family": "VibeThinker",
+      "size": "3B Q4_K_M",
+      "primaryRole": "experimental_editorial_worker",
+      "roleCandidates": ["extractor_worker", "editorial_worker"],
+      "recommendedRoles": [],
+      "testTracks": ["operator_log_discovery", "narrow_editorial_extraction", "operator_log_draft"],
+      "status": "candidate",
+      "candidateReason": "Fast 3B local model evaluated for decomposed editorial work.",
+      "benchmarkEvidence": "ai-models/benchmark-results/operator-log/vibethinker-3b-narrow-extraction-v0.1.json",
+      "knownStrengths": ["18/18 narrow calls returned parseable JSON without retry", "100% exact source-path precision", "Fast narrow extraction average of 1.89 seconds"],
+      "knownWeaknesses": ["Only 25% of evidence excerpts matched source text exactly", "Only one valid grounded signal across 18 narrow calls", "Prompt echo during broad ranking", "80-word malformed long-form draft"]
+    },
+    {
       "id": "supralabs-supra-title-350m-exp-gguf",
       "provider": "ollama",
       "runtimeModel": "hf.co/SupraLabs/Supra-Title-350M-exp-GGUF",

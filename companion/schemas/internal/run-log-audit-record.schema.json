@@ -113,7 +113,7 @@
           "items": { "type": "string" }
         },
         "memory": { "$ref": "#/$defs/memoryToolOutputMetadata" },
-        "contextPackId": { "type": "string" },
+        "contextPackId": { "type": ["string", "null"] },
         "project": { "type": ["string", "null"] },
         "task": { "type": ["string", "null"] },
         "filesUsed": {
@@ -131,7 +131,7 @@
       "additionalProperties": false,
       "properties": {
         "used": { "type": "boolean" },
-        "contextPackId": { "type": "string" },
+        "contextPackId": { "type": ["string", "null"] },
         "filesUsed": {
           "type": "array",
           "items": { "type": "string" }
@@ -162,7 +162,16 @@
         "step_id": { "type": "string" },
         "track_id": { "type": "string" },
         "status": { "type": "string" },
-        "worker_used": { "type": ["string", "null"] },
+        "worker_used": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string" },
+            {
+              "type": "object",
+              "additionalProperties": true
+            }
+          ]
+        },
         "duration_ms": { "type": ["number", "null"] },
         "error": {
           "oneOf": [

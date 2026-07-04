@@ -1,0 +1,101 @@
+[
+  {
+    "caseId": "intent-live-001",
+    "trackId": "intent-classification",
+    "difficulty": "easy",
+    "tags": [
+      "extract"
+    ],
+    "input": {
+      "text": "Pull the title and price from this marketplace listing."
+    },
+    "expected": {
+      "label": "extract"
+    }
+  },
+  {
+    "caseId": "intent-live-002",
+    "trackId": "intent-classification",
+    "difficulty": "easy",
+    "tags": [
+      "summarize"
+    ],
+    "input": {
+      "text": "Summarize this Lighthouse report for a developer handoff."
+    },
+    "expected": {
+      "label": "summarize"
+    }
+  },
+  {
+    "caseId": "intent-live-003",
+    "trackId": "intent-classification",
+    "difficulty": "medium",
+    "tags": [
+      "classify"
+    ],
+    "input": {
+      "text": "Classify this request as a workflow, tool, or memory task."
+    },
+    "expected": {
+      "label": "classify"
+    }
+  },
+  {
+    "caseId": "intent-live-004",
+    "trackId": "intent-classification",
+    "difficulty": "medium",
+    "tags": [
+      "route"
+    ],
+    "input": {
+      "text": "Send this to the best available local worker role."
+    },
+    "expected": {
+      "label": "route"
+    }
+  },
+  {
+    "caseId": "intent-live-005",
+    "trackId": "intent-classification",
+    "difficulty": "medium",
+    "tags": [
+      "classify",
+      "tagging"
+    ],
+    "input": {
+      "text": "Classify this customer message as billing, technical support, or account access."
+    },
+    "expected": {
+      "label": "classify"
+    }
+  },
+  {
+    "caseId": "intent-live-006",
+    "trackId": "intent-classification",
+    "difficulty": "edge",
+    "tags": [
+      "unknown"
+    ],
+    "input": {
+      "text": "Tell me a joke about a sandwich."
+    },
+    "expected": {
+      "label": "unknown"
+    }
+  },
+  {
+    "caseId": "intent-live-007",
+    "trackId": "intent-classification",
+    "difficulty": "edge",
+    "tags": [
+      "unknown"
+    ],
+    "input": {
+      "text": "What should I cook for dinner tonight?"
+    },
+    "expected": {
+      "label": "unknown"
+    }
+  }
+]

@@ -4,6 +4,34 @@ This file mirrors the intent of `AGENT.md` for editors and coding tools that loo
 
 **Read first:** [docs/00-start-here/current-state.md](docs/00-start-here/current-state.md), [docs/07-progress/next-agent-brief.md](docs/07-progress/next-agent-brief.md), and [docs/08-agents/agent-context.md](docs/08-agents/agent-context.md)
 
+## Active Build Slice
+
+Before beginning implementation, read:
+
+- `docs/00-start-here/current-vision.md`
+- `docs/00-start-here/current-state.md`
+- `docs/07-progress/active-build-slice.md`
+- `docs/07-progress/next-agent-brief.md`
+- `docs/08-agents/build-slice-protocol.md`
+
+The active build slice defines current scope and exclusions.
+
+Do not begin unrelated implementation work even when another roadmap item appears useful.
+
+## Repository Handoff Requirement
+
+Before completing a task, update:
+
+- `docs/00-start-here/current-state.md`
+- `docs/07-progress/next-agent-brief.md`
+- `docs/07-progress/latest-build-result.json`
+
+Record durable architecture decisions in:
+
+- `docs/06-decisions/decision-log.md`
+
+Important project state must not exist only in the agent's completion message.
+
 ## Role of the Coding Agent
 
 You are helping develop **Locaily**—a reusable local-first AI coordination stack. Your job is to keep the architecture clean, practical, and publishable.
@@ -250,12 +278,13 @@ Implemented:
 - `POST /tracks/run`, `GET /tracks` track APIs
 - `companion/orchestration/*` (track registry, workflow registry, run plan builder/executor)
 - `GET /orchestration/tracks`, `GET /orchestration/workflows`, `POST /workflows/plan`, `POST /workflows/run`
-- `scripts/smoke-test.js`, `scripts/contract-test.js` (55/55 clean-server baseline)
+- `scripts/smoke-test.js`, `scripts/contract-test.js` (56/56 clean-server baseline)
 - `start-windows.bat`, `start-dev.ps1`
 
 Next focus areas (see [docs/07-progress/milestone-map.md](docs/07-progress/milestone-map.md) and [docs/05-product/roadmap.md](docs/05-product/roadmap.md)):
 
-- **M5:** Remove legacy step-input fallbacks in `step-input.js` (all catalog steps declare `input_map`)
+- **M5:** Benchmark Lab acceptance (schema-backed evidence, qualification records, read-only status)
+- Follow-on: remove legacy step-input fallbacks in `step-input.js` after Lighthouse path parity resumes
 - Model Garage evaluation harness (Phase 2 — spec only until evidence)
 - Harden Lighthouse Handoff validation end-to-end with the extension client
 - NearbyNode capability connectors (spec + prototype — not implementation yet)

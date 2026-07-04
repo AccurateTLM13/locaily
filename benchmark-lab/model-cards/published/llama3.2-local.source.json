@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "benchmark.model_card_source.v1",
+  "modelId": "llama3.2-local",
+  "runtimeModelName": "llama3.2",
+  "generatedAt": "2026-06-24T02:37:15.179Z",
+  "evidenceIds": [
+    "llama32-local-intent-classification-v1"
+  ],
+  "trackQualifications": [
+    {
+      "trackId": "intent-classification",
+      "status": "screening",
+      "evidenceIds": [
+        "llama32-local-intent-classification-v1"
+      ]
+    }
+  ],
+  "limitations": [
+    "Draft model card only. No Locaily routing qualification is claimed by this artifact."
+  ]
+}

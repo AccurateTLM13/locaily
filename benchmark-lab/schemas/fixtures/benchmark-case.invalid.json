@@ -1,0 +1,12 @@
+{
+  "caseId": "intent-fixture-001",
+  "trackId": "intent-classification",
+  "difficulty": "impossible",
+  "tags": [
+    "fixture"
+  ],
+  "input": {},
+  "expected": {
+    "label": "invent"
+  }
+}

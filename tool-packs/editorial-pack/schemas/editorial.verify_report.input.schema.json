@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["report", "manifest"],
+  "properties": {
+    "report": { "type": "object" },
+    "manifest": { "type": "object" }
+  }
+}

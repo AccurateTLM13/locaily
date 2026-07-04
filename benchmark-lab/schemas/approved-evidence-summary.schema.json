@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/approved-evidence-summary.schema.json",
+  "title": "Benchmark Lab Approved Evidence Summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceId",
+    "sourceRunId",
+    "approvedAt",
+    "approvedBy",
+    "summaryPath",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "benchmark.approved_evidence_summary.v1"
+    },
+    "evidenceId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceRunId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approvedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approvedBy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summaryPath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

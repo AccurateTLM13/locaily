@@ -119,6 +119,10 @@ function assertHealthShape(body) {
   assert(typeof body.model.ready === "boolean", "Expected model readiness boolean.");
   assert(body.model_profile && typeof body.model_profile.id === "string", "Expected active model profile.");
   assert(typeof body.model_profile.policy === "string", "Expected model profile policy.");
+  assert(body.benchmark_lab && typeof body.benchmark_lab === "object", "Expected benchmark_lab health summary.");
+  assert(typeof body.benchmark_lab.qualification_records === "number", "Expected benchmark qualification count.");
+  assert(typeof body.benchmark_lab.checksums === "number", "Expected benchmark checksum count.");
+  assert(body.benchmark_lab.statusEndpoint === "/benchmark/status", "Expected benchmark status endpoint hint.");
   assert(Array.isArray(body.tools), "Expected registered tools array.");
   assert(body.tools.includes("deal-sniper"), "Expected deal-sniper tool registration.");
   assert(body.tools.includes("lighthouse-handoff"), "Expected lighthouse-handoff tool registration.");
@@ -591,6 +595,19 @@ async function checkHealth() {
   const health = await request("/health");
   assert(health.response.status === 200, `GET /health failed with HTTP ${health.response.status}.`);
   assertHealthShape(health.body);
+}
+
+async function checkBenchmarkStatus() {
+  const status = await request("/benchmark/status");
+  assert(status.response.status === 200, "Expected /benchmark/status HTTP 200.");
+  assertJsonObject(status.body, "/benchmark/status response");
+  assert(status.body.ok === true, "Expected /benchmark/status ok true.");
+  assert(status.body.benchmark_lab && typeof status.body.benchmark_lab === "object", "Expected benchmark_lab status object.");
+  assert(typeof status.body.benchmark_lab.records === "number", "Expected qualification record count.");
+  assert(typeof status.body.benchmark_lab.invalidRecords === "number", "Expected invalid qualification record count.");
+  assert(typeof status.body.benchmark_lab.checksums === "number", "Expected checksum count.");
+  assert(status.body.benchmark_lab.byStatus && typeof status.body.benchmark_lab.byStatus === "object", "Expected byStatus object.");
+  assert(status.body.benchmark_lab.byRole && typeof status.body.benchmark_lab.byRole === "object", "Expected byRole object.");
 }
 
 async function checkUnknownRoute() {
@@ -1699,6 +1716,7 @@ async function main() {
   console.log(`Smoke testing Local AI Platform at ${BASE_URL}`);
 
   await runCheck("GET /health", checkHealth);
+  await runCheck("GET /benchmark/status", checkBenchmarkStatus);
   await runCheck("GET /tools", checkToolsEndpoint);
   await runCheck("GET /console endpoints", checkConsoleEndpoints);
   await runCheck("GET /providers/status", checkProvidersStatus);

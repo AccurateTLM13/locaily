@@ -1,0 +1,31 @@
+{
+  "benchmark_id": "operator-log-baseline-v0.1",
+  "model_id": "mradermacher-vibethinker-3b-q4-k-m-gguf",
+  "runtime_model": "hf.co/mradermacher/VibeThinker-3B-GGUF:Q4_K_M",
+  "date": "2026-06-18",
+  "status": "failed",
+  "privacy": {
+    "private_source_content_included": false,
+    "absolute_vault_path_included": false
+  },
+  "runs": [
+    {
+      "name": "initial_full_workflow",
+      "duration_ms": 84200,
+      "result": "failed",
+      "failure": "malformed extraction JSON"
+    },
+    {
+      "name": "hardened_full_workflow",
+      "duration_ms": 265249,
+      "eligible_file_count": 37,
+      "processed_file_count": 37,
+      "batch_count": 28,
+      "discovery_schema_valid_before_semantic_gate": true,
+      "draft_schema_valid": false,
+      "draft_prose_word_count": 80,
+      "failures": ["prompt-echo recommended headline", "insufficient draft length", "invalid structured publication output"]
+    }
+  ],
+  "interpretation": "The broad workflow assigned too many responsibilities to one model. Preserve as a failure baseline; use decomposed role fixtures for future evaluation."
+}

@@ -1,0 +1,44 @@
+{
+  "track_id": "publishing.operator_log_discovery",
+  "version": "0.1.0",
+  "name": "Operator Log Opportunity Discovery",
+  "description": "Inventories the allowlisted Second Brain, extracts source-linked story signals in bounded batches, and ranks publishable Operator Log opportunities.",
+  "output_schema": "companion/schemas/editorial-opportunity-report.schema.json",
+  "result_step": "rank_opportunities",
+  "verification_step": "verify_report",
+  "steps": [
+    {
+      "id": "scan_vault",
+      "input_map": {
+        "editorialBrief": "$input.editorialBrief",
+        "maxSignalsPerBatch": ["$input.maxSignalsPerBatch", 4],
+        "batchCharLimit": ["$input.batchCharLimit", 12000],
+        "changedSince": ["$input.changedSince", ""]
+      },
+      "executor": { "type": "tool", "tool": "editorial.scan_vault", "task": "run" }
+    },
+    {
+      "id": "rank_opportunities",
+      "input_map": {
+        "editorialBrief": "$input.editorialBrief",
+        "maxOpportunities": ["$input.maxOpportunities", 8],
+        "signals": ["$artifacts.scan_vault.signals", []],
+        "inventoryId": "$artifacts.scan_vault.manifest.inventoryId"
+      },
+      "executor": {
+        "type": "model",
+        "role": "reasoning_worker",
+        "schema": "companion/pit-crew/schemas/editorial-opportunity-report.schema.json",
+        "prompt_template": "rank_editorial_opportunities"
+      }
+    },
+    {
+      "id": "verify_report",
+      "input_map": {
+        "report": "$artifacts.rank_opportunities",
+        "manifest": "$artifacts.scan_vault.manifest"
+      },
+      "executor": { "type": "tool", "tool": "editorial.verify_report", "task": "run" }
+    }
+  ]
+}

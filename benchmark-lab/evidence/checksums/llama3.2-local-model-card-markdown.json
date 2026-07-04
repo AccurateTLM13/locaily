@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "llama3.2-local-model-card-markdown",
+  "artifactType": "model_card_markdown",
+  "artifactPath": "benchmark-lab/model-cards/published/llama3.2-local.md",
+  "algorithm": "sha256",
+  "checksum": "sha256:986141a80dff735607bd051ceb8bc43a1b0440b18edd1c6d3a412be91091855f",
+  "generatedAt": "2026-06-24T02:37:15.197Z"
+}

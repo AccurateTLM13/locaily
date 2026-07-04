@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "benchmark.comparison.v1",
+  "comparisonId": "comparison-fixture",
+  "createdAt": "2026-06-23T00:00:00.000Z",
+  "leftRunId": "run-left",
+  "rightRunId": "run-right",
+  "comparable": true,
+  "differences": [],
+  "metrics": {
+    "left": {
+      "caseCount": 1,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "malformed": 0,
+      "passRate": 1
+    },
+    "right": {
+      "caseCount": 1,
+      "passed": 0,
+      "failed": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "malformed": 0,
+      "passRate": 0
+    },
+    "delta": {
+      "passed": -1,
+      "failed": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "malformed": 0,
+      "passRate": -1
+    }
+  },
+  "caseDeltas": [
+    {
+      "caseId": "intent-fixture-001",
+      "leftVerdict": "PASS",
+      "rightVerdict": "FAIL",
+      "changed": true
+    }
+  ]
+}

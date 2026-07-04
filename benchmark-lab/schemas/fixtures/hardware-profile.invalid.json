@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "benchmark.hardware_profile.v1",
+  "hardwareProfileId": "",
+  "displayName": "Local Development Example",
+  "capturedAt": "not-a-date",
+  "operatingSystem": {
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "cpu": {
+    "model": "redacted-local-cpu",
+    "logicalCores": 0
+  },
+  "memory": {
+    "totalBytes": -1
+  },
+  "privacy": {
+    "containsPrivatePaths": false,
+    "containsUsernames": "no"
+  }
+}

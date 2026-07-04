@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "benchmark.approved_evidence_summary.v1",
+  "evidenceId": "llama32-local-intent-classification-v1",
+  "sourceRunId": "run-20260624T023320Z",
+  "approvedAt": "2026-06-24T02:34:45.970Z",
+  "approvedBy": "JP",
+  "summaryPath": "benchmark-lab/evidence/summaries/llama32-local-intent-classification-v1.json",
+  "claims": [
+    "Explicitly promoted benchmark evidence. No model qualification claim is made by this artifact."
+  ]
+}

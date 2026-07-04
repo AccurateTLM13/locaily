@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "",
+  "subject": {
+    "type": "model",
+    "id": "mock-model",
+    "extra": true
+  },
+  "status": "qualified",
+  "evidence": {
+    "evidenceIds": [],
+    "summaryPaths": []
+  },
+  "generatedAt": "not-a-date"
+}

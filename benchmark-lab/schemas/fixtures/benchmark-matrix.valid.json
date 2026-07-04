@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "benchmark.matrix.v1",
+  "matrixId": "matrix-test-intent-classification",
+  "createdAt": "2026-06-23T00:00:00.000Z",
+  "suiteId": "intent-classification-v1",
+  "trackId": "intent-classification",
+  "contractId": "intent-classifier-worker-v1",
+  "models": [
+    {
+      "modelId": "mock-intent-classifier",
+      "runtimeModelName": "mock-intent-classifier",
+      "status": "completed",
+      "runId": "run-test-intent-classification-a",
+      "caseCount": 7,
+      "passed": 3,
+      "failed": 1,
+      "errors": 1,
+      "timeouts": 1,
+      "malformed": 1,
+      "passRate": 0.4286,
+      "error": ""
+    }
+  ],
+  "rankings": [
+    {
+      "rank": 1,
+      "modelId": "mock-intent-classifier",
+      "passRate": 0.4286,
+      "passed": 3,
+      "failed": 1,
+      "errors": 1,
+      "timeouts": 1,
+      "malformed": 1
+    }
+  ],
+  "caseMatrix": [
+    {
+      "caseId": "intent-001",
+      "verdicts": {
+        "mock-intent-classifier": "PASS"
+      }
+    }
+  ]
+}

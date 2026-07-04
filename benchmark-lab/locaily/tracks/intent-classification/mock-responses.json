@@ -1,0 +1,51 @@
+{
+  "intent-001": {
+    "type": "success",
+    "durationMs": 10,
+    "output": {
+      "track": "classification",
+      "label": "extract",
+      "confidence": "high"
+    }
+  },
+  "intent-002": {
+    "type": "success",
+    "durationMs": 11,
+    "output": {
+      "track": "classification",
+      "label": "summarize",
+      "confidence": "high"
+    }
+  },
+  "intent-003": {
+    "type": "success",
+    "durationMs": 12,
+    "output": {
+      "track": "classification",
+      "label": "classify",
+      "confidence": "high"
+    }
+  },
+  "intent-004": {
+    "type": "success",
+    "durationMs": 13,
+    "output": {
+      "track": "classification",
+      "label": "classify",
+      "confidence": "medium"
+    }
+  },
+  "intent-005": {
+    "type": "malformed",
+    "durationMs": 14,
+    "rawText": "{\"track\":\"classification\",\"label\":"
+  },
+  "intent-006": {
+    "type": "timeout",
+    "durationMs": 60000
+  },
+  "intent-007": {
+    "type": "runtime-error",
+    "durationMs": 3
+  }
+}

@@ -21,6 +21,7 @@ const {
 } = require("./core/envelope");
 const { createModelRoleManager } = require("./core/model-roles");
 const { createModelProfileManager } = require("./core/model-profiles");
+const { createModelQualificationLoader } = require("./core/model-qualification-loader");
 const { createPermissionManager } = require("./core/permissions");
 const { runToolWithValidation } = require("./core/result-validator");
 const { createProviderRouter } = require("./providers/router");
@@ -85,7 +86,7 @@ const DEFAULT_CONFIG = {
   },
   permissions: {
     filePath: join(__dirname, "..", "data", "permissions.json"),
-    approved: ["model.run", "memory.writeback.propose"],
+    approved: ["model.run", "memory.read", "memory.writeback.propose"],
     denied: ["file.delete", "file.write", "network.send", "browser.write", "memory.delete"]
   },
   memoryBridge: {
@@ -112,6 +113,7 @@ const modelProfileManager = createModelProfileManager({
   active: config.modelProfiles.active,
   profiles: config.modelProfiles.profiles
 });
+const modelQualificationLoader = createModelQualificationLoader();
 function getConfiguredProviderIds() {
   return Array.from(new Set([
     providerRouter.getActiveProviderId(),
@@ -271,6 +273,10 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && url.pathname === "/health") {
       return sendJson(response, 200, await buildHealthResponse());
+    }
+
+    if (request.method === "GET" && url.pathname === "/benchmark/status") {
+      return sendJson(response, 200, buildBenchmarkStatusResponse());
     }
 
     if (request.method === "GET" && url.pathname === "/tools") {
@@ -757,6 +763,7 @@ function applyEnvironmentOverrides(targetConfig) {
 async function buildHealthResponse() {
   const runtimeState = await checkRuntimeState();
   const memoryStatus = vaultAdapter.getStatus();
+  const benchmarkStatus = modelQualificationLoader.getStatus();
   const health = {
     ok: true,
     engine: "local-ai-engine-core",
@@ -779,6 +786,12 @@ async function buildHealthResponse() {
     memory: {
       enabled: memoryStatus.enabled,
       readable: memoryStatus.readable
+    },
+    benchmark_lab: {
+      qualification_records: benchmarkStatus.records,
+      checksums: benchmarkStatus.checksums,
+      latest_generated_at: benchmarkStatus.latestGeneratedAt,
+      statusEndpoint: "/benchmark/status"
     }
   };
 
@@ -835,6 +848,13 @@ function buildToolsResponse() {
   return {
     ok: true,
     tools: toolRegistry.listPublic()
+  };
+}
+
+function buildBenchmarkStatusResponse() {
+  return {
+    ok: true,
+    benchmark_lab: modelQualificationLoader.getStatus()
   };
 }
 
@@ -1222,6 +1242,24 @@ function buildModelRoutingOptions(extra = {}) {
     ...extra,
     profile_id: modelProfileManager.resolveActiveProfileId(),
     getRoleSuitability: (role) => modelProfileManager.getRoleSuitability(role),
+    getModelQualificationEvidence: ({ model, role, trackId, contractId }) => {
+      const matches = modelQualificationLoader.findForRole({
+        modelId: model,
+        role,
+        trackId,
+        contractId
+      });
+
+      return matches.length > 0
+        ? {
+          status: matches[0].status,
+          score: matches[0].score,
+          evidenceIds: matches[0].evidenceIds,
+          recordId: matches[0].recordId,
+          generatedAt: matches[0].generatedAt
+        }
+        : null;
+    },
     resolveModelForRole: (role) => resolveModelForRole(role),
     toolRegistry,
     memoryBridge: {
@@ -1740,7 +1778,8 @@ async function executeTrackRunRequest(body, context) {
   updateJob(job.job_id, { status: "running" });
 
   const runtime = getActiveRuntime();
-  const runtimeState = await checkRuntimeState(getActiveModel());
+  const requestedModel = getActiveModel(body.options && body.options.model);
+  const runtimeState = await checkRuntimeState(requestedModel);
 
   if (!runtimeState.available) {
     updateJob(job.job_id, {
@@ -1762,6 +1801,22 @@ async function executeTrackRunRequest(body, context) {
     };
   }
 
+  if (!runtimeState.modelReady) {
+    return {
+      statusCode: 503,
+      body: buildTaskRunError({
+        identity: context.identity,
+        startedAt: context.startedAt,
+        tool: "track-orchestrator",
+        task: body.track_id,
+        code: "MODEL_UNAVAILABLE",
+        message: `The local model '${requestedModel}' is not ready.`,
+        nextStep: getModelUnavailableNextStep(runtimeState),
+        model: requestedModel
+      })
+    };
+  }
+
   try {
     const trackResult = await runTrack({
       trackId: body.track_id,
@@ -1770,7 +1825,7 @@ async function executeTrackRunRequest(body, context) {
       toolRegistry,
       options: buildModelRoutingOptions({
         ...(body.options || {}),
-        model: getActiveModel()
+        model: requestedModel
       }),
       meta: {
         requestId: context.identity.requestId,
@@ -1801,7 +1856,7 @@ async function executeTrackRunRequest(body, context) {
         tool: "track-orchestrator",
         task: body.track_id,
         provider: getActiveProviderId(),
-        model: getActiveModel(),
+        model: requestedModel,
         model_role: "default_worker",
         result: normalizeToolResult(trackResult.result),
         confidence: 1,
@@ -2034,7 +2089,8 @@ async function executeWorkflowRunRequest(body, context) {
   updateJob(job.job_id, { status: "running" });
 
   const runtime = getActiveRuntime();
-  const runtimeState = await checkRuntimeState(getActiveModel());
+  const requestedModel = getActiveModel(body.options && body.options.model);
+  const runtimeState = await checkRuntimeState(requestedModel);
 
   if (!runtimeState.available) {
     updateJob(job.job_id, {
@@ -2052,6 +2108,22 @@ async function executeWorkflowRunRequest(body, context) {
         code: "PROVIDER_UNAVAILABLE",
         message: runtimeState.warning.message,
         nextStep: runtimeState.warning.nextStep
+      })
+    };
+  }
+
+  if (!runtimeState.modelReady) {
+    return {
+      statusCode: 503,
+      body: buildTaskRunError({
+        identity: context.identity,
+        startedAt: context.startedAt,
+        tool: "workflow-orchestrator",
+        task: body.workflow_id,
+        code: "MODEL_UNAVAILABLE",
+        message: `The local model '${requestedModel}' is not ready.`,
+        nextStep: getModelUnavailableNextStep(runtimeState),
+        model: requestedModel
       })
     };
   }
@@ -2097,7 +2169,7 @@ async function executeWorkflowRunRequest(body, context) {
       toolRegistry,
       options: buildModelRoutingOptions({
         ...(body.options || {}),
-        model: getActiveModel()
+        model: requestedModel
       }),
       meta: {
         requestId: context.identity.requestId,
@@ -2111,7 +2183,7 @@ async function executeWorkflowRunRequest(body, context) {
       identity: context.identity,
       plan: execution.plan,
       provider: getActiveProviderId(),
-      model: getActiveModel(),
+      model: requestedModel,
       status: execution.plan.status,
       durationMs: execution.durationMs
     });
@@ -2584,6 +2656,9 @@ async function recordTaskRunAndReturn({
   } catch (error) {
     console.error("Failed to write audit event.");
     console.error(error.message);
+    if (error.validation && Array.isArray(error.validation.errors)) {
+      console.error(error.validation.errors.join("; "));
+    }
   }
 
   return body;
@@ -2702,6 +2777,9 @@ async function recordMemoryAudit({
   } catch (error) {
     console.error("Failed to write memory audit event.");
     console.error(error.message);
+    if (error.validation && Array.isArray(error.validation.errors)) {
+      console.error(error.validation.errors.join("; "));
+    }
   }
 }
 

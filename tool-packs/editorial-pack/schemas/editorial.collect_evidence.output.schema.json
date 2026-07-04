@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "required": ["evidence", "warnings"],
+  "properties": {
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256", "content", "truncated"],
+        "properties": {
+          "path": { "type": "string" },
+          "sha256": { "type": "string" },
+          "content": { "type": "string" },
+          "truncated": { "type": "boolean" }
+        }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -34,7 +34,7 @@ function redactMemoryResultForAudit(result, endpoint = null) {
   }
 
   if (endpoint === "memory/status") {
-    return pickAllowedFields(result, [
+    return nullIfEmpty(pickAllowedFields(result, [
       "enabled",
       "mode",
       "vaultPathConfigured",
@@ -47,35 +47,35 @@ function redactMemoryResultForAudit(result, endpoint = null) {
       "projectCount",
       "topicCount",
       "warnings"
-    ]);
+    ]));
   }
 
   if (endpoint === "memory/context-pack") {
-    return pickAllowedFields(result, [
+    return nullIfEmpty(pickAllowedFields(result, [
       "contextPackId",
       "project",
       "task",
       "filesUsed",
       "warnings"
-    ]);
+    ]));
   }
 
   if (endpoint === "memory/writeback/propose") {
-    return pickAllowedFields(result, [
+    return nullIfEmpty(pickAllowedFields(result, [
       "proposalId",
       "proposalPath",
       "requiresHumanReview"
-    ]);
+    ]));
   }
 
   if (result.contextPackId || result.filesUsed) {
-    return pickAllowedFields(result, [
+    return nullIfEmpty(pickAllowedFields(result, [
       "contextPackId",
       "project",
       "task",
       "filesUsed",
       "warnings"
-    ]);
+    ]));
   }
 
   return null;
@@ -206,6 +206,10 @@ function pickAllowedFields(source, fields) {
   }
 
   return picked;
+}
+
+function nullIfEmpty(value) {
+  return value && Object.keys(value).length > 0 ? value : null;
 }
 
 module.exports = {

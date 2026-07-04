@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "benchmark.approved_evidence_summary.v1",
+  "evidenceId": "evidence-fixture",
+  "sourceRunId": "run-fixture",
+  "approvedAt": "2026-06-23T00:00:00.000Z",
+  "approvedBy": "human-review",
+  "summaryPath": "benchmark-lab/evidence/summaries/evidence-fixture.json",
+  "claims": [
+    "Fixture evidence only."
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "fixture_id": "operator-log-narrow-extraction-v0.1",
+  "model_id": "mradermacher-vibethinker-3b-q4-k-m-gguf",
+  "runtime_model": "hf.co/mradermacher/VibeThinker-3B-GGUF:Q4_K_M",
+  "date": "2026-06-18",
+  "status": "failed_automated_gate",
+  "privacy": {
+    "private_source_content_included": false,
+    "absolute_vault_path_included": false
+  },
+  "metrics": {
+    "call_count": 18,
+    "signal_count": 4,
+    "valid_signal_count": 1,
+    "parseable_json_rate_after_retry": 1,
+    "retry_rate": 0,
+    "source_path_precision": 1,
+    "excerpt_verification_rate": 0.25,
+    "raw_citation_count": 0,
+    "prompt_echo_count": 0,
+    "unsupported_claim_count": 2,
+    "useful_signal_yield_per_call": 0.0556,
+    "duplicate_signal_rate": 0,
+    "duration_ms": 34016,
+    "average_inference_ms": 1890,
+    "minimum_inference_ms": 589,
+    "maximum_inference_ms": 8812,
+    "human_usefulness_average": null
+  },
+  "criteria": {
+    "parseable_json": true,
+    "source_paths": true,
+    "exact_excerpts": false,
+    "raw_citations": true,
+    "prompt_echoes": true,
+    "duplicate_rate": true,
+    "automated_pass": false,
+    "final_pass": null
+  },
+  "interpretation": "Structured JSON and source-path copying passed, but exact evidence grounding and useful-signal yield failed. Do not route grounded editorial extraction to this model."
+}

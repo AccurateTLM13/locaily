@@ -29,5 +29,29 @@
       "verification_step": "validate_analysis",
       "required_result_sections": ["summary", "dealScore", "meta"]
     }
+  },
+  "publishing.operator_log_discovery": {
+    "purpose": "Inventory the allowlisted Second Brain and rank source-linked Operator Log opportunities.",
+    "input_type": "editorial_discovery_request",
+    "output_type": "editorial_opportunity_report",
+    "preferred_worker_type": "reasoning_worker",
+    "fallback_behavior": "fail_when_runtime_or_memory_unavailable",
+    "validation_expectations": {
+      "output_schema": "companion/schemas/editorial-opportunity-report.schema.json",
+      "verification_step": "verify_report",
+      "required_result_sections": ["summary", "recommendedOpportunity", "opportunities"]
+    }
+  },
+  "publishing.operator_log_draft": {
+    "purpose": "Turn a selected evidence-backed opportunity into reviewable Operator Log HTML and sitemap proposals.",
+    "input_type": "selected_editorial_opportunity",
+    "output_type": "operator_log_html_proposal",
+    "preferred_worker_type": "default_worker",
+    "fallback_behavior": "fail_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "companion/schemas/operator-log-draft.schema.json",
+      "verification_step": "verify_draft",
+      "required_result_sections": ["headline", "slug", "html", "sitemapEntry"]
+    }
   }
 }

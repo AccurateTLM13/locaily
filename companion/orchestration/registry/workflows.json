@@ -17,6 +17,24 @@
       "input_type": "marketplace_listing",
       "output_type": "deal_analysis",
       "status": "implemented"
+    },
+    {
+      "workflow_id": "operator_log_discovery",
+      "name": "Operator Log Opportunity Discovery",
+      "description": "Inventory the Second Brain and rank evidence-backed Operator Log opportunities.",
+      "track_id": "publishing.operator_log_discovery",
+      "input_type": "editorial_discovery_request",
+      "output_type": "editorial_opportunity_report",
+      "status": "experimental"
+    },
+    {
+      "workflow_id": "operator_log_draft",
+      "name": "Operator Log Draft",
+      "description": "Draft validated Operator Log HTML from a human-selected opportunity and evidence packet.",
+      "track_id": "publishing.operator_log_draft",
+      "input_type": "selected_editorial_opportunity",
+      "output_type": "operator_log_html_proposal",
+      "status": "experimental"
     }
   ]
 }

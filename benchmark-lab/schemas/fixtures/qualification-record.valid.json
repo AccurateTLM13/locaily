@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "qualification-fixture",
+  "subject": {
+    "type": "model",
+    "id": "mock-model",
+    "provider": "mock"
+  },
+  "status": "screening",
+  "qualifiedFor": [],
+  "evidence": {
+    "evidenceIds": [
+      "evidence-fixture"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/evidence/summaries/evidence-fixture.json"
+    ]
+  },
+  "generatedAt": "2026-06-23T00:00:00.000Z"
+}

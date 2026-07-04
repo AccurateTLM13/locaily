@@ -42,6 +42,7 @@ These roles extend the current operational set (`fast_worker`, `default_worker`,
 | Model | Role tested | Workflow | Result | Date |
 |---|---|---|---|---|
 | LiquidAI LFM2.5 family | mixed | Lighthouse Handoff | partial fixture evidence | 2026-06-14 |
+| VibeThinker 3B Q4_K_M | narrow extractor + editorial writer | Operator Log | failed grounding and writing gates | 2026-06-18 |
 | Proposed candidates above | — | — | not measured | — |
 
 Use [docs/99-archive/research-notes/model-evaluation-template.md](../docs/99-archive/research-notes/model-evaluation-template.md) when recording runs.

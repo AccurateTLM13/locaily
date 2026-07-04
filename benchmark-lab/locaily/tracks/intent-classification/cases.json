@@ -1,0 +1,101 @@
+[
+  {
+    "caseId": "intent-001",
+    "trackId": "intent-classification",
+    "difficulty": "easy",
+    "tags": [
+      "extract"
+    ],
+    "input": {
+      "text": "Pull the title and price from this marketplace listing."
+    },
+    "expected": {
+      "label": "extract"
+    }
+  },
+  {
+    "caseId": "intent-002",
+    "trackId": "intent-classification",
+    "difficulty": "easy",
+    "tags": [
+      "summarize"
+    ],
+    "input": {
+      "text": "Summarize this Lighthouse report for a developer handoff."
+    },
+    "expected": {
+      "label": "summarize"
+    }
+  },
+  {
+    "caseId": "intent-003",
+    "trackId": "intent-classification",
+    "difficulty": "medium",
+    "tags": [
+      "classify"
+    ],
+    "input": {
+      "text": "Classify this request as a workflow, tool, or memory task."
+    },
+    "expected": {
+      "label": "classify"
+    }
+  },
+  {
+    "caseId": "intent-004",
+    "trackId": "intent-classification",
+    "difficulty": "medium",
+    "tags": [
+      "route",
+      "expected-failure"
+    ],
+    "input": {
+      "text": "Send this to the best available local worker role."
+    },
+    "expected": {
+      "label": "route"
+    }
+  },
+  {
+    "caseId": "intent-005",
+    "trackId": "intent-classification",
+    "difficulty": "edge",
+    "tags": [
+      "malformed-simulation"
+    ],
+    "input": {
+      "text": "Return the strict JSON classification for this request."
+    },
+    "expected": {
+      "label": "classify"
+    }
+  },
+  {
+    "caseId": "intent-006",
+    "trackId": "intent-classification",
+    "difficulty": "edge",
+    "tags": [
+      "timeout-simulation"
+    ],
+    "input": {
+      "text": "Take too long while classifying this request."
+    },
+    "expected": {
+      "label": "unknown"
+    }
+  },
+  {
+    "caseId": "intent-007",
+    "trackId": "intent-classification",
+    "difficulty": "edge",
+    "tags": [
+      "runtime-error-simulation"
+    ],
+    "input": {
+      "text": "Trigger a simulated runtime error for isolation testing."
+    },
+    "expected": {
+      "label": "unknown"
+    }
+  }
+]

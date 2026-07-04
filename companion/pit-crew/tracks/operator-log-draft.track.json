@@ -1,0 +1,40 @@
+{
+  "track_id": "publishing.operator_log_draft",
+  "version": "0.1.0",
+  "name": "Operator Log Draft",
+  "description": "Turns a human-selected, source-linked opportunity into validated static HTML and a sitemap proposal.",
+  "output_schema": "companion/schemas/operator-log-draft.schema.json",
+  "result_step": "write_operator_log",
+  "verification_step": "verify_draft",
+  "steps": [
+    {
+      "id": "collect_evidence",
+      "input_map": {
+        "supportingFiles": ["$input.opportunity.supportingFiles", []],
+        "maxCharsPerFile": ["$input.maxCharsPerFile", 12000]
+      },
+      "executor": { "type": "tool", "tool": "editorial.collect_evidence", "task": "run" }
+    },
+    {
+      "id": "write_operator_log",
+      "input_map": {
+        "opportunity": "$input.opportunity",
+        "evidence": ["$input.evidence", "$artifacts.collect_evidence.evidence", []],
+        "publishDate": ["$input.publishDate", ""],
+        "zoneUrl": ["$input.zoneUrl", ""],
+        "toolUrl": ["$input.toolUrl", ""]
+      },
+      "executor": {
+        "type": "model",
+        "role": "default_worker",
+        "schema": "companion/pit-crew/schemas/operator-log-draft.schema.json",
+        "prompt_template": "write_operator_log"
+      }
+    },
+    {
+      "id": "verify_draft",
+      "input_map": { "draft": "$artifacts.write_operator_log" },
+      "executor": { "type": "tool", "tool": "editorial.verify_operator_log", "task": "run" }
+    }
+  ]
+}

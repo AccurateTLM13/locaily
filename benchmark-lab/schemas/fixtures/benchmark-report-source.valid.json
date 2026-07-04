@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "benchmark.report_source.v1",
+  "reportId": "report-fixture",
+  "title": "Fixture Report",
+  "generatedAt": "2026-06-23T00:00:00.000Z",
+  "evidenceIds": [
+    "evidence-fixture"
+  ],
+  "summaries": [
+    {
+      "evidenceId": "evidence-fixture",
+      "sourceRunId": "run-fixture",
+      "suiteId": "intent-classification-v1",
+      "trackId": "intent-classification",
+      "contractId": "intent-classifier-worker-v1",
+      "caseCount": 1,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "malformed": 0,
+      "passRate": 1
+    }
+  ]
+}

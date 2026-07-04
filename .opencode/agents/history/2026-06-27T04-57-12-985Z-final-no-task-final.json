@@ -1,0 +1,23 @@
+{
+  "run_id": "a925ea610937",
+  "iteration": 0,
+  "phase": "final",
+  "state": {
+    "objective": "controller-validation",
+    "status": "running",
+    "phase": "plan",
+    "iteration": 0,
+    "corrections_for_task": 0,
+    "consecutive_failures": 1,
+    "max_iterations": 3,
+    "max_corrections_per_task": 2,
+    "max_consecutive_failures": 2,
+    "current_task": null,
+    "worker_branch": "agents/worker/controller-validation",
+    "last_worker_status": "idle",
+    "last_review_status": null,
+    "objective_complete": false,
+    "blocker": "plan_artifact_unchanged",
+    "run_id": "a925ea610937"
+  }
+}

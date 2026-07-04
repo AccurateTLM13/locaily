@@ -2,60 +2,71 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-06-15
+**Updated:** 2026-06-27
 
 ## What Works
 
-- **Local Brain server** — `companion/server.js` on `127.0.0.1:31313`
-- **`POST /tasks/run`** — canonical single-tool entry (plus legacy `/analyze`)
-- **`POST /tracks/run`** and **`GET /tracks`** — Pit Crew track runner
-- **Tool registry** — manifest-backed packs under `tool-packs/`
-- **Lighthouse Handoff track** — `website_audit.lighthouse_handoff` in `companion/pit-crew/tracks/`
-- **DealSniper workflow track** — `marketplace.dealsniper` in `companion/pit-crew/tracks/`
-- **Declarative step `input_map`** — tool and model steps via `companion/pit-crew/step-input.js`
-- **Workflow orchestration** — `POST /workflows/plan`, `POST /workflows/run`, `GET /orchestration/*` (`companion/orchestration/`)
-- **Model roles** — role slots in track steps and routing options
-- **Provider routing** — Ollama + mock via `companion/providers/router.js`
-- **Audit / scoreboard hooks** — `GET /audit`, `GET /scoreboard`, per-run recording
-- **Memory Bridge v0** — `/memory/status`, `/memory/context-pack`, `/memory/writeback/propose` (disabled by default)
-- **Smoke and contract tests** — `scripts/smoke-test.js`, `scripts/contract-test.js` (**55/55** smoke on clean server with memory disabled)
+- **Local Brain server** - `companion/server.js` on `127.0.0.1:31313`
+- **`POST /tasks/run`** - canonical single-tool entry (plus legacy `/analyze`)
+- **`POST /tracks/run`** and **`GET /tracks`** - Pit Crew track runner
+- **Tool registry** - manifest-backed packs under `tool-packs/`
+- **Lighthouse Handoff track** - `website_audit.lighthouse_handoff` in `companion/pit-crew/tracks/`
+- **DealSniper workflow track** - `marketplace.dealsniper` in `companion/pit-crew/tracks/`
+- **Declarative step `input_map`** - tool and model steps via `companion/pit-crew/step-input.js`
+- **Workflow orchestration** - `POST /workflows/plan`, `POST /workflows/run`, `GET /orchestration/*` (`companion/orchestration/`)
+- **Model roles** - role slots in track steps and routing options
+- **Provider routing** - Ollama + mock via `companion/providers/router.js`
+- **Audit / scoreboard hooks** - `GET /audit`, `GET /scoreboard`, per-run recording
+- **Memory Bridge v0** - `/memory/status`, `/memory/context-pack`, `/memory/writeback/propose` (disabled by default)
+- **Operator Log editorial tracks** - experimental discovery and human-selected draft proposal paths
+- **Benchmark Lab scaffold** - `benchmark-lab/`, `GET /benchmark/status`, schemas, mock run loop, evidence summaries, model cards, and qualification records
+- **Smoke and contract tests** - `scripts/smoke-test.js`, `scripts/contract-test.js` (**56/56** smoke on clean server with memory disabled)
 
 ## What Is Partial
 
-- **Track runner** — linear pipeline only; two workflow tracks in catalog
-- **Model scorecards** — architecture spec exists; registry/selector not fully implemented
-- **Memory Bridge** — v0 endpoints + optional Lighthouse `compose-handoff` preflight; no apply/search/embeddings
-- **Console validation** — local validation UI exists; not a finished product surface
-- **Fallback ladder** — partial (`retry_same_model_once`); no full escalation handler
-- **Step input mapping** — declarative `input_map` on all Lighthouse and DealSniper steps; legacy fallbacks in `step-input.js`
+- **Track runner** - linear pipeline only; four workflow tracks in catalog
+- **Operator Log editorial workflow** - source-audited discovery and draft validation implemented; model quality and editorial ledger remain experimental
+- **Benchmark Lab live qualification depth** - schema/mock loop and first evidence path exist; broader live-model qualification coverage remains incremental
+- **Model scorecards / skill sheets** - direction exists; compact qualification records are the current evidence-backed runtime surface
+- **Memory Bridge** - v0 endpoints + optional Lighthouse `compose-handoff` preflight; no apply/search/embeddings
+- **Console validation** - local validation UI exists; not a finished product surface
+- **Fallback ladder** - partial (`retry_same_model_once`); no full escalation handler
+- **Step input mapping** - declarative `input_map` on all Lighthouse and DealSniper steps; legacy fallbacks remain in `step-input.js`
 
 ## What Is Not Built Yet
 
-- **Track planner** — no automatic decomposition from free-form requests
-- **DAG execution** — steps run in file order only
-- **NearbyNode protocol** — conceptual docs only
-- **Automatic track classification** — no classifier selects workflow + track
-- **Real Capability Registry** — tool packs exist; unified capability index does not
-- **Worker registry** — models routed by role, not a full worker catalog
-- **Extension ↔ Local Brain HTTP bridge** — spec exists; not implemented end-to-end
+- **Track planner** - no automatic decomposition from free-form requests
+- **DAG execution** - steps run in file order only
+- **NearbyNode protocol** - conceptual docs only
+- **Automatic track classification** - no classifier selects workflow + track
+- **Real Capability Registry** - tool packs exist; unified capability index does not
+- **Worker registry** - models routed by role, not a full worker catalog
+- **Automatic model swapping / Model Garage auto-switching** - proposed only
+- **Extension to Local Brain HTTP bridge** - spec exists; not implemented end-to-end
 
 ## Current Proof Workflows
 
-**Lighthouse Handoff** — `website_audit.lighthouse_handoff`
+**Lighthouse Handoff** - `website_audit.lighthouse_handoff`
 
 Exercises extraction, classification, prioritization, validation, markdown assembly, model routing, deterministic tool steps, and deterministic fallback when runtime is unavailable.
 
-**DealSniper** — `marketplace.dealsniper`
+**DealSniper** - `marketplace.dealsniper`
 
-Three-step track: prepare listing → model analysis → schema validation. Proves a second workflow on the same declarative track runner.
+Three-step track: prepare listing -> model analysis -> schema validation. Proves a second workflow on the same declarative track runner.
 
-See [../03-workflows/lighthouse-handoff.md](../03-workflows/lighthouse-handoff.md) and [../03-workflows/dealsniper.md](../03-workflows/dealsniper.md).
+**Benchmark Lab** - `benchmark-lab/`
+
+Exercises controlled local benchmark schemas, mock runtime runs, evidence promotion, report/model-card generation, checksum verification, and compact qualification records consumed by Local Brain.
+
+See [../03-workflows/lighthouse-handoff.md](../03-workflows/lighthouse-handoff.md), [../03-workflows/dealsniper.md](../03-workflows/dealsniper.md), and [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md).
 
 ## Current Architecture Stage
 
-**Pipeline-stage track runner**, not graph-stage planner.
+**Pipeline-stage track runner plus Benchmark Lab evidence scaffold**, not graph-stage planner.
 
-Locaily dispatches **tracks** (units of work with contracts), not raw models. Workflows compose tracks. Models and tools plug into track steps.
+Locaily dispatches **tracks** (units of work with contracts), not raw models. Workflows compose tracks. Models and tools plug into track steps. Benchmark Lab produces evidence and qualification records; Local Brain consumes compact records, not raw benchmark runs.
+
+The North Star is now documented as a local capability network: decompose work into track contracts, route each track to the smallest qualified capability, validate output, and record evidence. This is direction, not a claim that NearbyNode routing, RelayNode routing, adaptive model swapping, or automatic track planning exists.
 
 ## Source of Truth Order
 
@@ -66,14 +77,14 @@ Locaily dispatches **tracks** (units of work with contracts), not raw models. Wo
 5. [../01-architecture/](../01-architecture/)
 6. [../02-track-system/](../02-track-system/)
 7. [../03-workflows/](../03-workflows/)
-8. Archived docs — historical context only
+8. Archived docs - historical context only
 
 ## Now / Next / Later
 
 | Layer | Focus |
 |---|---|
-| **Now** | Remove legacy step-input fallbacks; extend orchestration to additional workflows |
-| **Next** | Model Garage evaluation harness (spec only until evidence) |
-| **Later** | Simple dependency graphs; Model Garage evaluation harness |
+| **Now** | Build Canonical Track Run Records as the first Track Learning Evidence Loop slice |
+| **Next** | Resume Lighthouse canonical-path and legacy step-input fallback hardening |
+| **Later** | Simple dependency graphs; broader model qualification coverage |
 | **Research** | DAG planner generated by Local Brain |
 | **Archive** | Old companion-only architecture, pre-track planning docs |

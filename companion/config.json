@@ -83,12 +83,16 @@
       "lighthouse.classify_audits",
       "lighthouse.validate_priority_fixes",
       "lighthouse.match_fixes",
-      "lighthouse.verify_handoff"
+      "lighthouse.verify_handoff",
+      "editorial.scan_vault",
+      "editorial.verify_report",
+      "editorial.collect_evidence",
+      "editorial.verify_operator_log"
     ]
   },
   "permissions": {
     "filePath": "data/permissions.json",
-    "approved": ["model.run", "memory.writeback.propose"],
+    "approved": ["model.run", "memory.read", "memory.writeback.propose"],
     "denied": ["file.delete", "file.write", "network.send", "browser.write", "memory.delete"]
   },
   "memoryBridge": {

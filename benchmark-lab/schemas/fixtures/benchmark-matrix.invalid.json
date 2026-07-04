@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.matrix.v1",
+  "createdAt": "2026-06-23T00:00:00.000Z",
+  "suiteId": "intent-classification-v1",
+  "trackId": "intent-classification",
+  "contractId": "intent-classifier-worker-v1",
+  "models": [],
+  "rankings": [],
+  "caseMatrix": []
+}

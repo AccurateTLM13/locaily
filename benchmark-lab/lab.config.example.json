@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "benchmark.lab.config.v1",
+  "runtime": {
+    "provider": "ollama",
+    "baseUrl": "http://127.0.0.1:11434"
+  },
+  "storage": {
+    "rawResultsDir": "benchmark-lab/results/raw",
+    "approvedEvidenceDir": "benchmark-lab/evidence/approved",
+    "qualificationDir": "benchmark-lab/qualifications"
+  },
+  "defaults": {
+    "mode": "quick-screen",
+    "concurrency": 1,
+    "timeoutMs": 60000,
+    "temperature": 0,
+    "topP": 1
+  }
+}

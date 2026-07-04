@@ -12,6 +12,14 @@ It is not one app. It is the system that lets practical workflows run on the use
 - nearby devices and connectors
 - rules, schemas, and audit trails
 
+## North Star
+
+Locaily is moving toward a **local capability network**: nearby hardware, local runtimes, tools, validators, and selected remote execution targets coordinated through the Local Brain.
+
+The goal is to decompose useful work into narrow tracks, route each track to the smallest qualified capability, validate the result, and record evidence so future runs can route and validate better.
+
+See [north-star-local-capability-network.md](./north-star-local-capability-network.md) for the full direction.
+
 ## The Four Layers
 
 ### Local Brain
@@ -27,6 +35,7 @@ It owns:
 - Task routing into tools and workflows
 - Provider routing and model role resolution
 - Result validation, fallbacks, and audit logging
+- Evidence recording and qualification-aware routing boundaries
 
 It does **not** own:
 
@@ -50,6 +59,8 @@ Principles:
 
 **Status:** conceptual / early. No full NearbyNode protocol or discovery layer is implemented in this repo yet.
 
+Future NearbyNode work should start from capability advertisements, health, availability, permissions, and evidence history. It should not assume every node hosts a model.
+
 ### AI Pit Crew
 
 The **AI Pit Crew** is the strategy for using multiple small specialists instead of one general model.
@@ -63,6 +74,7 @@ The Pit Crew layer includes:
 - tool packs with prompts, schemas, and rules
 - validators and fallback escalation
 - future model suitability profiles (speed, structured output quality, cost, etc.)
+- shared inference services where roles keep separate contracts while using the same loaded model when appropriate
 
 **Implemented today:** model roles, multi-step Lighthouse orchestration, provider router, and tool packs are partial Pit Crew mechanics. Full automatic track classification is not built yet.
 
@@ -118,12 +130,25 @@ A workflow may use:
 - several small models across steps
 - a nearby device for a non-model capability
 
+The target selection rule is **smallest qualified capability**: choose the least expensive model, tool, rule, validator, script, or node that consistently satisfies the track contract. Larger models, dedicated model instances, new hardware, or remote execution need evidence that they solve a real bottleneck.
+
+## Evidence Loop
+
+Locaily should improve through structured evidence, not vague memory or unstructured logs.
+
+```txt
+Run -> Observe -> Validate -> Record -> Compare -> Qualify -> Route Better -> Improve the Track
+```
+
+Evidence should support routing, qualification, validator design, track revision, and hardware/provider decisions. The current active slice, Canonical Track Run Records, is the first build step toward this loop.
+
 ## Builder-Friendly Guardrails
 
 - Prefer `/tasks/run` for new clients; keep `/analyze` for legacy clients
 - Tool handlers return raw results; the platform wraps envelopes
 - Do not claim benchmark wins without measured data
 - Do not expand scope until Lighthouse Handoff and core contracts stay stable
+- Do not add models, nodes, providers, or hardware without naming the track need, qualification method, and evidence required
 - Keep setup understandable for normal builders, not only terminal experts
 
 ## Related Docs

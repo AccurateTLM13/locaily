@@ -1,0 +1,14 @@
+{
+  "caseId": "intent-fixture-001",
+  "trackId": "intent-classification",
+  "difficulty": "easy",
+  "tags": [
+    "fixture"
+  ],
+  "input": {
+    "text": "Classify this request."
+  },
+  "expected": {
+    "label": "classify"
+  }
+}

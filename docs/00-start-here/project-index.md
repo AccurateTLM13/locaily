@@ -19,6 +19,9 @@ Master index of Locaily documentation. Prefer [repo-map.md](./repo-map.md) for a
 | [../02-track-system/track-graph-planning.md](../02-track-system/track-graph-planning.md) | Linear → DAG evolution | current |
 | [../01-architecture/local-brain-orchestration.md](../01-architecture/local-brain-orchestration.md) | Workflow run planning | current |
 | [../02-track-system/run-plan-format.md](../02-track-system/run-plan-format.md) | Run plan JSON shape | current |
+| **02-systems/** | Cross-cutting systems | current |
+| [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md) | Benchmark Lab architecture, evidence, qualification records | current |
+| [../../benchmark-lab/OPERATOR_GUIDE.md](../../benchmark-lab/OPERATOR_GUIDE.md) | Benchmark Lab command workflow | current |
 | [../01-architecture/locaily-overview.md](../01-architecture/locaily-overview.md) | System map | current |
 | [../01-architecture/local-brain.md](../01-architecture/local-brain.md) | Companion server | current |
 | [../01-architecture/api-contract.md](../01-architecture/api-contract.md) | HTTP API | current |
@@ -38,6 +41,8 @@ Master index of Locaily documentation. Prefer [repo-map.md](./repo-map.md) for a
 | [../05-product/roadmap.md](../05-product/roadmap.md) | Sequenced roadmap | current |
 | [../05-product/setup-flow.md](../05-product/setup-flow.md) | Setup | current |
 | **07-progress/** | Build dashboard | current |
+| [../07-progress/milestone-4-completion.md](../07-progress/milestone-4-completion.md) | M4 completion note | current |
+| [../07-progress/milestone-5-checkpoint.md](../07-progress/milestone-5-checkpoint.md) | M5 Benchmark Lab checkpoint | current |
 | [../07-progress/build-status.md](../07-progress/build-status.md) | Working / partial / not built | current |
 | [../07-progress/next-agent-brief.md](../07-progress/next-agent-brief.md) | Agent handoff | current |
 | [../07-progress/current-sprint.md](../07-progress/current-sprint.md) | Active sprint | current |

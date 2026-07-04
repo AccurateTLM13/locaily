@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/model-manifest.schema.json",
+  "title": "Benchmark Lab Model Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "modelId",
+    "displayName",
+    "provider",
+    "runtime",
+    "runtimeModelName",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "benchmark.model_manifest.v1"
+    },
+    "modelId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime": {
+      "enum": [
+        "mock",
+        "ollama"
+      ]
+    },
+    "runtimeModelName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "digest": {
+      "type": "string"
+    },
+    "parameterCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "quantization": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string"
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "commercialUse": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "enum": [
+        "planned",
+        "available",
+        "unavailable",
+        "retired"
+      ]
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

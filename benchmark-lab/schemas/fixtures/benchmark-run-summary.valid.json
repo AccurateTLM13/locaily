@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "benchmark.run_summary.v1",
+  "runId": "run-fixture",
+  "suiteId": "intent-classification-v1",
+  "trackId": "intent-classification",
+  "contractId": "intent-classifier-worker-v1",
+  "runtime": {
+    "provider": "mock",
+    "modelId": "mock-intent-classifier",
+    "runtimeModelName": "mock-intent-classifier"
+  },
+  "startedAt": "2026-06-23T00:00:00.000Z",
+  "completedAt": "2026-06-23T00:00:01.000Z",
+  "caseCount": 1,
+  "passed": 1,
+  "failed": 0,
+  "errors": 0,
+  "timeouts": 0,
+  "malformed": 0,
+  "caseResults": [
+    {
+      "caseId": "intent-fixture-001",
+      "verdict": "PASS",
+      "checks": [
+        {
+          "validator": "json-parse",
+          "status": "pass"
+        }
+      ]
+    }
+  ]
+}

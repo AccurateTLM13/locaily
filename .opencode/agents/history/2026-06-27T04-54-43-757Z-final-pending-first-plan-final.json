@@ -1,0 +1,23 @@
+{
+  "run_id": "612e9eb1e061",
+  "iteration": 0,
+  "phase": "final",
+  "state": {
+    "objective": "controller-validation",
+    "status": "running",
+    "phase": "worker",
+    "iteration": 0,
+    "corrections_for_task": 0,
+    "consecutive_failures": 1,
+    "max_iterations": 3,
+    "max_corrections_per_task": 2,
+    "max_consecutive_failures": 2,
+    "current_task": "pending-first-plan",
+    "worker_branch": "agents/worker/controller-validation",
+    "last_worker_status": "failed",
+    "last_review_status": null,
+    "objective_complete": false,
+    "blocker": "worker_missing_artifact",
+    "run_id": "612e9eb1e061"
+  }
+}

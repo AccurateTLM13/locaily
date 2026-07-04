@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "benchmark.hardware_profile.v1",
+  "hardwareProfileId": "local-dev-example",
+  "displayName": "Local Development Example",
+  "capturedAt": "2026-06-23T00:00:00.000Z",
+  "operatingSystem": {
+    "platform": "win32",
+    "release": "unknown",
+    "architecture": "x64"
+  },
+  "cpu": {
+    "model": "redacted-local-cpu",
+    "logicalCores": 1
+  },
+  "memory": {
+    "totalBytes": 0
+  },
+  "gpu": [],
+  "privacy": {
+    "containsPrivatePaths": false,
+    "containsUsernames": false,
+    "notes": "Example profile only. Replace with reviewed, non-private hardware profile data before using for performance evidence."
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/benchmark-review.schema.json",
+  "title": "Benchmark Lab Review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "suiteId",
+    "reviewedAt",
+    "caseCount",
+    "passed",
+    "failed",
+    "errors",
+    "timeouts",
+    "malformed",
+    "promotion"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "benchmark.review.v1"
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "suiteId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "caseCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "passed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "failed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "errors": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "timeouts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "malformed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "promotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eligible",
+        "reason"
+      ],
+      "properties": {
+        "eligible": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "notableCases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "caseId",
+          "verdict"
+        ],
+        "properties": {
+          "caseId": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

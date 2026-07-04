@@ -1,12 +1,12 @@
 # Milestone Map
 
-Layered planning — not a six-month prophecy.
+Layered planning, not a six-month prophecy.
 
-**Updated:** 2026-06-15
+**Updated:** 2026-06-26
 
-## Milestone 1A — Track System Explicit
+## Milestone 1A - Track System Explicit
 
-**Status:** **Complete**
+**Status:** Complete
 
 - Document core tracks, track registry, workflow registry
 - First proof track: `website_audit.lighthouse_handoff`
@@ -16,18 +16,18 @@ Layered planning — not a six-month prophecy.
 
 ---
 
-## Milestone 1B — Declarative Step Input
+## Milestone 1B - Declarative Step Input
 
-**Status:** **Complete**
+**Status:** Complete
 
 - `input_map` in track JSON + resolver in `input-map-resolver.js`
 - Lighthouse track migrated off hardcoded step ids
 
 ---
 
-## Milestone 2 — Second Workflow Track
+## Milestone 2 - Second Workflow Track
 
-**Status:** **Complete** — `marketplace.dealsniper` track merged (PR #7)
+**Status:** Complete - `marketplace.dealsniper` track merged (PR #7)
 
 - DealSniper track with declarative `input_map` only
 - Generic `result_step` / `verification_step` in orchestrator
@@ -35,9 +35,9 @@ Layered planning — not a six-month prophecy.
 
 ---
 
-## Milestone 3 — Model-Step Input Mapping
+## Milestone 3 - Model-Step Input Mapping
 
-**Status:** **Complete**
+**Status:** Complete
 
 - Declarative `input_map` for model steps via shared `step-input.js`
 - Lighthouse `prioritize_fixes` migrated off broad context reads in prompts
@@ -45,37 +45,55 @@ Layered planning — not a six-month prophecy.
 
 ---
 
-## Milestone 4 — Track-Based Orchestration
+## Milestone 4 - Track-Based Orchestration
 
-**Status:** **Complete**
+**Status:** Complete
 
 - Workflow registry + enriched track registry (`companion/orchestration/`)
 - Run plan builder and step-by-step executor
 - `GET /orchestration/tracks`, `GET /orchestration/workflows`, `POST /workflows/plan`, `POST /workflows/run`
 - Lighthouse Handoff first workflow target with audit logging
 
----
-
-## Milestone 5 — Legacy Fallback Removal (Next)
-
-**Status:** Not started
-
-- Remove `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` from `step-input.js`
-- All current catalog tracks declare `input_map` on every step
-- **Follow-up:** Improve `workflow-orchestrator` audit summaries so `GET /audit` exposes step-level orchestration status (step ids, statuses, workers, duration) without leaking raw task input/output
+**Completion note:** [milestone-4-completion.md](./milestone-4-completion.md)
 
 ---
 
-## Milestone 6 — Model Garage Evidence (Later)
-**Status:** Spec only
+## Milestone 5 - Benchmark Lab
 
-- Evaluation harness using [../99-archive/research-notes/model-evaluation-template.md](../99-archive/research-notes/model-evaluation-template.md)
-- Scoreboard baselines with logged runs
-- No benchmark marketing without data
+**Status:** Active / accepted next milestone
+
+**Checkpoint:** [milestone-5-checkpoint.md](./milestone-5-checkpoint.md)
+
+- Keep Benchmark Lab in-repo while qualification records and evidence contracts depend on Locaily runtime schemas
+- Validate qualification records before runtime model routing consumes them
+- Keep `GET /benchmark/status` read-only and side-effect free
+- Preserve Local Brain endpoint envelopes
+- Avoid broad benchmark claims beyond committed evidence
 
 ---
 
-## Milestone 7 — Simple Dependency Graph (Later)
+## Follow-On Hardening - Lighthouse Path / Step Fallbacks
+
+**Status:** After Benchmark Lab acceptance
+
+- Confirm canonical Lighthouse path (tool vs track vs workflow orchestration)
+- Extend parity checks across `/tasks/run`, `/tracks/run`, and `/workflows/run`
+- Remove `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` from `step-input.js` after parity tests
+- Improve `workflow-orchestrator` audit summaries without leaking raw task input/output
+
+---
+
+## Later - Model Swap / Model Garage Runtime Policy
+
+**Status:** Proposed architecture only
+
+- `docs/01-architecture/model-swap-manager.md` is design context, not an M5 runtime promise
+- No automatic model swapping until a dedicated milestone opens it
+
+---
+
+## Later - Simple Dependency Graph
+
 **Status:** Research gate
 
 - Topological runner for explicit `depends_on` in track files
@@ -83,16 +101,16 @@ Layered planning — not a six-month prophecy.
 
 ---
 
-## Milestone 8 — NearbyNode (Future)
+## Future - NearbyNode
 
 **Status:** Not built
 
 - Capability connector protocol
-- Device pairing — see [../01-architecture/nearby-node.md](../01-architecture/nearby-node.md)
+- Device pairing - see [../01-architecture/nearby-node.md](../01-architecture/nearby-node.md)
 
 ---
 
-## Milestone 9 — Planner-Generated DAG (Research)
+## Research - Planner-Generated DAG
 
 **Status:** Archive-ready research
 

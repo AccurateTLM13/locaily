@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "benchmark.model_manifest.v1",
+  "modelId": "mock-intent-classifier",
+  "displayName": "Mock Intent Classifier",
+  "provider": "benchmark-lab",
+  "runtime": "mock",
+  "runtimeModelName": "mock-intent-classifier",
+  "status": "available",
+  "capabilities": [
+    "structured-output"
+  ]
+}

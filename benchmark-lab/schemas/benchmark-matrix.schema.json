@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/benchmark-matrix.schema.json",
+  "title": "Benchmark Lab Matrix",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "matrixId",
+    "createdAt",
+    "suiteId",
+    "trackId",
+    "contractId",
+    "models",
+    "rankings",
+    "caseMatrix"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "benchmark.matrix.v1"
+    },
+    "matrixId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "suiteId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trackId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contractId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "modelId",
+          "runtimeModelName",
+          "status"
+        ],
+        "properties": {
+          "modelId": {
+            "type": "string"
+          },
+          "runtimeModelName": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "completed",
+              "run_error"
+            ]
+          },
+          "runId": {
+            "type": "string"
+          },
+          "caseCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "passed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "errors": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "timeouts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "malformed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "passRate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "rankings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rank",
+          "modelId",
+          "passRate",
+          "passed",
+          "failed",
+          "errors",
+          "timeouts",
+          "malformed"
+        ],
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "modelId": {
+            "type": "string"
+          },
+          "passRate": {
+            "type": "number"
+          },
+          "passed": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "errors": {
+            "type": "integer"
+          },
+          "timeouts": {
+            "type": "integer"
+          },
+          "malformed": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "caseMatrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "caseId",
+          "verdicts"
+        ],
+        "properties": {
+          "caseId": {
+            "type": "string"
+          },
+          "verdicts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

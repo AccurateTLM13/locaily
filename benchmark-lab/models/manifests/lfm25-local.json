@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "benchmark.model_manifest.v1",
+  "modelId": "lfm25-local",
+  "displayName": "LFM2.5 Local",
+  "provider": "Liquid AI",
+  "runtime": "ollama",
+  "runtimeModelName": "lfm2.5:latest",
+  "status": "available",
+  "capabilities": [
+    "structured-output",
+    "intent-classification"
+  ],
+  "notes": [
+    "Local Ollama manifest generated from installed model lfm2.5:latest."
+  ]
+}

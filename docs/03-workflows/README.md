@@ -6,6 +6,7 @@ User-facing jobs built from tracks. Workflows compose core and specialized track
 |---|---|---|
 | Lighthouse Handoff | **Implemented** (proof track) | [lighthouse-handoff.md](./lighthouse-handoff.md) |
 | DealSniper | Partial (tool only) | [dealsniper.md](./dealsniper.md) |
+| Operator Log Editorial | Experimental (discovery + draft proposals) | [operator-log.md](./operator-log.md) |
 | Content OS | Planned | — |
 | Repo Review | Planned | — |
 

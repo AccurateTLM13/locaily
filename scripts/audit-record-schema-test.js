@@ -83,7 +83,11 @@ function buildOrchestrationCandidate() {
           step_id: "extract_metrics",
           track_id: "website_audit.lighthouse_handoff",
           status: "completed",
-          worker_used: "lighthouse.parse",
+          worker_used: {
+            type: "tool",
+            tool: "lighthouse.parse",
+            task: "run"
+          },
           duration_ms: 12,
           error: null
         }

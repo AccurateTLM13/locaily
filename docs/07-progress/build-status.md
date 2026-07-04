@@ -1,32 +1,36 @@
 # Build Status
 
-**Updated:** 2026-06-15
+**Updated:** 2026-06-27
 
 ## Current Stage
 
-Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, declarative `input_map` on tool and model steps, two workflow tracks.
+Pipeline-stage **Local Brain** with **Pit Crew track runner**, JSON-first internal contracts, workflow orchestration, Memory Bridge v0, and Benchmark Lab evidence/qualification scaffolding.
+
+North Star direction is now documented as a local capability network: route track contracts to the smallest qualified capability, validate results, and preserve structured evidence for future routing and track improvement.
 
 ## Milestones
 
 | Milestone | Status |
 |---|---|
-| **1A — Track system explicit (docs)** | Complete |
-| **1B — Declarative track input mapping (tools)** | **Complete** |
-| **2 — Second workflow track** | **Complete** |
-| **3 — Model-step input mapping** | **Complete** |
-| **4 — Track-based orchestration** | **Complete** |
-| **5 — Legacy fallback removal** | **Next** |
+| **1A - Track system explicit (docs)** | Complete |
+| **1B - Declarative track input mapping (tools)** | Complete |
+| **2 - Second workflow track** | Complete |
+| **3 - Model-step input mapping** | Complete |
+| **4 - Track-based orchestration** | Complete |
+| **5 - Benchmark Lab** | Active / accepted next milestone |
 
 ## Current Proof
 
-**Lighthouse Handoff** — track id `website_audit.lighthouse_handoff`
+**Lighthouse Handoff** - track id `website_audit.lighthouse_handoff`
 
-**DealSniper** — track id `marketplace.dealsniper`
+**DealSniper** - track id `marketplace.dealsniper`
+
+**Benchmark Lab** - controlled local evaluation scaffold under `benchmark-lab/`, with read-only runtime status and qualification-record loading.
 
 ## Working
 
 - Local Brain server (`127.0.0.1:31313`)
-- `GET /health`, `GET /tools`, `GET /audit`, `GET /scoreboard`
+- `GET /health`, `GET /tools`, `GET /audit`, `GET /scoreboard`, `GET /benchmark/status`
 - `POST /tasks/run` and legacy `POST /analyze`
 - `POST /tracks/run` and `GET /tracks`
 - `GET /orchestration/tracks`, `GET /orchestration/workflows`, `POST /workflows/plan`, `POST /workflows/run`
@@ -34,17 +38,21 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 - Manifest-backed tool registry
 - Lighthouse proof track (7 steps)
 - DealSniper workflow track (3 steps)
-- **Declarative step `input_map`** (`input-map-resolver.js` + `step-input.js` for tool and model steps)
+- Experimental Operator Log editorial tracks
+- Declarative step `input_map` (`input-map-resolver.js` + `step-input.js` for tool and model steps)
 - Model roles + provider router (Ollama, mock)
+- Benchmark Lab schemas, mock run loop, evidence folders, reports, model cards, and qualification records
+- Qualification records schema-validated at `companion/core/model-qualification-loader.js`
 - Input gate, permissions, audit, result validation
 - Memory Bridge v0 endpoints (disabled by default)
-- Smoke tests 55/55 (clean server); contract tests
+- Smoke tests 56/56 (clean server); contract/schema/unit tests
 - Windows launch helpers
 
 ## Partial
 
-- Track registry (orchestration metadata + two track files)
-- Model scorecards (spec; limited implementation)
+- Track registry (orchestration metadata + implemented track files)
+- Benchmark Lab live model evaluation depth (mock loop and first evidence path exist; broader qualification coverage remains incremental)
+- Model scorecards / skill sheets (direction; qualification records are the current evidence-backed runtime surface)
 - Scoreboard (records runs; no full rubric harness)
 - Memory Bridge (v0; compose preflight only on Lighthouse)
 - Fallback ladder (retry only)
@@ -53,22 +61,28 @@ Pipeline-stage **Local Brain** with **Pit Crew track runner** — linear steps, 
 
 ## Not Built
 
+- Automatic model swapping / Model Garage auto-switching
 - DAG runner / graph planner
 - NearbyNode protocol and connectors
 - Automatic track classifier
 - Worker registry beyond role slots
 - Unified capability registry
-- Extension ↔ Local Brain HTTP bridge (end-to-end)
+- Extension to Local Brain HTTP bridge (end-to-end)
 - `GET /jobs/{id}/status` persistence API
 
 ## Current Priority
 
-**Next:** Remove legacy step-input fallbacks; Model Garage evaluation harness (spec only until evidence).
+**Now:** Build Canonical Track Run Records as the first Track Learning Evidence Loop slice. Records must stay summary-safe and must not store raw sensitive inputs or outputs by default.
+
+**Next:** Resume Lighthouse canonical-path and legacy step-input fallback hardening after the evidence-record slice lands.
 
 ## Evidence Pointers
 
+- M5 checkpoint: [milestone-5-checkpoint.md](./milestone-5-checkpoint.md)
+- Benchmark Lab architecture: [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md)
+- North Star: [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md)
+- M4 completion: [milestone-4-completion.md](./milestone-4-completion.md)
 - Pit Crew extraction: [../01-architecture/pit-crew-gap-analysis.md](../01-architecture/pit-crew-gap-analysis.md)
-- L1 validation: [../03-workflows/lighthouse-handoff-validation.md](../03-workflows/lighthouse-handoff-validation.md)
 - L2 Ollama + Memory: [../04-validation/l2-live-ollama-memory-bridge.md](../04-validation/l2-live-ollama-memory-bridge.md)
 - Track system: [../02-track-system/README.md](../02-track-system/README.md)
 - Input mapping: [../02-track-system/step-input-mapping.md](../02-track-system/step-input-mapping.md)

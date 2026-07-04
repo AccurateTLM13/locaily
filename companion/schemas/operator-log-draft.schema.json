@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "required": ["headline", "slug", "date", "zone", "status", "postType", "metaDescription", "supportingFiles", "html", "sitemapEntry"],
+  "properties": {
+    "headline": { "type": "string" },
+    "slug": { "type": "string" },
+    "date": { "type": "string" },
+    "zone": { "type": "string" },
+    "status": { "type": "string" },
+    "postType": { "type": "string" },
+    "metaDescription": { "type": "string" },
+    "supportingFiles": { "type": "array", "items": { "type": "string" } },
+    "html": { "type": "string" },
+    "sitemapEntry": { "type": "string" }
+  }
+}

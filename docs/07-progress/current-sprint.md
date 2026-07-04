@@ -1,33 +1,39 @@
 # Current Sprint
 
-**Updated:** 2026-06-15
+**Updated:** 2026-06-26
 
 ## Goal
 
-Complete Milestone 4 track-based orchestration and prepare Milestone 5 (legacy step-input fallback removal).
+Prepare Benchmark Lab as the accepted next milestone after M4, rebase it onto the JSON-first runtime baseline, and keep the runtime contract stable while qualification evidence wiring lands.
 
 ## Completed (recent)
 
-- Milestone 3: model-step `input_map` (PR #8)
-- Milestone 4: workflow orchestration layer (`companion/orchestration/`, workflow APIs)
-- Lighthouse Handoff run plan + executor with audit logging
-- Clean-server smoke baseline: **55/55**
+- Milestone 4 merged: PR #9 to `main` (`c89db65`)
+- JSON-first runtime integration merged on `origin/main` (`96d813b`)
+- Track-based orchestration layer shipped (`companion/orchestration/`, workflow APIs)
+- Completion note and M5 checkpoint docs added
+- Benchmark Lab accepted as the next milestone
 
-## In Scope (next)
+## In Scope
 
-- Remove `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` when safe
-- Keep Lighthouse + DealSniper tracks and workflow runs passing smoke/contract/unit tests
-- Sync progress docs after merge
+- Keep Benchmark Lab in-repo while it depends on Locaily track, schema, and model-role contracts
+- Validate qualification records before runtime routing consumes them
+- Keep `GET /benchmark/status` read-only and side-effect free
+- Preserve `/tasks/run`, `/tracks/run`, and `/workflows/run` response envelopes
+- Re-run smoke, contract, schema, and Benchmark Lab tests after rebase
 
 ## Out of Scope
 
-- Model swapping / Model Garage routing
+- Removing legacy `step-input.js` fallbacks
+- Automatic model swapping / Model Garage auto-switching
 - NearbyNode routing
-- DAG runner implementation
-- Semantic quality validation scoring
+- DAG runner / LLM-generated plans
+- Public benchmark marketing beyond committed evidence
 
 ## Done When
 
-- Legacy fallbacks removed or explicitly deferred with decision-log entry
-- `current-state.md`, `build-status.md`, and `next-agent-brief.md` match code
-- Smoke suite remains **55/55** on clean server
+- [x] Milestone 4 completion note published
+- [x] Benchmark Lab accepted as next milestone
+- [x] Benchmark Lab branch rebased on `origin/main`
+- [x] Qualification-record schema validation is enforced at load
+- [x] Full verification suite passes on the rebased branch

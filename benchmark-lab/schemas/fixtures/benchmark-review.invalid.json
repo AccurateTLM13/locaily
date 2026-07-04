@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "benchmark.review.v1",
+  "runId": "",
+  "suiteId": "intent-classification-v1",
+  "reviewedAt": "not-a-date",
+  "caseCount": -1,
+  "passed": 1,
+  "failed": 0,
+  "errors": 0,
+  "timeouts": 0,
+  "malformed": 0,
+  "promotion": {
+    "eligible": "yes",
+    "reason": ""
+  }
+}

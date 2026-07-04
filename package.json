@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "benchmark:run": "node benchmark-lab/engine/cli/benchmark-run.js",
+    "benchmark:review": "node benchmark-lab/engine/cli/benchmark-review.js",
+    "benchmark:promote": "node benchmark-lab/engine/cli/benchmark-promote.js",
+    "benchmark:compare": "node benchmark-lab/engine/cli/benchmark-compare.js",
+    "benchmark:matrix": "node benchmark-lab/engine/cli/benchmark-matrix.js",
+    "model-card:generate": "node benchmark-lab/engine/cli/model-card-generate.js",
+    "qualification:generate": "node benchmark-lab/engine/cli/qualification-generate.js",
+    "report:generate": "node benchmark-lab/engine/cli/report-generate.js",
+    "checksum:verify": "node benchmark-lab/engine/cli/checksum-verify.js",
+    "benchmark:status-smoke": "node scripts/benchmark-status-smoke-test.js",
+    "benchmark:test": "node scripts/benchmark-lab-schema-test.js && node scripts/benchmark-lab-run-test.js"
+  }
+}

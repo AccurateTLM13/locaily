@@ -1,4 +1,4 @@
-const { rm } = require("node:fs/promises");
+const { mkdir, rm, writeFile } = require("node:fs/promises");
 const { tmpdir } = require("node:os");
 const { join } = require("node:path");
 const {
@@ -36,6 +36,9 @@ const {
   createModelProfileManager
 } = require("../companion/core/model-profiles");
 const {
+  createModelQualificationLoader
+} = require("../companion/core/model-qualification-loader");
+const {
   createPermissionManager
 } = require("../companion/core/permissions");
 const {
@@ -45,6 +48,10 @@ const {
 const {
   createToolRegistry
 } = require("../companion/tools/registry");
+const {
+  executeModelStep,
+  evaluateQualificationPolicy
+} = require("../companion/pit-crew/model-router");
 
 function assert(condition, message) {
   if (!condition) {
@@ -550,6 +557,235 @@ function testModelRoleManager() {
   assert(list.some((role) => role.role === "default_worker"), "Expected role list.");
 }
 
+async function testModelQualificationLoader() {
+  const dir = join(tmpdir(), `locaily-qualification-test-${Date.now()}`);
+  const checksumDir = join(tmpdir(), `locaily-qualification-checksum-test-${Date.now()}`);
+  await mkdir(dir, { recursive: true });
+  await mkdir(checksumDir, { recursive: true });
+  await writeFile(join(dir, "mock-model-record.json"), JSON.stringify({
+    schemaVersion: "benchmark.qualification.v1",
+    recordId: "mock-model-record",
+    subject: {
+      type: "model",
+      id: "mock-model-id",
+      provider: "mock",
+      runtimeModelName: "mock-model"
+    },
+    status: "candidate",
+    qualifiedFor: [
+      {
+        role: "fast_worker",
+        trackId: "intent-classification",
+        contractId: "intent-classifier-worker-v1",
+        status: "conditional",
+        score: 0.8
+      }
+    ],
+    evidence: {
+      evidenceIds: ["evidence-1"],
+      summaryPaths: ["benchmark-lab/evidence/summaries/evidence-1.json"]
+    },
+    generatedAt: "2026-06-23T00:00:00.000Z"
+  }, null, 2), "utf8");
+  await writeFile(join(dir, "broken.json"), "{nope", "utf8");
+  await writeFile(join(dir, "schema-invalid.json"), JSON.stringify({
+    schemaVersion: "benchmark.qualification.v1",
+    recordId: "schema-invalid"
+  }, null, 2), "utf8");
+  await writeFile(join(checksumDir, "mock-checksum.json"), JSON.stringify({
+    schemaVersion: "benchmark.checksum.v1"
+  }), "utf8");
+
+  try {
+    const loader = createModelQualificationLoader({ qualificationDir: dir, checksumDir });
+    const records = loader.list();
+    const status = loader.getStatus();
+    const byModelId = loader.findByModel("mock-model-id");
+    const byRuntimeModelName = loader.findByModel("mock-model");
+    const matches = loader.findForRole({
+      modelId: "mock-model",
+      role: "fast_worker",
+      trackId: "intent-classification",
+      contractId: "intent-classifier-worker-v1"
+    });
+
+    assert(records.length === 1, "Expected one qualification record.");
+    assert(status.records === 1, "Expected status record count.");
+    assert(status.invalidRecords === 2, "Expected two invalid qualification records.");
+    assert(status.errors.some((error) => error.code === "QUALIFICATION_RECORD_SCHEMA_INVALID"), "Expected schema-invalid qualification record to be rejected.");
+    assert(status.checksums === 1, "Expected one checksum count.");
+    assert(status.byStatus.candidate === 1, "Expected candidate status count.");
+    assert(status.byRole.fast_worker === 1, "Expected fast worker role count.");
+    assert(byModelId.length === 1, "Expected one model qualification record by id.");
+    assert(byRuntimeModelName.length === 1, "Expected one model qualification record by runtime model name.");
+    assert(matches.length === 1, "Expected one role qualification match.");
+    assert(matches[0].status === "conditional", "Expected conditional qualification status.");
+    assert(matches[0].score === 0.8, "Expected qualification score.");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+    await rm(checksumDir, { recursive: true, force: true });
+  }
+}
+
+async function testModelStepQualificationMetadata() {
+  const output = {
+    label: "extract"
+  };
+  const runtime = {
+    generateJson: async () => output
+  };
+  const step = {
+    id: "classify_intent",
+    input_map: "$input",
+    executor: {
+      type: "model",
+      role: "fast_worker",
+      prompt_template: "classify_issues",
+      schema: "benchmark-lab/schemas/fixtures/model-step-output.schema.json"
+    }
+  };
+  const context = {
+    input: {
+      text: "Extract the title."
+    },
+    artifacts: {}
+  };
+
+  const result = await executeModelStep({
+    step,
+    context,
+    runtime,
+    options: {
+      track_id: "intent-classification",
+      profile_id: "balanced",
+      resolveModelForRole: () => ({
+        ok: true,
+        role: "fast_worker",
+        model: "mock-model"
+      }),
+      getRoleSuitability: () => ({
+        label: "Fast Worker"
+      }),
+      getModelQualificationEvidence: ({ model, role, trackId }) => ({
+        model,
+        role,
+        trackId,
+        status: "conditional",
+        evidenceIds: ["evidence-1"]
+      })
+    }
+  });
+
+  assert(result.output === output, "Expected model step output.");
+  assert(result.meta.model === "mock-model", "Expected model metadata.");
+  assert(result.meta.role === "fast_worker", "Expected role metadata.");
+  assert(result.meta.suitability.label === "Fast Worker", "Expected suitability metadata.");
+  assert(result.meta.qualification.status === "conditional", "Expected qualification metadata.");
+  assert(result.meta.qualification.evidenceIds.includes("evidence-1"), "Expected qualification evidence id.");
+}
+
+async function testModelQualificationPolicy() {
+  const advisory = evaluateQualificationPolicy({
+    policy: "advisory",
+    qualification: null,
+    model: "mock-model",
+    role: "fast_worker"
+  });
+  const rejectRejected = evaluateQualificationPolicy({
+    policy: "reject_rejected",
+    qualification: {
+      status: "rejected"
+    },
+    model: "mock-model",
+    role: "fast_worker"
+  });
+  const requireQualifiedWithConditional = evaluateQualificationPolicy({
+    policy: "require_qualified",
+    qualification: {
+      status: "conditional"
+    },
+    model: "mock-model",
+    role: "fast_worker"
+  });
+  const requireConditional = evaluateQualificationPolicy({
+    policy: "require_qualified_or_conditional",
+    qualification: {
+      status: "conditional"
+    },
+    model: "mock-model",
+    role: "fast_worker"
+  });
+  const unknown = evaluateQualificationPolicy({
+    policy: "mystery",
+    qualification: null,
+    model: "mock-model",
+    role: "fast_worker"
+  });
+
+  assert(advisory.ok === true, "Expected advisory policy to allow missing evidence.");
+  assert(rejectRejected.ok === false, "Expected reject_rejected to reject rejected status.");
+  assert(rejectRejected.code === "MODEL_QUALIFICATION_REJECTED", "Expected rejected policy code.");
+  assert(requireQualifiedWithConditional.ok === false, "Expected require_qualified to reject conditional status.");
+  assert(requireQualifiedWithConditional.code === "MODEL_NOT_QUALIFIED", "Expected not qualified code.");
+  assert(requireConditional.ok === true, "Expected require_qualified_or_conditional to accept conditional status.");
+  assert(unknown.ok === false, "Expected unknown policy to fail.");
+  assert(unknown.code === "QUALIFICATION_POLICY_INVALID", "Expected invalid policy code.");
+}
+
+async function testModelStepQualificationPolicyBlocksGeneration() {
+  let generateCalled = false;
+  const runtime = {
+    generateJson: async () => {
+      generateCalled = true;
+      return {
+        label: "extract"
+      };
+    }
+  };
+  const step = {
+    id: "classify_intent",
+    input_map: "$input",
+    executor: {
+      type: "model",
+      role: "fast_worker",
+      prompt_template: "classify_issues",
+      schema: "benchmark-lab/schemas/fixtures/model-step-output.schema.json"
+    }
+  };
+  let failed = null;
+
+  try {
+    await executeModelStep({
+      step,
+      context: {
+        input: {
+          text: "Extract the title."
+        },
+        artifacts: {}
+      },
+      runtime,
+      options: {
+        qualification_policy: "require_qualified",
+        resolveModelForRole: () => ({
+          ok: true,
+          role: "fast_worker",
+          model: "mock-model"
+        }),
+        getModelQualificationEvidence: () => ({
+          status: "conditional",
+          evidenceIds: ["evidence-1"]
+        })
+      }
+    });
+  } catch (error) {
+    failed = error;
+  }
+
+  assert(failed, "Expected model step to fail qualification policy.");
+  assert(failed.code === "MODEL_NOT_QUALIFIED", "Expected model step qualification failure code.");
+  assert(generateCalled === false, "Expected qualification policy to block generation before runtime call.");
+}
+
 function testPermissionManager() {
   const manager = createPermissionManager();
   const approved = manager.check({
@@ -675,6 +911,10 @@ async function main() {
   await testProviderRouter();
   testModelProfileManager();
   testModelRoleManager();
+  await testModelQualificationLoader();
+  await testModelStepQualificationMetadata();
+  await testModelQualificationPolicy();
+  await testModelStepQualificationPolicyBlocksGeneration();
   testPermissionManager();
   await testResultValidator();
   console.log("Contract helpers passed.");

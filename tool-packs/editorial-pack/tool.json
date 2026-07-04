@@ -1,0 +1,46 @@
+{
+  "id": "editorial-pack",
+  "name": "Editorial Workflow Pack",
+  "version": "0.1.0",
+  "trust": "local_private",
+  "permissions": ["memory.read", "model.run"],
+  "tools": [
+    {
+      "id": "editorial.scan_vault",
+      "name": "Scan Vault for Editorial Signals",
+      "description": "Inventories every allowlisted Markdown file and extracts bounded, source-linked editorial signals.",
+      "tasks": ["run"],
+      "model_role": "reasoning_worker",
+      "input_schema": "schemas/editorial.scan_vault.input.schema.json",
+      "output_schema": "schemas/editorial.scan_vault.output.schema.json",
+      "permissions": ["memory.read", "model.run"]
+    },
+    {
+      "id": "editorial.verify_report",
+      "name": "Verify Editorial Opportunity Report",
+      "description": "Checks source links, score ranges, and required editorial fields.",
+      "tasks": ["run"],
+      "input_schema": "schemas/editorial.verify_report.input.schema.json",
+      "output_schema": "schemas/editorial.verify_report.output.schema.json",
+      "permissions": []
+    },
+    {
+      "id": "editorial.collect_evidence",
+      "name": "Collect Editorial Evidence",
+      "description": "Reads only the selected opportunity's allowlisted supporting files into a bounded evidence packet.",
+      "tasks": ["run"],
+      "input_schema": "schemas/editorial.collect_evidence.input.schema.json",
+      "output_schema": "schemas/editorial.collect_evidence.output.schema.json",
+      "permissions": ["memory.read"]
+    },
+    {
+      "id": "editorial.verify_operator_log",
+      "name": "Verify Operator Log Draft",
+      "description": "Checks Operator Log anatomy, evidence links, HTML metadata, and prose length.",
+      "tasks": ["run"],
+      "input_schema": "schemas/editorial.verify_operator_log.input.schema.json",
+      "output_schema": "schemas/editorial.verify_operator_log.output.schema.json",
+      "permissions": []
+    }
+  ]
+}

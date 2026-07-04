@@ -6,3 +6,61 @@ build/
 coverage/
 *.log
 data/
+
+# Benchmark Lab - raw/generated local artifacts
+benchmark-lab/results/raw/*
+benchmark-lab/results/tmp/*
+benchmark-lab/cache/*
+benchmark-lab/runtime-logs/*
+!benchmark-lab/results/raw/.gitignore
+!benchmark-lab/results/tmp/.gitignore
+!benchmark-lab/cache/.gitignore
+!benchmark-lab/runtime-logs/.gitignore
+
+# Benchmark Lab - downloaded/local model files
+benchmark-lab/models/files/*
+!benchmark-lab/models/files/.gitignore
+benchmark-lab/models/**/*.bin
+benchmark-lab/models/**/*.gguf
+benchmark-lab/models/**/*.safetensors
+benchmark-lab/models/**/*.pt
+benchmark-lab/models/**/*.pth
+benchmark-lab/models/**/*.onnx
+
+# Benchmark Lab - temporary reports and exports
+benchmark-lab/reports/tmp/*
+benchmark-lab/reports/drafts/*
+benchmark-lab/model-cards/drafts/*
+!benchmark-lab/reports/drafts/.gitignore
+!benchmark-lab/model-cards/drafts/.gitignore
+benchmark-lab/reports/*.tmp.*
+benchmark-lab/reports/*.local.*
+benchmark-lab/reports/**/*.html
+!benchmark-lab/reports/published/**/*.html
+
+# Benchmark Lab - local configs and secrets
+benchmark-lab/lab.config.json
+benchmark-lab/configs/local.json
+benchmark-lab/configs/*.local.json
+benchmark-lab/**/*.secret.json
+
+# Benchmark Lab - provider/runtime caches
+benchmark-lab/.cache/
+benchmark-lab/.ollama/
+benchmark-lab/.hf/
+benchmark-lab/.tmp/
+
+# Benchmark Lab - structured logs/traces
+benchmark-lab/**/*.trace
+benchmark-lab/**/*.ndjson
+!benchmark-lab/evidence/approved/**/*.ndjson
+
+# LocAIly runtime evidence
+companion/evidence/records/*.json
+companion/evidence/lessons/*.json
+
+# Preserve directory placeholders and sanitized fixtures
+!companion/evidence/records/.gitkeep
+!companion/evidence/lessons/.gitkeep
+!companion/evidence/records/fixtures/
+!companion/evidence/lessons/fixtures/

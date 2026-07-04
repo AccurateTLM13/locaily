@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["supportingFiles"],
+  "properties": {
+    "supportingFiles": { "type": "array", "items": { "type": "string" } },
+    "maxCharsPerFile": { "type": "integer", "minimum": 1000, "maximum": 20000 }
+  }
+}

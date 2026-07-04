@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/benchmark-run-summary.schema.json",
+  "title": "Benchmark Lab Run Summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "suiteId",
+    "trackId",
+    "contractId",
+    "runtime",
+    "startedAt",
+    "completedAt",
+    "caseCount",
+    "passed",
+    "failed",
+    "errors",
+    "timeouts",
+    "malformed",
+    "caseResults"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "benchmark.run_summary.v1"
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "suiteId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trackId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contractId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "modelId": {
+          "type": "string"
+        },
+        "runtimeModelName": {
+          "type": "string"
+        }
+      }
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "caseCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "passed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "failed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "errors": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "timeouts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "malformed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "caseResults": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "caseId",
+          "verdict",
+          "checks"
+        ],
+        "properties": {
+          "caseId": {
+            "type": "string"
+          },
+          "verdict": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "MALFORMED_OUTPUT",
+              "TIMEOUT",
+              "RUNTIME_ERROR"
+            ]
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  }
+}

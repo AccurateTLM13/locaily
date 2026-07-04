@@ -1,0 +1,182 @@
+{
+  "schemaVersion": "benchmark.promoted_evidence.v1",
+  "evidenceId": "llama32-local-intent-classification-v1",
+  "sourceRunId": "run-20260624T023320Z",
+  "suiteId": "intent-classification-v1",
+  "trackId": "intent-classification",
+  "contractId": "intent-classifier-worker-v1",
+  "approvedAt": "2026-06-24T02:34:45.970Z",
+  "approvedBy": "JP",
+  "summary": {
+    "schemaVersion": "benchmark.run_summary.v1",
+    "runId": "run-20260624T023320Z",
+    "suiteId": "intent-classification-v1",
+    "trackId": "intent-classification",
+    "contractId": "intent-classifier-worker-v1",
+    "runtime": {
+      "provider": "ollama",
+      "modelId": "llama3.2-local",
+      "runtimeModelName": "llama3.2"
+    },
+    "startedAt": "2026-06-24T02:33:20.297Z",
+    "completedAt": "2026-06-24T02:33:35.415Z",
+    "caseCount": 7,
+    "passed": 7,
+    "failed": 0,
+    "errors": 0,
+    "timeouts": 0,
+    "malformed": 0,
+    "caseResults": [
+      {
+        "caseId": "intent-live-001",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "extract",
+            "actual": "extract"
+          }
+        ]
+      },
+      {
+        "caseId": "intent-live-002",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "summarize",
+            "actual": "summarize"
+          }
+        ]
+      },
+      {
+        "caseId": "intent-live-003",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "classify",
+            "actual": "classify"
+          }
+        ]
+      },
+      {
+        "caseId": "intent-live-004",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "route",
+            "actual": "route"
+          }
+        ]
+      },
+      {
+        "caseId": "intent-live-005",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "classify",
+            "actual": "classify"
+          }
+        ]
+      },
+      {
+        "caseId": "intent-live-006",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "unknown",
+            "actual": "unknown"
+          }
+        ]
+      },
+      {
+        "caseId": "intent-live-007",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "unknown",
+            "actual": "unknown"
+          }
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "Live local Ollama llama3.2 run for intent-classification-v1. First qualifying evidence; not a broad production qualification."
+  ]
+}

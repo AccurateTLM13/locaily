@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "required": ["editorialBrief"],
+  "properties": {
+    "editorialBrief": { "type": "string" },
+    "maxSignalsPerBatch": { "type": "integer", "minimum": 1, "maximum": 8 },
+    "batchCharLimit": { "type": "integer", "minimum": 4000, "maximum": 30000 },
+    "changedSince": { "type": "string" }
+  }
+}

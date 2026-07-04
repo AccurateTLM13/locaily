@@ -14,7 +14,8 @@ function describeWorkerUsed(stepResult, trackStep) {
       type: "model",
       role: stepResult.meta.role || trackStep.executor.role || "default_worker",
       model: stepResult.meta.model || null,
-      profile_id: stepResult.meta.profile_id || null
+      profile_id: stepResult.meta.profile_id || null,
+      qualification: stepResult.meta.qualification || null
     };
   }
 
@@ -75,7 +76,10 @@ async function executeRunPlan({
         step: trackStep,
         context,
         runtime,
-        options,
+        options: {
+          ...options,
+          track_id: track.track_id
+        },
         toolRegistry,
         meta
       });

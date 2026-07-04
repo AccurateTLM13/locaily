@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "intent-classification-v1",
+  "name": "Intent Classification V1",
+  "mode": "quick-screen",
+  "trackId": "intent-classification",
+  "contractId": "intent-classifier-worker-v1",
+  "runtime": {
+    "provider": "mock",
+    "modelManifest": "mock-intent-classifier",
+    "responsesPath": "mock-responses.json"
+  },
+  "caseFiles": [
+    "cases.json"
+  ],
+  "outputSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "track",
+      "label",
+      "confidence"
+    ],
+    "properties": {
+      "track": {
+        "const": "classification"
+      },
+      "label": {
+        "enum": [
+          "extract",
+          "summarize",
+          "classify",
+          "route",
+          "unknown"
+        ]
+      },
+      "confidence": {
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ]
+      }
+    }
+  },
+  "validators": [
+    "json-parse",
+    "json-schema",
+    "expected-label"
+  ]
+}

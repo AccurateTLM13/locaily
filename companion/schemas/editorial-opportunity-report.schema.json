@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["summary", "recommendedOpportunity", "opportunities"],
+  "properties": {
+    "summary": { "type": "string" },
+    "recommendedOpportunity": { "type": "integer", "minimum": 0 },
+    "opportunities": { "type": "array", "items": { "type": "object" } }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "benchmark.model_manifest.v1",
+  "modelId": "mock-intent-classifier",
+  "displayName": "Mock Intent Classifier",
+  "provider": "benchmark-lab",
+  "runtime": "mock",
+  "runtimeModelName": "mock-intent-classifier",
+  "status": "available",
+  "capabilities": [
+    "structured-output",
+    "intent-classification"
+  ],
+  "notes": [
+    "Deterministic fixture model used for Benchmark Lab harness tests.",
+    "Not a real model and not eligible for Locaily routing qualification."
+  ]
+}

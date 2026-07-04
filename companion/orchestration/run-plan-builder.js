@@ -85,6 +85,28 @@ function validateWorkflowInput(workflow, input) {
     }
   }
 
+  if (workflow.workflow_id === "operator_log_discovery") {
+    if (!input.editorialBrief || typeof input.editorialBrief !== "string") {
+      return {
+        ok: false,
+        code: "INVALID_INPUT",
+        message: "Operator Log discovery requires editorialBrief string.",
+        nextStep: "Describe the publication, voice, and opportunity criteria in editorialBrief."
+      };
+    }
+  }
+
+  if (workflow.workflow_id === "operator_log_draft") {
+    if (!input.opportunity || typeof input.opportunity !== "object" || Array.isArray(input.opportunity)) {
+      return {
+        ok: false,
+        code: "INVALID_INPUT",
+        message: "Operator Log drafting requires a selected opportunity object.",
+        nextStep: "Choose an opportunity from operator_log_discovery and send it as input.opportunity."
+      };
+    }
+  }
+
   return { ok: true };
 }
 

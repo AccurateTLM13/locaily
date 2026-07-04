@@ -1,0 +1,5 @@
+# Committed record of autonomous decisions. The controller writes a sanitized
+# snapshot here at the end of each iteration:
+#   <timestamp>-<phase>-<task-id>.{md|json}
+# This keeps meaningful decisions from disappearing after a run even though the
+# live working files under state/ and tasks/ are gitignored churn.

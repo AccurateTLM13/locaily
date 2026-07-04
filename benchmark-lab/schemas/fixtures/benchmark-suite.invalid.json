@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "wrong",
+  "suiteId": "fixture-suite",
+  "name": "Fixture Suite",
+  "mode": "quick-screen",
+  "trackId": "intent-classification",
+  "contractId": "intent-classifier-worker-v1",
+  "runtime": {
+    "provider": "nope"
+  },
+  "caseFiles": [],
+  "outputSchema": {
+    "type": "object"
+  },
+  "validators": [
+    "json-parse"
+  ],
+  "unexpected": true
+}

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "llama32-local-intent-classification-v1-approved-summary",
+  "artifactType": "approved_evidence_summary",
+  "artifactPath": "benchmark-lab/evidence/approved/llama32-local-intent-classification-v1.json",
+  "algorithm": "sha256",
+  "checksum": "sha256:98a771da08cbbc4f01c364c3fe15e791367d40a43eea2945078b8bcf6f15444d",
+  "generatedAt": "2026-06-24T02:34:45.980Z"
+}

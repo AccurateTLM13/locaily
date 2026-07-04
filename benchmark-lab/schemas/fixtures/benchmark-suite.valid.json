@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "fixture-suite",
+  "name": "Fixture Suite",
+  "mode": "quick-screen",
+  "trackId": "intent-classification",
+  "contractId": "intent-classifier-worker-v1",
+  "runtime": {
+    "provider": "mock",
+    "responsesPath": "mock-responses.json",
+    "modelManifest": "mock-intent-classifier"
+  },
+  "caseFiles": [
+    "cases.json"
+  ],
+  "outputSchema": {
+    "type": "object"
+  },
+  "validators": [
+    "json-parse",
+    "json-schema",
+    "expected-label"
+  ]
+}

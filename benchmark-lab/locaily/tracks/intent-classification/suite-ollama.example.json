@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "intent-classification-v1",
+  "name": "Intent Classification V1 Ollama Local",
+  "mode": "quick-screen",
+  "trackId": "intent-classification",
+  "contractId": "intent-classifier-worker-v1",
+  "runtime": {
+    "provider": "ollama",
+    "modelManifest": "llama3.2-local",
+    "baseUrl": "http://127.0.0.1:11434",
+    "timeoutMs": 60000,
+    "temperature": 0,
+    "numPredict": 256
+  },
+  "caseFiles": [
+    "cases-live.json"
+  ],
+  "outputSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "track",
+      "label",
+      "confidence"
+    ],
+    "properties": {
+      "track": {
+        "const": "classification"
+      },
+      "label": {
+        "enum": [
+          "extract",
+          "summarize",
+          "classify",
+          "route",
+          "unknown"
+        ]
+      },
+      "confidence": {
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ]
+      }
+    }
+  },
+  "validators": [
+    "json-parse",
+    "json-schema",
+    "expected-label"
+  ]
+}

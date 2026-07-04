@@ -1,0 +1,41 @@
+{
+  "fixture_id": "operator-log-narrow-extraction-v0.1",
+  "private_content_policy": "Vault content and hashes are captured only in ignored local artifacts.",
+  "runs_per_file": 3,
+  "max_signals_per_run": 2,
+  "files": [
+    {
+      "path": "wiki/projects/Locaily.md",
+      "fixture_role": "broad_project_page"
+    },
+    {
+      "path": "wiki/projects/Lighthouse Handoff.md",
+      "fixture_role": "workflow_project_page"
+    },
+    {
+      "path": "wiki/topics/Memory Bridge v0 Validation.md",
+      "fixture_role": "validation_evidence"
+    },
+    {
+      "path": "wiki/topics/Phase 1 Task - Research and Model Phone and Mini PC Nodes.md",
+      "fixture_role": "research_build_task"
+    },
+    {
+      "path": "wiki/concepts/Track-Based Orchestration.md",
+      "fixture_role": "concept_not_event"
+    },
+    {
+      "path": "wiki/entities/Phone Node.md",
+      "fixture_role": "entity_not_story"
+    }
+  ],
+  "pass_criteria": {
+    "parseable_json_after_retry": 1.0,
+    "source_path_precision": 1.0,
+    "excerpt_verification_rate": 0.9,
+    "raw_citation_count": 0,
+    "prompt_echo_count": 0,
+    "maximum_duplicate_signal_rate": 0.2,
+    "minimum_human_usefulness_average": 3
+  }
+}

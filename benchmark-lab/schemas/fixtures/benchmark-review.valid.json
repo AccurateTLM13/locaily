@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "benchmark.review.v1",
+  "runId": "run-fixture",
+  "suiteId": "intent-classification-v1",
+  "reviewedAt": "2026-06-23T00:00:00.000Z",
+  "caseCount": 1,
+  "passed": 1,
+  "failed": 0,
+  "errors": 0,
+  "timeouts": 0,
+  "malformed": 0,
+  "promotion": {
+    "eligible": true,
+    "reason": "No failed cases."
+  },
+  "notableCases": []
+}

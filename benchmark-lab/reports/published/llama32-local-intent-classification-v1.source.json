@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "benchmark.report_source.v1",
+  "reportId": "llama32-local-intent-classification-v1",
+  "title": "Llama 3.2 Local Intent Classification V1",
+  "generatedAt": "2026-06-24T02:34:58.330Z",
+  "evidenceIds": [
+    "llama32-local-intent-classification-v1"
+  ],
+  "summaries": [
+    {
+      "evidenceId": "llama32-local-intent-classification-v1",
+      "sourceRunId": "run-20260624T023320Z",
+      "suiteId": "intent-classification-v1",
+      "trackId": "intent-classification",
+      "contractId": "intent-classifier-worker-v1",
+      "caseCount": 7,
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "malformed": 0,
+      "passRate": 1
+    }
+  ]
+}

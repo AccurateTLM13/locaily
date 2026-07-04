@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/benchmark-comparison.schema.json",
+  "title": "Benchmark Lab Comparison",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "comparisonId",
+    "createdAt",
+    "leftRunId",
+    "rightRunId",
+    "comparable",
+    "differences",
+    "metrics",
+    "caseDeltas"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "benchmark.comparison.v1"
+    },
+    "comparisonId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "leftRunId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rightRunId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "comparable": {
+      "type": "boolean"
+    },
+    "differences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "field",
+          "left",
+          "right",
+          "invalidating"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "left": {
+            "type": "string"
+          },
+          "right": {
+            "type": "string"
+          },
+          "invalidating": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "left",
+        "right",
+        "delta"
+      ],
+      "properties": {
+        "left": {
+          "type": "object"
+        },
+        "right": {
+          "type": "object"
+        },
+        "delta": {
+          "type": "object"
+        }
+      }
+    },
+    "caseDeltas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "caseId",
+          "leftVerdict",
+          "rightVerdict",
+          "changed"
+        ],
+        "properties": {
+          "caseId": {
+            "type": "string"
+          },
+          "leftVerdict": {
+            "type": "string"
+          },
+          "rightVerdict": {
+            "type": "string"
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

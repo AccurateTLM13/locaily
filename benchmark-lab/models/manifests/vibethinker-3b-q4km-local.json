@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "benchmark.model_manifest.v1",
+  "modelId": "vibethinker-3b-q4km-local",
+  "displayName": "VibeThinker 3B Q4_K_M Local",
+  "provider": "mradermacher",
+  "runtime": "ollama",
+  "runtimeModelName": "hf.co/mradermacher/VibeThinker-3B-GGUF:Q4_K_M",
+  "status": "available",
+  "capabilities": [
+    "structured-output",
+    "intent-classification"
+  ],
+  "notes": [
+    "Local Ollama manifest generated from installed Hugging Face GGUF model.",
+    "Provider field names the published Ollama/Hugging Face source, not a routing qualification."
+  ]
+}

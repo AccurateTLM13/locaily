@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/model-card-source-data.schema.json",
+  "title": "Benchmark Lab Model Card Source Data",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "modelId",
+    "generatedAt",
+    "evidenceIds",
+    "trackQualifications"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "benchmark.model_card_source.v1"
+    },
+    "modelId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtimeModelName": {
+      "type": "string"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidenceIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "trackQualifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "trackId",
+          "status"
+        ],
+        "properties": {
+          "trackId": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "untested",
+              "screening",
+              "candidate",
+              "qualified",
+              "conditional",
+              "rejected",
+              "revalidation_required"
+            ]
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
