@@ -2,7 +2,7 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-07-05 (Shadow Routing Evidence Review and Enforcement Policy)
+**Updated:** 2026-07-05 (Guarded Qualification-Aware Routing Enforcement)
 
 ## What Works
 
@@ -26,6 +26,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Qualification Evidence Consumption** - six-state resolution engine (`companion/core/qualification-resolver.js`) mapping benchmark qualifications to consume states (qualified, unqualified, expired, stale, invalid, untested); Capability Registry (`companion/core/capability-registry.js`) surfacing qualification state per model+role+track; Evidence Linker (`companion/evidence/qualification-evidence-linker.js`) linking qualifications to Track Run Records; dry-run routing recommendation API at `POST /qualifications/dry-run`; read-only endpoints at `GET /qualifications/status`, `GET /qualifications/capabilities`, `GET /qualifications/capability`, `GET /capabilities`; `/health` response includes qualification summary; 25 tests in `scripts/test-qualification-resolver.js` covering all six states
 - **Qualification-Aware Shadow Routing** - shadow routing engine (`companion/core/shadow-routing.js`) compares current routing decisions against qualification-backed recommendations without changing execution; Shadow recommendation recorded in Track Run Records via optional `routing.shadowRecommendation` field; Comparison states: agree, disagree, no-qualified-capability, insufficient-evidence, current-selection-unqualified, recommendation-unavailable; Integrated into `executeModelStep()` and `buildModelRoutingOptions()` in server; 31 tests in `scripts/test-shadow-routing.js` covering all comparison states and builder integration
 - **Shadow Routing Evidence Review and Enforcement Policy** - enforcement policy engine (`companion/core/enforcement-policy.js`) defines 5 rollout states (disabled, shadow, eligible, enforced, suspended) with per-track granularity; Evaluates enforcement eligibility across 8+ conditions (track state, qualification state, score threshold, overrides, runtime availability, model readiness, track approval, comparison state); Shadow evidence review (`companion/evidence/shadow-evidence-review.js`) aggregates comparison statistics (agreement rate, coverage rate, by-track breakdowns); Endpoints: `GET /enforcement/status`, `POST /enforcement/set`, `POST /enforcement/approve`, `POST /enforcement/override`, `GET /enforcement/review`, `GET /enforcement/eligibility`; Enforcement remains off by default (all tracks in shadow); 60 tests in `scripts/test-enforcement-policy.js` covering all eligibility conditions, CRUD, and evidence review
+- **Guarded Enforcement Integration** - Enforcement decision evaluated in the canonical model router (`companion/crew/model-router.js`) via `evaluateEnforcement()`. The routing sequence: current selection → shadow recommendation → policy evaluation → final selection → execution. Enforcement decision structure recorded in Track Run Records via optional `routing.enforcementDecision`. Fallback behavior: enforced capability failure triggers re-execution with original selected model. Enforcement remains disabled for all tracks. No pilot activated — no companion track has a qualified model capability with sufficient shadow coverage. 83 tests in `scripts/test-enforcement-routing.js` covering all policy states, eligibility failures, routing evidence, runtime failures, and compatibility. Evidence review extended with enforcement outcome metrics (attempts, applied, blocked, fallback, success rates per capability). Additive API endpoints: `GET /enforcement/pilot`, `GET /enforcement/decisions`. Safe state change enforcement: `POST /enforcement/set` to `enforced` requires track approval, qualified capability, and non-suspended state.
 - **Smoke and contract tests** - `scripts/smoke-test.js`, `scripts/contract-test.js` (current verification suite passes; see latest progress log or CI evidence for counts)
 
 ## What Is Partial
@@ -33,7 +34,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Track runner** - linear pipeline only; four workflow tracks in catalog
 - **Model qualification coverage** - Qualification consumption engine and capability registry built; broader model, track, hardware, deeper live qualification evidence, and prompt/regression coverage remain incremental
 - **Model scorecards / skill sheets** - six-state qualification consumption engine + capability registry are the runtime surface
-- **Runtime Track Run Record emission** - The Crew orchestrator and workflow plan executor emit canonical Track Run Records for all supported runtime flows (direct track, workflow, Lighthouse Handoff, DealSniper). Records are persisted to `data/evidence/track-run-records/`. Responses from `/tracks/run` and `/workflows/run` include evidence references. Failed executions also produce records. Qualification Evidence Linker connects records to qualification data.
+- **Runtime Track Run Record emission** - The Crew orchestrator and workflow plan executor emit canonical Track Run Records for all supported runtime flows (direct track, workflow, Lighthouse Handoff, DealSniper). Records are persisted to `data/evidence/track-run-records/`. Responses from `/tracks/run` and `/worksflows/run` include evidence references. Failed executions also produce records. Qualification Evidence Linker connects records to qualification data.
 - **Memory Bridge** - v0 endpoints + optional Lighthouse `compose-handoff` preflight; no apply/search/embeddings
 - **Console validation** - local validation UI exists; not a finished product surface
 - **Fallback ladder** - partial (`retry_same_model_once`); no full escalation handler
@@ -65,6 +66,7 @@ The canonical Track Run Record schema (`locaily.track_run_record.v1`) is impleme
 - **Failure coverage** — `recordFailedExecution()` emits records for failed runs
 - **18 test cases** in `scripts/crew-track-run-record-test.js` covering all runtime flows
 - **Architecture documentation** at `docs/02-track-system/canonical-track-run-records.md`
+- **Enforcement Decision** — optional `routing.enforcementDecision` added to schema. Additive, validated. See `companion/crew/model-router.js` `evaluateEnforcement()` for integration.
 
 Existing Benchmark Lab schemas, qualification records, evidence, checksums, and CLI commands remain unchanged.
 
@@ -107,10 +109,10 @@ The North Star is now documented as a local capability network: decompose work i
 
 | Layer | Focus |
 |---|---|
-| **Now** | Select one low-risk Track, enable guarded enforcement, record routing outcomes, compare enforced runtime results. Land Benchmark Lab with strict evidence boundaries |
-| **Next** | Expand multi-model testing; add runtime performance feedback; add human correction records. Benchmark Lab live qualification depth; extension bridge; Memory Bridge private vault validation |
+| **Now** | Guarded enforcement integration complete. No pilot activated — no companion track has a qualified model capability with sufficient shadow coverage. All tracks remain in shadow mode. Enforcement machinery is implemented, tested (83 tests), and ready for pilot activation once qualification evidence exists. |
+| **Next** | Pilot Enforcement Validation and Multi-Model Track Expansion — Expand multi-model testing; add runtime performance feedback; add human correction records. Benchmark Lab live qualification depth; extension bridge; Memory Bridge private vault validation |
 | **Later** | Simple dependency graphs; Relay Node protocol implementation; broader model qualification coverage |
 | **Research** | DAG planner generated by Local Brain |
 | **Archive** | Old companion-only architecture, pre-track planning docs |
 
-Enforcement policy engine and shadow evidence review are complete. All tracks remain in shadow mode by default. The next step is selecting one low-risk Track (likely intent-classification based on approved qualification evidence), enabling guarded enforcement, and comparing enforced runtime results against shadow predictions.
+Enforcement policy engine, shadow evidence review, and guarded enforcement integration are complete. Enforcement remains disabled for all tracks by default. No safe pilot could be activated — no companion track has a current, valid `qualified` model capability with sufficient shadow routing evidence. The enforcement machinery is ready for pilot activation once a track meets all conditions.

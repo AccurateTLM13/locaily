@@ -1,42 +1,58 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "shadow-routing-evidence-review-and-enforcement-policy",
+  "build_slice": "guarded-qualification-aware-routing-enforcement",
   "status": "complete",
-  "objective": "Convert collected shadow results into a safe policy for deciding when qualification-aware routing is allowed to take control, with evidence aggregation and per-track enforcement states.",
+  "objective": "Implement guarded qualification-aware routing for one explicitly approved Track. Enforcement must remain disabled by default for every Track except the single pilot Track explicitly configured during validation.",
+  "pilot": {
+    "selected": null,
+    "reason": "No companion track has a current, valid 'qualified' model capability with sufficient shadow routing evidence. All model qualification records for companion tracks have status 'candidate' or 'screening', resolving to 'untested'. The only 'qualified' model capability targets the Benchmark Lab 'hybrid-weather' track, not a companion runtime track. Enforcement machinery implemented and ready for pilot activation when conditions are met.",
+    "requiredForActivation": [
+      "Companion track with model role having 'qualified' or 'conditional' qualification record (non-candidate/non-screening status)",
+      "At least 3-5 shadow routing comparisons showing consistent recommendation agreement",
+      "Qualification record must be current (not expired or stale)",
+      "Runtime availability and model readiness verifiable"
+    ]
+  },
   "validation": {
     "passed": true,
     "commands": [
-      "node scripts/contract-test.js",
-      "node scripts/test-qualification-resolver.js",
-      "node scripts/test-shadow-routing.js",
+      "node scripts/test-enforcement-routing.js",
       "node scripts/test-enforcement-policy.js",
-      "node scripts/track-run-record-schema-test.js"
+      "node scripts/test-shadow-routing.js",
+      "node scripts/test-qualification-resolver.js",
+      "node scripts/track-run-record-schema-test.js",
+      "node scripts/crew-track-run-record-test.js",
+      "node scripts/contract-test.js"
     ],
     "results": [
-      "60/60 enforcement-policy tests pass (default state, set state, states enum, override CRUD, approve track, policy summary, evidence review, evidence review empty, per-track review, 10 eligibility conditions)",
-      "25/25 qualification-resolver tests pass",
+      "83/83 enforcement routing tests pass (5 policy states, 10 eligibility failures, 7 routing evidence, 5 runtime failures, 3 enforcement metrics, 2 builder, 2 shadow compatibility, 1 non-pilot compatibility)",
+      "60/60 enforcement-policy tests pass",
       "31/31 shadow-routing tests pass",
+      "25/25 qualification-resolver tests pass",
+      "18/18 crew track run record tests pass",
+      "4/4 track-run-record schema tests pass",
       "Contract tests pass",
-      "Track run record schema tests pass (4/4, including schema with shadowRecommendation)",
       "Zero companion imports from benchmark-lab/engine/ — architectural boundary preserved",
-      "All enforcement is off by default (all tracks in shadow mode)"
+      "All tracks remain in shadow state by default",
+      "No pilot track activated — enforcement inactive for all tracks"
     ]
   },
   "acceptance_criteria": {
     "passed": [
-      "companion/core/enforcement-policy.js created — defines 5 rollout states (disabled, shadow, eligible, enforced, suspended) with per-track granularity",
-      "Enforcement eligibility evaluated across 8+ conditions: track state, qualification state, score threshold, active overrides, runtime availability, model readiness, track approval, comparison state validity",
-      "companion/evidence/shadow-evidence-review.js created — aggregates shadow routing comparisons from Track Run Records",
-      "Evidence review computes: total comparisons, agreement rate, disagreement rate, current-selection-unqualified count, coverage rate, by-track breakdowns",
-      "GET /enforcement/status — returns policy summary + evidence review",
-      "POST /enforcement/set — sets per-track enforcement state",
-      "POST /enforcement/approve — approves a track for enforcement",
-      "POST /enforcement/override — blocks a specific recommendation",
-      "GET /enforcement/review — returns detailed review with optional trackId filter",
-      "GET /enforcement/eligibility — checks if a recommendation is eligible for enforcement",
-      "Default state for all tracks is 'shadow'",
-      "Enforcement never enabled by default — off by design",
-      "60 tests in scripts/test-enforcement-policy.js cover all required scenarios"
+      "Enforcement evaluation integrated into canonical model router (companion/crew/model-router.js) via evaluateEnforcement()",
+      "Routing sequence: current selection → shadow recommendation → policy evaluation → final selection → execution",
+      "Enforcement decision recorded in Track Run Records via optional routing.enforcementDecision",
+      "Fallback behavior: enforced capability failure triggers re-execution with original selected model",
+      "Fallback decision, original error, and success/failure recorded in enforcement decision",
+      "Evidence review extended with buildEnforcementMetrics() — enforcement attempts, applied, blocked, fallback, success rates per capability, qualification record usage, failed conditions",
+      "Additive endpoints: GET /enforcement/pilot, GET /enforcement/decisions",
+      "Safe state change enforcement: POST /enforcement/set to enforced requires track approval, qualified capability, and non-suspended state",
+      "All tracks remain in shadow — no enforcement enabled",
+      "eligible never changes execution",
+      "suspended immediately blocks enforcement",
+      "83 tests in scripts/test-enforcement-routing.js cover all required scenarios",
+      "All existing tests remain passing",
+      "Historical records and checksums remain valid"
     ],
     "failed": [],
     "blockers": []

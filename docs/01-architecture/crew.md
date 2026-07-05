@@ -27,6 +27,7 @@ Track steps produce and consume **JSON artifacts**. Model steps enforce JSON sch
 - **Model Scorecards / Skill Sheets** for suitability profiles (fast, structured-output, classification, hardware fit, fallback rules)
 - Scoreboard / evaluation hooks for comparing orchestration modes (early: `companion/core/scoreboard.js`)
 - Qualification-aware role assignment via Benchmark Lab evidence
+- **Enforcement routing** — guarded qualification-aware model selection via the enforcement policy and model router integration
 
 ## What It Does Not Own
 
@@ -88,6 +89,8 @@ When runtime is unavailable, the tool falls back to deterministic demo output.
 - Per-step metadata (model, role, duration) where implemented
 - Validation errors triggering retry or escalation
 - Canonical Track Run Record emitted after every execution — persisted to `data/evidence/track-run-records/` and referenced in endpoint responses
+- Enforcement decision recorded in Track Run Records via optional `routing.enforcementDecision` — documents original, recommended, and executed capabilities with full policy context
+- Fallback on enforced execution failure: re-executes with original selected model; original error, fallback capability, and fallback success/failure recorded in enforcement decision
 
 ## Communicates With
 

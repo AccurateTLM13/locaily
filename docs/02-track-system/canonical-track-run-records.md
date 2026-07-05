@@ -31,7 +31,7 @@ The canonical schema is defined at `companion/evidence/schemas/track-run-record.
 | **Identity** | recordId, schemaVersion, trackId, workflowId, parentRunId, correlationId |
 | **Timestamps** | createdAt (required), startedAt, completedAt |
 | **Request** | requester, requestedCapability, inputSummary (summary-safe), inputRef, constraints |
-| **Routing** | executorType (required), capabilityId, provider, relayNodeId, qualificationRecordId, routingReason, fallbackCandidates |
+| **Routing** | executorType (required), capabilityId, provider, relayNodeId, qualificationRecordId, routingReason, fallbackCandidates, shadowRecommendation (optional), enforcementDecision (optional) |
 | **Execution** | status (required), durationMs, retryCount, fallbackUsed, plus executor-specific metadata (modelInfo, toolInfo, transformInfo, ruleInfo, relayNodeInfo) |
 | **Output** | outputFormat, outputSummary (summary-safe), outputRef, structuredOutputValid, artifacts, evidenceRefs |
 | **Validation** | status, validatorIds, failedChecks, warnings, score |
@@ -176,4 +176,80 @@ const record = buildToolRecord({
   toolInfo: { toolId: "my-tool", task: "process", version: "1.0.0" },
   output: { outputSummary: "processed 3 items" }
 });
+```
+
+## Enforcement Decision
+
+When guarded qualification-aware routing is evaluated, the `routing.enforcementDecision` field is populated in the Track Run Record. This is an optional, additive field — records without it remain valid.
+
+### Structure
+
+```json
+{
+  "state": "enforced",
+  "eligible": true,
+  "attempted": true,
+  "applied": true,
+  "reason": "All enforcement gates passed",
+  "failedConditions": [],
+  "overrideApplied": false,
+  "fallbackCapabilityId": "original-model",
+  "fallbackTriggered": false,
+  "fallbackSucceeded": false,
+  "originalError": null,
+  "selectedCapabilityId": "original-model",
+  "recommendedCapabilityId": "qualified-model",
+  "executedCapabilityId": "qualified-model",
+  "qualificationRecordId": "qual-rec-001"
+}
+```
+
+### Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `state` | string | Enforcement state at time of decision (`disabled`, `shadow`, `eligible`, `enforced`, `suspended`) |
+| `eligible` | boolean | Whether the recommendation was eligible for enforcement |
+| `attempted` | boolean | Whether enforcement evaluation was attempted |
+| `applied` | boolean | Whether enforcement replaced the current capability with the recommended one |
+| `reason` | string | Human-readable reason for the final decision |
+| `failedConditions` | array | Conditions that prevented enforcement (present when `applied` is `false`) |
+| `overrideApplied` | boolean | Whether an active override blocked enforcement |
+| `fallbackCapabilityId` | string | Capability used as fallback when enforced execution failed |
+| `fallbackTriggered` | boolean | Whether fallback execution occurred |
+| `fallbackSucceeded` | boolean | Whether fallback execution succeeded |
+| `originalError` | object | Original error when enforced execution failed (message + code) |
+| `selectedCapabilityId` | string | Original capability selected before enforcement |
+| `recommendedCapabilityId` | string | Capability recommended by qualification |
+| `executedCapabilityId` | string | Final capability that executed (may differ from recommended after fallback) |
+| `qualificationRecordId` | string | Qualification record that supported the recommendation |
+
+### When Enforcement Is Not Evaluated
+
+The `enforcementDecision` field is omitted entirely when no enforcement policy is available or no recommendation exists. This includes:
+- Tool-only track executions
+- Model steps where the enforcement policy is not configured
+- Runs before enforcement integration was added (no backward compatibility concerns)
+
+### Fallback Behavior
+
+When an enforced capability fails execution:
+
+1. The original error is captured in `originalError`.
+2. Execution is retried with the original selected model (`fallbackCapabilityId`).
+3. `fallbackTriggered` is set to `true`.
+4. `fallbackSucceeded` is set based on the fallback result.
+5. `executedCapabilityId` is updated to reflect the actual executing capability.
+6. No indefinite retry. No automatic qualification status modification.
+
+### Routing Sequence
+
+```txt
+current selection
+→ shadow recommendation
+→ enforcement policy evaluation
+→ final selection (enforced or original)
+→ execution
+→ fallback only if enforced capability fails
+→ record with enforcement decision
 ```

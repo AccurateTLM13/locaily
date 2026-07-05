@@ -89,20 +89,93 @@ async function executeModelStep({ step, context, runtime, options }) {
     }
   }
 
+  let enforcementDecision = null;
+  const originalModel = modelResolution.model;
+  let fallbackExecution = false;
+
+  if (options.enforcementPolicy && shadowRouting && modelResolution.model) {
+    try {
+      enforcementDecision = await evaluateEnforcement({
+        enforcementPolicy: options.enforcementPolicy,
+        trackId: options.track_id || null,
+        role: modelResolution.role,
+        contractId: executor.contract || executor.contract_id || null,
+        recommendedCapabilityId: shadowRouting.recommendedCapabilityId,
+        score: shadowRouting.recommendedScore,
+        qualificationState: shadowRouting.state,
+        comparisonState: shadowRouting.comparison,
+        currentModelId: originalModel,
+        shadowRecommendation: shadowRouting
+      });
+    } catch (enfError) {
+      console.warn("[Enforcement] Failed to evaluate enforcement:", enfError.message);
+    }
+  }
+
+  if (enforcementDecision && enforcementDecision.applied) {
+    modelResolution.model = enforcementDecision.recommendedCapabilityId;
+    modelResolution.source = "enforcement";
+  }
+
   if (!qualificationPolicy.ok) {
     const error = new Error(qualificationPolicy.message);
     error.code = qualificationPolicy.code;
     error.nextStep = qualificationPolicy.nextStep;
     error.qualification = qualification;
     error.shadowRouting = shadowRouting;
+    error.enforcementDecision = enforcementDecision;
     throw error;
   }
 
-  const output = await runtime.generateJson(prompt, schema, {
-    ...options,
-    model: modelResolution.model,
-    temperature: 0.2
-  });
+  let output;
+  let executionError = null;
+  let fallbackCapabilityId = null;
+  let fallbackSucceeded = false;
+
+  try {
+    output = await runtime.generateJson(prompt, schema, {
+      ...options,
+      model: modelResolution.model,
+      temperature: 0.2
+    });
+  } catch (execErr) {
+    if (enforcementDecision && enforcementDecision.applied && originalModel !== modelResolution.model) {
+      executionError = execErr;
+      fallbackCapabilityId = originalModel;
+      try {
+        output = await runtime.generateJson(prompt, schema, {
+          ...options,
+          model: originalModel,
+          temperature: 0.2
+        });
+        fallbackSucceeded = true;
+        if (enforcementDecision) {
+          enforcementDecision.fallbackTriggered = true;
+          enforcementDecision.fallbackCapabilityId = fallbackCapabilityId;
+          enforcementDecision.fallbackSucceeded = true;
+          enforcementDecision.originalError = {
+            message: execErr.message,
+            code: execErr.code || "EXECUTION_ERROR"
+          };
+        }
+        modelResolution.model = originalModel;
+        modelResolution.source = "fallback";
+      } catch (fallbackErr) {
+        if (enforcementDecision) {
+          enforcementDecision.fallbackTriggered = true;
+          enforcementDecision.fallbackCapabilityId = fallbackCapabilityId;
+          enforcementDecision.fallbackSucceeded = false;
+          enforcementDecision.originalError = {
+            message: execErr.message,
+            code: execErr.code || "EXECUTION_ERROR"
+          };
+        }
+        throw execErr;
+      }
+    } else {
+      throw execErr;
+    }
+  }
 
   return {
     output,
@@ -116,6 +189,7 @@ async function executeModelStep({ step, context, runtime, options }) {
       suitability,
       qualification,
       shadowRouting,
+      enforcementDecision,
       durationMs: Date.now() - stepStart
     }
   };
@@ -203,10 +277,93 @@ function normalizePolicy(policy) {
   return typeof policy === "string" ? policy.trim() : "advisory";
 }
 
+async function evaluateEnforcement({
+  enforcementPolicy,
+  trackId,
+  role,
+  contractId,
+  recommendedCapabilityId,
+  score,
+  qualificationState,
+  comparisonState,
+  currentModelId,
+  shadowRecommendation
+}) {
+  const decision = {
+    attempted: false,
+    eligible: false,
+    applied: false,
+    state: "shadow",
+    reason: "Enforcement not evaluated",
+    failedConditions: [],
+    overrideApplied: false,
+    fallbackCapabilityId: currentModelId,
+    fallbackTriggered: false,
+    fallbackSucceeded: false,
+    originalError: null,
+    selectedCapabilityId: currentModelId,
+    recommendedCapabilityId: recommendedCapabilityId || null,
+    executedCapabilityId: currentModelId,
+    qualificationRecordId: (shadowRecommendation && shadowRecommendation.qualificationRecordId) || null
+  };
+
+  if (!trackId || !recommendedCapabilityId) {
+    decision.reason = "No recommendation available for enforcement";
+    return decision;
+  }
+
+  const trackState = enforcementPolicy.getTrackState ? enforcementPolicy.getTrackState(trackId) : "shadow";
+  decision.state = trackState;
+
+  if (trackState !== "enforced") {
+    decision.reason = `Track '${trackId}' is in '${trackState}' state. Only 'enforced' permits routing changes.`;
+    decision.failedConditions.push({ condition: "track_state", detail: `State is '${trackState}', requires 'enforced'` });
+    return decision;
+  }
+
+  if (!enforcementPolicy.isTrackApproved || !enforcementPolicy.isTrackApproved(trackId)) {
+    decision.reason = `Track '${trackId}' is not approved for enforcement.`;
+    decision.failedConditions.push({ condition: "track_approved", detail: "Track not in approved list" });
+    return decision;
+  }
+
+  const eligibility = await enforcementPolicy.evaluateEligibility({
+    trackId,
+    role,
+    recommendedCapabilityId,
+    contractId: contractId || undefined,
+    score: score != null ? score : null,
+    qualificationState: qualificationState || "untested",
+    comparisonState: comparisonState || "recommendation-unavailable"
+  });
+
+  decision.attempted = true;
+  decision.eligible = eligibility.eligible || false;
+  decision.reason = eligibility.reason || "Enforcement evaluation completed";
+  decision.failedConditions = (eligibility.blocks || []).map((b) => ({ condition: "policy_block", detail: b }));
+  decision.checks = eligibility.checks || [];
+
+  if (eligibility.canEnforce && eligibility.eligible) {
+    decision.applied = true;
+    decision.executedCapabilityId = recommendedCapabilityId;
+    decision.reason = "All enforcement gates passed";
+  } else {
+    decision.applied = false;
+    if (eligibility.blocks && eligibility.blocks.length > 0) {
+      decision.reason = `Enforcement blocked: ${eligibility.blocks[0]}`;
+    } else {
+      decision.reason = "Enforcement eligibility not met";
+    }
+  }
+
+  return decision;
+}
+
 module.exports = {
   resolveModel,
   resolveStepModel,
   buildModelStepInput,
   executeModelStep,
-  evaluateQualificationPolicy
+  evaluateQualificationPolicy,
+  evaluateEnforcement
 };

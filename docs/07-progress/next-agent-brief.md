@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-05 (Shadow Routing Evidence Review and Enforcement Policy complete)
+**Updated:** 2026-07-05 (Guarded Qualification-Aware Routing Enforcement complete)
 
 ## Read First
 
@@ -62,19 +62,17 @@ A shadow routing engine (`companion/core/shadow-routing.js`) now compares curren
 
 An enforcement policy engine (`companion/core/enforcement-policy.js`) now defines 5 rollout states per track: `disabled`, `shadow`, `eligible`, `enforced`, `suspended`. The default is `shadow` — observe only. The policy evaluates enforcement eligibility across 8+ conditions: track enforcement state, qualification state (`qualified` required), score threshold (default 0.7), active overrides, runtime availability, model readiness, track approval, and comparison state validity. A shadow evidence review layer (`companion/evidence/shadow-evidence-review.js`) aggregates Track Run Record shadow comparisons into statistics: agreement rate, disagreement rate, coverage rate, per-track breakdowns. Enforcement endpoints: `GET /enforcement/status` (policy summary + evidence review), `POST /enforcement/set` (set track state), `POST /enforcement/approve` (approve track for enforcement), `POST /enforcement/override` (block specific recommendation), `GET /enforcement/review` (detailed review per track), `GET /enforcement/eligibility` (check if a recommendation is eligible). All enforcement is off by default. 60 tests cover all eligibility conditions, CRUD, and evidence review.
 
+### Guarded Enforcement Integration
+
+Enforcement evaluation is now integrated into the canonical model router (`companion/crew/model-router.js`). The routing sequence: current selection → shadow recommendation → policy evaluation → final selection → execution. Enforcement decision recorded in Track Run Records via optional `routing.enforcementDecision`. Fallback: enforced capability failure triggers re-execution with original selected model. Evidence review extended with enforcement outcome metrics (attempts, applied, blocked, fallback, success rates). Additive endpoints: `GET /enforcement/pilot`, `GET /enforcement/decisions`. Safe state change enforcement on `POST /enforcement/set`. 83 tests cover all policy states, eligibility failures, routing evidence, runtime failures, and compatibility.
+
 ## Current Task
 
-The next step is Guarded Enforcement for One Track. This includes:
+Guarded Enforcement is complete. **No pilot Track activated** — no companion track has a current, valid `qualified` model capability with sufficient shadow routing evidence. All tracks remain in shadow mode. Enforcement machinery is implemented, tested, and ready for pilot activation.
 
-1. Select one low-risk Track with existing approved qualification evidence, multiple tested model candidates, deterministic validation, and reliable fallback behavior.
-2. Based on current Benchmark Lab history, the safest candidate is likely `intent-classification` — it has approved qualification records and a simple deterministic validation path.
-3. Enable the track for enforcement: set state to `eligible` (not `enforced`), approve the track, verify no overrides block the recommendation.
-4. Run the companion with the track in eligible mode — verify shadow routing continues to record comparisons.
-5. If the evidence review shows strong agreement and no issues, promote to `enforced` for that single track.
-6. Record routing outcome in Track Run Records with the enforced recommendation.
-7. Compare enforced runtime results against prior shadow predictions.
-8. Do not enable enforcement for any other track.
-9. Re-run relevant smoke, contract, schema, and track evidence tests after changes.
+## Next Task
+
+Pilot Enforcement Validation and Multi-Model Track Expansion. Activate enforcement for one qualified track once qualification evidence exists. Expand multi-model testing with runtime performance feedback. Add human correction records.
 
 ## Do Not
 
@@ -87,7 +85,6 @@ The next step is Guarded Enforcement for One Track. This includes:
 - Break existing Local Brain endpoints or response envelopes
 - Implement RelayNode routing, hardware recommendations, or remote execution dispatch in this slice
 - Import `benchmark-lab/engine/` modules from the Local Brain companion or any code under `companion/`
-- Change active routing behavior for more than the single selected Track
 - Enable enforcement for any Track without explicit evidence review
 - Modify the qualification-resolver, capability-registry, evidence-linker, shadow-routing, enforcement-policy, or shadow-evidence-review modules unless extending them for enforcement
 - Enable global enforcement — per-track states only
