@@ -309,7 +309,13 @@ Implemented:
 Current focus and follow-on candidates (see [docs/07-progress/current-sprint.md](docs/07-progress/current-sprint.md)):
 
 - **Active slice:** Canonical Track Run Records (Track Learning Evidence Loop)
+- **M5:** Benchmark Lab acceptance (schema-backed evidence, qualification records, read-only status)
 - Follow-on candidates (not yet scoped): broader model/track/hardware qualification coverage, deeper live qualification evidence, structured output and error recovery evaluation
+- Follow-on: Lighthouse canonical-path documentation; workflow audit summary hardening
+- Model Garage evaluation harness (Phase 2 — spec only until evidence)
+- Harden Lighthouse Handoff validation end-to-end with the extension client
+- NearbyNode capability connectors (spec + prototype — not implementation yet)
+- Desktop Companion UI (deferred; see desktop companion decision doc)
 - Do not begin follow-on milestone work without an explicitly supplied objective
 
 **Benchmark Lab Milestone 1 is complete.** Do not restart or extend the operator workflow without an explicit task. Do not modify approved evidence or qualification artifacts unless directed. Do not broaden claims from narrow benchmark evidence.

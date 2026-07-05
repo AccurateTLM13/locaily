@@ -39,7 +39,7 @@ North Star direction is now documented as a local capability network: route trac
 - Lighthouse proof track (7 steps)
 - DealSniper workflow track (3 steps)
 - Experimental Operator Log editorial tracks
-- Declarative step `input_map` (`input-map-resolver.js` + `step-input.js` for tool and model steps)
+- Declarative step `input_map` on all track steps (`input-map-resolver.js` + `step-input.js`)
 - Model roles + provider router (Ollama, mock)
 - Benchmark Lab schemas (14), mock + Ollama + ToolEvalRuntime adapters, CLI commands (run/compare/promote/review/matrix/probe/diagnose/report/qualification/model-card/checksum-verify), evidence promotion, checksum verification, capability probing, and qualification records
 - Execution-router architecture with native/policy-routed/runtime-constrained execution modes
@@ -76,7 +76,7 @@ North Star direction is now documented as a local capability network: route trac
 
 **Now:** Build Canonical Track Run Records as the first Track Learning Evidence Loop slice. Records must stay summary-safe and must not store raw sensitive inputs or outputs by default.
 
-**Next:** Not yet documented beyond the active build slice.
+**Next:** Benchmark Lab live qualification depth, extension bridge, or Memory Bridge private vault validation.
 
 **Benchmark Lab:** Milestone 1 complete and operator-ready. Broader model, track, hardware, and live qualification coverage remain follow-on work — not yet scoped or scheduled.
 

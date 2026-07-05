@@ -71,6 +71,26 @@ Not built:    automatic track classification, graph runner, free-form Track gene
 | [track-catalog-expansion-plan.md](./track-catalog-expansion-plan.md) | Rollout proposal for future tracks |
 | [future-dag-runner.md](./future-dag-runner.md) | Research — not implemented |
 
+## Code Map
+
+| Component | Path |
+|---|---|
+| Track catalog | `companion/crew/tracks/*.track.json` |
+| Track loader | `companion/crew/decomposer.js` |
+| Track runner | `companion/crew/orchestrator.js` |
+| Step input | `companion/crew/step-input.js`, `input-map-resolver.js` |
+| Model steps | `companion/crew/model-router.js` |
+| Tool steps | `companion/crew/tool-router.js` |
+| HTTP entry | `POST /tracks/run`, `GET /tracks` in `companion/server.js` |
+
+## Current Stage
+
+```txt
+Implemented:  linear track pipeline (two workflow tracks, declarative input_map on all steps)
+Next:         Lighthouse canonical-path doc; workflow audit summary hardening
+Future:       DAG planner generated from request
+Not built:    automatic track classification, graph runner
+```
 ## Related
 
 - Architecture: [../01-architecture/locaily-overview.md](../01-architecture/locaily-overview.md)

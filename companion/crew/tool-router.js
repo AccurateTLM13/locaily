@@ -1,7 +1,4 @@
-const { buildStepInput, buildLegacyToolStepInput } = require("./step-input");
-
-/** @deprecated Use buildLegacyToolStepInput from step-input.js */
-const buildLegacyStepInput = buildLegacyToolStepInput;
+const { buildStepInput } = require("./step-input");
 
 async function executeToolStep({ step, context, toolRegistry, runtime, options, meta }) {
   const executor = step.executor;
@@ -56,6 +53,5 @@ async function executeToolStep({ step, context, toolRegistry, runtime, options, 
 
 module.exports = {
   buildStepInput,
-  buildLegacyStepInput,
   executeToolStep
 };

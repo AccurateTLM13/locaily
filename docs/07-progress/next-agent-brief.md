@@ -83,6 +83,7 @@ The next step is Guarded Enforcement for One Track. This includes:
 - Implement a follow-on milestone or qualification-coverage expansion without an explicitly supplied objective
 - Implement automatic model swapping / Model Garage auto-switching
 - Claim DAG support, Relay Node routing, or automatic track classification exists
+- Remove legacy `step-input.js` fallbacks until Lighthouse parity work resumes — **done 2026-06-30**
 - Break existing Local Brain endpoints or response envelopes
 - Implement RelayNode routing, hardware recommendations, or remote execution dispatch in this slice
 - Import `benchmark-lab/engine/` modules from the Local Brain companion or any code under `companion/`
