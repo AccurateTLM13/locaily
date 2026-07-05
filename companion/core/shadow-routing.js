@@ -19,11 +19,15 @@ function createShadowRouter({ resolver }) {
     let comparison;
     let recommendedCapabilityId = null;
     let recommendedScore = null;
+    let recommendedQualificationState = null;
+    let recommendedRecordId = null;
     let reason;
     let fallbackRecommendation = null;
 
     if (qualifiedCaps.length > 0) {
       const best = qualifiedCaps[0];
+      recommendedQualificationState = best.state;
+      recommendedRecordId = best.recordId;
 
       if (best.modelId === currentModelId) {
         comparison = "agree";
@@ -69,6 +73,9 @@ function createShadowRouter({ resolver }) {
 
       if (bestByScore.length > 0) {
         fallbackRecommendation = bestByScore[0].modelId;
+        const fallbackCap = bestByScore[0];
+        recommendedQualificationState = fallbackCap.state;
+        recommendedRecordId = fallbackCap.recordId;
       }
     } else {
       comparison = "recommendation-unavailable";
@@ -82,12 +89,14 @@ function createShadowRouter({ resolver }) {
       recommendedCapabilityId,
       recommendedScore,
       state: currentState,
+      selectedQualificationState: currentState,
+      recommendedQualificationState,
       comparison,
       reason,
       notEnforcedReason: "Shadow mode: qualification recommendations do not affect routing decisions.",
       qualificationRecordId: currentQualification && currentQualification.recordId
         ? currentQualification.recordId
-        : null,
+        : (recommendedRecordId || null),
       fallbackRecommendation
     };
   }

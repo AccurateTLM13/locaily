@@ -102,7 +102,9 @@ async function executeModelStep({ step, context, runtime, options }) {
         contractId: executor.contract || executor.contract_id || null,
         recommendedCapabilityId: shadowRouting.recommendedCapabilityId,
         score: shadowRouting.recommendedScore,
-        qualificationState: shadowRouting.state,
+        qualificationState: shadowRouting.recommendedQualificationState || shadowRouting.state,
+        selectedQualificationState: shadowRouting.selectedQualificationState || shadowRouting.state,
+        recommendedQualificationState: shadowRouting.recommendedQualificationState,
         comparisonState: shadowRouting.comparison,
         currentModelId: originalModel,
         shadowRecommendation: shadowRouting
@@ -285,6 +287,8 @@ async function evaluateEnforcement({
   recommendedCapabilityId,
   score,
   qualificationState,
+  selectedQualificationState,
+  recommendedQualificationState,
   comparisonState,
   currentModelId,
   shadowRecommendation
@@ -304,6 +308,8 @@ async function evaluateEnforcement({
     selectedCapabilityId: currentModelId,
     recommendedCapabilityId: recommendedCapabilityId || null,
     executedCapabilityId: currentModelId,
+    selectedQualificationState: selectedQualificationState || "untested",
+    recommendedQualificationState: recommendedQualificationState || null,
     qualificationRecordId: (shadowRecommendation && shadowRecommendation.qualificationRecordId) || null
   };
 
@@ -334,7 +340,9 @@ async function evaluateEnforcement({
     contractId: contractId || undefined,
     score: score != null ? score : null,
     qualificationState: qualificationState || "untested",
-    comparisonState: comparisonState || "recommendation-unavailable"
+    comparisonState: comparisonState || "recommendation-unavailable",
+    selectedQualificationState: selectedQualificationState || "untested",
+    recommendedQualificationState: recommendedQualificationState || null
   });
 
   decision.attempted = true;

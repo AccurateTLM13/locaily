@@ -133,9 +133,9 @@ const qualificationEvidenceLinker = createQualificationEvidenceLinker({
 const shadowRouter = createShadowRouter({ resolver: qualificationResolver });
 const enforcementPolicy = createEnforcementPolicy({
   resolver: qualificationResolver,
-  getProviderStatus: async () => {
+  getProviderStatus: async (modelId) => {
     try {
-      const state = await checkRuntimeState();
+      const state = await checkRuntimeState(modelId || null);
       return { available: state.available, modelReady: state.modelReady };
     } catch {
       return { available: false, modelReady: false };

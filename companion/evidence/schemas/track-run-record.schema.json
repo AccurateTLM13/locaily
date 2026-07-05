@@ -147,6 +147,8 @@
             "recommendedCapabilityId": { "type": "string" },
             "recommendedScore": { "type": "number" },
             "state": { "type": "string" },
+            "selectedQualificationState": { "type": "string", "description": "Qualification state of the currently selected capability" },
+            "recommendedQualificationState": { "type": "string", "description": "Qualification state of the recommended capability" },
             "comparison": {
               "enum": [
                 "agree",
@@ -229,9 +231,17 @@
               "type": "string",
               "description": "Original capability selected before enforcement"
             },
+            "selectedQualificationState": {
+              "type": "string",
+              "description": "Qualification state of the selected capability at time of enforcement evaluation"
+            },
             "recommendedCapabilityId": {
               "type": "string",
               "description": "Capability recommended by qualification"
+            },
+            "recommendedQualificationState": {
+              "type": "string",
+              "description": "Qualification state of the recommended capability at time of enforcement evaluation"
             },
             "executedCapabilityId": {
               "type": "string",
@@ -567,6 +577,8 @@
                   "recommendedCapabilityId": { "type": "string" },
                   "recommendedScore": { "type": "number" },
                   "state": { "type": "string" },
+                  "selectedQualificationState": { "type": "string" },
+                  "recommendedQualificationState": { "type": "string" },
                   "comparison": { "enum": ["agree", "disagree", "no-qualified-capability", "insufficient-evidence", "current-selection-unqualified", "recommendation-unavailable"] },
                   "reason": { "type": "string" },
                   "notEnforcedReason": { "type": "string" },
@@ -591,7 +603,9 @@
                   "fallbackSucceeded": { "type": "boolean" },
                   "originalError": { "type": "object", "additionalProperties": false, "properties": { "message": { "type": "string" }, "code": { "type": "string" } } },
                   "selectedCapabilityId": { "type": "string" },
+                  "selectedQualificationState": { "type": "string" },
                   "recommendedCapabilityId": { "type": "string" },
+                  "recommendedQualificationState": { "type": "string" },
                   "executedCapabilityId": { "type": "string" },
                   "qualificationRecordId": { "type": "string" }
                 }

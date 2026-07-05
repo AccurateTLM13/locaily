@@ -46,7 +46,7 @@ function makeLoader(records) {
   };
 }
 
-function makeShadowRec(selected, recommended, comparison, score, qualRecId) {
+function makeShadowRec(selected, recommended, comparison, score, qualRecId, recQualState) {
   return {
     enabled: true,
     enforced: false,
@@ -54,6 +54,8 @@ function makeShadowRec(selected, recommended, comparison, score, qualRecId) {
     recommendedCapabilityId: recommended,
     recommendedScore: score || null,
     state: "qualified",
+    selectedQualificationState: "qualified",
+    recommendedQualificationState: recQualState || "qualified",
     comparison: comparison || "disagree",
     reason: "Test shadow recommendation",
     notEnforcedReason: "Shadow mode",
@@ -130,11 +132,40 @@ async function testEnforcedAppliesRecommendation() {
     enforcementPolicy: policy, trackId: "test-track", role: "worker",
     recommendedCapabilityId: "recommended-model", score: 0.95,
     qualificationState: "qualified", comparisonState: "disagree", currentModelId: "current-model",
+    selectedQualificationState: "untested", recommendedQualificationState: "qualified",
     shadowRecommendation: shadowRec
   });
   assert(result.applied === true, "applied enforcement");
   assert(result.eligible === true, "eligible");
   assert(result.executedCapabilityId === "recommended-model", "executed is recommended");
+  assert(result.reason === "All enforcement gates passed", "all gates passed");
+}
+
+async function testUnselectedCurrentQualifiedRecommendedEnforced() {
+  console.log("TEST: unqualified current + qualified recommended + enforced track uses recommended");
+  const policy = createEnforcementPolicy({
+    resolver: null, getProviderStatus: async (modelId) => {
+      assert(modelId === "recommended-model", "getProviderStatus called with correct model ID");
+      return { available: true, modelReady: true };
+    },
+    trackStates: { "test-track": "enforced" }, approvedTracks: ["test-track"]
+  });
+  const shadowRec = makeShadowRec("current-model", "recommended-model", "disagree", 0.95, "qual-rec-unsel-01", "qualified");
+  const result = await evaluateEnforcement({
+    enforcementPolicy: policy, trackId: "test-track", role: "worker",
+    recommendedCapabilityId: "recommended-model", score: 0.95,
+    qualificationState: "qualified",
+    selectedQualificationState: "untested",
+    recommendedQualificationState: "qualified",
+    comparisonState: "disagree", currentModelId: "current-model",
+    shadowRecommendation: shadowRec
+  });
+  assert(result.applied === true, "enforcement applied");
+  assert(result.eligible === true, "eligible");
+  assert(result.selectedQualificationState === "untested", "selected state is untested");
+  assert(result.recommendedQualificationState === "qualified", "recommended state is qualified");
+  assert(result.executedCapabilityId === "recommended-model", "executed is recommended model");
+  assert(result.selectedCapabilityId === "current-model", "selected is current model");
   assert(result.reason === "All enforcement gates passed", "all gates passed");
 }
 
@@ -673,21 +704,21 @@ function testShadowRoutingStillFunctions() {
   assert(sr.recommendedCapabilityId === "llama3.2-local", "shadow recommends best model");
 }
 
-function testShadowComparisonInEnforcement() {
+async function testShadowComparisonInEnforcement() {
   console.log("TEST: shadow comparison 'agree' does not trigger enforcement change");
   const policy = createEnforcementPolicy({
     resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }),
     trackStates: { "test-track": "enforced" }, approvedTracks: ["test-track"]
   });
   const shadowRec = makeShadowRec("best-model", "best-model", "agree", 0.99);
-  const result = evaluateEnforcement({
+  const result = await evaluateEnforcement({
     enforcementPolicy: policy, trackId: "test-track", role: "worker",
     recommendedCapabilityId: "best-model", score: 0.99,
-    qualificationState: "qualified", comparisonState: "agree", currentModelId: "best-model",
+    qualificationState: "qualified", selectedQualificationState: "qualified", recommendedQualificationState: "qualified",
+    comparisonState: "agree", currentModelId: "best-model",
     shadowRecommendation: shadowRec
   });
-  // Even though comparison is "agree", the enforcement still passes because all gates pass
-  result.then(r => assert(r.applied === true, "enforcement still applies when gates pass and recommendation matches current"));
+  assert(result.applied === true, "enforcement still applies when gates pass and recommendation matches current");
 }
 
 // ========== Non-Pilot Track Compatibility ==========
@@ -713,7 +744,6 @@ async function testNonPilotTrackUnchanged() {
 
 function runSync() {
   testShadowRoutingStillFunctions();
-  testShadowComparisonInEnforcement();
   testBuilderIncludesEnforcement();
   testBuilderOmitsEnforcementWhenNotProvided();
   testEnforcementMetrics();
@@ -739,6 +769,7 @@ async function runAsync() {
   await testOverrideBlocks();
   await testMissingFallback();
   await testNoRecommendation();
+  await testShadowComparisonInEnforcement();
   await testOriginalCapabilityRecorded();
   await testRecommendedCapabilityRecorded();
   await testExecutedCapabilityRecorded();
@@ -749,6 +780,7 @@ async function runAsync() {
   await testFailureDoesNotMutateQualification();
   await testFailureEvidencePersisted();
   await testNonPilotTrackUnchanged();
+  await testUnselectedCurrentQualifiedRecommendedEnforced();
 }
 
 runSync();
