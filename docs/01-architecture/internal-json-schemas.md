@@ -11,13 +11,13 @@ Canonical JSON Schema files for Local Brain internal state. These document the *
 | Schema | File | Runtime validation | Description |
 |---|---|---|---|
 | Workflow plan | [workflow-plan.schema.json](../../companion/schemas/internal/workflow-plan.schema.json) | **Runtime-enforced at build** — `validateBuiltRunPlan()` in `run-plan-builder.js` after `buildRunPlan()` | Run plan from `POST /workflows/plan` and `/workflows/run` |
-| Task track | [task-track.schema.json](../../companion/schemas/internal/task-track.schema.json) | **Runtime-enforced at load** — `validateLoadedTrackFile()` in `companion/pit-crew/decomposer.js` when track files are loaded | Track definition files under `companion/pit-crew/tracks/` |
+| Task track | [task-track.schema.json](../../companion/schemas/internal/task-track.schema.json) | **Runtime-enforced at load** — `validateLoadedTrackFile()` in `companion/crew/decomposer.js` when track files are loaded | Track definition files under `companion/crew/tracks/` |
 | Tool pack manifest | [tool-pack-manifest.schema.json](../../companion/schemas/internal/tool-pack-manifest.schema.json) | **Runtime-enforced at load** — `validateLoadedToolPackManifest()` in `loadToolPack()`; `$defs.manifestTool` loaded from [tool-pack-manifest-tool.schema.json](../../companion/schemas/internal/tool-pack-manifest-tool.schema.json) | Pack root manifest |
 | Tool pack manifest tool | [tool-pack-manifest-tool.schema.json](../../companion/schemas/internal/tool-pack-manifest-tool.schema.json) | **Runtime-enforced at load** — validated via root manifest `$ref` to `#/$defs/manifestTool` | Pre-registration tool declaration |
 | Internal registry entry | [internal-tool-registry-entry.schema.json](../../companion/schemas/internal/internal-tool-registry-entry.schema.json) | **Runtime-enforced at registration** — `validateInternalToolRegistryEntry()` in `registerTool()` validates `toInternalToolRegistryMetadata()` snapshot (excludes `handle`, `validateInput`) | camelCase in-process registry object |
 | Public tool metadata | [public-tool-metadata.schema.json](../../companion/schemas/internal/public-tool-metadata.schema.json) | **Contract tests only** — `toPublicToolMetadata()` / `GET /tools` | snake_case public API item |
 | Model registry entry | [model-registry-entry.schema.json](../../companion/schemas/internal/model-registry-entry.schema.json) | **Spec only** — `model-profiles.js` uses a different shape | Model scorecard / skill sheet row for routing |
-| NearbyNode capability | [nearby-node-capability.schema.json](../../companion/schemas/internal/nearby-node-capability.schema.json) | **Spec only** — NearbyNode not implemented | Capability advertisement from a nearby device |
+| Relay Node capability | [nearby-node-capability.schema.json](../../companion/schemas/internal/nearby-node-capability.schema.json) | **Spec only** — Relay Nodes not implemented | Capability advertisement from a nearby device (legacy filename; identifier retained for schema compatibility) |
 | Workflow verification | [workflow-verification-result.schema.json](../../companion/schemas/internal/workflow-verification-result.schema.json) | **Runtime-enforced at step gate** — `validateWorkflowVerificationOutput()` in `validateStepOutput()` when `planStep.step_id === track.verification_step` (or registry `validation_expectations.verification_step`) | Verification gate result |
 | Engine schema validation | [engine-schema-validation-result.schema.json](../../companion/schemas/internal/engine-schema-validation-result.schema.json) | **Internal primitive** — `validateResult()` return `{ ok, errors }`; not runtime-enforced at API boundary | JSON Schema check outcome |
 | Priority fix review | [priority-fix-review-result.schema.json](../../companion/schemas/internal/priority-fix-review-result.schema.json) | **Contract tests only** — `lighthouse.validate_priority_fixes` content review (not a verification gate) | Audit-truth enrichment output |
@@ -40,7 +40,7 @@ Canonical JSON Schema files for Local Brain internal state. These document the *
 | Area | Path | Role |
 |---|---|---|
 | Workflow output contracts | `companion/schemas/*.schema.json` | Client-facing result shapes (e.g. Lighthouse handoff) |
-| Step intermediates | `companion/pit-crew/schemas/*.schema.json` | Per-step model JSON outputs |
+| Step intermediates | `companion/crew/schemas/*.schema.json` | Per-step model JSON outputs |
 | Tool pack I/O | `tool-packs/*/schemas/*.schema.json` | Tool input/output validation |
 | API envelopes | [api-contract.md](./api-contract.md) | HTTP response wrapper |
 

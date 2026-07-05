@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/model-capability-probe.schema.json",
+  "title": "Model Capability Probe",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "probeId",
+    "modelId",
+    "runtime",
+    "runtimeModelName",
+    "probeVersion",
+    "verifiedCapabilities",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "benchmark.model_capability_probe.v1"
+    },
+    "probeId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "modelId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime": {
+      "type": "string",
+      "enum": ["ollama"]
+    },
+    "runtimeModelName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtimeVersion": {
+      "type": "string"
+    },
+    "adapterVersion": {
+      "type": "string"
+    },
+    "probeVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "probeTimestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "declaredCapabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "verifiedCapabilities": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["SUPPORTED", "UNSUPPORTED", "INCOMPATIBLE_FORMAT", "TIMEOUT", "LOAD_FAILED", "REQUEST_FAILED", "PARTIAL", "UNTESTED"]
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "reason": { "type": "string" },
+          "toolName": { "type": "string" }
+        }
+      }
+    },
+    "latency": {
+      "type": "object",
+      "additionalProperties:": { "type": "number" },
+      "properties": {
+        "textCompletion": { "type": "number" },
+        "chatCompletion": { "type": "number" },
+        "nativeToolCalls": { "type": "number" },
+        "toolArguments": { "type": "number" },
+        "guidedJson": { "type": "number" },
+        "toolResultFollowUp": { "type": "number" }
+      }
+    },
+    "timeouts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "code": { "type": "string" },
+          "durationMs": { "type": "number" },
+          "message": { "type": "string" }
+        }
+      }
+    },
+    "rawEvidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "toolCallCount": { "type": "integer" },
+          "standardFormat": { "type": "boolean" }
+        }
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "probeDurationMs": {
+      "type": "number"
+    }
+  }
+}

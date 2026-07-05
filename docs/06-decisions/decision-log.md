@@ -1,5 +1,31 @@
 # Decision Log
 
+## 2026-07-05 — Pit Crew → The Crew: Code Path Migration
+
+### Decision
+
+Rename the legacy `companion/pit-crew/` internal implementation path to `companion/crew/` and update all active code and documentation references. Preserve the rename history in archival and historical notes only.
+
+### Why
+
+The public product name was shortened from "AI Pit Crew" to "The Crew" earlier (2026-06-12). The code path `companion/pit-crew/` retained the old name, creating a mismatch between public terminology and internal structure. The rename closes that gap without changing any orchestration behavior, endpoint contracts, or runtime semantics.
+
+### Consequences
+
+- `companion/pit-crew/` directory renamed to `companion/crew/` via `git mv` — all require paths in server, orchestrator, routers, decomposer, markdown, and track JSON files updated.
+- `docs/01-architecture/pit-crew-gap-analysis.md` renamed to `crew-gap-analysis.md`.
+- 25+ documentation files updated with path/terminology alignment.
+- Historical notes in `crew.md`, `crew-gap-analysis.md`, `glossary.md`, and `CONTRIBUTING.md` record the former name and path.
+- Archive files (`99-archive/`), historical decision entries, and `docs/LocAIly_ and_Second_Brain_Alignment_and_Connection.md` are preserved as-is.
+- No behavioral changes, endpoint response changes, or dependency changes.
+- No benchmark evidence, qualification records, or schema checksums invalidated.
+
+### Status
+
+Implemented and verified.
+
+---
+
 ## 2026-06-27 - North Star Local Capability Network
 
 ### Decision
@@ -140,7 +166,7 @@ Use **Model Scorecards / Skill Sheets** as the target data layer for model suita
 
 ### Why
 
-The Local Brain should route by task track and capability, not by generic model size or a single benchmark score. Scorecards make the AI Pit Crew model-selection thesis concrete while preserving rules, tools, validators, and human review as first-class handler types.
+The Local Brain should route by task track and capability, not by generic model size or a single benchmark score. Scorecards make The Crew model-selection thesis concrete while preserving rules, tools, validators, and human review as first-class handler types.
 
 ### Status
 
@@ -176,7 +202,7 @@ Some repo files (`README.md`, `AGENTS.md`) still use legacy "Local AI Platform" 
 
 ### Decision
 
-**NearbyNode** and **AI Pit Crew** ship as public product/architecture terms alongside Local Brain and Lighthouse Handoff.
+**NearbyNode** and **AI Pit Crew** (later shortened to **The Crew**) ship as public product/architecture terms alongside Local Brain and Lighthouse Handoff.
 
 ### Why
 
@@ -184,11 +210,11 @@ Owner confirmation. These names communicate the capability-first and multi-speci
 
 ### Status
 
-Confirmed (naming); NearbyNode implementation remains experimental
+Confirmed (naming); "AI Pit Crew" shortened to "The Crew" as product naming matured (2026-07-04). NearbyNode implementation remains experimental.
 
 ### Notes
 
-NearbyNode is a confirmed term for a not-yet-built layer—do not imply it is implemented.
+NearbyNode is a confirmed term for a not-yet-built layer—do not imply it is implemented. "AI Pit Crew" references in archived material are historical.
 
 ---
 
@@ -260,7 +286,7 @@ Legacy alias "Local AI Platform" may still appear in archived docs and older che
 
 ### Decision
 
-Restructure `/docs` into numbered folders (`00-start-here` through `06-decisions`, plus `99-archive`) aligned with Locaily, Local Brain, NearbyNode, AI Pit Crew, and Lighthouse Handoff framing.
+Restructure `/docs` into numbered folders (`00-start-here` through `06-decisions`, plus `99-archive`) aligned with Locaily, Local Brain, NearbyNode, The Crew (formerly AI Pit Crew), and Lighthouse Handoff framing.
 
 ### Why
 
@@ -272,7 +298,7 @@ Confirmed
 
 ### Notes
 
-See `docs/DOCS_CLEANUP_REPORT.md` for file moves.
+See `docs/99-archive/docs-maintenance/DOCS_CLEANUP_REPORT-2026-06-12.md` for file moves.
 
 ---
 
@@ -553,6 +579,252 @@ Confirmed for the Operator Log fixtures tested on 2026-06-18; other roles remain
 ### Notes
 
 Public summary: `ai-models/benchmark-results/operator-log/vibethinker-3b-narrow-extraction-v0.1.json`. Private excerpts and hashes remain in ignored local artifacts.
+
+---
+
+## 2026-07-04 — Tool Eval Bench Compatibility Slice
+
+### Decision
+
+Port 8 deterministic Tool Eval Bench scenarios (Categories A–D) as a native Node.js integration into the existing Benchmark Lab, using a new ToolEvalRuntime adapter (Ollama /api/chat native tool-calling) and a multi-turn runner. Extend the run-summary schema with a PARTIAL verdict. Store evidence in existing conventions. Do not vendor or submodule the upstream Python repository.
+
+### Why
+
+The upstream Tool Eval Bench is Python-based with 8+ dependencies (httpx, rich, pyyaml etc.). The existing Benchmark Lab is Node.js with zero external dependencies. A thin subprocess adapter would add Python build/runtime requirements. A native port of 8 deterministic scenarios is the least invasive approach — each scenario is ~20 lines of deterministic evaluation logic. Existing schemas cover most needs; only the PARTIAL verdict was missing from the verdict enum.
+
+### Consequences
+
+- Added `benchmark-lab/engine/adapters/tool-eval-runtime.js` (Ollama /api/chat adapter with tool support)
+- Added `benchmark-lab/engine/runners/tool-eval-runner.js` (multi-turn scenario runner)
+- Added `benchmark-lab/locaily/tracks/basic-tool-use/` (8 ported scenarios, tool definitions, suite config)
+- Extended `benchmark-lab/schemas/benchmark-run-summary.schema.json` with PARTIAL verdict
+- Added `scripts/benchmark-lab-tool-eval-test.js` (integration test)
+- Draft report and draft qualification record generated
+- llama3.2 results: 4 PASS, 3 PARTIAL, 1 FAIL — tool selection and precision reliable, restraint and refusal failing
+- Tool-call argument format differs from OpenAI: Ollama /api/chat requires arguments as JSON objects, not strings
+
+### Status
+
+Confirmed — compatibility slice operates independently of existing Benchmark Lab pipeline. All existing tests pass unchanged.
+
+### Notes
+
+Upstream commit: `8eca976167dfe925c125edd5a289433e78ee54e0`. Repository: https://github.com/MiaAI-Lab/tool-eval-bench.
+
+---
+
+## 2026-07-04 — Basic Tool Use Track Hardening
+
+### Decision
+
+Harden the basic-tool-use Benchmark Lab track with: (1) capability allowlisting at the runner level — hallucinated tool calls blocked and recorded as evidence, never executed; (2) track-level tool-use policy injected into system prompt — instructs on tool scope, refusal, direct answers, reference date; (3) explicit fixed reference date for TC-05; (4) TC-12 evaluator with 6 diagnostic dimensions; (5) TC-10/TC-11 separate correct-answer vs. unnecessary-tool metrics; (6) canonical checksum normalization for CRLF/LF text file equivalence.
+
+### Why
+
+The first completion report identified four specific gaps: TC-05 date parsing failed without explicit reference date; TC-10/TC-11 conflated answer correctness with tool-restraint compliance; TC-12 hallucinated tool names that were never blocked; checksums failed on Windows due to CRLF line endings. All six hardening items directly addressed these gaps without overfitting evaluators or hiding model failures.
+
+### Consequences
+
+- Capability allowlist blocks and records hallucinated tool calls (e.g., `send_email` for email deletion) — tools are never executed if not in the provided tool definitions.
+- Track policy is specific to `basic-tool-use` — does not modify global model behavior or other Benchmark Lab tracks.
+- TC-05 now has explicit `referenceDate: "2026-03-20"` and separates date correctness from argument-type validation.
+- TC-12 evaluator tracks `refusedCorrectly`, `acknowledgedMissingCapability`, `hallucinatedTool`, `falselyClaimedCompletion`, `attemptedUnrelatedTool`, `failedWithoutExplanation` independently.
+- Checksum records now include `checksumMode: "canonical_text_v1"` or `"byte_exact"`. Legacy records without `checksumMode` verified via fallback to canonical normalization.
+- TC-12 improved from FAIL to PARTIAL — model still attempts `send_email` but runtime blocks it and model adjusts to refusal.
+- Direct-answer compliance unchanged: llama3.2 still overuses tools for trivia and math.
+
+### Status
+
+Confirmed — all existing tests pass, 19 hardened integration tests pass, before/after comparison generated.
+
+### Notes
+
+Previous run ID: `run-tool-eval-20260704T162917Z`. Hardened run ID: `run-tool-eval-20260704T164235Z`. Comparison report: `compare-basic-tool-use-20260704T162917Z-vs-20260704T164235Z.md`.
+
+---
+
+## 2026-07-04 — Execution-Metadata Standardization and Cross-Model Assessment
+
+### Decision
+
+Standardize execution metadata in the benchmark-case schema with six optional fields: `executionPolicy`, `responseMode`, `supportMode`, `allowedInitialTools`, `allowedFollowupTools`, `maxTurns`. All fields are backward-compatible — existing fixtures and approved evidence remain valid without migration. Then attempt a cross-model mode comparison against `lfm25-8b-a1b-local` and `vibethinker-3b-q4km-local`.
+
+### Why
+
+The execution-mode comparison demonstrated that orchestration metadata (policy, mode, staged tools) is essential for distinguishing native capability from assisted capability. Without schema representation, this metadata cannot travel with evidence. The cross-model comparison was intended to determine whether observed failures are model-specific or runtime-specific.
+
+### Consequences
+
+- benchmark-case schema extended with 6 optional fields. All existing fixtures pass unchanged.
+- Existing approved evidence remains valid without migration.
+- lfm25-8b-a1b-local: **blocked** for tool-calling scenarios. Ollama reports `capabilities: ["completion"]` — no `tools` support. The `/api/chat` endpoint with `tools` parameter causes request timeout.
+- vibethinker-3b-q4km-local: **incompatible** with standard tool-calling format. Has `capabilities: ["completion", "tools", "insert"]` but produces non-standard XML `<parallel>` output instead of JSON `tool_calls` array. Also exhibits extreme latency (5+ minutes per request) due to thinking token prefill.
+- llama3.2-local: only fully compatible model for the standard tool-calling benchmark format.
+- Cross-model comparison completed as model compatibility assessment rather than full execution matrix.
+
+### Status
+
+Confirmed — schema changes are backward-compatible. Model compatibility findings are documented blockers for non-llama3.2 models.
+
+### Notes
+
+llama3.2 capabilities: `completion tools`. LFM2.5-8B-A1B capabilities: `completion` only. VibeThinker-3B capabilities: `completion tools insert` but non-standard output format.
+
+---
+
+## 2026-07-04 — Hybrid Deterministic Workflow Integration
+
+### Decision
+
+For deterministic known-schema mappings where benchmark evidence demonstrates higher reliability than tested model-generated formatting, LocAIly will prefer a registered deterministic transformer. The hybrid workflow (model tool selection → deterministic formatting) is now a first-class capability with its own execution policy, runner, schema support, and operator CLI.
+
+### Why
+
+llama3.2 achieves 0% schema compliance in model-only TC-65 (generates Python code instead of JSON) but 100% schema compliance in the hybrid workflow (3/3 PASS, <1ms formatting latency). The deterministic approach eliminates hallucination risk, reduces latency from ~2.5s to <1ms, and produces source-faithful output. The evidence demonstrates that for structured tool output to known schemas, deterministic formatting is superior to model-generated JSON.
+
+### Consequences
+
+- Probe gating integrated into tool-eval-runner.js and mode-comparison-runner.js
+- Hybrid CLI created (`npm run benchmark:hybrid`)
+- benchmark-case schema extended with hybrid-deterministic supportMode and TOOL_THEN_DETERMINISTIC_TRANSFORM policy
+- Transformation fixtures created with valid/invalid variants
+- lfm25-local hybrid blocked (Ollama runtime stability — 8.5B model exceeds system memory)
+- vibethinker-3b-q4km-local incompatible (non-standard tool output format)
+- Canonical TC-65 remains unchanged
+
+### Status
+
+Confirmed — hybrid workflow validated for llama3.2-local. LFM2.5 blocked by runtime stability. Architecture documented under deterministic-transformation Track.
+
+### Notes
+
+Model-only formatting: 0% schema compliance. Deterministic formatting: 100% schema compliance, 100% source fidelity.
+
+---
+
+## 2026-07-05 — Canonical Track Run Record Schema
+
+### Decision
+
+Define and implement `locaily.track_run_record.v1` as the canonical Track Run Record schema. The schema lives at `companion/evidence/schemas/track-run-record.schema.json` and covers all required executor types (`model`, `tool`, `transform`, `rule`, `relay-node`, `hybrid`) with logical field groups for identity, request, routing, execution, output, validation, performance, errors, and child runs.
+
+### Why
+
+The active build slice (Canonical Track Run Records) requires a single, standardized execution record format usable by both Benchmark Lab executions and real LocAIly runtime executions. No such format existed — only empty placeholder schema files. The schema fills the first gap in the Track Learning Evidence Loop: `Run -> Observe -> Validate -> Record -> Compare -> Qualify -> Route Better`.
+
+### Consequences
+
+- Schema defined at `companion/evidence/schemas/track-run-record.schema.json` (replaced empty `{}` placeholder).
+- Record builder at `companion/evidence/track-run-record-builder.js` with convenience builders per executor type.
+- Benchmark Lab suite-runner now emits a Track Run Record after each mock/Ollama suite execution.
+- Benchmark Lab hybrid-deterministic-runner now emits a parent Track Run Record with child records for each scenario trial's model, tool, and transform stages.
+- Example fixture records for model, transform, and hybrid executor types.
+- Schema validation tests pass against valid and invalid fixtures.
+- Existing Benchmark Lab tests, schemas, qualification records, evidence, and checksums remain valid.
+- The schema uses the codebase's existing custom JSON Schema validator (no `$ref`/`$defs` support) — child run structures are duplicated inline rather than referenced.
+- No companion track runner integration yet; that is the next integration step.
+
+### Status
+
+Confirmed — core schema, builder, and two Benchmark Lab runner integrations complete.
+
+### Notes
+
+Architecture doc: `docs/02-track-system/canonical-track-run-records.md`. Active build slice: `docs/07-progress/active-build-slice.md`.
+
+---
+
+## 2026-07-05 — Qualification Evidence Consumption: Six-State Resolution Engine
+
+### Decision
+
+Built a dedicated qualification resolver (`companion/core/qualification-resolver.js`) that converts raw Benchmark Lab qualification records into six actionable consumption states (qualified, unqualified, expired, stale, invalid, untested) with deterministic precedence. Created a Capability Registry (`companion/core/capability-registry.js`) as the qualification-aware surface for model+role+track capability queries. Created a Qualification Evidence Linker (`companion/evidence/qualification-evidence-linker.js`) to connect qualifications to Track Run Records. Added read-only endpoints (`GET /qualifications/*`, `GET /capabilities`) and a dry-run routing recommendation API (`POST /qualifications/dry-run`). Preserved existing routing behavior — advisory policy remains the default.
+
+### Why
+
+Before this slice, qualification records existed in `benchmark-lab/qualifications/models/` and were loaded by `model-qualification-loader.js`, but there was no unified interpretation layer that could answer "is this model+role+track combination eligible for routing?" The six-state model provides a clean eligibility view while the dry-run API allows proving correct interpretation before enabling automatic routing. The Capability Registry fills the previously documented gap of "unified capability index does not exist."
+
+### Consequences
+
+- Six states resolved with precedence: invalid > expired > stale > unqualified > qualified > untested.
+- `companion/core/qualification-resolver.js` wraps `modelQualificationLoader` — does not replace it.
+- Record-level `status` field (untested/screening/candidate) gates non-definitive records to `untested`.
+- Entry-level `status` field (qualified/conditional/rejected/revalidation_required) drives the definitive resolution.
+- Temporal staleness uses configurable TTL (default 30 days).
+- Dry-run API explains eligibility without changing routing — advisory policy remains default.
+- Read-only endpoints do not modify any existing qualification records, evidence, or schema.
+- No `benchmark-lab/engine/` modules imported — architectural boundary preserved.
+- 25 tests in `scripts/test-qualification-resolver.js` cover all six states plus edge cases.
+- Routes are inline in `companion/server.js` following existing pattern.
+
+### Status
+
+Confirmed.
+
+### Notes
+
+Full implementation: `companion/core/qualification-resolver.js`, `companion/core/capability-registry.js`, `companion/evidence/qualification-evidence-linker.js`, `scripts/test-qualification-resolver.js`. Routes: `GET /qualifications/status`, `GET /qualifications/capabilities`, `GET /qualifications/capability`, `POST /qualifications/dry-run`, `GET /capabilities`. Build slice result: `docs/07-progress/latest-build-result.json`.
+
+---
+
+## 2026-07-05 — Qualification-Aware Shadow Routing: Observe, Don't Enforce
+
+### Decision
+
+Built a shadow routing engine (`companion/core/shadow-routing.js`) that computes qualification-backed routing recommendations alongside the current routing decision without changing execution. Shadow comparison data is embedded in Track Run Records via an optional `routing.shadowRecommendation` field. The shadow router is called from `executeModelStep()` for every model step; both the selected capability and the recommended capability are recorded, along with the comparison state and reasoning. `enforced` is always `false` in shadow mode.
+
+### Why
+
+Before this slice, the qualification resolver could compute eligibility (dry-run), but there was no integration at runtime that captured the divergence between "what the router chose" and "what qualifications recommend." Shadow routing proves whether the evidence layer agrees with or correctly differs from current routing before it gains authority. Embedding the comparison in Track Run Records ensures every execution produces analyzable data without separate infrastructure.
+
+### Consequences
+
+- Shadow comparison data is produced for every model step across all tracks (Lighthouse Handoff, DealSniper, operator logs, benchmark suites).
+- Six comparison states: agree (current matches best qualified), disagree (current differs from best qualified), no-qualified-capability (no model qualified), insufficient-evidence (models exist but none definitive), current-selection-unqualified (current model known to fail), recommendation-unavailable (no data at all).
+- `routing.shadowRecommendation` is optional and omitted when not provided — no breaking schema change.
+- Fallback recommendation tracks the second-best qualified candidate when multiple exist.
+- `notEnforcedReason` explains why shadow mode does not affect routing.
+- No routing behavior changed: `enforced` is always `false`, execution is never blocked or redirected.
+- 31 tests cover all comparison states, builder integration, and shadow-not-enforced assertion.
+
+### Status
+
+Confirmed.
+
+### Notes
+
+Shadow router: `companion/core/shadow-routing.js`. Schema extension: `companion/evidence/schemas/track-run-record.schema.json` (optional `shadowRecommendation` in routing). Builder: `companion/evidence/track-run-record-builder.js`. Integration points: `companion/crew/model-router.js` (line 60-74), `companion/crew/orchestrator.js`, `companion/crew/runtime-track-run-recorder.js`, `companion/server.js`. Tests: `scripts/test-shadow-routing.js` (31 tests). Build slice result: `docs/07-progress/latest-build-result.json`.
+
+---
+
+## 2026-07-05 — Shadow Routing Evidence Review and Enforcement Policy
+
+### Decision
+
+Built an enforcement policy engine with 5 per-track rollout states (`disabled`, `shadow`, `eligible`, `enforced`, `suspended`) and an evidence review layer that aggregates shadow routing comparisons from Track Run Records. Enforcement eligibility is evaluated across 8+ conditions including track state, qualification state, score threshold, active overrides, runtime availability, model readiness, and comparison state validity. All enforcement is off by default — every track starts in `shadow` mode.
+
+### Why
+
+Shadow routing proved the system can detect when the current model is the best-qualified choice, when a better model exists, when the selected model is unqualified, when coverage is missing, and when evidence is insufficient. The next step before turning on enforcement is defining a safe policy that gates enforcement behind explicit conditions. The 5-state model (disabled → shadow → eligible → enforced → suspended) provides granular control without a single global switch. The evidence review layer enables data-driven decisions about which tracks are safe to enforce.
+
+### Consequences
+
+- 5 per-track enforcement states: disabled (no shadow either), shadow (observe only), eligible (ready to enforce but not yet), enforced (recommendations applied), suspended (previously enforced, now stopped).
+- Default state for all tracks is `shadow` — enforcement never activates without explicit action.
+- Eligibility checks: track must be approved, state must be eligible or enforced, qualification must be `qualified`, score must meet threshold (default 0.7), no active override, runtime must be available, model must be ready, comparison state must be actionable (not insufficient-evidence or recommendation-unavailable).
+- Override system allows blocking specific track+role+model combinations.
+- Evidence review aggregates by track with agreement rate, coverage rate, and per-comparison breakdowns.
+- 6 new endpoints: GET /enforcement/status, POST /enforcement/set, POST /enforcement/approve, POST /enforcement/override, GET /enforcement/review, GET /enforcement/eligibility.
+- 60 tests cover all conditions, CRUD operations, and evidence review.
+- Next slice: select one low-risk Track, enable guarded enforcement, compare enforced results against shadow predictions.
+
+### Status
+
+Confirmed.
+
+### Notes
+
+Policy engine: `companion/core/enforcement-policy.js`. Evidence review: `companion/evidence/shadow-evidence-review.js`. Tests: `scripts/test-enforcement-policy.js` (60 tests). Endpoints: `companion/server.js` (6 new route handlers). Build slice result: `docs/07-progress/latest-build-result.json`.
 
 ---
 

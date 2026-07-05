@@ -2,7 +2,7 @@ const { mkdirSync, writeFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { createOllamaRuntime } = require("../companion/runtime/ollama");
 const { createToolRegistry } = require("../companion/tools/registry");
-const { runTrack } = require("../companion/pit-crew");
+const { runTrack } = require("../companion/crew");
 const { createVaultAdapter } = require("../companion/memory/vault-adapter");
 const { WIKI_ALLOWED_PATHS, DEFAULT_BLOCKED_PATHS } = require("../companion/memory/allowlist-presets");
 

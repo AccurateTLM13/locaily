@@ -45,7 +45,7 @@ Locaily
 ├─ Local Brain      (companion server — implemented)
 ├─ Memory Bridge    (optional vault adapter — v0 implemented)
 ├─ NearbyNode       (conceptual)
-├─ AI Pit Crew      (roles/tracks — partial)
+├─ The Crew      (roles/tracks — partial; companion/crew/)
 └─ Lighthouse Handoff (first workflow; only memory-wired workflow in v0)
 ```
 

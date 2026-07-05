@@ -1,8 +1,8 @@
-const { runTrack } = require("../pit-crew/orchestrator");
+const { runTrack } = require("../crew/orchestrator");
 
 async function executeLighthouseHandoffTrack({ input, runtime, options, toolRegistry }) {
   if (!toolRegistry) {
-    throw new Error("Tool registry is required for pit crew track execution.");
+    throw new Error("Tool registry is required for crew track execution.");
   }
 
   const registry = toolRegistry || options.toolRegistry;

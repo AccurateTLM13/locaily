@@ -1,6 +1,6 @@
 # Task Track Template
 
-Use for **AI Pit Crew** tracks: classified job types that map to tools, packs, roles, and validators.
+Use for **The Crew** tracks: classified job types that map to tools, packs, roles, and validators.
 
 ---
 

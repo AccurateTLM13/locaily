@@ -1,0 +1,9 @@
+{
+  "fixtureId": "weather-tool-result-to-report/valid-complete",
+  "description": "Valid complete input with all required fields",
+  "input": { "location": "Tokyo", "temperature_celsius": 18, "condition": "Partly Cloudy" },
+  "expectedVerdict": "PASS",
+  "expectedOutput": { "location": "Tokyo", "temperature_celsius": 18, "condition": "Partly Cloudy", "recommendation": "Bring a light jacket." },
+  "expectedDiagnostics": { "missingFields": [], "typeMismatches": [], "ignoredSourceFields": [], "inferredFields": [] },
+  "forbiddenInferredFields": ["temperature_celsius", "location", "condition"]
+}

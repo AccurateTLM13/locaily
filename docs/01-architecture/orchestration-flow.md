@@ -17,34 +17,47 @@ See [json-first-internal-format.md](./json-first-internal-format.md).
 
 - Global API auth or CORS
 - Pack installation
-- NearbyNode delegation (future)
+- Relay Node delegation (future)
+- Automatic planning or DAG generation
 
 ## High-Level Shape
 
 ```txt
-Workflow input (JSON)
-    │
-    ▼
-Step 1 (e.g. extract)     → JSON artifact
-    │ validate intermediate (JSON)
-    ▼
-Step 2 (e.g. classify)    → JSON artifact
-    │ validate intermediate (JSON)
-    ▼
-Step 3 (e.g. prioritize)  → JSON artifact
-    │ validate final (JSON)
-    ▼
+Request
+  │
+  ▼
+Local Brain
+  │
+  ▼
+Track / workflow resolution
+  │
+  ▼
+Run plan (JSON)
+  │
+  ▼
+Crew assignment (model roles, tools, validators)
+  │
+  ▼
+Step execution (model steps, tool steps)
+  │  └─ validate intermediate (JSON)
+  ▼
+Validation (JSON)
+  │
+  ▼
+Canonical Track Run Record (JSON)
+  │
+  ▼
 Structured workflow result (JSON)
-    │
-    ▼
+  │
+  ▼
 [optional] Markdown / other export render
 ```
 
 ## Implemented Example: Lighthouse Handoff
 
-Platform module: `companion/pit-crew/` (orchestrator, decomposer, model-router, tool-router).
+Platform module: `companion/crew/` (orchestrator, decomposer, model-router, tool-router).
 
-Legacy wrapper: `companion/core/orchestrator.js` delegates to the pit-crew runner.
+Legacy wrapper: `companion/core/orchestrator.js` delegates to the Crew runner.
 
 | Step | Purpose | Executor |
 |---|---|---|
@@ -86,6 +99,10 @@ The tool handler in `companion/tools/lighthouse-handoff.js` also supports orches
 
 Core orchestration mechanics should stay **boring and stable**. Weird, domain-specific logic belongs in tool packs and workflow modules—not in the server monolith.
 
+## Canonical Track Run Records
+
+The active build slice is the Canonical Track Run Record — a structured JSON record emitted after each Track execution. It captures track version, steps, workers, validation results, retries, timing, and routing context. Once complete, it will be the first concrete artifact in the Track Learning Evidence Loop.
+
 ## Target Direction (Not Fully Built)
 
 From evolution notes:
@@ -101,7 +118,7 @@ Today, the client or tool id effectively acts as the classifier (e.g. calling `l
 - Generic orchestration DSL vs per-workflow code
 - Persisting partial workflow state across failures
 - Human-in-the-loop review steps
-- Running steps on NearbyNode hardware
+- Running steps on Relay Node hardware
 
 ## Archive
 

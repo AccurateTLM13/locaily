@@ -28,7 +28,7 @@
       "executor": {
         "type": "model",
         "role": "reasoning_worker",
-        "schema": "companion/pit-crew/schemas/editorial-opportunity-report.schema.json",
+        "schema": "companion/crew/schemas/editorial-opportunity-report.schema.json",
         "prompt_template": "rank_editorial_opportunities"
       }
     },

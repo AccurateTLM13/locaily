@@ -37,7 +37,7 @@ Separated from [assumptions.md](./assumptions.md). Items here are **not decided*
 2. Version compatibility declaration format?
 3. Community pack signing/checksums required?
 
-## Pit Crew / Tracks
+## The Crew / Tracks
 
 1. Automatic track classifier design?
 2. Model suitability profile schema?

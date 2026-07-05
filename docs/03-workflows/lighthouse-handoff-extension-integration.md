@@ -75,7 +75,7 @@ POST http://127.0.0.1:31313/analyze
 
 | Value | When to use |
 |---|---|
-| `orchestrated` | Default when Local Brain has mock/Ollama runtime — multi-step Pit Crew track |
+| `orchestrated` | Default when Local Brain has mock/Ollama runtime — multi-step Crew track |
 | `baseline` | Single-pass model call (comparison / fallback) |
 | *(omit + no runtime)* | Local Brain returns deterministic demo JSON |
 

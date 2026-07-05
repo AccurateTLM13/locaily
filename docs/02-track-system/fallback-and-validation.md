@@ -64,5 +64,5 @@ Record evidence in [../04-validation/](../04-validation/) and [../07-progress/pr
 ## Related
 
 - [../04-validation/README.md](../04-validation/README.md)
-- [../01-architecture/pit-crew-gap-analysis.md](../01-architecture/pit-crew-gap-analysis.md)
+- [The Crew / legacy gap analysis](../01-architecture/crew-gap-analysis.md)
 - Workflow validation template: [../03-workflows/validation-template.md](../03-workflows/validation-template.md)

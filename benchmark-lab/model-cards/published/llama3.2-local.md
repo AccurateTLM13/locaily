@@ -13,12 +13,14 @@
 | Evidence ID | Track | Contract | Source Run | Pass Rate |
 |---|---|---|---|---:|
 | llama32-local-intent-classification-v1 | intent-classification | intent-classifier-worker-v1 | run-20260624T023320Z | 100% |
+| hybrid-weather-cli-evidence-v1 | basic-tool-use | basic-tool-use-v1 | hybrid-loc-hybrid-weather-001-1783220768439 | 100% |
 
 ## Track Status
 
 | Track | Status | Evidence |
 |---|---|---|
 | intent-classification | screening | llama32-local-intent-classification-v1 |
+| basic-tool-use | screening | hybrid-weather-cli-evidence-v1 |
 
 ## Limitations
 

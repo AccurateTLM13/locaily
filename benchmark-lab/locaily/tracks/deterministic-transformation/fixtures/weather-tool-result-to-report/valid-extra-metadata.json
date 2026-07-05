@@ -1,0 +1,9 @@
+{
+  "fixtureId": "weather-tool-result-to-report/valid-extra-metadata",
+  "description": "Input with extra fields that should be ignored",
+  "input": { "location": "Berlin", "temperature_celsius": 8, "condition": "Cloudy", "humidity": 72, "wind_speed_kmh": 15, "request_id": "abc123" },
+  "expectedVerdict": "PASS",
+  "expectedOutput": { "location": "Berlin", "temperature_celsius": 8, "condition": "Cloudy", "recommendation": "Bring a light jacket." },
+  "expectedDiagnostics": { "missingFields": [], "typeMismatches": [], "ignoredSourceFields": ["humidity", "wind_speed_kmh", "request_id"], "inferredFields": [] },
+  "forbiddenInferredFields": []
+}

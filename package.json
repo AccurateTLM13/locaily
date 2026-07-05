@@ -1,5 +1,23 @@
 {
+  "name": "locaily",
+  "version": "1.0.0",
+  "description": "Local-first AI coordination stack with Benchmark Lab evaluation subsystem",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
   "scripts": {
+    "start": "node companion/server.js",
+    "test:contract": "node scripts/contract-test.js",
+    "test:smoke": "node scripts/smoke-test.js",
+    "test:benchmark": "node scripts/benchmark-lab-schema-test.js && node scripts/benchmark-lab-run-test.js && node scripts/benchmark-lab-mode-comparison-test.js",
+    "validate": "node scripts/benchmark-lab-schema-test.js && node scripts/benchmark-lab-run-test.js && node scripts/benchmark-lab-mode-comparison-test.js && node scripts/contract-test.js",
+    "tool-eval:run": "node benchmark-lab/engine/cli/tool-eval-run.js",
+    "tool-eval:test": "node scripts/benchmark-lab-tool-eval-test.js",
+    "benchmark:probe": "node benchmark-lab/engine/cli/benchmark-probe.js",
+    "benchmark:diagnose": "node benchmark-lab/engine/cli/tc65-diagnose.js",
+    "benchmark:hybrid": "node benchmark-lab/engine/cli/benchmark-hybrid.js",
     "benchmark:run": "node benchmark-lab/engine/cli/benchmark-run.js",
     "benchmark:review": "node benchmark-lab/engine/cli/benchmark-review.js",
     "benchmark:promote": "node benchmark-lab/engine/cli/benchmark-promote.js",

@@ -1,8 +1,12 @@
-# NearbyNode
+# Relay Nodes
+
+> **Historical note:** This concept was previously called **NearbyNode**. The name was updated to "Relay Nodes" as the product naming matured. No code rename has occurred.
 
 ## What It Is
 
-**NearbyNode** is the planned layer for nearby devices and capabilities: phones, tablets, secondary machines, edge boxes, or browser-connected peers that expose connectors without necessarily hosting a model.
+**Relay Nodes** are the planned layer for nearby devices and capabilities: phones, tablets, secondary machines, edge boxes, or browser-connected peers that expose connectors without necessarily hosting a model.
+
+A Relay Node does not need an AI model. It exposes **capabilities**—files, sensors, UI hooks, APIs, compute—through trusted connectors. The Local Brain coordinates Relay Node capabilities.
 
 ## What It Owns (Target)
 
@@ -24,7 +28,7 @@
 
 Not every node needs a model. Every node needs a **connector** so Local Brain can route work to the right place.
 
-Examples of capabilities that might live on a NearbyNode:
+Examples of capabilities that might live on a Relay Node:
 
 - Read a folder the main PC cannot access
 - Run a mobile-only API or sensor
@@ -36,19 +40,11 @@ Examples of capabilities that might live on a NearbyNode:
 - **Local Brain** — registration, health, task delegation, result return
 - **Clients** — indirectly; clients talk to Local Brain, not directly to every node (target design)
 
-## Inputs / Outputs (Planned)
-
-Not standardized in this repo yet. Capability advertisements should be **structured JSON** records (see `companion/schemas/internal/nearby-node-capability.schema.json`). Expect something like:
-
-- Register capability manifest (JSON)
-- Accept delegated sub-tasks from orchestrator (JSON in / JSON out)
-- Return structured capability results or errors (JSON)
-
 ## Status
 
 **Experimental / not implemented.**
 
-No NearbyNode discovery service, protocol, or reference connector exists in the current codebase. This doc captures direction from project vision and research notes only.
+No Relay Node discovery service, protocol, or reference connector exists in the current codebase. This doc captures direction from project vision and research notes only.
 
 ## Still Undecided
 

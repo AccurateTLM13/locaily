@@ -20,7 +20,7 @@ Schema: [internal-json-schemas.md](./internal-json-schemas.md) (manifest, intern
 
 - Executing model inference (providers)
 - Multi-step orchestration inside a tool (orchestrator / tool handler)
-- NearbyNode capability advertisements (future — see `nearby-node-capability.schema.json`)
+- Relay Node capability advertisements (future — see `nearby-node-capability.schema.json`)
 
 ## Tool Pack Shape (Implemented)
 
@@ -86,7 +86,7 @@ Clients receive entries like:
 - Community pack signing and checksum policy
 - Sandboxed pack execution vs in-process Node modules
 - Version compatibility matrix between engine and packs
-- Unified registry row for NearbyNode capabilities
+- Unified registry row for Relay Node capabilities
 
 ## Detailed Spec (Archived)
 

@@ -1,0 +1,33 @@
+name: Documentation Issue
+description: Report incorrect, stale, or missing documentation
+labels: [documentation]
+body:
+  - type: input
+    id: path
+    attributes:
+      label: Affected File or Path
+    validations:
+      required: true
+  - type: textarea
+    id: incorrect
+    attributes:
+      label: Incorrect or Missing Statement
+    validations:
+      required: true
+  - type: textarea
+    id: truth
+    attributes:
+      label: Observed Implementation Truth
+  - type: textarea
+    id: correction
+    attributes:
+      label: Proposed Correction
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Affected Audience
+      options:
+        - Contributors
+        - Users
+        - Coding agents
+        - All

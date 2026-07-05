@@ -46,7 +46,7 @@ The legacy [validation-result.schema.json](../../companion/schemas/internal/vali
 | Consumer | Behavior |
 |---|---|
 | `run-plan-validator.js` | Schema gate via `validateWorkflowVerificationOutput()` then boolean gate on designated verification steps |
-| `pit-crew/orchestrator.js` | Copies artifact into `result.meta.verification` |
+| `crew/orchestrator.js` | Copies artifact into `result.meta.verification` |
 | `validateWorkflowResult()` | Fails workflow when `meta.verification.valid === false` |
 | Clients / smoke tests | Read `result.meta.verification.valid` |
 
@@ -204,7 +204,7 @@ Uses engine `validateResult()` internally plus `meta.verification.valid` check.
 | **Stored in** | Public `/tracks/run` and `/workflows/run` result objects |
 | **Must not change** | This audit pass does not alter API output shapes |
 
-**Assembly:** `assembleLighthouseTrackResult()` / `assembleGenericTrackResult()` in `pit-crew/orchestrator.js`
+**Assembly:** `assembleLighthouseTrackResult()` / `assembleGenericTrackResult()` in `crew/orchestrator.js`
 
 ---
 

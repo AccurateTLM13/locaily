@@ -27,7 +27,7 @@
       "executor": {
         "type": "model",
         "role": "default_worker",
-        "schema": "companion/pit-crew/schemas/operator-log-draft.schema.json",
+        "schema": "companion/crew/schemas/operator-log-draft.schema.json",
         "prompt_template": "write_operator_log"
       }
     },

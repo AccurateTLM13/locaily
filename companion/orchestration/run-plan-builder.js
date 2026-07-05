@@ -1,5 +1,5 @@
 const { randomUUID } = require("node:crypto");
-const { loadTrack } = require("../pit-crew/decomposer");
+const { loadTrack } = require("../crew/decomposer");
 const { validateResult } = require("../core/result-validator");
 const { getWorkflow } = require("./workflow-registry");
 const { getTrackRegistryEntry, getWorkerTypeForStep } = require("./track-registry");

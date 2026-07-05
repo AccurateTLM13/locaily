@@ -209,14 +209,19 @@ Do not try to solve model bundling on day one.
 
 Before public open-source release:
 
-- README explains what this is.
-- README explains what this is not.
-- Setup is tested on Windows.
-- Health endpoint works.
-- Ollama setup is documented.
-- DealSniper works as the required MVP tool.
-- Lighthouse Handoff exists as a workflow test bench (deterministic + orchestrated paths; extension bridge not implemented).
-- Errors are readable and use the standard envelope.
-- License is chosen.
-- Security note explains localhost-only behavior.
-- Contribution path is clear.
+- [ ] README explains what this is and is not.
+- [ ] Setup is tested on Windows.
+- [ ] Health endpoint works.
+- [ ] Ollama setup is documented.
+- [ ] DealSniper works as the required MVP tool.
+- [ ] Lighthouse Handoff exists as a workflow test bench (deterministic + orchestrated paths; extension bridge not implemented).
+- [ ] Errors are readable and use the standard envelope.
+- [ ] License file is present.
+- [ ] Security note explains localhost-only behavior.
+- [ ] Contribution path is clear.
+- [ ] Known limitations are documented.
+- [ ] Evidence claims are scoped to actual Benchmark Lab results.
+- [ ] No secrets or private paths committed in repo.
+- [ ] Node version requirement documented.
+
+Full checklist: [publish-readiness-checklist.md](./publish-readiness-checklist.md)

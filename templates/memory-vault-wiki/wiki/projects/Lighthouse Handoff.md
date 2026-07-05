@@ -2,7 +2,7 @@
 
 ## Current state
 
-First workflow test bench for Locaily pit crew orchestration.
+First workflow test bench for Locaily The Crew orchestration.
 
 ## Constraints
 

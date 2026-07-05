@@ -2,7 +2,7 @@
 
 **Status:** Draft specifications only. Every track in this catalog is **not implemented** unless explicitly noted elsewhere (e.g. partial patterns in Lighthouse validation steps).
 
-Use [track-definition-schema.md](./track-definition-schema.md) when converting a draft here into `companion/pit-crew/tracks/*.track.json`.
+Use [track-definition-schema.md](./track-definition-schema.md) when converting a draft here into `companion/crew/tracks/*.track.json`.
 
 ---
 
@@ -532,15 +532,15 @@ Feeds **role → model** resolution with evidence. Local Brain continues to disp
 
 ---
 
-## Capability Discovery Track (Future Only)
+## Capability Discovery Track (Future — Relay Node Required)
 
 | Field | Value |
 |---|---|
 | **Track name** | Capability Discovery Track |
 | **Track id** | `capability.discovery` |
-| **Status** | **Future / NearbyNode-adjacent — not implemented, not Milestone 2 scope** |
+| **Status** | **Future / Relay Node-dependent — not implemented** |
 
-> **Explicit boundary:** This track depends on NearbyNode protocol, unified Capability Registry, and device pairing — none of which exist in the repo today. Do not wire this track into workflows or claim partial implementation.
+> **Explicit boundary:** This track depends on Relay Node protocol (formerly NearbyNode), unified Capability Registry, and device pairing — none of which exist in the repo today. Do not wire this track into workflows or claim partial implementation.
 
 ### Purpose
 
@@ -549,7 +549,7 @@ Discover executable capabilities on Local Brain and connected nearby devices, no
 ### When it should run (future)
 
 - Local Brain startup or periodic refresh
-- After a NearbyNode peer connects or disconnects
+- After a Relay Node peer connects or disconnects
 - Before Routing Track selects a handler that may execute on a remote device
 
 ### Input contract (draft)
@@ -582,7 +582,7 @@ Discover executable capabilities on Local Brain and connected nearby devices, no
 
 ### Required capabilities (future)
 
-- NearbyNode connector protocol — **not built**
+- Relay Node connector protocol — **not built**
 - Unified Capability Registry merging tool packs + node manifests — **partial (tools only today)**
 - Local `/tools` and `/models/roles` endpoints as local slice
 
@@ -597,18 +597,18 @@ Discover executable capabilities on Local Brain and connected nearby devices, no
 
 ### Fallback behavior
 
-- NearbyNode unavailable: return local capabilities only with `scope_effective: "local"`
+- Relay Node unavailable: return local capabilities only with `scope_effective: "local"`
 
 ### Failure cases
 
 | Code | When |
 |---|---|
-| `NEARBY_NODE_UNAVAILABLE` | Peer discovery failed (non-fatal for local-only) |
+| `RELAY_NODE_UNAVAILABLE` | Peer discovery failed (non-fatal for local-only) |
 | `REGISTRY_STALE` | Optional TTL exceeded |
 
 ### Example fixture
 
-None in this catalog — add when NearbyNode milestone starts.
+None in this catalog — add when Relay Node milestone starts.
 
 ### Local Brain routing notes
 

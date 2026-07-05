@@ -31,10 +31,10 @@ Models and tools are **handlers** that execute track steps.
 Track definitions live as JSON files:
 
 ```txt
-companion/pit-crew/tracks/*.track.json
+companion/crew/tracks/*.track.json
 ```
 
-Loaded by `companion/pit-crew/decomposer.js`. Listed via `GET /tracks` (basic) and `GET /orchestration/tracks` (enriched metadata from `companion/orchestration/track-registry.js`).
+Loaded by `companion/crew/decomposer.js`. Listed via `GET /tracks` (basic) and `GET /orchestration/tracks` (enriched metadata from `companion/orchestration/track-registry.js`).
 
 ## Current Catalog
 

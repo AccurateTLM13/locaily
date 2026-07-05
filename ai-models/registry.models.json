@@ -1,4 +1,5 @@
 {
+  "//note": "Declared capability (roleCandidates, knownStrengths) is not Benchmark Lab qualification. Installed/available is not qualified. Qualification is specific to tested roles, Tracks, contracts, prompts, runtimes, and evidence. See model-candidates.md and benchmark-lab/qualifications/ for qualification records.",
   "routingBaseline": {
     "fast_worker": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
     "classification_worker": "deterministic-audit-mapping",
@@ -139,7 +140,7 @@
       "candidateReason": "Reduces prompt size before routing to small models.",
       "runtimeNotes": "Seq2seq compression model (~60M params). May require llama.cpp or a dedicated adapter rather than standard Ollama chat routing.",
       "knownStrengths": ["Targets sub-100ms preprocessing for short prompts", "Designed to preserve intent while trimming tokens"],
-      "knownWeaknesses": ["Not a general LLM; integration path into Pit Crew router is unproven"]
+      "knownWeaknesses": ["Not a general LLM; integration path into The Crew router is unproven"]
     },
     {
       "id": "paddlepaddle-paddleocr-vl-1.6-i1-gguf",

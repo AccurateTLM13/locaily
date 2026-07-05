@@ -2,7 +2,7 @@ const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { executeLighthouseHandoffTrack } = require("../core/orchestrator");
 const { recordScoreboardEntry } = require("../core/scoreboard");
-const { formatHandoffMarkdown } = require("../pit-crew/markdown");
+const { formatHandoffMarkdown } = require("../crew/markdown");
 const {
   resolveMemoryBridgeAdapter,
   runMemoryPreflight,

@@ -1,0 +1,52 @@
+name: Feature Request
+description: Propose a new capability for Locaily
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Being Solved
+    validations:
+      required: true
+  - type: input
+    id: layer
+    attributes:
+      label: Affected Architecture Layer
+      description: Local Brain, Track system, The Crew, Benchmark Lab, Memory Bridge, Relay Nodes, Tool pack, Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: why-existing
+    attributes:
+      label: Why Existing Tracks/Tools Cannot Handle This
+  - type: dropdown
+    id: type
+    attributes:
+      label: Implementation Type
+      options:
+        - New code
+        - New Track
+        - New tool pack
+        - Model qualification
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: approach
+    attributes:
+      label: Approach
+      options:
+        - Deterministic
+        - Model-backed
+        - Hybrid
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy / Permission Impact
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Explicit Non-Goals

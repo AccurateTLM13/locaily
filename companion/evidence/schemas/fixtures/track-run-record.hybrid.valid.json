@@ -1,0 +1,181 @@
+{
+  "schemaVersion": "locaily.track_run_record.v1",
+  "recordId": "hybrid-weather-parent-001",
+  "trackId": "hybrid-weather",
+  "workflowId": "hybrid-weather-workflow",
+  "correlationId": "corr-weather-001",
+  "timestamps": {
+    "createdAt": "2026-07-05T00:01:00.000Z",
+    "startedAt": "2026-07-05T00:00:58.000Z",
+    "completedAt": "2026-07-05T00:01:00.050Z"
+  },
+  "request": {
+    "requester": "hybrid-deterministic-runner",
+    "requestedCapability": "hybrid-weather-workflow",
+    "inputSummary": "weather query for Tokyo"
+  },
+  "routing": {
+    "executorType": "hybrid",
+    "capabilityId": "hybrid-weather-workflow-v1",
+    "provider": "tool-eval",
+    "qualificationRecordId": "llama3.2-local-hybrid-weather-workflow-live-draft",
+    "routingReason": "model selects tool, deterministic transform processes result"
+  },
+  "execution": {
+    "status": "success",
+    "durationMs": 2050,
+    "retryCount": 0,
+    "fallbackUsed": false
+  },
+  "output": {
+    "outputFormat": "json",
+    "outputSummary": "transformed weather report for Tokyo",
+    "structuredOutputValid": true
+  },
+  "validation": {
+    "status": "passed",
+    "validatorIds": [
+      "model-stage",
+      "transformer-stage",
+      "capability-allowlist",
+      "runtime"
+    ],
+    "score": 1.0
+  },
+  "performance": {
+    "totalDurationMs": 2050,
+    "inferenceTimeMs": 2000,
+    "toolExecutionTimeMs": 5
+  },
+  "childRuns": [
+    {
+      "schemaVersion": "locaily.track_run_record.v1",
+      "recordId": "hybrid-weather-child-model-001",
+      "trackId": "hybrid-weather",
+      "parentRunId": "hybrid-weather-parent-001",
+      "correlationId": "corr-weather-001",
+      "timestamps": {
+        "createdAt": "2026-07-05T00:01:00.000Z",
+        "startedAt": "2026-07-05T00:00:58.000Z",
+        "completedAt": "2026-07-05T00:01:00.020Z"
+      },
+      "request": {
+        "requester": "hybrid-deterministic-runner",
+        "requestedCapability": "tool-selection",
+        "inputSummary": "weather query for Tokyo"
+      },
+      "routing": {
+        "executorType": "model",
+        "capabilityId": "llama3.2-local",
+        "provider": "ollama"
+      },
+      "execution": {
+        "status": "success",
+        "durationMs": 2020,
+        "retryCount": 0,
+        "fallbackUsed": false,
+        "modelInfo": {
+          "modelId": "llama3.2-local",
+          "role": "tool_selector",
+          "temperature": 0
+        }
+      },
+      "output": {
+        "outputFormat": "json",
+        "outputSummary": "selected get_weather tool for Tokyo"
+      },
+      "validation": {
+        "status": "passed",
+        "validatorIds": ["model-stage", "capability-allowlist"],
+        "score": 1.0
+      }
+    },
+    {
+      "schemaVersion": "locaily.track_run_record.v1",
+      "recordId": "hybrid-weather-child-tool-001",
+      "trackId": "hybrid-weather",
+      "parentRunId": "hybrid-weather-parent-001",
+      "correlationId": "corr-weather-001",
+      "timestamps": {
+        "createdAt": "2026-07-05T00:01:00.000Z",
+        "startedAt": "2026-07-05T00:01:00.020Z",
+        "completedAt": "2026-07-05T00:01:00.025Z"
+      },
+      "request": {
+        "requester": "hybrid-deterministic-runner",
+        "requestedCapability": "get_weather",
+        "inputSummary": "tool call for Tokyo weather"
+      },
+      "routing": {
+        "executorType": "tool",
+        "capabilityId": "get_weather",
+        "provider": "mock-handler"
+      },
+      "execution": {
+        "status": "success",
+        "durationMs": 5,
+        "retryCount": 0,
+        "fallbackUsed": false,
+        "toolInfo": {
+          "toolId": "mock_weather",
+          "task": "get_weather"
+        }
+      },
+      "output": {
+        "outputFormat": "json",
+        "outputSummary": "weather data for Tokyo: 18C, Partly Cloudy"
+      },
+      "validation": {
+        "status": "passed",
+        "validatorIds": ["tool-response"],
+        "score": 1.0
+      }
+    },
+    {
+      "schemaVersion": "locaily.track_run_record.v1",
+      "recordId": "hybrid-weather-child-transform-001",
+      "trackId": "hybrid-weather",
+      "parentRunId": "hybrid-weather-parent-001",
+      "correlationId": "corr-weather-001",
+      "timestamps": {
+        "createdAt": "2026-07-05T00:01:00.000Z",
+        "startedAt": "2026-07-05T00:01:00.025Z",
+        "completedAt": "2026-07-05T00:01:00.037Z"
+      },
+      "request": {
+        "requester": "hybrid-deterministic-runner",
+        "requestedCapability": "weather-tool-result-to-report",
+        "inputSummary": "transform weather tool output to report"
+      },
+      "routing": {
+        "executorType": "transform",
+        "capabilityId": "weather-tool-result-to-report",
+        "provider": "transform-registry",
+        "qualificationRecordId": "weather-tool-result-to-report-live-draft"
+      },
+      "execution": {
+        "status": "success",
+        "durationMs": 12,
+        "retryCount": 0,
+        "fallbackUsed": false,
+        "transformInfo": {
+          "transformerId": "weather-tool-result-to-report",
+          "version": "1.0.0",
+          "checksum": "sha256:a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1",
+          "inputValid": true,
+          "outputValid": true,
+          "sourceFaithful": true
+        }
+      },
+      "output": {
+        "outputFormat": "json",
+        "outputSummary": "transformed report with recommendation"
+      },
+      "validation": {
+        "status": "passed",
+        "validatorIds": ["transform-output-schema"],
+        "score": 1.0
+      }
+    }
+  ]
+}

@@ -22,7 +22,7 @@ Working assumptions for Locaily. **Not all validated.** When an assumption becom
 | Nearby devices will expose capabilities without full models | May require heavier edge agents |
 | Track metaphor helps users and agents reason about routing | May be marketing-only; classifier may stay technical |
 | Tauri is best Desktop shell | Electron may be easier for some Windows integrations |
-| Older hardware profiles are sufficient for Pit Crew workflows | May fail performance targets |
+| Older hardware profiles are sufficient for Crew workflows | May fail performance targets |
 
 ## Product Assumptions
 

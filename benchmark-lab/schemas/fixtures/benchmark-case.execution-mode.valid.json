@@ -1,0 +1,18 @@
+{
+  "caseId": "tc-05-execution",
+  "trackId": "basic-tool-use",
+  "difficulty": "medium",
+  "tags": ["date-resolution", "execution-mode"],
+  "input": {
+    "text": "Schedule a meeting for next Monday."
+  },
+  "expected": {
+    "label": "extract"
+  },
+  "executionPolicy": "DATE_RESOLUTION_REQUIRED",
+  "responseMode": "tool_then_text",
+  "supportMode": "runtime-constrained",
+  "allowedInitialTools": ["resolve_relative_date"],
+  "allowedFollowupTools": ["create_calendar_event"],
+  "maxTurns": 8
+}

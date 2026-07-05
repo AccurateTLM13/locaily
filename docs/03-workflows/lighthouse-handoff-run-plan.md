@@ -4,7 +4,7 @@ First workflow plan executed through Local Brain track-based orchestration.
 
 **Workflow id:** `lighthouse_handoff`  
 **Track id:** `website_audit.lighthouse_handoff`  
-**Track file:** `companion/pit-crew/tracks/lighthouse-handoff.track.json`
+**Track file:** `companion/crew/tracks/lighthouse-handoff.track.json`
 
 ## JSON Pipeline Stages
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-**Implemented** — showcase tool plus Pit Crew workflow track
+**Implemented** — showcase tool plus Crew workflow track
 
 ## Goal
 
@@ -22,7 +22,7 @@ Structured analysis object per `companion/schemas/deal-sniper.schema.json`, wrap
 
 **Track ID:** `marketplace.dealsniper`
 
-**File:** `companion/pit-crew/tracks/dealsniper.track.json`
+**File:** `companion/crew/tracks/dealsniper.track.json`
 
 | Step | Executor | Purpose |
 |---|---|---|

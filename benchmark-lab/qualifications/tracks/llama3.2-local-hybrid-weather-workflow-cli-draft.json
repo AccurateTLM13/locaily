@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "llama3.2-local-hybrid-weather-workflow-cli-promoted",
+  "subject": {
+    "type": "track",
+    "id": "hybrid-weather-workflow",
+    "provider": "locaily"
+  },
+  "status": "conditional",
+  "qualifiedFor": [
+    {
+      "role": "weather-workflow",
+      "trackId": "hybrid-weather",
+      "contractId": "hybrid-weather-v1",
+      "status": "conditional",
+      "score": 1,
+      "conditions": [
+        "Model: llama3.2-local (weather-tool-selection)",
+        "Transformer: weather-tool-result-to-report v1.0.0",
+        "Invalidation conditions: model change, quantization change, runtime model name change, Ollama version change, adapter change, probe incompatibility, tool contract change, transformer version/checksum change, source/output schema change, evaluator change, dependency qualification revocation"
+      ]
+    }
+  ],
+  "evidence": {
+    "evidenceIds": ["hybrid-weather-cli-evidence-v1"],
+    "summaryPaths": ["benchmark-lab/reports/drafts/hybrid-loc-hybrid-weather-001-1783220768439/summary.json"]
+  },
+  "modelProfileId": "llama3.2-local",
+  "notes": [
+    "PROMOTED — Combined hybrid workflow qualification",
+    "Support mode: hybrid-deterministic",
+    "Dependencies: model-capability (llama3.2-local) + transformer-capability (weather-tool-result-to-report)",
+    "Probe: llama3.2-local-probe-1783214984915",
+    "Run: hybrid-loc-hybrid-weather-001-1783220768439",
+    "Runtime: Ollama 0.31.1, llama3.2:latest",
+    "Tool: get_weather (location: Tokyo)",
+    "Source schema: {location, temperature_celsius, condition}",
+    "Output schema: {location, temperature_celsius, condition, recommendation}",
+    "This is hybrid-deterministic capability, NOT native model structured-output support"
+  ],
+  "generatedAt": "2026-07-04T23:30:00.000Z"
+}

@@ -33,6 +33,67 @@
         "type": "string"
       }
     },
+    "executionPolicy": {
+      "type": "string",
+      "enum": [
+        "NATIVE",
+        "DIRECT_RESPONSE",
+        "REFUSAL_REQUIRED",
+        "STRUCTURED_RESPONSE",
+        "DATE_RESOLUTION_REQUIRED",
+        "TOOL_THEN_STRUCTURED_RESPONSE",
+        "TOOL_THEN_DETERMINISTIC_TRANSFORM"
+      ]
+    },
+    "responseMode": {
+      "type": "string",
+      "enum": [
+        "text",
+        "json",
+        "json_schema",
+        "tool_call",
+        "tool_then_text",
+        "tool_then_json_schema",
+        "deterministic_schema"
+      ]
+    },
+    "supportMode": {
+      "type": "string",
+      "enum": [
+        "native",
+        "policy-assisted",
+        "runtime-constrained",
+        "hybrid-deterministic"
+      ]
+    },
+    "allowedInitialTools": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowedFollowupTools": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "maxTurns": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "transformerId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "transformerVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "transformerChecksum": {
+      "type": "string",
+      "minLength": 1
+    },
     "input": {
       "type": "object",
       "additionalProperties": false,

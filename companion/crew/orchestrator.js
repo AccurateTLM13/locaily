@@ -4,6 +4,7 @@ const { executeModelStep } = require("./model-router");
 const { executeToolStep } = require("./tool-router");
 const { formatHandoffMarkdown } = require("./markdown");
 const { validateResult } = require("../core/result-validator");
+const { recordDirectTrackRun } = require("./runtime-track-run-recorder");
 
 function createTrackContext(input) {
   return {
@@ -51,7 +52,8 @@ async function runTrack({
   runtime,
   options = {},
   toolRegistry: toolRegistryParam,
-  meta = {}
+  meta = {},
+  recordOpts = null
 }) {
   const toolRegistry = toolRegistryParam || options.toolRegistry;
 
@@ -103,6 +105,7 @@ async function runTrack({
       profile_id: stepResult.meta.profile_id || options.profile_id || null,
       suitability: stepResult.meta.suitability || null,
       qualification: stepResult.meta.qualification || null,
+      shadowRouting: stepResult.meta.shadowRouting || null,
       durationMs: stepResult.meta.durationMs,
       output: stepResult.output
     });
@@ -110,13 +113,42 @@ async function runTrack({
 
   const { result, schemaValid } = assembleTrackResult(track, context, input, outputSchema);
 
+  let evidence = null;
+  if (recordOpts && recordOpts.enabled !== false) {
+    try {
+      evidence = await recordDirectTrackRun({
+        trackId: track.track_id,
+        input,
+        result,
+        steps: stepsRun,
+        durationMs: Date.now() - startTrack,
+        schemaValid,
+        fallbacksUsed: [],
+        error: null,
+        correlationId: meta.run_id || meta.requestId || null,
+        auditRecordId: recordOpts.auditRecordId || null,
+        options: {
+          provider: recordOpts.provider || options.provider || null
+        }
+      });
+    } catch (recError) {
+      console.error("Failed to emit Track Run Record:", recError.message);
+      evidence = {
+        parentRecordId: null,
+        error: recError.message,
+        warning: "Record emission failed"
+      };
+    }
+  }
+
   return {
     track_id: track.track_id,
     result,
     steps: stepsRun,
     durationMs: Date.now() - startTrack,
     schemaValid,
-    fallbacks_used: []
+    fallbacks_used: [],
+    evidence
   };
 }
 

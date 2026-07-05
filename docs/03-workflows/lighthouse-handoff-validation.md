@@ -19,7 +19,7 @@ The **Local Brain** `lighthouse-handoff` tool returns schema-valid handoff JSON 
 | Contract helpers | `node scripts/contract-test.js` | `Contract helpers passed.` |
 | Full smoke suite | `node companion/server.js` then `node scripts/smoke-test.js` | `28/28 checks passed` (2026-06-12 L1 baseline) |
 
-**Suite expansion:** Memory Bridge v0 and compose regression added checks (historical **48/48**). DealSniper + model-step `input_map` checks brought the suite to **51/51** (2026-06-15). Run on a **clean server** with memory bridge disabled. See [../04-validation/memory-bridge-lighthouse-v0.md](../04-validation/memory-bridge-lighthouse-v0.md).
+**Suite expansion:** Memory Bridge v0 and compose regression added checks (historical **48/48**). DealSniper + model-step `input_map` checks brought the suite to **51/51** (2026-06-15). Run on a **clean server** with memory bridge disabled. Test counts reflect contract compliance at time of recording — not current global baseline. See [../04-validation/memory-bridge-lighthouse-v0.md](../04-validation/memory-bridge-lighthouse-v0.md).
 
 | Lighthouse deterministic (`/analyze`) | smoke: `Lighthouse Handoff stub success` | PASS |
 | Lighthouse deterministic (`/tasks/run`) | smoke: `tasks run Lighthouse success` | PASS |

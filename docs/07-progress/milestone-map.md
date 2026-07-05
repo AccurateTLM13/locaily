@@ -2,7 +2,7 @@
 
 Layered planning, not a six-month prophecy.
 
-**Updated:** 2026-06-26
+**Updated:** 2026-07-04
 
 ## Milestone 1A - Track System Explicit
 
@@ -60,21 +60,31 @@ Layered planning, not a six-month prophecy.
 
 ## Milestone 5 - Benchmark Lab
 
-**Status:** Active / accepted next milestone
+**Status:** Complete — Milestone 1 operator-ready
 
-**Checkpoint:** [milestone-5-checkpoint.md](./milestone-5-checkpoint.md)
+**Checkpoint (historical):** [milestone-5-checkpoint.md](./milestone-5-checkpoint.md)
 
-- Keep Benchmark Lab in-repo while qualification records and evidence contracts depend on Locaily runtime schemas
-- Validate qualification records before runtime model routing consumes them
-- Keep `GET /benchmark/status` read-only and side-effect free
-- Preserve Local Brain endpoint envelopes
-- Avoid broad benchmark claims beyond committed evidence
+- CLI commands: run, review, compare, promote, matrix, probe, diagnose, report, model-card, qualification, checksum-verify
+- Mock + Ollama + ToolEvalRuntime adapters
+- 14 schemas with validation
+- Evidence promotion, approval, and checksum verification workflow
+- Qualification-record generation consumed by runtime routing
+- Execution-router with native/policy-routed/runtime-constrained modes
+- Model capability probing with cached results and suite requirement checking
+- Published evidence, model cards, and reports for intent-classification track
+- Basic-tool-use track with Tool Eval Bench scenarios
+
+## Next Milestone
+
+**Status:** Not yet selected
+
+The next major milestone has not yet been canonically selected. Follow-on candidates (broader model coverage, additional tracks, hardware profiling, prompt regression) are recognized but not approved scope.
 
 ---
 
 ## Follow-On Hardening - Lighthouse Path / Step Fallbacks
 
-**Status:** After Benchmark Lab acceptance
+**Status:** Deferred — not yet scoped
 
 - Confirm canonical Lighthouse path (tool vs track vs workflow orchestration)
 - Extend parity checks across `/tasks/run`, `/tracks/run`, and `/workflows/run`
@@ -101,12 +111,12 @@ Layered planning, not a six-month prophecy.
 
 ---
 
-## Future - NearbyNode
+## Future — Relay Nodes
 
 **Status:** Not built
 
-- Capability connector protocol
-- Device pairing - see [../01-architecture/nearby-node.md](../01-architecture/nearby-node.md)
+- Capability connector protocol (formerly NearbyNode protocol)
+- Device pairing — see [Relay Nodes doc](../01-architecture/nearby-node.md)
 
 ---
 

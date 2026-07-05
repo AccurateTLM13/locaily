@@ -9,7 +9,7 @@ Seven internal schemas are **runtime-enforced** at documented production boundar
 
 **Integration branch:** [json-first-runtime-integration.md](./json-first-runtime-integration.md) — full enforcement matrix and test commands.
 
-JSON objects are produced throughout the stack. Enforcement uses **`validateResult()`** (with `$ref` / `minItems` / `oneOf` support), **imperative checks**, and **workflow-specific schemas** (`companion/schemas/`, `companion/pit-crew/schemas/`, `tool-packs/*/schemas/`).
+JSON objects are produced throughout the stack. Enforcement uses **`validateResult()`** (with `$ref` / `minItems` / `oneOf` support), **imperative checks**, and **workflow-specific schemas** (`companion/schemas/`, `companion/crew/schemas/`, `tool-packs/*/schemas/`).
 
 **Safest next implementation step:** validate `toPublicToolMetadata()` output before optional runtime in `listPublic()`, or contract-test intermediate step artifacts on `/workflows/run`.
 
@@ -19,7 +19,7 @@ JSON objects are produced throughout the stack. Enforcement uses **`validateResu
 
 | Finding | Detail |
 |---|---|
-| Internal schemas referenced in code | **`workflow-plan.schema.json`** in `run-plan-builder.js`; **`task-track.schema.json`** in `companion/pit-crew/decomposer.js`; **`tool-pack-manifest*.schema.json`** and **`internal-tool-registry-entry.schema.json`** in `registry.js`; **`run-log-audit-record.schema.json`** in `audit-log.js`; **`workflow-verification-result.schema.json`** in `run-plan-validator.js`; spec-only schemas not yet wired |
+| Internal schemas referenced in code | **`workflow-plan.schema.json`** in `run-plan-builder.js`; **`task-track.schema.json`** in `companion/crew/decomposer.js`; **`tool-pack-manifest*.schema.json`** and **`internal-tool-registry-entry.schema.json`** in `registry.js`; **`run-log-audit-record.schema.json`** in `audit-log.js`; **`workflow-verification-result.schema.json`** in `run-plan-validator.js`; spec-only schemas not yet wired |
 | Shared validator | `companion/core/result-validator.js` — supports `$ref`, `minItems`, `oneOf`, `const`, `additionalProperties: false` |
 | `/tracks/run` vs `/workflows/run` | Workflow path adds per-step validation in `run-plan-validator.js`; direct track path does not validate intermediate tool outputs |
 | Lighthouse pipeline | JSON artifacts are real; `final-output-manifest` wrapper is **not** emitted; result is a flat handoff object + `markdown` + `meta.verification` |
@@ -49,8 +49,8 @@ JSON objects are produced throughout the stack. Enforcement uses **`validateResu
 | | |
 |---|---|
 | **Runtime status** | **Runtime-enforced at load** — validated in `loadTrackFile()` via `validateLoadedTrackFile()` |
-| **Producer** | Hand-authored `companion/pit-crew/tracks/*.track.json` |
-| **Consumers** | `decomposer.js` → `loadTrack()`; `pit-crew/orchestrator.js`; `run-plan-builder.js`; `track-registry.js` |
+| **Producer** | Hand-authored `companion/crew/tracks/*.track.json` |
+| **Consumers** | `decomposer.js` → `loadTrack()`; `crew/orchestrator.js`; `run-plan-builder.js`; `track-registry.js` |
 | **Validation coverage** | `validateResult(track, taskTrackSchema, "track")` after JSON parse. Executor shapes enforced via schema `oneOf` (tool vs model). JSON parse failures still use `TRACK_CONFIG_INVALID`. |
 | **Partial vs complete** | **Enforced at load only** — does not verify `output_schema` path exists on disk; optional metadata fields (`version`, `name`, etc.) validated when present |
 | **Schema fields unused at runtime** | None required by schema are missing from current track files |
@@ -171,7 +171,7 @@ Contract tests: `scripts/validation-result-contract-test.js`
 | Verify | `verify_output` | `{ valid, errors }` | Schema gate + boolean gate in `run-plan-validator` | **Runtime-enforced** via `workflow-verification-result` at step gate |
 | Final assembly | `assembleLighthouseTrackResult` | Flat result + `markdown` + `meta.verification` | `lighthouse-handoff.schema.json` on handoff body | **Not** `final-output-manifest` |
 
-**Markdown export:** `formatHandoffMarkdown()` in `companion/pit-crew/markdown.js` — called from orchestrator after `write_handoff`, consistent with export-layer docs.
+**Markdown export:** `formatHandoffMarkdown()` in `companion/crew/markdown.js` — called from orchestrator after `write_handoff`, consistent with export-layer docs.
 
 ---
 

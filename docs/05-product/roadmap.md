@@ -1,86 +1,60 @@
 # Roadmap
 
-Practical sequencing for Locaily. **Dates omitted**—order reflects dependency, not schedule promises.
+Practical sequencing for Locaily. No dates or numbered milestones — order reflects dependency, not schedule promises.
 
-## Done (Repo Evidence)
+## Completed
 
-- Local companion server on localhost
-- Engine endpoints + legacy `/analyze`
-- Ollama + mock providers
-- Core modules: input gate, context, permissions, validator, audit
-- Manifest-backed Standard Text Pack
-- Showcase tools: DealSniper, Lighthouse Handoff
-- Lighthouse multi-step orchestration path
+- Local companion server (Local Brain) on localhost, `127.0.0.1:31313`
+- Engine endpoints: `GET /health`, `POST /tasks/run`, `POST /analyze`, `GET /tools`, `GET /audit`
+- Ollama + mock provider runtime adapters
+- Core modules: input gate, context, permissions, validator, audit, model-qualification-loader
+- Manifest-backed tool pack loader (`tool-packs/*/tool.json` via `companion/tools/registry.js`)
+- Track runner (Crew orchestrator) + declarative input mapping
+- Second proof workflow: DealSniper (`marketplace.dealsniper` track)
+- Workflow orchestration: `POST /workflows/plan`, `POST /workflows/run`
+- Memory Bridge v0 (optional, bounded context access, proposal-only writeback)
+- Audit redaction, Memory Bridge endpoints, smoke tests for disabled + template-enabled
+- Benchmark Lab Milestone 1 (engine, CLI, schemas, evidence, qualifications, reports, model-cards, checksums)
+- JSON-first internal format with runtime schema enforcement (7 internal schemas enforced at production boundaries)
+- Windows/PowerShell launch helpers (`start-windows.bat`, `start-dev.ps1`)
 - Smoke and contract tests
-- Windows/PowerShell launch helpers
+- Standard Text Pack (`text.clean`, `text.summarize`), Lighthouse Parser Pack
 
-## Now — Stabilize First Workflow
+## Active Build Slice — Canonical Track Run Records
 
-- [x] Document Lighthouse Handoff L1 validation (smoke + contract)
-- [x] Extension integration spec (bridge not implemented)
-- [ ] Implement extension ↔ Local Brain HTTP bridge (extension repo + CORS/proxy)
-- [x] L2: live Ollama orchestration evidence on target hardware — see [l2-live-ollama-memory-bridge.md](../04-validation/l2-live-ollama-memory-bridge.md)
-- [x] Example normalized fixture in `examples/lighthouse-handoff/slim-mobile.fixture.json`
-- [ ] Persistent provider / model role config across restarts
-- [ ] CORS policy (or MV3 background proxy pattern) for extension testing
-
-## Now - Track Learning Evidence Loop
+**Status:** Specification stage — not implemented.
 
 - [ ] Canonical track-run record schema
-- [ ] Emit a valid record after successful and failed track executions
-- [ ] Store summary-safe evidence without raw sensitive inputs or outputs by default
+- [ ] Emit valid records after successful and failed track executions
+- [ ] Store summary-safe evidence without raw sensitive inputs or outputs
 - [ ] Associate optional human correction records with existing runs
-- [ ] Prove Lighthouse Handoff and DealSniper produce valid evidence records
+- [ ] Validate Lighthouse Handoff and DealSniper produce valid evidence records
 
-## Now — Memory Bridge v0
+## Candidate Follow-Ons (Unapproved)
 
-- [x] Architecture docs: memory-bridge, context-packs, memory-writeback
-- [x] Decision: second-brain-as-memory-layer
-- [x] Public starter template (`templates/memory-vault/`)
-- [x] Vault adapter + context pack builder + writeback proposal modules
-- [x] Endpoints: `GET /memory/status`, `POST /memory/context-pack`, `POST /memory/writeback/propose`
-- [x] Smoke tests (disabled + template-enabled module checks, blockedPaths override)
-- [x] Wire Context Pack into Lighthouse Handoff compose-handoff (optional memory preflight)
-- [x] Audit redaction for memory endpoints and handoff memory metadata
-- [x] Controlled validation against real wiki-style private vault (user-local; see `docs/04-validation/`)
-- [x] L2: live Ollama + Lighthouse Handoff + Memory Bridge on target hardware — [l2-live-ollama-memory-bridge.md](../04-validation/l2-live-ollama-memory-bridge.md)
+These are candidates for future scoping — no schedule commitment:
 
-## Next — Pit Crew Mechanics
+- Lighthouse extension ↔ Local Brain HTTP bridge / CORS policy
+- Broader model qualification coverage across roles and Tracks
+- Hardware profiling and capability probe integration
+- Memory Bridge validation depth (second workflow, richer extraction)
+- Simple dependency graphs for Track definition
+- Relay Node research (capability connector protocol, device discovery)
+- Operator UX improvements (persistent provider/model config, permission review UI)
+- Desktop Companion prototype (Tauri-first per decision)
 
-- [x] Model Scorecard / Skill Sheet architecture spec — see [model-scorecard-and-routing.md](../01-architecture/model-scorecard-and-routing.md)
-- [ ] Model evaluation harness using templates in `99-archive/research-notes/`
-- [ ] Scoreboard / comparison baselines with logged evidence
-- [ ] Track classifier design (spec only until proven)
-- [ ] Model Scorecard registry and selector implementation (experimental)
+## Later / Research
 
-## Later — Product Surface
-
-- [ ] Desktop Companion prototype (Tauri-first per decision)
-- [ ] Tester-friendly packaging stage
-- [ ] Permission review endpoint + UI
-
-## Future — NearbyNode
-
-- [ ] Capability connector protocol
-- [ ] Device pairing and discovery
-- [ ] Delegate non-model capabilities to nearby devices
-- [ ] Capability advertisements with node health, availability, constraints, and evidence history
-- [ ] Two-computer proof: laptop and desktop registered as distinct nodes in one coordinated execution system
-
-## Future - RelayNode
-
-- [ ] Spec approved remote execution targets as policy-controlled execution capacity
-- [ ] Keep Local Brain as the control plane when remote execution is used
-- [ ] Require qualification, privacy policy, and evidence records before remote dispatch affects routing
-
-## Explicitly Post-MVP / Research
-
+- DAG planning for Track execution
+- Free-form Track generation
+- Relay Node distributed execution
+- Automatic model swapping
+- Automated learning loops (may build on Canonical Track Run Records when implemented)
 - Community tool marketplace
 - Voice/Mumble pack
-- Cloud fallback gateway beyond explicit RelayNode experiments
-- Distributed local clusters
 - Memory embeddings / vector search
 - `POST /memory/writeback/apply`
+- Cloud fallback gateway
 
 ## Archive Roadmaps
 

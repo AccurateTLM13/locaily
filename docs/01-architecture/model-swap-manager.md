@@ -13,7 +13,7 @@ The Model Swap Manager is a proposed layer that sits inside the Local Brain and 
 
 Without some form of swap management, a machine with limited RAM ends up in one of two bad states: it either keeps every model it has ever used loaded at once (runs out of memory fast), or it loads a fresh model on every request and makes the user wait every time.
 
-The Model Swap Manager proposes a middle path. A small set of models stays warm all the time. Others load only when a task actually needs them. When memory gets tight, the manager decides what to unload first. When no local model is suitable or the machine is too busy, the manager can direct the task to a NearbyNode instead of failing.
+The Model Swap Manager proposes a middle path. A small set of models stays warm all the time. Others load only when a task actually needs them. When memory gets tight, the manager decides what to unload first. When no local model is suitable or the machine is too busy, the manager can direct the task to a Relay Node instead of failing.
 
 This document describes the rules that govern those decisions. None of this is implemented yet. It is written as a design target so that the first implementation has something specific to test against.
 
@@ -37,11 +37,11 @@ Model swapping is the answer: keep the most-used models ready, load others only 
 
 **Model Registry** (proposed, distinct from the tool registry) is a catalog of models available on this machine — what they are named, where they live, what task types they can handle, which other models they are explicitly compatible with for substitution, and roughly how much memory they need. It answers: *what models exist and what can they do?* The Model Swap Manager reads from this registry to know what is available and what has been loaded.
 
-**Capability Registry** (proposed) is a catalog of what the local machine or connected NearbyNodes can actually provide at runtime — which models are installed, what hardware is present, and what capacity is available. It answers: *what can this node actually run right now?* The Model Swap Manager checks the Capability Registry when evaluating whether a required model can be served locally or should be routed elsewhere. This is distinct from the Model Registry (which lists what exists) and from the Track Registry (which lists what is needed).
+**Capability Registry** (proposed) is a catalog of what the local machine or connected Relay Nodes can actually provide at runtime — which models are installed, what hardware is present, and what capacity is available. It answers: *what can this node actually run right now?* The Model Swap Manager checks the Capability Registry when evaluating whether a required model can be served locally or should be routed elsewhere. This is distinct from the Model Registry (which lists what exists) and from the Track Registry (which lists what is needed).
 
 These three registries are separate concepts. The Track Registry is about task requirements. The Model Registry is about model identity and compatibility. The Capability Registry is about runtime availability. They are consulted in that order when building a run plan.
 
-**NearbyNode** (planned) is a nearby device or capability layer. If the local machine cannot run a required model — because memory is too low, the model is not installed, or the machine is already under load — the Model Swap Manager can signal the Local Brain to route the task to a NearbyNode instead. The manager does not contact NearbyNode directly; it returns a routing signal and lets the Local Brain handle the handoff.
+**Relay Node** (planned; formerly called NearbyNode) is a nearby device or capability layer. If the local machine cannot run a required model — because memory is too low, the model is not installed, or the machine is already under load — the Model Swap Manager can signal the Local Brain to route the task to a Relay Node instead. The manager does not contact the Relay Node directly; it returns a routing signal and lets the Local Brain handle the handoff.
 
 ---
 
@@ -191,11 +191,11 @@ When a task cannot be served locally, the Model Swap Manager returns a routing s
 | `local_ready` | A warm model is available; proceed. |
 | `local_loading` | A model is loading; task will be queued. |
 | `local_substitute_ready` | A compatible substitute model is available locally; proceed, but mark the run as using substitution. |
-| `nearbynode_preferred` | Local machine cannot serve this; try NearbyNode. |
+| `nearbynode_preferred` *(legacy name)* | Local machine cannot serve this; try a Relay Node. |
 | `no_capable_model` | No model (local or nearby) is known to handle this task type. |
 | `failed` | Load was attempted and failed. |
 
-The Local Brain receives the signal and acts: dispatch locally, hand off to NearbyNode, or return a structured error to the caller.
+The Local Brain receives the signal and acts: dispatch locally, hand off to a Relay Node, or return a structured error to the caller.
 
 When `local_substitute_ready` is returned, the Local Brain must record `preferred_model`, `selected_model`, and `substitution_reason` in the finalized run plan before execution begins. The workflow result should be marked `completed_with_substitution` if the run completes successfully using the substitute model.
 
@@ -273,7 +273,7 @@ The Model Swap Manager does not act on individual task requests in isolation. Fo
 
 1. The Local Brain receives a workflow request and begins assembling a run plan. The run plan lists each step, its track, and its required capabilities.
 2. For each model-backed step, the Local Brain asks the Model Swap Manager to evaluate availability: is a suitable model warm, loadable, or unavailable?
-3. The Model Swap Manager checks the Track Registry for what the step needs, then checks the Model Registry for a matching model, then checks the Capability Registry for whether the local machine or a NearbyNode can run it.
+3. The Model Swap Manager checks the Track Registry for what the step needs, then checks the Model Registry for a matching model, then checks the Capability Registry for whether the local machine or a Relay Node can run it.
 4. The manager returns a proposed model assignment for each step. If a preferred model is unavailable, it applies substitution rules and returns the substitute (or `no_capable_model` if no substitute exists).
 5. The Local Brain finalizes the run plan with the model assignment for each step recorded explicitly. No step in a finalized run plan has an unresolved model.
 6. The finalized run plan is the authority for model selection during execution. The Model Swap Manager does not re-evaluate model assignments during a run except in the case of model failure (see Workflow-Level Stability).
@@ -316,7 +316,7 @@ The first implementation should be small enough to test in one sprint. Proposed 
 - Manual memory footprint estimates in config.
 - Idle eviction timer for load-on-demand models.
 - Basic memory pressure check (estimated footprint vs. threshold).
-- `nearbynode_preferred` signal emitted but not acted on (NearbyNode routing is a future step).
+- `nearbynode_preferred` signal emitted but not acted on (Relay Node routing is a future step).
 - `GET /models/swap-status` endpoint returning current state.
 - Structured log events for all swap actions, including substitution events.
 - Model substitution using explicit `compatibleSubstitutes` declarations; no implicit fallback.
@@ -326,7 +326,7 @@ The first implementation should be small enough to test in one sprint. Proposed 
 
 **Out of scope for first implementation:**
 
-- Actual NearbyNode routing (signal is emitted, routing is not wired).
+- Actual Relay Node routing (signal is emitted, routing is not wired).
 - Dynamic memory measurement from runtime.
 - Multiple keep-warm slots.
 - `pinned` behavior (proposed only; do not implement until keep-warm is stable).
@@ -349,8 +349,8 @@ Five minutes is a guess. Too short and models churn on bursty workloads. Too lon
 **3. How does the manager know a machine is "overloaded" beyond memory?**
 CPU and GPU saturation matter too. Is there a simple cross-platform way to check load average or GPU utilization that does not add a new dependency? Or do we accept that v1 only checks estimated RAM?
 
-**4. How does NearbyNode advertise its available models?**
-For the `nearbynode_preferred` signal to be useful, the Local Brain needs to know whether the NearbyNode can actually handle the task. Does NearbyNode expose a capability endpoint? Who maintains that catalog?
+**4. How does a Relay Node advertise its available models?**
+For the `nearbynode_preferred` signal to be useful, the Local Brain needs to know whether the Relay Node can actually handle the task. Does the Relay Node expose a capability endpoint? Who maintains that catalog?
 
 **5. What happens when two tasks arrive simultaneously and both need a load-on-demand model that is not yet loaded?**
 Does the second task wait in a queue behind the first load? Does it fail fast? Does it try a different model? The in-flight protection rule needs to extend to the loading state.

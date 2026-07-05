@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "locaily.track_run_record.v1",
+  "recordId": "run-weather-transform-001",
+  "trackId": "deterministic-transformation",
+  "workflowId": "hybrid-weather-workflow",
+  "parentRunId": "hybrid-weather-parent-001",
+  "correlationId": "corr-weather-001",
+  "timestamps": {
+    "createdAt": "2026-07-05T00:01:00.000Z",
+    "startedAt": "2026-07-05T00:01:00.000Z",
+    "completedAt": "2026-07-05T00:01:00.012Z"
+  },
+  "request": {
+    "requester": "hybrid-deterministic-runner",
+    "requestedCapability": "weather-tool-result-to-report",
+    "inputSummary": "weather tool output for Tokyo (18C, Partly Cloudy)",
+    "inputRef": "benchmark-lab/results/raw/hybrid-001/run.json"
+  },
+  "routing": {
+    "executorType": "transform",
+    "capabilityId": "weather-tool-result-to-report",
+    "provider": "transform-registry",
+    "qualificationRecordId": "weather-tool-result-to-report-live-draft",
+    "routingReason": "deterministic transform for weather-to-report conversion"
+  },
+  "execution": {
+    "status": "success",
+    "durationMs": 12,
+    "retryCount": 0,
+    "fallbackUsed": false,
+    "transformInfo": {
+      "transformerId": "weather-tool-result-to-report",
+      "version": "1.0.0",
+      "checksum": "sha256:a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1",
+      "inputValid": true,
+      "outputValid": true,
+      "sourceFaithful": true
+    }
+  },
+  "output": {
+    "outputFormat": "json",
+    "outputSummary": "transformed weather data with recommendation (Bring a light jacket.)",
+    "structuredOutputValid": true
+  },
+  "validation": {
+    "status": "passed",
+    "validatorIds": [
+      "transform-output-schema"
+    ],
+    "score": 1.0
+  },
+  "performance": {
+    "totalDurationMs": 12
+  }
+}

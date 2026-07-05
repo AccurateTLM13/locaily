@@ -7,7 +7,7 @@ How Locaily should evolve from **linear pipelines** toward **graph-based plannin
 **Implemented today.**
 
 - Track steps are an **ordered array** in `*.track.json`
-- `companion/pit-crew/orchestrator.js` runs steps sequentially
+- `companion/crew/orchestrator.js` runs steps sequentially
 - Step outputs land in `context.artifacts[step.id]`
 - No parallel branches, no conditional edges, no planner-generated graphs
 
@@ -64,10 +64,12 @@ This is **not** v1 scope. Nathan's DAG direction belongs here as research, not a
 
 | Milestone | Graph stage |
 |---|---|
-| **M1 — Track system explicit** | Linear pipeline documented + one proof track |
-| **M2 — Declarative input mapping** | Step maps in track files; tool-router decoupled from Lighthouse IDs |
-| **M3 — Simple dependency graph** | Topological runner; still explicit track files |
-| **M4 — Planner-generated graphs** | Research gate — requires validation harness + classifier |
+| **M1A/M1B — Track system + declarative input** | Linear pipeline, `input_map` on all steps |
+| **M2/M3/M4 — Second track, model input, orchestration** | Proof tracks, declarative mapping, workflow orchestration — all linear |
+| **M5 — Benchmark Lab** | Operator-ready evaluation; not graph-related |
+| **Active slice** | Canonical Track Run Records (specification stage) |
+| **Simple dependency graph** | Planned — topological runner with `depends_on` in track files |
+| **DAG planner** | Research gate — requires validation harness + classifier |
 
 ## Related
 

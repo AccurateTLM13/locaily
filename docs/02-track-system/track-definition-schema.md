@@ -1,6 +1,6 @@
 # Track Definition Schema
 
-JSON shape for track files under `companion/pit-crew/tracks/`. Matches what `decomposer.js` validates today.
+JSON shape for track files under `companion/crew/tracks/`. Matches what `decomposer.js` validates today.
 
 **JSON Schema:** [../../companion/schemas/internal/task-track.schema.json](../../companion/schemas/internal/task-track.schema.json)
 
@@ -48,7 +48,7 @@ See also [../01-architecture/json-first-internal-format.md](../01-architecture/j
   "executor": {
     "type": "model",
     "role": "priority_helper",
-    "schema": "companion/pit-crew/schemas/prioritize-fixes.schema.json",
+    "schema": "companion/crew/schemas/prioritize-fixes.schema.json",
     "prompt_template": "prioritize_fixes"
   }
 }
@@ -57,9 +57,9 @@ See also [../01-architecture/json-first-internal-format.md](../01-architecture/j
 Model steps request a **role**, not a hardcoded model name. The model router resolves role → provider model.
 
 ## Reference: Proof Tracks
+- Lighthouse: `companion/crew/tracks/lighthouse-handoff.track.json` — track id `website_audit.lighthouse_handoff` (7 steps)
 
-- Lighthouse: `companion/pit-crew/tracks/lighthouse-handoff.track.json` — track id `website_audit.lighthouse_handoff` (7 steps)
-- DealSniper: `companion/pit-crew/tracks/dealsniper.track.json` — track id `marketplace.dealsniper` (3 steps)
+- DealSniper: `companion/crew/tracks/dealsniper.track.json` — track id `marketplace.dealsniper` (3 steps)
 
 ## Validation Rules (Loader)
 

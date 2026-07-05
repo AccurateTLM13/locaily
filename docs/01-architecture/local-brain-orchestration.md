@@ -6,7 +6,7 @@ Track-based orchestration layer for turning workflow requests into structured ru
 
 ## Purpose
 
-The Pit Crew track runner (`POST /tracks/run`) executes a known `track_id` directly. The orchestration layer adds a workflow-facing path:
+The Track runner (`POST /tracks/run`) executes a known `track_id` directly. The orchestration layer adds a workflow-facing path:
 
 ```txt
 Workflow request (JSON)
@@ -16,16 +16,27 @@ Workflow request (JSON)
   → Run plan executor (JSON step artifacts + statuses)
   → Validation (JSON validation results)
   → Audit logging (JSONL run records)
+  → Canonical Track Run Record (JSON)
   → Structured response envelope (JSON)
   → [optional] Markdown export from final JSON state
 ```
 
+The Canonical Track Run Record is the active build slice — it is not yet fully emitted at every track execution.
+
 All orchestration state is JSON. Markdown handoffs, when present, are **exports** — see [json-first-internal-format.md](./json-first-internal-format.md).
+
+## Key Concepts
+
+- **Tracks** are the unit of dispatch. Locaily routes track contracts, not raw model names.
+- **The Crew** is assembled per Track: the Track contract declares required model roles, tools, validators, and capabilities.
+- **Model Lab / Benchmark Lab** produces qualification evidence that may inform model-role suitability at runtime. The Local Brain consumes compact qualification records through `companion/core/model-qualification-loader.js` but must not import `benchmark-lab/engine/` modules.
+- **Relay Nodes** remain future capability providers — not implemented.
+- **Canonical Track Run Records** are the current active evidence slice.
 
 This milestone does **not** implement:
 
 - Model swapping / Model Garage routing
-- NearbyNode capability routing
+- Relay Node capability routing
 - LLM-generated plans or DAG planners
 - Semantic quality scoring
 
@@ -45,7 +56,7 @@ companion/orchestration/
     workflows.json
 ```
 
-Execution still reuses Pit Crew step routers via `companion/pit-crew/orchestrator.js` (`executeStep`, `assembleTrackResult`).
+Execution still reuses Crew step routers via `companion/crew/orchestrator.js` (`executeStep`, `assembleTrackResult`).
 
 ## HTTP Surfaces
 
@@ -83,7 +94,7 @@ See [api-contract.md](./api-contract.md) for request/response shapes.
 | `POST /tracks/run` | Direct track execution when `track_id` is already known |
 | `POST /workflows/run` | Workflow-first entry; returns executed run plan + audit trail |
 
-Both paths share the same underlying track definitions in `companion/pit-crew/tracks/`.
+Both paths share the same underlying track definitions in `companion/crew/tracks/`.
 
 ## Related Docs
 
@@ -92,3 +103,5 @@ Both paths share the same underlying track definitions in `companion/pit-crew/tr
 - [../02-track-system/run-plan-format.md](../02-track-system/run-plan-format.md)
 - [../03-workflows/lighthouse-handoff-run-plan.md](../03-workflows/lighthouse-handoff-run-plan.md)
 - [../02-track-system/workflow-registry.md](../02-track-system/workflow-registry.md)
+- [crew.md](./crew.md)
+- [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md)

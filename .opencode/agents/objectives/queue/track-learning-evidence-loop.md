@@ -28,7 +28,7 @@ file to match.
 
 - Automatic track generation
 - Automatic mutation of existing tracks
-- NearbyNode
+- Relay Nodes
 - DAG execution
 - New provider integrations
 - New showcase workflows

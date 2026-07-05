@@ -13,7 +13,7 @@ User-facing jobs built from tracks. Workflows compose core and specialized track
 ## Templates
 
 - [workflow-template.md](./workflow-template.md) — document a new workflow
-- [task-track-template.md](./task-track-template.md) — Pit Crew track JSON template
+- [task-track-template.md](./task-track-template.md) — Crew track JSON template
 - [validation-template.md](./validation-template.md) — validation evidence template
 
 ## Related

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "llama3.2-local-weather-tool-selection-cli-promoted",
+  "subject": {
+    "type": "model",
+    "id": "llama3.2-local",
+    "provider": "ollama",
+    "runtimeModelName": "llama3.2",
+    "digest": "unknown"
+  },
+  "status": "conditional",
+  "qualifiedFor": [
+    {
+      "role": "fast_worker",
+      "trackId": "hybrid-weather",
+      "contractId": "hybrid-weather-v1",
+      "status": "conditional",
+      "score": 1,
+      "conditions": [
+        "CLI-verified: 3/3 live trials with probe gating",
+        "Transform provides formatting for structured output"
+      ],
+      "limits": {
+        "testedCase": "LOC-HYBRID-WEATHER-001",
+        "testedLocation": "Tokyo",
+        "testedTool": "get_weather",
+        "testedTrials": 3,
+        "runtime": "Ollama 0.31.1",
+        "runtimeModel": "llama3.2:latest",
+        "supportMode": "native model tool selection",
+        "notQualifiedFor": [
+          "general-purpose tool routing",
+          "arbitrary weather query interpretation",
+          "tool-to-schema formatting"
+        ]
+      }
+    }
+  ],
+  "evidence": {
+    "evidenceIds": ["hybrid-weather-cli-evidence-v1"],
+    "summaryPaths": ["benchmark-lab/reports/drafts/hybrid-loc-hybrid-weather-001-1783220768439/summary.json"]
+  },
+  "modelProfileId": "llama3.2-local",
+  "notes": [
+    "PROMOTED — Model-stage qualification for weather-tool-selection",
+    "Probe: llama3.2-local-probe-1783214984915",
+    "Run: hybrid-loc-hybrid-weather-001-1783220768439",
+    "Scope: Single weather request (Tokyo), 3/3 PASS",
+    "Does not cover broader locations, ambiguous queries, units, forecasts, or malformed requests"
+  ],
+  "generatedAt": "2026-07-04T23:30:00.000Z"
+}

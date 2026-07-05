@@ -4,7 +4,11 @@
 
 Planning gate complete. Do not start the desktop UI implementation yet.
 
+This is a product decision document, not an implementation claim. No production desktop application exists.
+
 The core endpoints needed by a future dashboard are now available, so UI planning can proceed without guessing at server contracts. The next UI step should be a prototype only after the remaining core packaging and manifest-loader decisions are stable enough for tester builds.
+
+The validation console (`http://127.0.0.1:31313/console`) is an early local operator surface, not a finished Desktop Companion. Desktop UI work should not block current Track and evidence architecture.
 
 ## Product Direction
 

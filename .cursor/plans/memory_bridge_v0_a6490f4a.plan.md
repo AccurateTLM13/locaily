@@ -1,3 +1,5 @@
+> Status: Historical — completed and superseded. Memory Bridge v0 is implemented. Deferred items (writeback/apply, embeddings, NearbyNode) remain unimplemented. See `docs/01-architecture/memory-bridge.md` for current scope.
+
 ---
 name: Memory Bridge v0
 overview: "Build Memory Bridge v0 in LocAIly as a local Markdown vault adapter: Phase 1 docs/contracts + public starter template, Phase 2 minimal read + proposal-only writeback modules and three HTTP endpoints, with smoke coverage for disabled and template-enabled paths."

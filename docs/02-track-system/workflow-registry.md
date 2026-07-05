@@ -135,7 +135,7 @@ Status: **Implemented** — workflow orchestration API + track files for Lightho
 
 1. Define workflow doc from [../03-workflows/workflow-template.md](../03-workflows/workflow-template.md)
 2. Map core tracks + specialized steps
-3. Add `*.track.json` under `companion/pit-crew/tracks/`
+3. Add `*.track.json` under `companion/crew/tracks/`
 4. Replace hardcoded step input mapping with declarative maps — see [step-input-mapping.md](./step-input-mapping.md)
 5. Add validation evidence under [../04-validation/](../04-validation/)
 

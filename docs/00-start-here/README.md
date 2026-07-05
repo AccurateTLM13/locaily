@@ -51,6 +51,14 @@ The Local Brain dispatches **tracks** (units of work with contracts), not raw mo
 
 ## Naming Note
 
-**Locaily** is the confirmed public product name. **NearbyNode** and **AI Pit Crew** are confirmed public architecture terms.
+**Locaily** is the confirmed public product name. Current public architecture terms:
 
-Some repo files still say **Local AI Platform** or **Local AI Engine** from earlier phases. Treat those as legacy aliases being phased out.
+- **Local Brain** — runtime coordinator
+- **Tracks** — reusable execution contracts
+- **The Crew** — specialized workers and capabilities (formerly AI Pit Crew)
+- **Model Lab** — evaluation and qualification layer
+- **Benchmark Lab** — evidence and qualification subsystem under `benchmark-lab/`
+- **Relay Nodes** — nearby-device capability layer (formerly NearbyNode)
+- **Memory Bridge** — controlled local context integration
+
+Some repo files still say **Local AI Platform** or **Local AI Engine** from earlier phases, or **NearbyNode** from before the rename to Relay Nodes. Treat those as legacy aliases being phased out.

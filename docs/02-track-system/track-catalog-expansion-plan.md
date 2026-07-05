@@ -17,10 +17,10 @@ Give Locaily a **draft catalog** of governance, routing, memory, and Model Garag
 
 ## What Was Intentionally Not Implemented
 
-- No new `companion/pit-crew/tracks/*.track.json` files
+- No new `companion/crew/tracks/*.track.json` files
 - No changes to `companion/server.js`, orchestrators, or routers
 - No DAG runner or `depends_on` execution
-- No NearbyNode connectors or Capability Discovery runtime
+- No Relay Node connectors or Capability Discovery runtime
 - No automatic track classification or planner
 - No Lighthouse Handoff behavior changes
 - No production wiring of governance tracks into existing workflows
@@ -79,7 +79,7 @@ Give Locaily a **draft catalog** of governance, routing, memory, and Model Garag
 
 **Exit:** Scorecard rows in evidence log; no user-facing endpoint required.
 
-### Phase E — NearbyNode (future gate)
+### Phase E — Relay Nodes (future gate)
 
 | Track | Deliverable |
 |---|---|
@@ -108,5 +108,5 @@ Give Locaily a **draft catalog** of governance, routing, memory, and Model Garag
 ## Related
 
 - [../07-progress/milestone-map.md](../07-progress/milestone-map.md)
-- [../01-architecture/pit-crew-gap-analysis.md](../01-architecture/pit-crew-gap-analysis.md)
+- [../01-architecture/crew-gap-analysis.md](../01-architecture/crew-gap-analysis.md)
 - [fallback-and-validation.md](./fallback-and-validation.md)

@@ -1,0 +1,9 @@
+{
+  "fixtureId": "weather-tool-result-to-report/valid-numeric-string",
+  "description": "Temperature as numeric string (should be coerced)",
+  "input": { "location": "Tokyo", "temperature_celsius": "18", "condition": "Sunny" },
+  "expectedVerdict": "PASS",
+  "expectedOutput": { "location": "Tokyo", "temperature_celsius": 18, "condition": "Sunny", "recommendation": "Bring a light jacket." },
+  "expectedDiagnostics": { "missingFields": [], "typeMismatches": [], "ignoredSourceFields": [], "inferredFields": ["temperature_celsius: coerced from string to number"] },
+  "forbiddenInferredFields": []
+}

@@ -37,7 +37,7 @@
       "executor": {
         "type": "model",
         "role": "priority_helper",
-        "schema": "companion/pit-crew/schemas/prioritize-fixes.schema.json",
+        "schema": "companion/crew/schemas/prioritize-fixes.schema.json",
         "prompt_template": "prioritize_fixes"
       }
     },

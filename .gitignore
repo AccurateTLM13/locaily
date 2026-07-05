@@ -31,6 +31,9 @@ benchmark-lab/models/**/*.onnx
 benchmark-lab/reports/tmp/*
 benchmark-lab/reports/drafts/*
 benchmark-lab/model-cards/drafts/*
+
+# Benchmark Lab - generated capability probe cache
+benchmark-lab/evidence/probes/*
 !benchmark-lab/reports/drafts/.gitignore
 !benchmark-lab/model-cards/drafts/.gitignore
 benchmark-lab/reports/*.tmp.*

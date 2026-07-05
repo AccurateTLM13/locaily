@@ -4,6 +4,7 @@ const { MockRuntimeAdapter } = require("../adapters/mock-runtime");
 const { OllamaRuntimeAdapter } = require("../adapters/ollama-runtime");
 const { readJson, writeJson, toPosixPath } = require("../fs-utils");
 const { validateSchema } = require("../schema-validator");
+const { buildModelRecord } = require("../../../companion/evidence/track-run-record-builder");
 
 const LAB_ROOT = path.resolve(__dirname, "..", "..");
 const SUITE_SCHEMA_PATH = path.join(LAB_ROOT, "schemas", "benchmark-suite.schema.json");
@@ -70,11 +71,47 @@ async function runSuite({ suitePath, modelManifest = null, runId = createRunId()
   });
   await writeJson(path.join(draftReportDir, "summary.json"), summary);
 
+  // Build canonical Track Run Record
+  const passCount = summary.caseResults.filter(r => r.verdict === "PASS").length;
+  const totalCases = summary.caseResults.length;
+  const trackRunRecord = buildModelRecord({
+    recordId: `benchmark-${runId}`,
+    trackId: summary.trackId,
+    correlationId: summary.suiteId,
+    workflowId: summary.contractId,
+    startedAt,
+    completedAt,
+    capabilityId: runtimeContext.modelManifest ? runtimeContext.modelManifest.modelId : null,
+    provider: suite.runtime.provider,
+    status: summary.caseCount > 0 && passCount === totalCases ? "success" : "partial",
+    durationMs: Date.parse(completedAt) - Date.parse(startedAt),
+    modelInfo: runtimeContext.modelManifest ? {
+      modelId: runtimeContext.modelManifest.modelId,
+      runtimeModelName: runtimeContext.modelManifest.runtimeModelName
+    } : null,
+    output: {
+      outputFormat: "json",
+      outputSummary: `${passCount}/${totalCases} cases passed`,
+      structuredOutputValid: summary.caseResults.every(r => r.verdict === "PASS" || r.verdict === "FAIL")
+    },
+    validation: {
+      status: passCount === totalCases ? "passed" : (passCount > 0 ? "partial" : "failed"),
+      validatorIds: [...new Set(summary.caseResults.flatMap(r => r.checks.map(c => c.validator)))],
+      score: totalCases > 0 ? passCount / totalCases : 0
+    },
+    performance: {
+      totalDurationMs: Date.parse(completedAt) - Date.parse(startedAt)
+    }
+  });
+  const recordDir = path.join(LAB_ROOT, "results", "raw", runId);
+  await writeJson(path.join(recordDir, "track-run-record.json"), trackRunRecord);
+
   return {
     runId,
     rawRunDir,
     draftSummaryPath: path.join(draftReportDir, "summary.json"),
-    summary
+    summary,
+    trackRunRecord
   };
 }
 

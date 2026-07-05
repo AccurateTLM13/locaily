@@ -21,23 +21,29 @@ Internal state is JSON. Markdown reports are generated from validated JSON — n
 Clients (extension, CLI, desktop UI, web widget)
         │
         ▼
-┌───────────────────┐
-│    Local Brain    │  companion server + core modules
-│  (orchestrator)   │
-└─────────┬─────────┘
-          │
-    ┌─────┴─────┬──────────────┬─────────────┐
-    ▼           ▼              ▼             ▼
-Tool Packs   AI Pit Crew    Providers   Memory Bridge
-& Tools      (roles/tracks)  (Ollama…)   (optional vault)
-    │                           │             │
-    └───────────┬───────────────┴─────────────┘
-                ▼
-         Workflows (e.g. Lighthouse Handoff)
-                │
-                ▼
-      NearbyNode capabilities (future)
+┌──────────────────────────┐
+│       Local Brain        │  companion server + core
+│  (orchestrator, router)  │
+└──────────┬───────────────┘
+           │
+     ┌─────┼──────┬──────────┬───────────┬────────────┐
+     ▼     ▼      ▼          ▼           ▼            ▼
+  Tool    Tracks  The Crew  Providers  Memory      Benchmark
+  Packs          (roles/   (Ollama…)  Bridge      Lab
+  & Tools         tracks)              (optional)  (evidence)
+     │     │      │          │           │            │
+     └─────┴──────┴──────────┴───────────┴────────────┘
+                            │
+                            ▼
+        Workflows (e.g. Lighthouse Handoff)
+                            │
+                            ▼
+               Relay Nodes (future)
 ```
+
+**Tracks** are the unit of dispatch. Locaily routes work as track contracts, not raw model names. Models, tools, validators, and relayed capabilities plug into track steps. See [../02-track-system/README.md](../02-track-system/README.md).
+
+**Model Lab** is the public architecture layer for evaluating and qualifying models. **Benchmark Lab** (under `benchmark-lab/`) is the implemented repository subsystem that powers it — CLI evaluation commands, 13 schemas, mock + Ollama adapters, evidence promotion, checksum verification, and qualification records. Milestone 1 is complete and operator-ready. Broader coverage remains incremental.
 
 **Memory Bridge** is optional. Locaily runs without a vault. When configured, it reads a user-owned private Markdown vault and supplies Context Packs; only **Lighthouse Handoff** `compose-handoff` is wired to optional memory preflight in v0.
 
@@ -71,17 +77,20 @@ User Task
   -> Result + Evidence Record
 ```
 
-Only part of this spine is implemented today. Current code supports explicit workflow/track execution, model roles, provider routing, tool routing, validation, audit summaries, Benchmark Lab qualification scaffolding, and Memory Bridge v0. Automatic task decomposition, DAG planning, NearbyNode dispatch, RelayNode dispatch, and adaptive routing are future work.
+Only part of this spine is implemented today. Current code supports explicit workflow/track execution, model roles, provider routing, tool routing, validation, audit summaries, Benchmark Lab operator-ready evidence and qualification subsystem, and Memory Bridge v0. Automatic task decomposition, DAG planning, Relay Node dispatch, and adaptive routing are future work.
 
 ## What Lives Where
 
 | Layer | Owns | Does not own |
 |---|---|---|
 | Local Brain | API, security gates, routing, envelopes, audit | Extension UI, pack business logic |
+| Tracks | Execution contracts, step orchestration, evidence records | Automatic planning, DAG generation |
+| The Crew | Model roles, tool dispatch, rules, validators | HTTP API surface, pack business logic |
 | Tool Pack | Tool definitions, schemas, prompts | Server lifecycle |
-| Workflow | Track steps, handoff format | Global provider config |
-| NearbyNode (future) | Device connectors, advertised capabilities, health, availability | Central routing authority |
-| RelayNode (future) | Approved remote execution capacity | Control plane ownership |
+| Workflow | Track composition, handoff format | Global provider config |
+| Model Lab / Benchmark Lab | Evidence, qualification records, model cards, checksums | Direct runtime routing (advisory only) |
+| Relay Node (future) | Device connectors, advertised capabilities, health, availability | Central routing authority |
+| Memory Bridge | Vault context, writeback proposals | Automatic editing (proposal-only) |
 | Client | Capture input, display results | Direct model calls |
 
 ## Routing Principle
@@ -95,21 +104,39 @@ Current implementation uses model roles and qualification-record loading as the 
 ```txt
 companion/
   server.js
-  core/           # context, input-gate, permissions, orchestrator, …
+  core/           # context, input-gate, permissions, validation, audit, qualification loader
+  crew/           # Track runner, model/tool routers, step input, track JSON files
+  orchestration/  # workflow registry, run plan builder/executor
   memory/         # vault adapter, context packs, writeback, audit redaction
   providers/      # provider router
   runtime/        # ollama adapter
   tools/          # registry + showcase handlers
+  console/        # local validation UI
+
+benchmark-lab/
+  engine/         # CLI entrypoints, runners, adapters, scorers, reporters
+  locaily/        # Locaily-specific suites, fixtures, prompts
+  schemas/        # 13 benchmark schemas with validation
+  evidence/       # curated, checksummed approved evidence
+  qualifications/ # runtime-facing qualification records
+  model-cards/    # published model cards
+  reports/        # published reports
+  models/         # model manifests
+
 tool-packs/
   standard-text-pack/
   lighthouse-parser-pack/
+
 templates/
   memory-vault/
-  memory-vault-wiki/
+
 scripts/
   smoke-test.js
   contract-test.js
-  memory-bridge-lighthouse-validation.js
+  benchmark-lab-schema-test.js
+  benchmark-lab-run-test.js
+  benchmark-status-smoke-test.js
+  benchmark-lab-tool-eval-test.js
 ```
 
 ## API Surfaces
@@ -121,6 +148,10 @@ GET  /health
 GET  /tools
 GET  /tracks
 POST /tracks/run
+GET  /orchestration/tracks
+GET  /orchestration/workflows
+POST /workflows/plan
+POST /workflows/run
 POST /tasks/run
 GET  /audit
 GET  /scoreboard
@@ -128,9 +159,17 @@ GET  /providers/status
 POST /providers/set
 GET  /models/roles
 POST /models/roles/set
+GET  /models/profiles
+POST /models/profiles/set
 GET  /memory/status
 POST /memory/context-pack
 POST /memory/writeback/propose
+GET  /benchmark/status
+GET  /console/status
+POST /console/run-validation
+POST /console/setup/pagespeed-key
+POST /console/setup/memory-vault
+GET  /console/runs
 ```
 
 Legacy:
@@ -154,7 +193,7 @@ New features should extend `/tasks/run` and engine endpoints. Legacy `/analyze` 
 - [internal-json-schemas.md](./internal-json-schemas.md)
 - [local-brain.md](./local-brain.md)
 - [nearby-node.md](./nearby-node.md)
-- [ai-pit-crew.md](./ai-pit-crew.md)
+- [crew.md](./crew.md) (was ai-pit-crew.md — now part of The Crew docs)
 - [model-scorecard-and-routing.md](./model-scorecard-and-routing.md)
 - [capability-registry.md](./capability-registry.md)
 - [task-routing.md](./task-routing.md)
@@ -162,8 +201,7 @@ New features should extend `/tasks/run` and engine endpoints. Legacy `/analyze` 
 
 ## Still Undecided
 
-- Final public naming (Locaily vs Local AI Platform)
-- NearbyNode wire protocol and discovery
+- Relay Node wire protocol and discovery
 - Automatic track classifier
 - Persistent provider/role configuration across restarts
 - Sandboxed vs in-process tool pack execution

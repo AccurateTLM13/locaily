@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "benchmark.approved_evidence_summary.v1",
+  "evidenceId": "hybrid-weather-cli-evidence-v1",
+  "sourceRunId": "hybrid-loc-hybrid-weather-001-1783220768439",
+  "approvedAt": "2026-07-05T03:13:22.454Z",
+  "approvedBy": "Operator Review",
+  "summaryPath": "benchmark-lab/evidence/summaries/hybrid-weather-cli-evidence-v1.json",
+  "claims": [
+    "Explicitly promoted benchmark evidence. No model qualification claim is made by this artifact."
+  ]
+}

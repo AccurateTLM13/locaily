@@ -456,6 +456,8 @@ Forbidden:
 - random layout invention
 - top-level junk-drawer navigation
 
+For practical UX guidance and state-visibility principles complementing these rules, see [ux-principles.md](./ux-principles.md).
+
 ## Implementation Contract
 
 You are building a premium local application interface for LocAIly.

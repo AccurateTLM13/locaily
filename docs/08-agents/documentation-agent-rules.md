@@ -55,7 +55,7 @@ For periodic alignment passes, use the project command `/sync-docs` (`.cursor/co
 
 ## Cleanup
 
-Follow [cleanup-rules.md](./cleanup-rules.md). Produce or update `docs/DOCS_CLEANUP_REPORT.md` after large moves.
+Follow [cleanup-rules.md](./cleanup-rules.md). Produce or update a cleanup report after large moves.
 
 ## Do Not
 

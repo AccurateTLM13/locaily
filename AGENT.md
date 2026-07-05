@@ -31,10 +31,10 @@ Frame it as:
 ```txt
 A local-first coordination layer (Local Brain) that powers structured AI workflows
 for browser extensions, websites, apps, and developer tools—using capability-first
-routing, tool packs, and AI Pit Crew orchestration instead of one giant model by default.
+routing, tool packs, and The Crew (formerly AI Pit Crew) orchestration instead of one giant model by default.
 ```
 
-Public architecture terms: **Local Brain**, **NearbyNode**, **AI Pit Crew**, **Lighthouse Handoff**.
+Public architecture terms: **Local Brain**, **Tracks**, **The Crew** (formerly AI Pit Crew), **Model Lab**, **Benchmark Lab**, **Relay Nodes**, **Memory Bridge**, **Lighthouse Handoff**.
 
 ## Architecture Summary
 
@@ -49,23 +49,27 @@ Client / Workflow
 Local Brain (companion server)
   - localhost API
   - input gate / context / permissions
+  - Track execution + workflow orchestration
   - tool registry + tool packs
-  - orchestrator + AI Pit Crew roles
-  - provider router
-  - audit log
+  - The Crew orchestrator (companion/crew/)
+  - provider router (Ollama + mock)
+  - audit log + scoreboard
         │
         ▼
 Local providers + capabilities
   - Ollama (implemented)
   - mock (implemented)
-  - NearbyNode connectors (planned)
+  - Benchmark Lab (implemented — evidence/qualification subsystem)
+  - Relay Nodes (planned — nearby-device capability layer)
 ```
+
+`companion/crew/` is the internal implementation path for the mechanics described publicly as **The Crew**.
 
 Full docs: [docs/01-architecture/locaily-overview.md](docs/01-architecture/locaily-overview.md)
 
-## Initial Technical Direction
+## Technical Foundation
 
-Start with a lightweight Node.js local server using no external packages unless truly necessary.
+Lightweight Node.js local server using no external packages unless truly necessary.
 
 Primary local API port:
 
@@ -79,7 +83,7 @@ Primary Ollama port:
 11434
 ```
 
-The first runtime adapter targets Ollama. The project should remain easy to run on Windows.
+Ollama is the primary local runtime adapter. The project should remain easy to run on Windows.
 
 Development command:
 
@@ -88,6 +92,10 @@ node companion/server.js
 ```
 
 Later packaging may add a Desktop Companion control panel—not a replacement for the Local Brain server.
+
+## Active Build Slice
+
+The current active build slice is **Canonical Track Run Records** — the first Track Learning Evidence Loop implementation step. See [docs/07-progress/current-sprint.md](docs/07-progress/current-sprint.md) and [docs/07-progress/next-agent-brief.md](docs/07-progress/next-agent-brief.md) for current scope.
 
 ## Contract Source of Truth
 
@@ -119,23 +127,37 @@ locailly/
   companion/
     server.js
     core/
+    crew/
+    orchestration/
     providers/
     runtime/
     tools/
+    memory/
+    console/
+  benchmark-lab/
+    engine/
+    locaily/
+    schemas/
+    evidence/
+    qualifications/
+    model-cards/
+    reports/
   tool-packs/
     standard-text-pack/
+    lighthouse-parser-pack/
   docs/
     00-start-here/
     01-architecture/
-    02-workflows/
-    03-research/
-    04-product/
-    05-agents/
+    02-track-system/
+    03-workflows/
+    04-validation/
+    05-product/
     06-decisions/
+    07-progress/
+    08-agents/
     99-archive/
   scripts/
-    smoke-test.js
-    contract-test.js
+  templates/
 ```
 
 ## Showcase Tools and First Workflow
@@ -152,17 +174,22 @@ Workflow doc: [docs/03-workflows/lighthouse-handoff.md](docs/03-workflows/lighth
 
 ## Current Implementation Status
 
-Engine core, provider router, permissions, audit log, manifest-backed tool packs, and Lighthouse orchestration are implemented.
+Engine core, Track runner, workflow orchestration, provider router, permissions, audit log, memory bridge v0, manifest-backed tool packs, Lighthouse orchestration, and Benchmark Lab Milestone 1 are implemented.
 
 Implemented:
 
-- `companion/server.js` and `companion/core/*`
+- `companion/server.js`, `companion/core/*`
+- `companion/crew/*` — Track and The Crew runner (internal implementation path)
+- `companion/orchestration/*` — workflow registry, plan builder/executor
 - `companion/providers/router.js`, `companion/runtime/ollama.js`
-- `companion/tools/registry.js`, showcase tools, `tool-packs/standard-text-pack/`
-- `scripts/smoke-test.js`, `scripts/contract-test.js`
+- `companion/tools/registry.js`, showcase tools, `tool-packs/`
+- `companion/memory/*` — Memory Bridge v0 endpoints
+- `companion/console/*` — local validation UI
+- `benchmark-lab/` — complete Milestone 1 operator-ready subsystem
+- `scripts/smoke-test.js`, `scripts/contract-test.js`, `scripts/benchmark-lab-*.js`
 - Windows/PowerShell launch helpers
 
-Next phases: see [docs/05-product/roadmap.md](docs/05-product/roadmap.md)
+The active build slice is **Canonical Track Run Records**. See [docs/07-progress/build-status.md](docs/07-progress/build-status.md) and [docs/07-progress/current-sprint.md](docs/07-progress/current-sprint.md) for current status.
 
 ## Expected Client Behavior
 
@@ -228,8 +255,9 @@ Build and maintain in this order:
 4. Permissions, validation, and audit logging stay intact.
 5. Lighthouse Handoff workflow stays stable (deterministic + orchestrated).
 6. Tool packs extend capability without forking core.
-7. Tests pass; docs match code.
-8. Packaging and Desktop Companion only after the above are solid.
+7. Benchmark Lab non-live validation passes (`npm run benchmark:test`, `npm run benchmark:status-smoke`, `node scripts/contract-test.js`).
+8. Tests pass; docs match code.
+9. Packaging and Desktop Companion only after the above are solid.
 
 ## What Not To Do Yet
 

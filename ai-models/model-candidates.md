@@ -1,6 +1,8 @@
 # Model Candidates
 
-Structured candidate list for LocAIly **Model Garage** evaluation. Entries in `registry.models.json` with `status: "proposed"` are unevaluated potential fits; `status: "candidate"` means at least one fixture benchmark exists; `status: "baseline"` is the comparison anchor.
+Structured candidate list for Locaily **Model Lab** evaluation. Entries in `registry.models.json` with `status: "proposed"` are unevaluated potential fits; `status: "candidate"` means at least one fixture benchmark exists; `status: "baseline"` is the comparison anchor.
+
+> **Declared capability ≠ Benchmark Lab qualification.** Installed/available does not mean qualified. Qualification is specific to tested roles, Tracks, contracts, prompts, runtimes, and evidence. See `benchmark-lab/qualifications/` for qualification records.
 
 ## Strategy
 

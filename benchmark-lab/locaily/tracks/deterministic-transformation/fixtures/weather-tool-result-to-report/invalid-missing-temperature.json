@@ -1,0 +1,8 @@
+{
+  "fixtureId": "weather-tool-result-to-report/invalid-missing-temperature",
+  "description": "Missing required temperature_celsius field",
+  "input": { "location": "Tokyo", "condition": "Cloudy" },
+  "expectedVerdict": "FAIL",
+  "expectedDiagnostics": { "missingFields": ["temperature_celsius"], "typeMismatches": [], "ignoredSourceFields": [], "inferredFields": [] },
+  "forbiddenInferredFields": []
+}

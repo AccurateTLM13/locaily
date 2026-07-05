@@ -13,7 +13,7 @@ const {
 } = require("../companion/memory/audit-redaction");
 const { normalizeAuditEvent, buildAuditEvent } = require("../companion/core/audit-log");
 const { lighthouseHandoffTool } = require("../companion/tools/lighthouse-handoff");
-const { loadTrack } = require("../companion/pit-crew/decomposer");
+const { loadTrack } = require("../companion/crew/decomposer");
 
 const TEMPLATE_VAULT_PATH = path.join(__dirname, "..", "templates", "memory-vault");
 const WIKI_VAULT_PATH = path.join(__dirname, "..", "templates", "memory-vault-wiki");

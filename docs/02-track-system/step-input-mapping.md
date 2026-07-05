@@ -4,9 +4,9 @@ How track steps receive input from the original request and prior step artifacts
 
 ## Current Implementation
 
-Tool and model steps resolve `input_map` in `companion/pit-crew/input-map-resolver.js` via `companion/pit-crew/step-input.js` (`buildStepInput` for tools, `buildModelStepInput` for models).
+Tool and model steps resolve `input_map` in `companion/crew/input-map-resolver.js` via `companion/crew/step-input.js` (`buildStepInput` for tools, `buildModelStepInput` for models).
 
-The Lighthouse proof track declares `input_map` on every step in `companion/pit-crew/tracks/lighthouse-handoff.track.json`, including the `prioritize_fixes` model step.
+The Lighthouse proof track declares `input_map` on every step in `companion/crew/tracks/lighthouse-handoff.track.json`, including the `prioritize_fixes` model step.
 
 Tracks without `input_map` fall back to deprecated step-id logic in `buildLegacyToolStepInput()` / `buildLegacyModelStepInput()` inside `step-input.js`.
 
@@ -113,4 +113,4 @@ Deprecated step-id branches remain in `buildLegacyToolStepInput()` and `buildLeg
 
 - [track-definition-schema.md](./track-definition-schema.md)
 - [../07-progress/current-sprint.md](../07-progress/current-sprint.md)
-- Code: `companion/pit-crew/step-input.js`, `companion/pit-crew/tool-router.js`, `companion/pit-crew/model-router.js`
+- Code: `companion/crew/step-input.js`, `companion/crew/tool-router.js`, `companion/crew/model-router.js`

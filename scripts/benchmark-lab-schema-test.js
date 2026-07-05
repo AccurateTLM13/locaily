@@ -82,6 +82,12 @@ const FIXTURES = [
     valid: "benchmark-report-source.valid.json",
     invalid: "benchmark-report-source.invalid.json",
     expectedInvalidFragment: "reportId"
+  },
+  {
+    schema: "benchmark-case.schema.json",
+    valid: "benchmark-case.execution-mode.valid.json",
+    invalid: "benchmark-case.execution-mode.invalid.json",
+    expectedInvalidFragment: "executionPolicy"
   }
 ];
 

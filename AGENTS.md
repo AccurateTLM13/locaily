@@ -42,13 +42,19 @@ The **Local Brain** (companion server in this repo) should run locally, expose a
 
 ```txt
 Locaily = umbrella project
-Local Brain = coordinator / orchestrator (companion/server.js)
-NearbyNode = nearby device / capability layer (planned, not fully built)
-AI Pit Crew = specialized model / tool / task-track strategy
+Local Brain = coordinator and runtime (companion/server.js)
+Tracks = reusable execution contracts
+The Crew = specialized workers and capabilities (formerly AI Pit Crew)
+Model Lab = evaluation and qualification layer
+Benchmark Lab = implemented evidence and qualification subsystem (benchmark-lab/)
+Relay Nodes = nearby-device capability layer (planned, not fully implemented)
+Memory Bridge = controlled local context integration
 Lighthouse Handoff = first practical workflow / validation test bench
 DealSniper = showcase model-backed tool (not the whole product)
 Tool packs = plugin-style capabilities (e.g. standard-text-pack)
 ```
+
+`companion/crew/` is the internal implementation path for the mechanics described publicly as **The Crew**. New documentation and user-facing terminology should use **The Crew**.
 
 Do not treat DealSniper or Lighthouse Handoff as the entire product.
 
@@ -256,39 +262,59 @@ When making changes:
 9. Do not claim benchmark results without data.
 10. Document decisions in [docs/06-decisions/decision-log.md](docs/06-decisions/decision-log.md).
 
+## Validation Instructions
+
+Before reporting success, run the relevant subset of these commands:
+
+```bash
+node scripts/smoke-test.js            # full server smoke (requires companion running)
+node scripts/contract-test.js         # contract helpers
+npm run benchmark:test                # schema + mock run loop (no Ollama needed)
+npm run benchmark:status-smoke        # /benchmark/status contract
+```
+
+Use `npm.cmd` on Windows if the repository requires it. Do not claim all tests pass unless the commands were actually executed.
+
 ## Current Implementation Status
 
-Core engine modules and manifest-backed tool packs are implemented.
+Core engine modules, Track runner, workflow orchestration, Memory Bridge v0, manifest-backed tool packs, and Benchmark Lab Milestone 1 are implemented.
 
 Implemented:
 
 - `companion/server.js` (Local Brain / companion server)
-- `companion/core/*` (input gate, context, permissions, validator, audit, orchestrator)
-- `companion/pit-crew/*` (track orchestrator, decomposer, step-input, model/tool routers, session jobs)
-- `companion/pit-crew/tracks/` — `website_audit.lighthouse_handoff`, `marketplace.dealsniper`
-- `companion/core/model-profiles.js` (Model Garage profiles / suitability metadata)
+- `companion/core/*` (input gate, context, permissions, validator, audit, model-qualification-loader)
+- `companion/crew/*` (track orchestrator, step-input, model/tool routers — internal The Crew implementation)
+- `companion/crew/tracks/` — `website_audit.lighthouse_handoff`, `marketplace.dealsniper`
+- `companion/orchestration/*` (track registry, workflow registry, run plan builder/executor)
 - `companion/providers/router.js` (Ollama + mock)
 - `companion/runtime/ollama.js`
 - `companion/tools/registry.js` (manifest-backed tool pack loader)
 - `companion/tools/deal-sniper.js`, `companion/tools/lighthouse-handoff.js`
-- `companion/memory/*` (Memory Bridge v0: vault adapter, context packs, writeback proposals)
-- `templates/memory-vault/` (public starter vault template)
-- `GET /memory/status`, `POST /memory/context-pack`, `POST /memory/writeback/propose`
+- `companion/memory/*` (Memory Bridge v0)
+- `companion/console/*` (local validation UI)
+- `benchmark-lab/` (complete Milestone 1: engine, CLI, adapters, schemas, evidence, qualifications, reports, model-cards, checksums)
 - `tool-packs/standard-text-pack/`, `tool-packs/lighthouse-parser-pack/`
-- `POST /tracks/run`, `GET /tracks` track APIs
-- `companion/orchestration/*` (track registry, workflow registry, run plan builder/executor)
-- `GET /orchestration/tracks`, `GET /orchestration/workflows`, `POST /workflows/plan`, `POST /workflows/run`
-- `scripts/smoke-test.js`, `scripts/contract-test.js` (56/56 clean-server baseline)
+- `templates/memory-vault/` (public starter vault template)
+- `POST /tracks/run`, `GET /tracks`, `GET /orchestration/tracks`, `GET /orchestration/workflows`, `POST /workflows/plan`, `POST /workflows/run`
+- `POST /tasks/run`, `POST /analyze`, `GET /health`, `GET /tools`
+- `GET /audit`, `GET /scoreboard`
+- `GET /providers/status`, `POST /providers/set`
+- `GET /models/roles`, `POST /models/roles/set`, `GET /models/profiles`, `POST /models/profiles/set`
+- `GET /memory/status`, `POST /memory/context-pack`, `POST /memory/writeback/propose`
+- `GET /benchmark/status` (read-only qualification/checksum status)
+- `GET /console/status`, `POST /console/run-validation`, `POST /console/setup/*`, `GET /console/runs`
+- `scripts/smoke-test.js`, `scripts/contract-test.js`, `scripts/benchmark-lab-*.js`
 - `start-windows.bat`, `start-dev.ps1`
 
-Next focus areas (see [docs/07-progress/milestone-map.md](docs/07-progress/milestone-map.md) and [docs/05-product/roadmap.md](docs/05-product/roadmap.md)):
+Current focus and follow-on candidates (see [docs/07-progress/current-sprint.md](docs/07-progress/current-sprint.md)):
 
-- **M5:** Benchmark Lab acceptance (schema-backed evidence, qualification records, read-only status)
-- Follow-on: remove legacy step-input fallbacks in `step-input.js` after Lighthouse path parity resumes
-- Model Garage evaluation harness (Phase 2 — spec only until evidence)
-- Harden Lighthouse Handoff validation end-to-end with the extension client
-- NearbyNode capability connectors (spec + prototype — not implementation yet)
-- Desktop Companion UI (deferred; see desktop companion decision doc)
+- **Active slice:** Canonical Track Run Records (Track Learning Evidence Loop)
+- Follow-on candidates (not yet scoped): broader model/track/hardware qualification coverage, deeper live qualification evidence, structured output and error recovery evaluation
+- Do not begin follow-on milestone work without an explicitly supplied objective
+
+**Benchmark Lab Milestone 1 is complete.** Do not restart or extend the operator workflow without an explicit task. Do not modify approved evidence or qualification artifacts unless directed. Do not broaden claims from narrow benchmark evidence.
+
+**Model Lab** is the public Locaily architecture layer for evaluating and qualifying models. **Benchmark Lab** is the concrete repository subsystem that powers it. The Local Brain may consume compact qualification records but must not import `benchmark-lab/engine/` modules.
 
 ## Documentation Map
 
@@ -300,7 +326,7 @@ Next focus areas (see [docs/07-progress/milestone-map.md](docs/07-progress/miles
 | Progress / agent brief | [docs/07-progress/next-agent-brief.md](docs/07-progress/next-agent-brief.md) |
 | Vision / glossary | [docs/00-start-here/current-vision.md](docs/00-start-here/current-vision.md) |
 | Architecture | [docs/01-architecture/locaily-overview.md](docs/01-architecture/locaily-overview.md) |
-| Pit Crew gap analysis | [docs/01-architecture/pit-crew-gap-analysis.md](docs/01-architecture/pit-crew-gap-analysis.md) |
+| The Crew architecture / legacy path analysis | [docs/01-architecture/crew-gap-analysis.md](docs/01-architecture/crew-gap-analysis.md) |
 | Lighthouse workflow | [docs/03-workflows/lighthouse-handoff.md](docs/03-workflows/lighthouse-handoff.md) |
 | Validation evidence | [docs/04-validation/README.md](docs/04-validation/README.md) |
 | Agent rules | [docs/08-agents/agent-context.md](docs/08-agents/agent-context.md) |

@@ -7,7 +7,7 @@
 - Never change response envelope shapes for `/tasks/run`, `/tracks/run`,
   `/workflows/run`, or `/analyze`. Tool handlers return raw results; the
   platform wraps envelopes.
-- Do not invent unimplemented capabilities in docs (DAG, NearbyNode routing,
+- Do not invent unimplemented capabilities in docs (DAG, Relay Node routing,
   automatic track classification). Label unvalidated ideas as experimental.
 - Do not claim benchmark results without measured data.
 
@@ -51,7 +51,7 @@ stale or mismatched results.
   "files_changed": [],
   "commit": "<sha or null>",
   "tests": [
-    { "command": "node scripts/smoke-test.js", "passed": true, "summary": "56/56" }
+    { "command": "node scripts/smoke-test.js", "passed": true, "summary": "see latest progress log or CI" }
   ],
   "acceptance": [
     { "criterion": "<from task>", "met": true, "evidence": "" }

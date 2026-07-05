@@ -1,0 +1,16 @@
+{
+  "caseId": "tc-05-execution-invalid",
+  "trackId": "basic-tool-use",
+  "difficulty": "medium",
+  "input": {
+    "text": "Schedule a meeting."
+  },
+  "expected": {
+    "label": "extract"
+  },
+  "executionPolicy": "INVALID_POLICY",
+  "responseMode": "invalid_mode",
+  "supportMode": "non-existent",
+  "allowedInitialTools": "not_an_array",
+  "maxTurns": -1
+}

@@ -1,56 +1,45 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "canonical-track-run-records",
-  "status": "partial",
-  "branch": "codex/docs-north-star-capability-network",
-  "commit": null,
-  "objective": "Create the canonical evidence record emitted by every track execution.",
-  "files_changed": [
-    "docs/00-start-here/north-star-local-capability-network.md",
-    "docs/00-start-here/README.md",
-    "docs/00-start-here/current-vision.md",
-    "docs/00-start-here/current-state.md",
-    "docs/00-start-here/glossary.md",
-    "docs/01-architecture/locaily-overview.md",
-    "docs/05-product/roadmap.md",
-    "docs/07-progress/active-build-slice.md",
-    "docs/07-progress/build-status.md",
-    "docs/07-progress/next-agent-brief.md",
-    "docs/07-progress/progress-log.md",
-    "docs/07-progress/latest-build-result.json",
-    "docs/06-decisions/decision-log.md"
-  ],
+  "build_slice": "shadow-routing-evidence-review-and-enforcement-policy",
+  "status": "complete",
+  "objective": "Convert collected shadow results into a safe policy for deciding when qualification-aware routing is allowed to take control, with evidence aggregation and per-track enforcement states.",
   "validation": {
     "passed": true,
     "commands": [
-      "Get-Content -Raw docs/07-progress/latest-build-result.json | ConvertFrom-Json | Out-Null",
-      "rg \"north-star-local-capability-network|RelayNode|Smallest Qualified Capability|Canonical Track Run Records\" docs",
-      "PowerShell touched-doc markdown link check"
+      "node scripts/contract-test.js",
+      "node scripts/test-qualification-resolver.js",
+      "node scripts/test-shadow-routing.js",
+      "node scripts/test-enforcement-policy.js",
+      "node scripts/track-run-record-schema-test.js"
     ],
     "results": [
-      "latest-build-result.json parsed successfully.",
-      "North Star terms and links were found in the expected docs.",
-      "Touched-doc markdown links resolved successfully."
+      "60/60 enforcement-policy tests pass (default state, set state, states enum, override CRUD, approve track, policy summary, evidence review, evidence review empty, per-track review, 10 eligibility conditions)",
+      "25/25 qualification-resolver tests pass",
+      "31/31 shadow-routing tests pass",
+      "Contract tests pass",
+      "Track run record schema tests pass (4/4, including schema with shadowRecommendation)",
+      "Zero companion imports from benchmark-lab/engine/ — architectural boundary preserved",
+      "All enforcement is off by default (all tracks in shadow mode)"
     ]
   },
   "acceptance_criteria": {
-    "passed": [],
+    "passed": [
+      "companion/core/enforcement-policy.js created — defines 5 rollout states (disabled, shadow, eligible, enforced, suspended) with per-track granularity",
+      "Enforcement eligibility evaluated across 8+ conditions: track state, qualification state, score threshold, active overrides, runtime availability, model readiness, track approval, comparison state validity",
+      "companion/evidence/shadow-evidence-review.js created — aggregates shadow routing comparisons from Track Run Records",
+      "Evidence review computes: total comparisons, agreement rate, disagreement rate, current-selection-unqualified count, coverage rate, by-track breakdowns",
+      "GET /enforcement/status — returns policy summary + evidence review",
+      "POST /enforcement/set — sets per-track enforcement state",
+      "POST /enforcement/approve — approves a track for enforcement",
+      "POST /enforcement/override — blocks a specific recommendation",
+      "GET /enforcement/review — returns detailed review with optional trackId filter",
+      "GET /enforcement/eligibility — checks if a recommendation is eligible for enforcement",
+      "Default state for all tracks is 'shadow'",
+      "Enforcement never enabled by default — off by design",
+      "60 tests in scripts/test-enforcement-policy.js cover all required scenarios"
+    ],
     "failed": [],
-    "not_tested": [
-      "Canonical track-run record schema",
-      "Track-run record emission",
-      "Lighthouse Handoff evidence record production",
-      "DealSniper evidence record production"
-    ]
+    "blockers": []
   },
-  "decisions": [
-    "North Star direction documented as local capability network and smallest-qualified-capability routing principle."
-  ],
-  "known_gaps": [],
-  "blockers": [],
-  "scope_changes": [
-    "Docs-only update from June 2026 North Star document; no runtime behavior changed."
-  ],
-  "recommended_next_slice": "Implement canonical track-run record schema and emission.",
-  "updated_at": "2026-06-27"
+  "updated_at": "2026-07-05"
 }

@@ -315,5 +315,5 @@ The Lighthouse report remains the source of truth. Model output can improve hand
 - Which score fields are manually curated vs generated from evaluation runs?
 - What is the minimum evidence needed before a scorecard becomes `recommended` instead of `candidate`?
 - How should recent failure history influence routing without making behavior hard to explain?
-- Should NearbyNode advertisements include model scorecard ids or only hardware/runtime capabilities?
+- Should Relay Node advertisements include model scorecard ids or only hardware/runtime capabilities?
 - How much routing explanation should be returned to clients vs kept in audit logs?

@@ -1,12 +1,13 @@
-const { loadTrack } = require("../pit-crew/decomposer");
+const { loadTrack } = require("../crew/decomposer");
 const {
   executeStep,
   assembleTrackResult,
   createTrackContext,
   loadOutputSchema
-} = require("../pit-crew/orchestrator");
-const { formatHandoffMarkdown } = require("../pit-crew/markdown");
+} = require("../crew/orchestrator");
+const { formatHandoffMarkdown } = require("../crew/markdown");
 const { validateStepOutput, validateWorkflowResult } = require("./run-plan-validator");
+const { recordWorkflowRun } = require("../crew/runtime-track-run-recorder");
 
 function describeWorkerUsed(stepResult, trackStep) {
   if (trackStep.executor.type === "model") {
@@ -41,7 +42,8 @@ async function executeRunPlan({
   runtime,
   options = {},
   toolRegistry,
-  meta = {}
+  meta = {},
+  recordOpts = null
 }) {
   if (!toolRegistry || typeof toolRegistry.get !== "function") {
     const error = new Error("Tool registry is required for run plan execution.");
@@ -146,12 +148,41 @@ async function executeRunPlan({
   plan.completed_at = new Date().toISOString();
   plan.duration_ms = Date.now() - startedAt;
 
+  let evidence = null;
+  if (recordOpts && recordOpts.enabled !== false) {
+    try {
+      evidence = await recordWorkflowRun({
+        workflowId: plan.workflow_id,
+        trackId: plan.track_id,
+        input: plan.input,
+        planSteps: plan.steps,
+        planResult: plan,
+        durationMs: plan.duration_ms,
+        schemaValid: workflowValidation.ok && schemaValid !== false,
+        error: null,
+        correlationId: meta.run_id || meta.requestId || null,
+        auditRecordId: recordOpts.auditRecordId || null,
+        options: {
+          provider: recordOpts.provider || options.provider || null
+        }
+      });
+    } catch (recError) {
+      console.error("Failed to emit workflow Track Run Record:", recError.message);
+      evidence = {
+        parentRecordId: null,
+        error: recError.message,
+        warning: "Record emission failed"
+      };
+    }
+  }
+
   return {
     plan,
     result,
     schemaValid: workflowValidation.ok && schemaValid !== false,
     validation: workflowValidation,
-    durationMs: plan.duration_ms
+    durationMs: plan.duration_ms,
+    evidence
   };
 }
 

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "locaily.track_run_record.v1",
+  "recordId": "",
+  "trackId": "",
+  "timestamps": {
+    "createdAt": "not-a-date"
+  },
+  "routing": {
+    "executorType": "invalid-executor"
+  },
+  "execution": {
+    "status": "invalid-status"
+  },
+  "extraField": true
+}

@@ -8,7 +8,7 @@ const {
   executeRunPlan
 } = require("../companion/orchestration");
 const { validateBuiltRunPlan } = require("../companion/orchestration/run-plan-builder");
-const { loadTrack, validateLoadedTrackFile } = require("../companion/pit-crew/decomposer");
+const { loadTrack, validateLoadedTrackFile } = require("../companion/crew/decomposer");
 const { validateResult } = require("../companion/core/result-validator");
 const workflowPlanSchema = require("../companion/schemas/internal/workflow-plan.schema.json");
 const taskTrackSchema = require("../companion/schemas/internal/task-track.schema.json");

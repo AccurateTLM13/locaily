@@ -26,7 +26,8 @@ const { createPermissionManager } = require("./core/permissions");
 const { runToolWithValidation } = require("./core/result-validator");
 const { createProviderRouter } = require("./providers/router");
 const { createToolRegistry } = require("./tools/registry");
-const { listTracks, runTrack, createJob, updateJob } = require("./pit-crew");
+const { listTracks, runTrack, createJob, updateJob } = require("./crew");
+const { recordFailedExecution } = require("./crew/runtime-track-run-recorder");
 const {
   listTrackRegistry,
   listWorkflows,
@@ -46,6 +47,12 @@ const { createValidationRunner } = require("./console/validation-runner");
 const { createLocalSetupStore } = require("./console/local-setup");
 const { configurePageSpeed, getPageSpeedStatus } = require("./console/pagespeed");
 const { normalizeValidationModel } = require("./console/model-slug");
+const { createQualificationResolver } = require("./core/qualification-resolver");
+const { createCapabilityRegistry } = require("./core/capability-registry");
+const { createQualificationEvidenceLinker } = require("./evidence/qualification-evidence-linker");
+const { createShadowRouter } = require("./core/shadow-routing");
+const { createEnforcementPolicy } = require("./core/enforcement-policy");
+const { getEvidenceReview, getTrackReview, getDisagreements } = require("./evidence/shadow-evidence-review");
 
 const PLATFORM_VERSION = "0.1.0";
 const SERVICE_NAME = "local-ai-platform";
@@ -114,6 +121,28 @@ const modelProfileManager = createModelProfileManager({
   profiles: config.modelProfiles.profiles
 });
 const modelQualificationLoader = createModelQualificationLoader();
+const qualificationResolver = createQualificationResolver({ loader: modelQualificationLoader });
+const capabilityRegistry = createCapabilityRegistry({
+  loader: modelQualificationLoader,
+  resolver: qualificationResolver
+});
+const qualificationEvidenceLinker = createQualificationEvidenceLinker({
+  loader: modelQualificationLoader,
+  resolver: qualificationResolver
+});
+const shadowRouter = createShadowRouter({ resolver: qualificationResolver });
+const enforcementPolicy = createEnforcementPolicy({
+  resolver: qualificationResolver,
+  getProviderStatus: async () => {
+    try {
+      const state = await checkRuntimeState();
+      return { available: state.available, modelReady: state.modelReady };
+    } catch {
+      return { available: false, modelReady: false };
+    }
+  }
+});
+
 function getConfiguredProviderIds() {
   return Array.from(new Set([
     providerRouter.getActiveProviderId(),
@@ -277,6 +306,175 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && url.pathname === "/benchmark/status") {
       return sendJson(response, 200, buildBenchmarkStatusResponse());
+    }
+
+    if (request.method === "GET" && url.pathname === "/qualifications/status") {
+      return sendJson(response, 200, {
+        ok: true,
+        qualifications: qualificationResolver.getAllSummary()
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/qualifications/capabilities") {
+      return sendJson(response, 200, {
+        ok: true,
+        capabilities: capabilityRegistry.listCapabilities()
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/qualifications/capability") {
+      const modelId = url.searchParams.get("modelId") || "";
+      const role = url.searchParams.get("role") || "";
+      const trackId = url.searchParams.get("trackId") || "";
+      const contractId = url.searchParams.get("contractId") || "";
+
+      const result = capabilityRegistry.getCapability({ modelId, role, trackId, contractId });
+      return sendJson(response, 200, {
+        ok: true,
+        ...result
+      });
+    }
+
+    if (request.method === "POST" && url.pathname === "/qualifications/dry-run") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with modelId, role, trackId, and optional contractId and policy."
+        });
+      }
+
+      const { modelId, role, trackId, contractId, policy } = bodyResult.body || {};
+      if (!modelId || !role || !trackId) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "MISSING_PARAMS",
+          message: "modelId, role, and trackId are required.",
+          nextStep: "Provide modelId, role, and trackId in the request body."
+        });
+      }
+
+      const result = capabilityRegistry.dryRunRecommendation({ modelId, role, trackId, contractId, policy });
+      return sendJson(response, 200, result);
+    }
+
+    if (request.method === "GET" && url.pathname === "/capabilities") {
+      return sendJson(response, 200, {
+        ok: true,
+        capabilities: capabilityRegistry.listCapabilities()
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/enforcement/status") {
+      return sendJson(response, 200, {
+        ok: true,
+        policy: enforcementPolicy.getPolicySummary(),
+        review: await getEvidenceReview()
+      });
+    }
+
+    if (request.method === "POST" && url.pathname === "/enforcement/set") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with trackId and state."
+        });
+      }
+
+      const { trackId, state } = bodyResult.body || {};
+      if (!trackId || !state) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "MISSING_PARAMS",
+          message: "trackId and state are required.",
+          nextStep: "Provide trackId and state in the request body."
+        });
+      }
+
+      const result = enforcementPolicy.setTrackState(trackId, state);
+      return sendJson(response, result.ok ? 200 : 400, result);
+    }
+
+    if (request.method === "POST" && url.pathname === "/enforcement/approve") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON."
+        });
+      }
+
+      const { trackId } = bodyResult.body || {};
+      if (!trackId) {
+        return sendJson(response, 400, { ok: false, code: "MISSING_PARAMS", message: "trackId is required." });
+      }
+
+      const result = enforcementPolicy.approveTrack(trackId);
+      return sendJson(response, 200, result);
+    }
+
+    if (request.method === "POST" && url.pathname === "/enforcement/override") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, { ok: false, code: "BAD_JSON" });
+      }
+
+      const { trackId, role, modelId, reason } = bodyResult.body || {};
+      if (!trackId || !role || !modelId) {
+        return sendJson(response, 400, { ok: false, code: "MISSING_PARAMS", message: "trackId, role, and modelId are required." });
+      }
+
+      const result = enforcementPolicy.setOverride({ trackId, role, modelId, reason });
+      return sendJson(response, 200, result);
+    }
+
+    if (request.method === "GET" && url.pathname === "/enforcement/review") {
+      const trackId = url.searchParams.get("trackId");
+      const review = trackId
+        ? await getTrackReview(trackId)
+        : { summary: await getEvidenceReview(), disagreements: await getDisagreements() };
+
+      return sendJson(response, 200, { ok: true, ...review });
+    }
+
+    if (request.method === "GET" && url.pathname === "/enforcement/eligibility") {
+      const trackId = url.searchParams.get("trackId") || "";
+      const role = url.searchParams.get("role") || "";
+
+      if (!trackId || !role) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "MISSING_PARAMS",
+          message: "trackId and role are required.",
+          nextStep: "Use query parameters trackId and role."
+        });
+      }
+
+      const caps = capabilityRegistry.listCapabilities();
+      const relevant = caps.filter((c) => c.role === role && c.trackId === trackId);
+      const qualified = relevant.filter((c) => c.state === "qualified").sort((a, b) => (b.score || 0) - (a.score || 0));
+      const bestQualified = qualified[0] || null;
+
+      const result = await enforcementPolicy.evaluateEligibility({
+        trackId,
+        role,
+        recommendedCapabilityId: bestQualified ? bestQualified.modelId : null,
+        score: bestQualified ? bestQualified.score : null,
+        qualificationState: bestQualified ? bestQualified.state : "untested",
+        comparisonState: bestQualified ? "agree" : "no-qualified-capability"
+      });
+
+      return sendJson(response, 200, { ok: true, ...result });
     }
 
     if (request.method === "GET" && url.pathname === "/tools") {
@@ -792,6 +990,11 @@ async function buildHealthResponse() {
       checksums: benchmarkStatus.checksums,
       latest_generated_at: benchmarkStatus.latestGeneratedAt,
       statusEndpoint: "/benchmark/status"
+    },
+    qualifications: {
+      summary: qualificationResolver.getAllSummary(),
+      capabilitiesEndpoint: "/qualifications/capabilities",
+      dryRunEndpoint: "/qualifications/dry-run"
     }
   };
 
@@ -854,7 +1057,8 @@ function buildToolsResponse() {
 function buildBenchmarkStatusResponse() {
   return {
     ok: true,
-    benchmark_lab: modelQualificationLoader.getStatus()
+    benchmark_lab: modelQualificationLoader.getStatus(),
+    qualifications: qualificationResolver.getAllSummary()
   };
 }
 
@@ -1261,6 +1465,7 @@ function buildModelRoutingOptions(extra = {}) {
         : null;
     },
     resolveModelForRole: (role) => resolveModelForRole(role),
+    shadowRouter: (shadowOpts) => shadowRouter.computeShadowRecommendation(shadowOpts),
     toolRegistry,
     memoryBridge: {
       adapter: vaultAdapter
@@ -1832,6 +2037,10 @@ async function executeTrackRunRequest(body, context) {
         run_id: context.identity.run_id,
         trace_id: context.identity.trace_id,
         job_id: job.job_id
+      },
+      recordOpts: {
+        provider: getActiveProviderId(),
+        auditRecordId: null
       }
     });
 
@@ -1848,34 +2057,49 @@ async function executeTrackRunRequest(body, context) {
       result: trackResult.result
     });
 
+    const evidenceRef = trackResult.evidence
+      ? {
+          trackRunRecordId: trackResult.evidence.parentRecordId,
+          trackRunRecordRef: trackResult.evidence.storeResult?.filePath || null,
+          childRecordIds: trackResult.evidence.childRecordIds || [],
+          warning: trackResult.evidence.warning || null
+        }
+      : null;
+
+    const trackSuccessBody = buildEngineSuccess({
+      run_id: context.identity.run_id,
+      trace_id: context.identity.trace_id,
+      tool: "track-orchestrator",
+      task: body.track_id,
+      provider: getActiveProviderId(),
+      model: requestedModel,
+      model_role: "default_worker",
+      result: normalizeToolResult(trackResult.result),
+      confidence: 1,
+      warnings: [],
+      fallbacks_used: trackResult.fallbacks_used || [],
+      meta: {
+        ...buildTaskRunMeta(context, { warnings: [], risk_level: "low", flags: [] }, trackResult.schemaValid !== false, { ok: true }),
+        job_id: job.job_id,
+        track_id: body.track_id,
+        steps: trackResult.steps.map((step) => ({
+          step_id: step.name,
+          executor: step.executor,
+          tool: step.tool,
+          model: step.model,
+          role: step.role,
+          durationMs: step.durationMs
+        }))
+      }
+    });
+
+    if (evidenceRef) {
+      trackSuccessBody.evidence = evidenceRef;
+    }
+
     return {
       statusCode: 200,
-      body: buildEngineSuccess({
-        run_id: context.identity.run_id,
-        trace_id: context.identity.trace_id,
-        tool: "track-orchestrator",
-        task: body.track_id,
-        provider: getActiveProviderId(),
-        model: requestedModel,
-        model_role: "default_worker",
-        result: normalizeToolResult(trackResult.result),
-        confidence: 1,
-        warnings: [],
-        fallbacks_used: trackResult.fallbacks_used || [],
-        meta: {
-          ...buildTaskRunMeta(context, { warnings: [], risk_level: "low", flags: [] }, trackResult.schemaValid !== false, { ok: true }),
-          job_id: job.job_id,
-          track_id: body.track_id,
-          steps: trackResult.steps.map((step) => ({
-            step_id: step.name,
-            executor: step.executor,
-            tool: step.tool,
-            model: step.model,
-            role: step.role,
-            durationMs: step.durationMs
-          }))
-        }
-      })
+      body: trackSuccessBody
     };
   } catch (error) {
     updateJob(job.job_id, {
@@ -1888,17 +2112,41 @@ async function executeTrackRunRequest(body, context) {
 
     const code = normalizeTaskRunErrorCode(error.code || "TRACK_EXECUTION_FAILED");
 
+    let failedEvidence = null;
+    try {
+      const failedRec = await recordFailedExecution({
+        trackId: body.track_id,
+        input: body.input,
+        error,
+        durationMs: Date.now() - context.startedAt,
+        correlationId: context.identity.run_id,
+        options: { provider: getActiveProviderId() }
+      });
+      failedEvidence = {
+        trackRunRecordId: failedRec.parentRecordId,
+        warning: "Record reflects failed execution"
+      };
+    } catch (recError) {
+      console.error("Failed to emit failed Track Run Record:", recError.message);
+    }
+
+    const errorBody = buildTaskRunError({
+      identity: context.identity,
+      startedAt: context.startedAt,
+      tool: "track-orchestrator",
+      task: body.track_id,
+      code,
+      message: error.message || "Track execution failed.",
+      nextStep: error.nextStep || "Check track configuration and tool registration."
+    });
+
+    if (failedEvidence) {
+      errorBody.evidence = failedEvidence;
+    }
+
     return {
       statusCode: code === "TRACK_NOT_FOUND" ? 404 : 500,
-      body: buildTaskRunError({
-        identity: context.identity,
-        startedAt: context.startedAt,
-        tool: "track-orchestrator",
-        task: body.track_id,
-        code,
-        message: error.message || "Track execution failed.",
-        nextStep: error.nextStep || "Check track configuration and tool registration."
-      })
+      body: errorBody
     };
   }
 }
@@ -2176,6 +2424,10 @@ async function executeWorkflowRunRequest(body, context) {
         run_id: context.identity.run_id,
         trace_id: context.identity.trace_id,
         job_id: job.job_id
+      },
+      recordOpts: {
+        provider: getActiveProviderId(),
+        auditRecordId: null
       }
     });
 
@@ -2203,42 +2455,21 @@ async function executeWorkflowRunRequest(body, context) {
       }))
     });
 
+    const evidenceRef = execution.evidence
+      ? {
+          trackRunRecordId: execution.evidence.parentRecordId,
+          childRecordIds: execution.evidence.childRecordIds || [],
+          warning: execution.evidence.warning || null
+        }
+      : null;
+
     updateJob(job.job_id, {
       status: execution.plan.status === "completed" ? "completed" : "failed",
       result: execution.result
     });
 
     if (execution.plan.status !== "completed") {
-      return {
-        statusCode: 422,
-        body: buildEngineError({
-          run_id: context.identity.run_id,
-          trace_id: context.identity.trace_id,
-          tool: "workflow-orchestrator",
-          task: body.workflow_id,
-          provider: getActiveProviderId(),
-          model: getActiveModel(),
-          model_role: "default_worker",
-          code: "WORKFLOW_VALIDATION_FAILED",
-          message: "Workflow completed with validation failures.",
-          next_step: "Inspect run plan step statuses and validation errors.",
-          meta: {
-            ...buildTaskRunMeta(context, { warnings: [], risk_level: "medium", flags: [] }, false, { ok: false }),
-            job_id: job.job_id,
-            workflow_id: body.workflow_id,
-            track_id: execution.plan.track_id,
-            plan_id: execution.plan.plan_id,
-            task_id: execution.plan.task_id,
-            plan: execution.plan,
-            validation: execution.validation
-          }
-        })
-      };
-    }
-
-    return {
-      statusCode: 200,
-      body: buildEngineSuccess({
+      const partialErrorBody = buildEngineError({
         run_id: context.identity.run_id,
         trace_id: context.identity.trace_id,
         tool: "workflow-orchestrator",
@@ -2246,29 +2477,70 @@ async function executeWorkflowRunRequest(body, context) {
         provider: getActiveProviderId(),
         model: getActiveModel(),
         model_role: "default_worker",
-        result: {
-          ...normalizeToolResult(execution.result),
-          plan: execution.plan
-        },
-        confidence: 1,
-        warnings: [],
-        fallbacks_used: [],
+        code: "WORKFLOW_VALIDATION_FAILED",
+        message: "Workflow completed with validation failures.",
+        next_step: "Inspect run plan step statuses and validation errors.",
         meta: {
-          ...buildTaskRunMeta(context, { warnings: [], risk_level: "low", flags: [] }, execution.schemaValid !== false, { ok: true }),
+          ...buildTaskRunMeta(context, { warnings: [], risk_level: "medium", flags: [] }, false, { ok: false }),
           job_id: job.job_id,
           workflow_id: body.workflow_id,
           track_id: execution.plan.track_id,
           plan_id: execution.plan.plan_id,
           task_id: execution.plan.task_id,
-          steps: execution.plan.steps.map((step) => ({
-            step_id: step.step_id,
-            track_id: step.track_id,
-            status: step.status,
-            worker_used: step.worker_used,
-            duration_ms: step.duration_ms
-          }))
+          plan: execution.plan,
+          validation: execution.validation
         }
-      })
+      });
+
+      if (evidenceRef) {
+        partialErrorBody.evidence = evidenceRef;
+      }
+
+      return {
+        statusCode: 422,
+        body: partialErrorBody
+      };
+    }
+
+    const workflowSuccessBody = buildEngineSuccess({
+      run_id: context.identity.run_id,
+      trace_id: context.identity.trace_id,
+      tool: "workflow-orchestrator",
+      task: body.workflow_id,
+      provider: getActiveProviderId(),
+      model: getActiveModel(),
+      model_role: "default_worker",
+      result: {
+        ...normalizeToolResult(execution.result),
+        plan: execution.plan
+      },
+      confidence: 1,
+      warnings: [],
+      fallbacks_used: [],
+      meta: {
+        ...buildTaskRunMeta(context, { warnings: [], risk_level: "low", flags: [] }, execution.schemaValid !== false, { ok: true }),
+        job_id: job.job_id,
+        workflow_id: body.workflow_id,
+        track_id: execution.plan.track_id,
+        plan_id: execution.plan.plan_id,
+        task_id: execution.plan.task_id,
+        steps: execution.plan.steps.map((step) => ({
+          step_id: step.step_id,
+          track_id: step.track_id,
+          status: step.status,
+          worker_used: step.worker_used,
+          duration_ms: step.duration_ms
+        }))
+      }
+    });
+
+    if (evidenceRef) {
+      workflowSuccessBody.evidence = evidenceRef;
+    }
+
+    return {
+      statusCode: 200,
+      body: workflowSuccessBody
     };
   } catch (error) {
     updateJob(job.job_id, {
@@ -2289,31 +2561,56 @@ async function executeWorkflowRunRequest(body, context) {
       durationMs: plan.duration_ms || Date.now() - context.startedAt
     });
 
+    let failedEvidence = null;
+    try {
+      const failedRec = await recordFailedExecution({
+        trackId: plan?.track_id,
+        workflowId: body.workflow_id,
+        input: body.input,
+        error,
+        durationMs: Date.now() - context.startedAt,
+        correlationId: context.identity.run_id,
+        options: { provider: getActiveProviderId() }
+      });
+      failedEvidence = {
+        trackRunRecordId: failedRec.parentRecordId,
+        warning: "Record reflects failed workflow execution"
+      };
+    } catch (recError) {
+      console.error("Failed to emit failed workflow Track Run Record:", recError.message);
+    }
+
     const code = normalizeTaskRunErrorCode(error.code || "WORKFLOW_EXECUTION_FAILED");
+
+    const workflowErrorBody = buildEngineError({
+      run_id: context.identity.run_id,
+      trace_id: context.identity.trace_id,
+      tool: "workflow-orchestrator",
+      task: body.workflow_id,
+      provider: getActiveProviderId(),
+      model: getActiveModel(),
+      model_role: "default_worker",
+      code,
+      message: error.message || "Workflow execution failed.",
+      next_step: error.nextStep || "Inspect run plan step statuses.",
+      meta: {
+        ...buildTaskRunMeta(context, { warnings: [], risk_level: "medium", flags: [] }, false, { ok: false }),
+        job_id: job.job_id,
+        workflow_id: body.workflow_id,
+        track_id: plan.track_id,
+        plan_id: plan.plan_id,
+        task_id: plan.task_id,
+        plan
+      }
+    });
+
+    if (failedEvidence) {
+      workflowErrorBody.evidence = failedEvidence;
+    }
 
     return {
       statusCode: mapWorkflowErrorStatus(code),
-      body: buildEngineError({
-        run_id: context.identity.run_id,
-        trace_id: context.identity.trace_id,
-        tool: "workflow-orchestrator",
-        task: body.workflow_id,
-        provider: getActiveProviderId(),
-        model: getActiveModel(),
-        model_role: "default_worker",
-        code,
-        message: error.message || "Workflow execution failed.",
-        next_step: error.nextStep || "Inspect run plan step statuses.",
-        meta: {
-          ...buildTaskRunMeta(context, { warnings: [], risk_level: "medium", flags: [] }, false, { ok: false }),
-          job_id: job.job_id,
-          workflow_id: body.workflow_id,
-          track_id: plan.track_id,
-          plan_id: plan.plan_id,
-          task_id: plan.task_id,
-          plan
-        }
-      })
+      body: workflowErrorBody
     };
   }
 }

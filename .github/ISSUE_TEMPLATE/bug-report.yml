@@ -1,0 +1,75 @@
+name: Bug Report
+description: Report a bug in Locaily
+labels: [bug]
+body:
+  - type: input
+    id: subsystem
+    attributes:
+      label: Affected Subsystem
+      description: e.g., Local Brain, Track runner, Tool registry, Benchmark Lab, Memory Bridge, Console
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction Steps
+      placeholder: |
+        1. Start the server
+        2. Send request X
+        3. Observe error Y
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version / Commit
+      description: Output of `git log --oneline -1`
+  - type: input
+    id: node
+    attributes:
+      label: Node Version
+      description: Output of `node --version`
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      description: e.g., Windows 11, Ubuntu 22.04
+  - type: input
+    id: provider
+    attributes:
+      label: Provider / Runtime
+      description: e.g., Ollama, mock
+  - type: input
+    id: model
+    attributes:
+      label: Model Name (if relevant)
+  - type: input
+    id: track
+    attributes:
+      label: Track / Tool / Workflow ID
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (with sensitive data removed)
+      render: text
+  - type: textarea
+    id: commands
+    attributes:
+      label: Commands Already Run
+      render: text
+  - type: markdown
+    attributes:
+      value: |
+        **Warning:** Do not paste API keys, Memory Bridge contents, local vault paths, private prompts, or raw benchmark outputs containing sensitive material.

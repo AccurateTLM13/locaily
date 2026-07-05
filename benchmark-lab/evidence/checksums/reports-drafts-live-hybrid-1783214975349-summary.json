@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "reports-drafts-live-hybrid-1783214975349-summary",
+  "artifactType": "run_summary",
+  "artifactPath": "benchmark-lab/reports/drafts/live-hybrid-1783214975349/summary.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:41a37a17bdce9196db360a7ecf53c1673239953c6155e00a70945a288c0f4f4b",
+  "generatedAt": "2026-07-05T01:30:17.001Z"
+}

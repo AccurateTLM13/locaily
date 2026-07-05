@@ -48,7 +48,7 @@ See [../01-architecture/json-first-internal-format.md](../01-architecture/json-f
 | Deterministic handoff path | Runs without Ollama when runtime is missing; still produces structured JSON + Markdown export |
 | Local AI enhancement path | Uses model roles across orchestrated JSON steps when runtime is ready |
 | Markdown export | Final human/agent-readable report rendered from validated JSON at `write_handoff` |
-| Validation test bench | Exercises Pit Crew-style step routing and scoreboard hooks |
+| Validation test bench | Exercises Crew-style step routing and scoreboard hooks |
 
 ## Tool Contract
 

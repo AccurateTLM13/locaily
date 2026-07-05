@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "weather-tool-result-to-report-live-draft",
+  "subject": {
+    "type": "worker_contract",
+    "id": "weather-tool-result-to-report",
+    "provider": "locaily-engine"
+  },
+  "status": "screening",
+  "qualifiedFor": [
+    {
+      "role": "formatter",
+      "trackId": "deterministic-transformation",
+      "contractId": "deterministic-transformation-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": [
+        "Deterministic transformer: weather-tool-result-to-report v1.0.0",
+        "Checksum: sha256:66dd24bed49ee848437824435fdcc0554eba9f32af02a1994a009a94a2c58f7a"
+      ]
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "live-hybrid-1783214975349"
+    ],
+    "summaryPaths": []
+  },
+  "modelProfileId": "weather-tool-result-to-report",
+  "notes": [
+    "DRAFT — live transformer-stage qualification",
+    "Version: 1.0.0",
+    "Checksum: sha256:66dd24bed49ee848437824435fdcc0554eba9f32af02a1994a009a94a2c58f7a",
+    "Run: live-hybrid-1783214975349"
+  ],
+  "generatedAt": "2026-07-05T01:30:42.696Z"
+}

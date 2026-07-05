@@ -13,7 +13,7 @@ Live PageSpeed capture
   → metric-preserving Markdown handoff
 ```
 
-**Out of scope for this milestone:** full multi-model Pit Crew routing, extension ↔ Local Brain bridge, writeback apply, embeddings, benchmark claims, or automatic score improvement.
+**Out of scope for this milestone:** full multi-model The Crew routing, extension ↔ Local Brain bridge, writeback apply, embeddings, benchmark claims, or automatic score improvement.
 
 ## Status
 
@@ -116,7 +116,7 @@ Related PowerShell session logs were captured locally during the run.
 
 ## Caveats (Honest Limits)
 
-1. **L2 + Memory Bridge only** — Does not prove full multi-model Pit Crew routing across tracks or roles beyond this workflow path.
+1. **L2 + Memory Bridge only** — Does not prove full multi-model The Crew routing across tracks or roles beyond this workflow path.
 2. **Rich memory context (2026-06-14 update)** — Console post-cleanup run used six allowlisted files including `wiki/projects/Lighthouse Handoff.md`. Earlier 2026-06-13 script run used only `index.md` and `log.md` before the project page existed.
 3. **Checklist duplication** — Live run showed duplicate checklist lines when matched-fix steps repeated; deduplication fix tracked in code (see regression test).
 4. **Single site / single run** — One URL, one hardware session; not a golden-set or multi-site study.

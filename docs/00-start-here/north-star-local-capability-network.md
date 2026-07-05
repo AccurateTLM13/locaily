@@ -36,7 +36,7 @@ User Task
   -> Result + Evidence Record
 ```
 
-Current implementation is earlier than the full spine. Local Brain, tool packs, model roles, linear tracks, workflow orchestration, Memory Bridge v0, and Benchmark Lab scaffolding exist. Automatic decomposition, graph planning, NearbyNode dispatch, RelayNode dispatch, and adaptive routing are future work.
+Current implementation is earlier than the full spine. Local Brain, tool packs, model roles, linear tracks, workflow orchestration, Memory Bridge v0, and Benchmark Lab (Milestone 1 operator-ready) exist. Automatic decomposition, graph planning, Relay Node dispatch, and adaptive routing are future work.
 
 ## Tracks as Contracts
 
@@ -86,7 +86,7 @@ Node metadata should eventually cover:
 - Availability: load, queue depth, health, readiness, and loading state
 - Evidence: observed latency, quality, reliability, failures, and qualification history
 
-NearbyNodes are trusted local or nearby devices that advertise capabilities to Local Brain and accept only approved work. RelayNodes are approved remote execution targets for burst capacity, hosted models, automation, or benchmarking. RelayNodes may provide execution, but Local Brain remains the control plane.
+Relay Nodes are trusted local or nearby devices that advertise capabilities to Local Brain and accept only approved work. Relay Nodes were previously called NearbyNodes in early architecture work. RelayNodes are approved remote execution targets for burst capacity, hosted models, automation, or benchmarking. RelayNodes may provide execution, but Local Brain remains the control plane.
 
 ## Compounding Evidence Loop
 
@@ -160,7 +160,7 @@ unnecessary escalation.
 2. Prove qualification: Benchmark Lab produces qualification records that runtime uses for real routing decisions.
 3. Prove shared services: multiple crew roles share inference endpoints through queues, priorities, and bounded contexts.
 4. Prove adaptive routing: routing considers quality, availability, latency, privacy, cost, and recent evidence.
-5. Expand the network: additional NearbyNodes and RelayNodes add capabilities without changing workflow contracts.
+5. Expand the network: additional Relay Nodes add capabilities without changing workflow contracts.
 6. Compound track development: run evidence suggests track revisions, benchmark cases, validator improvements, and new reusable workflows.
 
 ## Decision Guardrail

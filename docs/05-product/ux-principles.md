@@ -2,11 +2,13 @@
 
 Product UX guidance for Locaily and future Desktop Companion. UI is mostly **not built**; these are target principles.
 
+For high-level UI rules (layout, navigation, components, colors, typography), see [locaily-ui-constitution.md](./locaily-ui-constitution.md). This document covers practical application guidance.
+
 ## Core Principle
 
 **Anyone with a brain should be able to start and run this tool easily.**
 
-(from Pit Crew research notes—aspirational, not fully achieved)
+(from The Crew research notes — aspirational, not fully achieved)
 
 ## Local Brain / Server UX (Today)
 
@@ -46,6 +48,19 @@ Defer client/app management until identity and approval flows mature.
 - Show when local AI is unavailable and what fallback was used
 - Do not imply cloud-grade analysis from demo paths
 - Prefer structured handoff output over raw model prose
+- Show whether a result is validated
+- Show whether Memory Bridge or qualification data was used
+
+## Making State Visible
+
+- The UI should reveal what is running, and distinguish deterministic from model-backed behavior
+- Users should see whether a result is validated
+- Failure states should be actionable (include a clear next step)
+- Technical detail (run IDs, JSON, audit events) should be available without overwhelming normal users — use progressive disclosure
+- The interface should not pretend future capabilities exist
+- Local/private behavior should be visible
+- Operators should understand whether Memory Bridge or qualification data was used
+- Relay Nodes should not appear as active — they are not implemented
 
 ## Failure States
 
@@ -63,6 +78,7 @@ Failures must be readable:
 
 ## Related
 
+- [locaily-ui-constitution.md](./locaily-ui-constitution.md)
 - [desktop-companion-decision.md](./desktop-companion-decision.md)
 - [setup-flow.md](./setup-flow.md)
 - [status-states.md](./status-states.md)

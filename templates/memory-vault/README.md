@@ -57,9 +57,17 @@ See [.memory-bridge/allowlist.example.json](./.memory-bridge/allowlist.example.j
 
 ## Privacy
 
+- This template is a public starter structure. Copy it outside the repository before adding real notes.
+- Local Brain reads this vault from the configured path — it does not ship the vault with the repository.
+- Vault content is never automatically synced, committed, or uploaded.
 - Keep personal notes in paths blocked by default (`raw/`, `private/`, `personal/`).
+- Context Packs return summaries and excerpts (truncated), not full file dumps.
+- Writeback is proposal-only — no automatic vault mutation occurs.
 - Locaily never copies your vault into the public repo.
 - Context packs return summaries and excerpts — inspect `filesUsed` on every response.
+- No embeddings, broad semantic search, or autonomous memory management exist in v0.
+- Recommended: back up or version-control your vault independently.
+- Do not commit your vault path or actual vault content to the Locaily repository.
 
 ## Related
 

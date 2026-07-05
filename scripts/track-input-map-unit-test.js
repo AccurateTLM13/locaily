@@ -1,12 +1,12 @@
 const assert = require("node:assert/strict");
-const { loadTrack } = require("../companion/pit-crew/decomposer");
-const { buildStepInput, buildLegacyStepInput } = require("../companion/pit-crew/tool-router");
+const { loadTrack } = require("../companion/crew/decomposer");
+const { buildStepInput, buildLegacyStepInput } = require("../companion/crew/tool-router");
 const {
   buildModelStepInput,
   buildLegacyModelStepInput
-} = require("../companion/pit-crew/step-input");
-const { resolveInputMap } = require("../companion/pit-crew/input-map-resolver");
-const { buildPrompt } = require("../companion/pit-crew/prompts");
+} = require("../companion/crew/step-input");
+const { resolveInputMap } = require("../companion/crew/input-map-resolver");
+const { buildPrompt } = require("../companion/crew/prompts");
 
 const SAMPLE_CONTEXT = {
   input: {

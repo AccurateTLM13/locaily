@@ -9,7 +9,7 @@ It is not one app. It is the system that lets practical workflows run on the use
 - small local models
 - deterministic tools and validators
 - tool packs and workflows
-- nearby devices and connectors
+- relay nodes and connectors
 - rules, schemas, and audit trails
 
 ## North Star
@@ -20,7 +20,7 @@ The goal is to decompose useful work into narrow tracks, route each track to the
 
 See [north-star-local-capability-network.md](./north-star-local-capability-network.md) for the full direction.
 
-## The Four Layers
+## Architecture
 
 ### Local Brain
 
@@ -45,38 +45,52 @@ It does **not** own:
 
 **Implemented today:** `companion/server.js` and `companion/core/*` are the Local Brain in practice. Older docs call this the "Local AI Engine Core" or "companion server."
 
-### NearbyNode
+### Tracks
 
-**NearbyNode** is the nearby device and capability layer.
+A **Track** is a reusable execution contract: it declares inputs, outputs, steps, required capabilities, model roles, validation rules, retry policies, and evidence expectations. Tracks decompose useful work into narrow contracts so each step can be routed to the smallest qualified capability.
 
-The idea: a phone, tablet, old laptop, edge box, or browser-connected peer can expose **capabilities** (files, sensors, UI, compute, APIs) without necessarily running a full model.
+Tracks are the unit of dispatch. Locaily routes tracks, not raw model names. Workflows compose tracks. Models, tools, validators, and other capabilities plug into track steps.
+
+**Implemented today:** two proof tracks exist (`website_audit.lighthouse_handoff`, `marketplace.dealsniper`) running on the linear track runner in `companion/crew/`. Track declarations are JSON files under `companion/crew/tracks/`.
+
+See [../02-track-system/README.md](../02-track-system/README.md).
+
+### The Crew
+
+**The Crew** (historically "AI Pit Crew") is the strategy for using multiple small specialists — models, tools, rules, validators, and relayed capabilities — instead of one general model.
+
+Mental model (from research notes): models are like vehicles; tasks are like tracks. The fastest car is not always the best car.
+
+The Crew layer includes:
+
+- model roles (`fast_worker`, `default_worker`, `reasoning_worker`, etc.)
+- track step decomposition and routing
+- tool packs with prompts, schemas, and rules
+- validators and fallback escalation
+- future model suitability profiles (speed, structured output quality, cost, etc.)
+- shared inference services where roles keep separate contracts while using the same loaded model when appropriate
+- deterministic tools preferred when the task is deterministic
+- future Relay Node capability routing
+
+**Implemented today:** model roles, multi-step Lighthouse orchestration, provider router, and tool packs are partial Crew mechanics. Track contracts declare the required Crew roles. Full automatic track classification is not built yet. The internal implementation path is `companion/crew/`.
+
+### Model Lab / Benchmark Lab
+
+**Model Lab** is the public Locaily architecture layer for evaluating and qualifying models. **Benchmark Lab** is the concrete repository subsystem under `benchmark-lab/` that powers it — CLI evaluation commands, 13 schemas, mock + Ollama adapters, evidence promotion, checksum verification, and qualification records.
+
+Benchmark Lab Milestone 1 is complete and operator-ready. Qualification records are consumed by the Local Brain at runtime but must not be treated as automatic model promotion. Broader coverage across additional models, Tracks, hardware profiles, and live qualification depth remains incremental.
+
+### Relay Nodes
+
+**Relay Nodes** (formerly "NearbyNode") are the planned nearby-device and capability layer. A phone, tablet, old laptop, edge box, or browser-connected peer can expose **capabilities** (files, sensors, UI, compute, APIs) without necessarily running a full model.
 
 Principles:
 
 - Device = capability, not "device = model"
 - Every node needs a connector, not necessarily a model
-- Local Brain coordinates; NearbyNode supplies reachable capabilities
+- Local Brain coordinates; Relay Nodes supply reachable capabilities
 
-**Status:** conceptual / early. No full NearbyNode protocol or discovery layer is implemented in this repo yet.
-
-Future NearbyNode work should start from capability advertisements, health, availability, permissions, and evidence history. It should not assume every node hosts a model.
-
-### AI Pit Crew
-
-The **AI Pit Crew** is the strategy for using multiple small specialists instead of one general model.
-
-Mental model (from research notes): models are like vehicles; tasks are like tracks. The fastest car is not always the best car.
-
-The Pit Crew layer includes:
-
-- model roles (`fast_worker`, `default_worker`, `reasoning_worker`, etc.)
-- task tracks and step decomposition
-- tool packs with prompts, schemas, and rules
-- validators and fallback escalation
-- future model suitability profiles (speed, structured output quality, cost, etc.)
-- shared inference services where roles keep separate contracts while using the same loaded model when appropriate
-
-**Implemented today:** model roles, multi-step Lighthouse orchestration, provider router, and tool packs are partial Pit Crew mechanics. Full automatic track classification is not built yet.
+**Status:** conceptual / early. No full Relay Node protocol or discovery layer is implemented. Future work should start from capability advertisements, health, availability, permissions, and evidence history. It should not assume every node hosts a model.
 
 ### Lighthouse Handoff — First Workflow
 
@@ -92,7 +106,7 @@ It is:
 
 It is **not** the entire Locaily system. It proves one track works before expanding to marketplace analysis, code review, and other packs.
 
-### Memory Layer (Optional)
+### Memory Bridge (Optional)
 
 Locaily operates **without** a memory vault. When configured, the **Memory Bridge** reads a user-owned local Markdown vault and supplies **Context Packs** for tasks.
 
@@ -128,7 +142,7 @@ A workflow may use:
 - zero models (deterministic transform)
 - one model on one step
 - several small models across steps
-- a nearby device for a non-model capability
+- a relayed capability from another device
 
 The target selection rule is **smallest qualified capability**: choose the least expensive model, tool, rule, validator, script, or node that consistently satisfies the track contract. Larger models, dedicated model instances, new hardware, or remote execution need evidence that they solve a real bottleneck.
 

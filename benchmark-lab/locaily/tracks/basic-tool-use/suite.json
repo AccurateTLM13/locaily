@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "basic-tool-use-v1",
+  "trackId": "basic-tool-use",
+  "contractId": "basic-tool-use-v1",
+  "description": "Ported Tool Eval Bench scenarios testing basic tool-use capabilities: selection, parameter precision, restraint, multi-step, and safety refusal",
+  "runtime": {
+    "provider": "tool-eval",
+    "baseUrl": "http://127.0.0.1:11434",
+    "timeoutMs": 120000,
+    "temperature": 0,
+    "numPredict": 2048,
+    "maxTurns": 8
+  },
+  "scenarioModule": "scenarios.js",
+  "toolDefinitions": "tool-definitions.json",
+  "requiredModelCapabilities": [
+    "chatCompletion",
+    "nativeToolCalls"
+  ],
+  "optionalModelCapabilities": [
+    "guidedJson"
+  ],
+  "externalSuite": {
+    "name": "Tool Eval Bench",
+    "repositoryUrl": "https://github.com/MiaAI-Lab/tool-eval-bench",
+    "commitSha": "8eca976167dfe925c125edd5a289433e78ee54e0",
+    "upstreamUrl": "https://github.com/SeraphimSerapis/tool-eval-bench"
+  }
+}

@@ -8,13 +8,21 @@ Run one local AI coordinator. Power many tools and workflows.
 
 ```txt
 Locaily
-├─ Local Brain        — coordinator (this repo: companion/server.js)
-├─ NearbyNode         — nearby device/capability layer (planned)
-├─ AI Pit Crew        — specialized model/tool/task-track strategy
+├─ Local Brain        — coordinator and runtime (companion/server.js)
+├─ Tracks             — reusable execution contracts
+├─ The Crew           — specialized workers and capabilities (formerly AI Pit Crew)
+├─ Model Lab          — evaluation and qualification layer
+│  └─ Benchmark Lab   — evidence and qualification subsystem (benchmark-lab/)
+├─ Relay Nodes        — nearby-device capability layer (planned)
+├─ Memory Bridge      — controlled local context integration
 └─ Lighthouse Handoff — first practical workflow / test bench
 ```
 
 This repo is not a single Chrome extension or one demo tool. **DealSniper** is a showcase model-backed tool. **Lighthouse Handoff** is the first workflow test bench (deterministic fallback plus orchestrated AI when a runtime is available). The **Standard Text Pack** is the first manifest-backed engine pack.
+
+**Model Lab** is the public Locaily architecture layer for evaluating and qualifying models. **Benchmark Lab** is the concrete repository subsystem that powers it — CLI evaluation commands, 13 schemas, mock + Ollama adapters, evidence promotion, checksum verification, and qualification records. Benchmark Lab Milestone 1 is complete and operator-ready. Broader coverage across additional models, Tracks, hardware profiles, and live qualification depth remains incremental.
+
+The active build slice is **Canonical Track Run Records** — the first Track Learning Evidence Loop implementation step.
 
 **Lighthouse client:** https://github.com/mnfrdrsh/lighthouse-handoff
 
@@ -49,54 +57,73 @@ GET  /health
 GET  /tools
 GET  /tracks
 POST /tracks/run
+GET  /orchestration/tracks
+GET  /orchestration/workflows
+POST /workflows/plan
+POST /workflows/run
 POST /tasks/run
 GET  /audit
+GET  /scoreboard
 GET  /providers/status
 POST /providers/set
 GET  /models/roles
 POST /models/roles/set
+GET  /models/profiles
+POST /models/profiles/set
 GET  /memory/status
 POST /memory/context-pack
 POST /memory/writeback/propose
-POST /analyze       legacy compatibility
+GET  /benchmark/status
+GET  /console/status
+POST /console/run-validation
+POST /console/setup/pagespeed-key
+POST /console/setup/memory-vault
+GET  /console/runs
+POST /analyze          legacy compatibility
 ```
 
 ## Implemented Core
 
 ```txt
 companion/
-  server.js
+  server.js          — Local Brain HTTP server
   config.json
-  core/
-    audit-log.js
-    context.js
-    envelope.js
-    ids.js
-    input-gate.js
-    model-roles.js
-    orchestrator.js
-    permissions.js
-    result-validator.js
-  providers/
-    router.js
-  runtime/
-    ollama.js
-  tools/
-    deal-sniper.js
-    lighthouse-handoff.js
-    registry.js
-    standard-text.js
-  memory/
-    vault-adapter.js
-    context-pack-builder.js
-    writeback-proposal.js
-    audit-redaction.js
-    preflight.js
+  core/              — input gate, context, permissions, validator, audit, model-profiles
+  crew/              — track orchestrator, input maps, model/tool routers, track files
+  orchestration/     — workflow registry, run plan builder/executor
+  providers/         — provider router (Ollama + mock)
+  runtime/           — Ollama adapter
+  tools/             — tool registry, showcase tools
+  memory/            — Memory Bridge v0
+  console/           — local validation UI
+
+benchmark-lab/
+  engine/            — CLI entrypoints, runners, adapters, scorers, reporters
+  locaily/           — Locaily-specific suites, fixtures, prompts
+  schemas/           — 13 benchmark schemas with validation
+  evidence/          — curated, checksummed approved evidence
+  qualifications/    — runtime-facing qualification records
+  model-cards/       — published model cards
+  reports/           — published reports
+  models/            — model manifests
+  validators/        — contract and schema validators
+  configs/           — lab configuration
+  contracts/         — benchmark-facing validation contracts
+
 tool-packs/
   standard-text-pack/
+  lighthouse-parser-pack/
+
 scripts/
   smoke-test.js
   contract-test.js
+  benchmark-lab-schema-test.js
+  benchmark-lab-run-test.js
+  benchmark-status-smoke-test.js
+  benchmark-lab-tool-eval-test.js
+
+templates/
+  memory-vault/      — starter vault template
 ```
 
 ## Included Tools
@@ -183,13 +210,17 @@ $env:LOCAL_AI_BASE_URL = "http://127.0.0.1:31314"
 node scripts/smoke-test.js
 ```
 
-Expected current result (clean server, memory bridge disabled in config / local setup):
+Expected: all checks pass. See the latest progress log or CI evidence for current counts. Memory Bridge checks pass with memory disabled in default `companion/config.json`.
 
-```txt
-Smoke test summary: 55/55 checks passed.
+## Non-Live Validation
+
+Benchmark Lab framework changes do not require a live Ollama:
+
+```powershell
+npm.cmd run benchmark:test
+npm.cmd run benchmark:status-smoke
+node scripts/contract-test.js
 ```
-
-(Memory Bridge checks pass with memory disabled in default `companion/config.json`. Clear `memoryValidationVaultPath` in `data/console/local-setup.json` for a clean-server run.)
 
 ## Example `/tasks/run`
 
@@ -232,7 +263,12 @@ Smoke test summary: 55/55 checks passed.
 - Some older docs mention port `4317`; this repo keeps `31313` for compatibility.
 - Audit events are summary-only and do not persist raw input/output by default.
 - CORS remains minimal and should be expanded carefully for browser extension testing.
-- No `package.json` is required yet; helper scripts call Node directly.
+
+## Project Policies
+
+- [Contributing](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [License](LICENSE)
 
 ## Documentation
 
@@ -253,9 +289,9 @@ Start at [docs/00-start-here/README.md](docs/00-start-here/README.md). **Blunt s
 - [Packaging plan](docs/05-product/packaging-plan.md)
 - [Publish readiness checklist](docs/05-product/publish-readiness-checklist.md)
 
-## AI Pit Crew Thesis
+## The Crew Thesis
 
-Locaily explores whether multiple small local models, tools, rules, and validators—coordinated by the **AI Pit Crew** strategy—can complete useful workflows without always defaulting to one large general-purpose model.
+Locaily explores whether multiple small local models, tools, rules, and validators—coordinated by **The Crew** strategy (formerly "AI Pit Crew")—can complete useful workflows without always defaulting to one large general-purpose model.
 
 Instead of treating model size as the primary measure of capability, the system treats each task as a **track**. Each track can decompose into smaller jobs routed to the best available model role, tool pack, ruleset, or verifier.
 
@@ -268,6 +304,6 @@ This architecture supports:
 - tool packs and structured outputs
 - fallback handling and validation
 - older hardware reuse
-- future **NearbyNode** capability connectors
+- future **Relay Node** capability connectors
 
 Do not claim benchmark wins without measured data in the repo.

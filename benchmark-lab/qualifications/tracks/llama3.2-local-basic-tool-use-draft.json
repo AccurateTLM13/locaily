@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "llama3.2-local-basic-tool-use-draft",
+  "subject": {
+    "type": "model",
+    "id": "llama3.2-local",
+    "provider": "ollama",
+    "runtimeModelName": "llama3.2",
+    "digest": "unknown"
+  },
+  "status": "screening",
+  "qualifiedFor": [
+    {
+      "role": "fast_worker",
+      "trackId": "basic-tool-use",
+      "contractId": "basic-tool-use-v1",
+      "status": "conditional",
+      "score": 0.5,
+      "conditions": [
+        "Tool selection (weather, stock) reliable at 100% over 3 trials",
+        "Parameter precision (unit conversion) reliable at 100%",
+        "Parallel tool calls (2 tools) working",
+        "Date/time parsing partial: relative dates not computed correctly",
+        "Restraint failure: model overuses tools for known trivia and simple math",
+        "Safety failure: model hallucinates tool usage for impossible requests instead of refusing",
+        "Compatibility: tested via Ollama /api/chat native tool-calling (not OpenAI /v1/chat/completions)",
+        "DRAFT — Requires operator review before promotion to candidate status"
+      ]
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [],
+    "summaryPaths": []
+  },
+  "modelProfileId": "llama3.2-local",
+  "notes": [
+    "DRAFT qualification record for Tool Eval Bench compatibility slice",
+    "Source: Tool Eval Bench (https://github.com/MiaAI-Lab/tool-eval-bench) commit 8eca976167dfe925c125edd5a289433e78ee54e0",
+    "Selected scenarios: TC-01, TC-02, TC-04, TC-05, TC-09, TC-10, TC-11, TC-12 (8 scenarios from Categories A, B, C, D)",
+    "Trials: 3 per scenario (24 total trials)",
+    "Runtime: ToolEvalRuntime adapter via Ollama /api/chat",
+    "Tool scope: 12 universal tools (read-only mock responses — no mutation side effects)",
+    "Maximum tested chain depth: 2 tools in a single turn (parallel calls)",
+    "Untested: mutation behavior (send_email, create_calendar_event actual execution not validated)",
+    "Untested: autonomous planning (Category M — goal decomposition, open-ended research)",
+    "Untested: error recovery (Category E — empty results, malformed responses)",
+    "Untested: prompt injection resistance (Category K — adversarial safety)",
+    "Untested: large toolset navigation (Category L — 52 tools)",
+    "Untested: structured output (Category O — JSON schema compliance)",
+    "Ollama-specific limitation: native /api/chat tool-calling format, not OpenAI /v1/chat/completions",
+    "Ollama-specific limitation: arguments must be JSON objects, not strings (OpenAI format)",
+    "llama3.2 does not reliably refuse impossible requests — hallucinates tool usage",
+    "llama3.2 overuses tools for tasks answerable from knowledge",
+    "This qualification is a draft — do not use for routing decisions without operator review",
+    "Generated at: 2026-07-04T16:31:00.000Z"
+  ],
+  "generatedAt": "2026-07-04T16:31:00.000Z"
+}

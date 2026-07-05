@@ -20,7 +20,7 @@
 - Do not default to bigger models as the answer. Prefer roles, tracks, tools,
   and validators.
 - Do not claim benchmark results without measured data in the repo.
-- Do not claim unimplemented capabilities (DAG, NearbyNode routing, automatic
+- Do not claim unimplemented capabilities (DAG, Relay Node routing, automatic
   track classification) exist.
 
 ## Review standard

@@ -32,7 +32,7 @@ When merging old docs:
 
 - Update `docs/00-start-here/project-index.md`
 - Update root `README.md` doc links
-- Write `docs/DOCS_CLEANUP_REPORT.md`
+- Write a cleanup report at `docs/DOCS_CLEANUP_REPORT.md` (historical reports are archived under `docs/99-archive/docs-maintenance/`)
 
 ## Naming
 

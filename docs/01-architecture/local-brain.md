@@ -31,7 +31,7 @@ In this repository it is implemented as the **companion server** plus **core mod
 - Lighthouse report parsing inside the browser (client responsibility)
 - Ollama installation or model downloads (user / provider responsibility)
 - Desktop Companion UI (planned separately)
-- NearbyNode device agents (not implemented)
+- Relay Node device agents (not implemented)
 
 ## Key Modules
 
@@ -80,7 +80,7 @@ Tool handlers return **raw result objects only**; the server wraps them.
 - **Providers** (Ollama, mock) for model-backed tools
 - **Tool packs** via registry manifests and handler modules
 - **Optional Memory Bridge** vault (user-configured local Markdown; disabled by default)
-- **Future NearbyNode** connectors (not wired yet)
+- **Future Relay Node** connectors (not wired yet)
 
 ## Still Undecided
 

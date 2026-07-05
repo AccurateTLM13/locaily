@@ -74,11 +74,27 @@ async function executeModelStep({ step, context, runtime, options }) {
     trackId: options.track_id || null
   });
 
+  let shadowRouting = null;
+  if (typeof options.shadowRouter === "function") {
+    try {
+      shadowRouting = options.shadowRouter({
+        role: modelResolution.role,
+        trackId: options.track_id || null,
+        contractId: executor.contract || executor.contract_id || null,
+        currentModelId: modelResolution.model,
+        currentQualification: qualification
+      });
+    } catch (shadowError) {
+      console.warn("[Shadow Routing] Failed to compute recommendation:", shadowError.message);
+    }
+  }
+
   if (!qualificationPolicy.ok) {
     const error = new Error(qualificationPolicy.message);
     error.code = qualificationPolicy.code;
     error.nextStep = qualificationPolicy.nextStep;
     error.qualification = qualification;
+    error.shadowRouting = shadowRouting;
     throw error;
   }
 
@@ -99,6 +115,7 @@ async function executeModelStep({ step, context, runtime, options }) {
       profile_id: options.profile_id || null,
       suitability,
       qualification,
+      shadowRouting,
       durationMs: Date.now() - stepStart
     }
   };

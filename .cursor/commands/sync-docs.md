@@ -24,7 +24,7 @@ Keep documentation **confirmed**, **navigable**, and **free of stale claims** �
 - Root drift checks: `README.md`, `AGENTS.md`, `AGENT.md` (endpoint lists, smoke counts, naming)
 - `docs/00-start-here/project-index.md` — add/archive entries
 - `docs/06-decisions/decision-log.md` — log doc-impacting decisions
-- `docs/DOCS_CLEANUP_REPORT.md` — append summary when changes are non-trivial
+- `docs/99-archive/docs-maintenance/DOCS_CLEANUP_REPORT-2026-06-12.md` — append summary when changes are non-trivial
 
 **Out of scope unless user asks**
 
@@ -46,9 +46,7 @@ Keep documentation **confirmed**, **navigable**, and **free of stale claims** �
 
 Search for outdated patterns:
 
-- `28/28` smoke (historical L1 baseline)
-- `48/48` smoke (pre–DealSniper track checks; superseded)
-- Current baseline: **51/51** with memory disabled on clean server
+- Historical smoke-test totals (e.g. 28/28, 48/48, 51/51) — see latest progress log or CI evidence for current counts
 - "stub/demo" for Lighthouse Handoff (now a real workflow test bench)
 - "Local AI Platform" / "Local AI Engine" without Locaily context
 - Missing Memory Bridge endpoints or `companion/memory/` modules
@@ -61,10 +59,10 @@ Search for outdated patterns:
 |--------|----------------|
 | `00-start-here/` | Confirmed vs experimental lists, glossary, project index |
 | `01-architecture/` | System map, modules, API surfaces, memory bridge |
-| `02-workflows/` | Tool contracts, validation tiers, memory preflight |
-| `04-product/` | Roadmap done/open, publish checklist |
-| `05-validation/` | Evidence records, privacy notes, deferred scope |
-| `05-agents/` | Agent rules, doc maintenance pointers |
+| `03-workflows/` | Tool contracts, validation tiers, memory preflight |
+| `05-product/` | Roadmap done/open, publish checklist |
+| `04-validation/` | Evidence records, privacy notes, deferred scope |
+| `08-agents/` | Agent rules, doc maintenance pointers |
 | `06-decisions/` | Decision log, open questions (resolve or narrow) |
 
 ### 4. Writing rules

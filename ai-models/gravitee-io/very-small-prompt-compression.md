@@ -27,4 +27,4 @@ Reduces prompt size before routing to small models.
 
 ## Evaluation status
 
-Proposed — integration path into Pit Crew router is unproven.
+Proposed — integration path into The Crew router is unproven.

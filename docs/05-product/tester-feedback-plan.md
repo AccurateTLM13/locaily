@@ -12,6 +12,39 @@ How to collect useful feedback without overclaiming readiness.
 
 Not yet targeting non-technical installers until packaging stage advances.
 
+## Feedback Groups
+
+Separate feedback by role:
+
+### Lighthouse Handoff users (developers)
+
+- Would you use the generated handoff for real client work?
+- Is deterministic vs model-enhanced behavior clear in the output?
+- Are Track failures understandable?
+- Is setup manageable?
+
+### Local Brain operators
+
+- Is the server output clear enough?
+- Are provider/model status checks useful?
+- Is the error nextStep guidance actionable?
+
+### Local-model evaluators
+
+- Do qualification labels increase trust or create confusion?
+- Is the declared-vs-proven capability distinction clear?
+- Are Benchmark Lab qualification records useful?
+
+### Memory Bridge testers
+
+- Are memory permissions clear?
+- Is the proposal-only writeback model understandable?
+- Does Context Pack output match expectations?
+
+### Future Relay Node testers
+
+- Do not recruit for Relay Node testing — the protocol does not exist yet.
+
 ## Pre-Invite Checklist
 
 Use [publish-readiness-checklist.md](./publish-readiness-checklist.md) before inviting outsiders.
@@ -45,7 +78,7 @@ Minimum bar today:
 ## What Not To Ask Yet
 
 - "Is this better than GPT-4?" (no benchmark program yet)
-- NearbyNode pairing (not built)
+- Relay Node pairing (not built)
 - Desktop app polish (not built)
 
 ## Feedback Capture
@@ -69,7 +102,7 @@ Store in issue tracker or `tester-feedback/` folder if created later—do not co
 - Repeatable setup on Windows and macOS
 - Smoke test pass rate across tester machines
 - Actionable bug reports with repro steps
-- Clear separation of "demo path" vs "AI-enhanced path"
+- Clear separation of "deterministic path" vs "AI-enhanced path"
 
 ## Owner
 

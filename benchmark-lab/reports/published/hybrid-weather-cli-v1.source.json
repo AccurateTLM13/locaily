@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "benchmark.report_source.v1",
+  "reportId": "hybrid-weather-cli-v1",
+  "title": "Hybrid Weather Workflow Report — CLI Verified",
+  "generatedAt": "2026-07-05T03:13:28.942Z",
+  "evidenceIds": [
+    "hybrid-weather-cli-evidence-v1"
+  ],
+  "summaries": [
+    {
+      "evidenceId": "hybrid-weather-cli-evidence-v1",
+      "sourceRunId": "hybrid-loc-hybrid-weather-001-1783220768439",
+      "suiteId": "basic-tool-use-v1",
+      "trackId": "basic-tool-use",
+      "contractId": "basic-tool-use-v1",
+      "caseCount": 1,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "malformed": 0,
+      "passRate": 1
+    }
+  ]
+}

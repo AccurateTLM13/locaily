@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "locaily.track_run_record.v1",
+  "recordId": "run-model-intent-classification-v1-001",
+  "trackId": "intent-classification",
+  "correlationId": "corr-intent-001",
+  "timestamps": {
+    "createdAt": "2026-07-05T00:00:00.000Z",
+    "startedAt": "2026-07-05T00:00:00.000Z",
+    "completedAt": "2026-07-05T00:00:02.345Z"
+  },
+  "request": {
+    "requester": "benchmark-lab",
+    "requestedCapability": "intent-classification",
+    "inputSummary": "3 classification cases with website intent labels"
+  },
+  "routing": {
+    "executorType": "model",
+    "capabilityId": "llama3.2-local",
+    "provider": "ollama",
+    "routingReason": "default model for intent-classification track"
+  },
+  "execution": {
+    "status": "success",
+    "durationMs": 2345,
+    "retryCount": 0,
+    "fallbackUsed": false,
+    "modelInfo": {
+      "modelId": "llama3.2-local",
+      "runtimeModelName": "llama3.2:latest",
+      "temperature": 0,
+      "numPredict": 2048
+    }
+  },
+  "output": {
+    "outputFormat": "json",
+    "outputSummary": "3/3 cases passed - all labels matched expected values",
+    "structuredOutputValid": true,
+    "evidenceRefs": [
+      "benchmark-lab/evidence/summaries/llama32-local-intent-classification-v1.json"
+    ]
+  },
+  "validation": {
+    "status": "passed",
+    "validatorIds": [
+      "json-parse",
+      "json-schema",
+      "expected-label"
+    ],
+    "score": 1.0
+  },
+  "performance": {
+    "totalDurationMs": 2345,
+    "inferenceTimeMs": 2200,
+    "tokenCounts": {
+      "prompt": 850,
+      "completion": 120,
+      "total": 970
+    }
+  },
+  "childRuns": []
+}

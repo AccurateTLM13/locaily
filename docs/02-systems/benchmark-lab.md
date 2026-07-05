@@ -1,13 +1,16 @@
 # Benchmark Lab
 
-**Status:** Initial architecture and scaffold  
+**Status:** Milestone 1 complete — operator-ready  
 **Subsystem:** `benchmark-lab/`  
 **Canonical runtime-facing output:** qualification records  
-**Related draft:** `docs/02-track-system/benchmark-lab.md`
 
-Benchmark Lab is Locaily's local evaluation subsystem. It supports model selection, track qualification, worker-contract testing, hardware profiling, prompt regression testing, model-card generation, and orchestration/routing decisions.
+Benchmark Lab is Locaily's local evaluation subsystem. It produces validated evidence, model cards, and compact qualification records consumed by runtime routing and orchestration. It is not a public leaderboard and not a replacement for the Local Brain runtime.
 
-It is not a public leaderboard and it is not a replacement for the Local Brain runtime. It produces evidence that the runtime can consume.
+## Model Lab and Benchmark Lab Relationship
+
+- **Model Lab** is the public Locaily architecture layer for evaluating and qualifying models.
+- **Benchmark Lab** is the implemented repository subsystem that powers it.
+- Local Brain may consume compact qualification records but must not import `benchmark-lab/engine/` modules.
 
 ## Architectural Position
 
@@ -21,291 +24,282 @@ model cards and qualification records
 Locaily routing decisions
 ```
 
-The runtime consumes qualified model data. Benchmark Lab produces and validates that data.
+The runtime consumes compact qualification records. Benchmark Lab produces and validates that data. Runtime components must not import `benchmark-lab/engine/` modules or parse raw benchmark results.
 
-Keep Benchmark Lab in the main Locaily repository for now because its first useful outputs depend on Locaily's existing schemas, contracts, model registry, and track definitions. A separate repository would add release and contract drift before the subsystem is stable.
+## Milestone 1 Status
 
-## Non-Goals
+Benchmark Lab Milestone 1 is complete and operator-ready. Qualification breadth remains incremental across models, Tracks, hardware profiles, prompts, runtimes, and regression packs.
 
-- Do not commit large model binaries, provider caches, or raw benchmark outputs.
-- Do not claim benchmark results without committed or attached evidence.
-- Do not make the companion runtime import benchmark runner code.
-- Do not promote models automatically from quick-screen runs.
-- Do not treat one aggregate score as a substitute for track-specific qualification.
+Completion of the engine and operator workflow does not imply broad coverage.
+
+## CLI Commands
+
+| Command | npm script | Purpose |
+|---|---|---|
+| `run` | `npm run benchmark:run` | Run a suite, write raw results + draft summary |
+| `review` | `npm run benchmark:review` | Review a draft run summary without promoting |
+| `compare` | `npm run benchmark:compare` | Compare two draft summaries |
+| `promote` | `npm run benchmark:promote` | Explicitly promote a draft run to approved evidence |
+| `matrix` | `npm run benchmark:matrix` | Run a suite across multiple model manifests |
+| `probe` | `npm run benchmark:probe` | Probe model capabilities before running a suite |
+| `diagnose` | `npm run benchmark:diagnose` | Run TC-65 diagnostic variants across models and modes |
+| `hybrid` | `npm run benchmark:hybrid` | Hybrid mock+Ollama cross-mode comparison |
+| `report:generate` | `npm run report:generate` | Generate published report from promoted evidence |
+| `model-card:generate` | `npm run model-card:generate` | Generate model card from promoted evidence |
+| `qualification:generate` | `npm run qualification:generate` | Generate qualification record from promoted evidence |
+| `checksum:verify` | `npm run checksum:verify` | Verify a checksum record |
+| `benchmark:test` | `npm run benchmark:test` | Schema validation + mock run test |
+| `benchmark:status-smoke` | `npm run benchmark:status-smoke` | Spawn companion, verify `/benchmark/status` |
+| `tool-eval:run` | `npm run tool-eval:run` | Run Tool Eval Bench tool-use scenarios |
+| `tool-eval:test` | `npm run tool-eval:test` | Run tool-eval integration tests |
+
+All CLI scripts are in `benchmark-lab/engine/cli/`. The CLI arg parser is in `args.js`.
+
+## Adapters
+
+- **Mock adapter** (`benchmark-lab/engine/adapters/mock-runtime.js`) — deterministic fixture responses for CI and contract tests.
+- **Ollama adapter** (`benchmark-lab/engine/adapters/ollama-runtime.js`) — connects to `127.0.0.1:11434`, supports `/api/chat` for tool-calling and standard generation.
+- **ToolEvalRuntime adapter** (`benchmark-lab/engine/adapters/tool-eval-runtime.js`) — multi-turn Ollama `/api/chat` for tool-use evaluation.
+
+## Execution Modes
+
+The execution router (`benchmark-lab/locaily/tracks/basic-tool-use/execution-router.js`) supports three modes:
+
+| Mode | Description | When selected |
+|---|---|---|
+| `native` | Full tool exposure, no policy constraints | Default for scenarios without specific policy requirements |
+| `policy-routed` | Scenario-specific policies injected via system prompt | Selected by POLICY_BY_SCENARIO mapping |
+| `runtime-constrained` | Restricted tool exposure and response modes based on policy | Explicitly requested for capability-boundary testing |
+
+Policies include: `NATIVE`, `DIRECT_RESPONSE`, `REFUSAL_REQUIRED`, `STRUCTURED_RESPONSE`, `DATE_RESOLUTION_REQUIRED`, and `TOOL_THEN_STRUCTURED_RESPONSE`.
+
+Capability probes affect execution by recording which capabilities a model supports, allowing suites to check requirements before running.
+
+## Capability Probing
+
+`benchmark-lab/engine/probes/model-capability-probe.js` probes a model's capabilities before running a suite. Results are cached under `benchmark-lab/evidence/probes/`. The probe records:
+
+- `textCompletion` — basic text generation
+- `chatCompletion` — chat-formatted generation
+- `nativeToolCalls` — native Ollama tool-calling support
+- `toolArguments` — proper tool argument formatting
+- `guidedJson` — structured JSON output via format parameter
+
+Capability results: `SUPPORTED`, `UNSUPPORTED`, `INCOMPATIBLE_FORMAT`, `TIMEOUT`.
+
+Suite configs can declare `requiredModelCapabilities` and `optionalModelCapabilities` to gate execution via `checkSuiteRequirements()`.
+
+## Qualification-Record Loader
+
+`companion/core/model-qualification-loader.js` loads qualification JSON from `benchmark-lab/qualifications/`, validates schema versions, and returns model-role and track suitability metadata. It does not import Benchmark Lab engine code.
+
+## Schemas and Validation
+
+14 schema files in `benchmark-lab/schemas/`:
+
+- `qualification-record.schema.json`
+- `promoted-evidence.schema.json`
+- `approved-evidence-summary.schema.json`
+- `model-manifest.schema.json`
+- `model-card-source-data.schema.json`
+- `hardware-profile.schema.json`
+- `benchmark-suite.schema.json`
+- `benchmark-run-summary.schema.json`
+- `benchmark-case.schema.json`
+- `benchmark-review.schema.json`
+- `benchmark-comparison.schema.json`
+- `benchmark-matrix.schema.json`
+- `benchmark-report-source.schema.json`
+- `model-capability-probe.schema.json`
+
+All 14 schemas pass validation tests. The benchmark schema test suite (`scripts/benchmark-lab-schema-test.js`) validates every schema with valid and invalid fixtures including execution-mode variants.
+
+## Evidence and Validation
+
+### Evidence Promotion Workflow
+
+```
+run -> review -> compare -> promote -> checksum verify
+```
+
+1. Run a suite → raw results + draft summary (Git-ignored under `results/raw/`, `reports/drafts/`)
+2. Review the draft (`benchmark:review`)
+3. Compare against other runs (`benchmark:compare`)
+4. Promote explicitly (`benchmark:promote` with `--run`, `--evidence`, `--approved-by`)
+5. Promotion writes compact evidence to `evidence/summaries/` and `evidence/approved/`, plus checksum records to `evidence/checksums/`
+
+### Artifact Lifecycle
+
+| Stage | Command | Output | Git status | Human review required |
+|---|---|---|---|---|
+| Run | `benchmark:run` | `results/raw/<run-id>/run.json`, `reports/drafts/<run-id>/summary.json` | Ignored | Yes |
+| Review | `benchmark:review` | Review record | Ignored | Yes |
+| Compare | `benchmark:compare` | Comparison output | Ignored | Before using to justify promotion |
+| Matrix | `benchmark:matrix` | `reports/drafts/matrices/<matrix-id>.json`, `.md` | Ignored | Per-model review |
+| Promote | `benchmark:promote` | `evidence/summaries/`, `evidence/approved/`, `evidence/checksums/` | Committed | Yes |
+| Report | `report:generate` | `reports/published/` + checksums | Committed | Review before committing |
+| Model card | `model-card:generate` | `model-cards/published/` + checksums | Committed | Review before committing |
+| Qualification | `qualification:generate` | `qualifications/models/` + checksum | Committed | Yes — status must be intentional |
+| Checksum verify | `checksum:verify` | Verification result (stdout) | N/A | Verify before trusting |
+
+### Checksum Verification
+
+Two modes: `canonical_text_v1` (CRLF→LF normalization for text files) and `byte_exact` (binary files). Backward-compatible fallback verifies legacy byte-exact records against canonical normalization.
+
+### Qualification Generation
+
+```powershell
+npm run qualification:generate -- --model <model-id> --evidence <evidence-id>
+```
+
+Default status is `screening`. Use `--status`, `--role`, `--role-status` for more specific records. Use `qualified` only when evidence genuinely supports it.
+
+### Operator Guide and Validation Checklist
+
+- `benchmark-lab/OPERATOR_GUIDE.md` — exact commands, trust boundaries, live Ollama validation steps, commit policy.
+- `benchmark-lab/VALIDATION_CHECKLIST.md` — required checks before committing framework changes.
+
+### Current Qualified Models and Tracks
+
+Qualification records exist for `llama3.2-local` on intent-classification and basic-tool-use tracks. These are narrow, evidence-based records — not broad model-capability claims. See `benchmark-lab/qualifications/models/`, `benchmark-lab/qualifications/tracks/`, and `benchmark-lab/qualifications/hardware/`.
 
 ## Repository Layout
 
 ```txt
 benchmark-lab/
 |-- README.md
-|-- lab.config.example.json
-|-- configs/
-|   `-- suites/
+|-- OPERATOR_GUIDE.md
+|-- VALIDATION_CHECKLIST.md
 |-- engine/
-|   |-- adapters/
-|   |-- cli/
+|   |-- adapters/          (mock-runtime, ollama-runtime, tool-eval-runtime)
+|   |-- cli/               (run, review, compare, promote, matrix, probe, diagnose, report, model-card, qualification, checksum-verify, tool-eval-run, mode-comparison-run)
+|   |-- runners/           (suite-runner, tool-eval-runner, mode-comparison-runner, tc65-diagnostic-runner)
+|   |-- probes/            (model-capability-probe)
+|   |-- scorers/
 |   |-- reporters/
-|   |-- runners/
-|   `-- scorers/
+|   |-- checksums.js
+|   |-- review-run.js
+|   |-- compare-runs.js
+|   |-- qualification.js
+|   |-- model-card.js
 |-- locaily/
-|   |-- fixtures/
-|   |-- prompts/
-|   |-- test-packs/
 |   |-- tracks/
-|   `-- worker-contracts/
-|-- contracts/
-|-- schemas/
+|       |-- basic-tool-use/   (suite, scenarios, execution-router, compare-runs, tool-definitions)
+|       |-- intent-classification/ (suite, suite-improved, suite-ollama.example, cases, cases-live)
+|-- schemas/              (14 schema files)
 |-- validators/
 |-- evidence/
 |   |-- approved/
 |   |-- checksums/
-|   |-- failures/
-|   `-- summaries/
+|   |-- summaries/
+|   |-- probes/           (git-ignored cache)
 |-- qualifications/
-|   |-- hardware/
 |   |-- models/
-|   `-- tracks/
+|   |-- tracks/
+|   |-- hardware/
 |-- model-cards/
-|-- models/
-|   |-- files/
-|   `-- manifests/
+|   |-- published/
+|   |-- drafts/
 |-- reports/
 |   |-- published/
-|   `-- templates/
-|-- results/
-|   |-- raw/
-|   `-- tmp/
-|-- cache/
-`-- runtime-logs/
+|   |-- drafts/
+|-- results/raw/         (git-ignored)
+|-- cache/               (git-ignored)
+|-- runtime-logs/        (git-ignored)
 ```
 
-## Artifact Types
+## Security and Privacy
 
-`engine/` contains reusable benchmark machinery: runners, adapters, scorers, reporters, and CLI entrypoints.
-
-`locaily/` contains Locaily-specific benchmark assets: track suites, prompt-regression packs, worker contracts, fixtures, and test packs.
-
-`contracts/`, `schemas/`, and `validators/` define benchmark-facing validation surfaces. Canonical runtime API contracts remain in `docs/01-architecture/`; benchmark contracts should reference or mirror those contracts intentionally.
-
-`results/raw/` contains local run output and must remain ignored.
-
-`evidence/` contains compact, reviewed evidence promoted from raw runs.
-
-`qualifications/` contains compact JSON records consumed by model routing and orchestration.
-
-`model-cards/` contains human-readable generated summaries backed by approved evidence.
-
-## Data Flow
-
-```txt
-suite config
-   |
-benchmark runner
-   |
-raw local results
-   |
-validators and scorers
-   |
-approved summaries and evidence
-   |
-qualification records
-   |
-runtime model routing hints
-```
-
-Raw outputs are useful for inspection, but the companion runtime should never parse raw benchmark result folders. Runtime integration should use only stable qualification records and approved summaries.
-
-## Runtime Integration
-
-The runtime/orchestration layer should consume Benchmark Lab output through a small loader, for example:
-
-```txt
-companion/core/model-qualification-loader.js
-```
-
-That loader should:
-
-- Load qualification JSON from `benchmark-lab/qualifications/`.
-- Validate schema versions.
-- Return model-role and track suitability metadata.
-- Fail gracefully when qualification data is missing.
-- Avoid importing `benchmark-lab/engine/`.
-- Avoid parsing raw benchmark logs or temporary reports.
-
-Routing should treat qualification records as evidence-backed hints. It should still preserve configured model roles, provider availability checks, and existing fallback behavior.
-
-## Qualification Policy
-
-Runtime routing defaults to advisory use of qualification records. Model steps include matching qualification evidence in metadata when available, but the default policy does not block execution.
-
-Callers may opt into stricter behavior through `options.qualification_policy`:
-
-- `advisory`: attach qualification metadata when available; never block.
-- `reject_rejected`: block models with `rejected` or `revalidation_required` qualification status.
-- `require_qualified`: require a matching `qualified` role/track record.
-- `require_qualified_or_conditional`: require a matching `qualified` or `conditional` role/track record.
-
-This keeps current local-first workflows usable while allowing validation-sensitive runs to require Benchmark Lab evidence.
+- Bind to localhost only.
+- Do not commit large model binaries, provider caches, or raw benchmark outputs.
+- Do not commit local paths, usernames, or private device identifiers.
+- Evidence promotion is explicit — no automatic qualification.
+- Do not claim benchmark results without committed or attached evidence.
 
 ## Status Visibility
 
-The companion exposes a read-only status endpoint:
-
-```txt
-GET /benchmark/status
-```
-
-It reports qualification record counts, invalid qualification records, checksum counts, status distribution, role distribution, and the latest generated qualification timestamp. `GET /health` includes a compact Benchmark Lab summary and points to this endpoint.
-
-The status endpoint reads generated records only. It does not run benchmarks, promote evidence, generate qualifications, or import Benchmark Lab engine code.
-
-## Qualification Record
-
-The first schema is:
-
-```txt
-benchmark-lab/schemas/qualification-record.schema.json
-```
-
-A qualification record represents a specific evidence-backed status for a model, track, worker contract, or hardware profile.
-
-Qualification states:
-
-```txt
-untested
-screening
-candidate
-qualified
-conditional
-rejected
-revalidation_required
-```
-
-A model must not remain qualified automatically after a relevant dependency changes, including model digest, runtime provider, prompt contract, schema, test pack, validator logic, or hardware profile.
+`GET /benchmark/status` is read-only and side-effect free. It reports qualification record counts, checksum counts, status distribution, and the latest generated qualification timestamp. `GET /health` includes a compact Benchmark Lab summary.
 
 ## Git Storage Policy
 
-Commit:
+**Commit:** engine code, schemas, validators, manifests, checksums, compact JSON summaries, approved evidence, curated failure examples, generated model cards, qualification records, published reports.
 
-- Benchmark Lab source code and docs.
-- Example configs and suite configs.
-- Schemas, contracts, validators, manifests, and checksums.
-- Compact JSON summaries.
-- Approved evidence.
-- Curated failure examples.
-- Generated model cards.
-- Qualification records.
-- Published Markdown reports.
+**Exclude:** raw benchmark outputs, temporary results, downloaded model binaries, provider caches, runtime logs, local configs and secrets, temporary report exports, generated capability probe cache.
 
-Exclude:
+## Qualification States
 
-- Raw benchmark outputs.
-- Temporary results.
-- Downloaded model binaries.
-- Provider caches.
-- Runtime logs.
-- Local configs and secrets.
-- Temporary report exports.
+| State | Meaning |
+|---|---|
+| `untested` | No controlled benchmark evidence exists |
+| `screening` | Limited test completed |
+| `candidate` | Results justify a qualification run |
+| `qualified` | Meets the track's defined criteria |
+| `conditional` | Useful only under documented constraints |
+| `rejected` | Does not meet the track's requirements |
+| `revalidation_required` | A relevant dependency changed |
 
-## Evidence Promotion
+A model must not remain qualified automatically after its contract, model file, or relevant dependencies change.
 
-Evidence promotion should be explicit:
+## Runtime Qualification Policies
 
-1. Run a benchmark suite.
-2. Store raw output locally under ignored `results/raw/`.
-3. Validate cases with deterministic validators.
-4. Generate a compact summary.
-5. Review failures and privacy concerns.
-6. Promote selected summaries or examples into `evidence/`.
-7. Generate or update qualification records.
-8. Generate model cards from approved evidence.
+The runtime's `evaluateQualificationPolicy` supports four policies (set via `options.qualification_policy`):
 
-Quick-screen runs can inform development but should not create `qualified` records.
+| Policy | Behavior |
+|---|---|
+| `advisory` | Default. Qualification is logged but does not block execution. |
+| `reject_rejected` | Blocks models with `rejected` or `revalidation_required` status. |
+| `require_qualified` | Blocks models unless status is `qualified`. |
+| `require_qualified_or_conditional` | Blocks unless status is `qualified` or `conditional`. |
 
-## Checksums
+Routing treats records as evidence-backed hints; default policy is advisory.
 
-Promoted evidence, approved evidence summaries, qualification records, and draft model-card artifacts should have checksum records under:
+## Revalidation Triggers
 
-```txt
-benchmark-lab/evidence/checksums/
-```
+Qualification records require revalidation when:
 
-Checksum records use `schemaVersion: benchmark.checksum.v1` and store SHA-256 hashes plus the artifact path. Use:
+- The contract version changes (e.g., `intent-classifier-worker-v1` → `v2`)
+- The model file or digest changes
+- The suite config or cases are modified
+- The prompt template or version is updated
+- The hardware profile changes enough to affect results
 
-```txt
-npm run checksum:verify -- --checksum benchmark-lab/evidence/checksums/<record>.json
-```
+## Evidence Interpretation
 
-Checksum records are part of the reviewable evidence chain. They do not prove benchmark quality by themselves; they prove that a reviewed artifact has not changed since the checksum was generated.
+- A passing suite supports only the tested contract (Track + prompt version + hardware context).
+- Evidence must name the model, runtime, suite, prompt/contract version, and hardware context.
+- Narrow fixtures must not be turned into general model claims.
+- Model-card prose must remain traceable to promoted evidence.
+- Checksum integrity does not prove benchmark quality; it proves artifact immutability since hashing.
 
-## Hardware Profiles
+## Extraction Criteria
 
-Hardware profiles should be specific enough to explain performance and memory behavior without leaking private machine details. Prefer stable profile IDs and broad specs over absolute local paths, usernames, or private device names.
+Evidence and qualification records should be extracted (promoted) only when:
 
-## Prompt Regression
+- The run used a controlled, repeatable suite
+- Results were reviewed by an operator
+- The evidence claim is scoped to the tested contract
+- Checksums were generated and verified
+- No sensitive data is included
+- The qualification status reflects the actual evidence strength
 
-Prompt-regression packs should pin:
+## Current Follow-On Areas
 
-- Prompt or worker-contract version.
-- Prompt hash.
-- Target track.
-- Expected output schema.
-- Validator set.
-- Test-pack version.
-- Inference settings.
+The following areas are recognized as valuable extensions but are not yet scoped or scheduled as an approved milestone:
 
-Prompt changes that affect benchmark behavior require a new contract version or a revalidation record.
+- Additional Track suites beyond intent-classification and basic-tool-use
+- Additional model evidence across more Ollama models
+- Hardware profiling and qualification records for multiple hardware profiles
+- Deeper prompt-regression coverage
+- Richer failure analysis and error categorization
+- Broader capability probes (structured output, error recovery)
+- Continued operator UX improvements (aggregate commands, simplified chaining)
 
-## Track Qualification
+These are follow-on candidates, not an approved milestone. Do not begin implementation without an explicitly supplied objective.
 
-Track qualification should validate the model against the actual Locaily track contract. A model can be qualified for one track or role and rejected for another.
+## Related Docs
 
-Track-level records should describe:
-
-- Track ID.
-- Contract ID and version.
-- Required validators.
-- Thresholds.
-- Evidence IDs.
-- Known conditions.
-- Revalidation triggers.
-
-## Model Cards
-
-Model cards are generated human-readable summaries. They must be backed by approved evidence and qualification records.
-
-Model cards may describe:
-
-- Identity and runtime.
-- Tested hardware profile.
-- Qualified tracks and roles.
-- Observed strengths.
-- Known failure modes.
-- Conditions and guardrails.
-- Evidence freshness.
-
-They must not invent claims absent from evidence.
-
-## Future Extraction Criteria
-
-Do not split Benchmark Lab out of the repository yet.
-
-Move generic engine code into a separate `locaily-benchmark-lab/` repository only when at least one concrete condition is true:
-
-- The benchmark engine becomes useful independently of Locaily.
-- Other projects need to consume it.
-- Its release cycle materially diverges from Locaily.
-- Benchmark artifacts make the main repository too large.
-- External contributors primarily work on evaluation tooling.
-- It becomes a standalone CLI, package, or product.
-
-If extraction happens, keep Locaily-specific tracks, contracts, test packs, curated evidence, and generated qualification records in the main Locaily repository.
-
-## Immediate Implementation Steps
-
-1. Keep the initial scaffold in `benchmark-lab/`.
-2. Validate the first qualification-record schema with local tests.
-3. Add a minimal mock-runtime benchmark path before using live Ollama.
-4. Add one Locaily-specific suite targeting a narrow worker contract.
-5. Produce one compact summary and one draft qualification record.
-6. Add a runtime loader only after a real qualification record exists.
+- [benchmark-lab/OPERATOR_GUIDE.md](../../benchmark-lab/OPERATOR_GUIDE.md)
+- [benchmark-lab/VALIDATION_CHECKLIST.md](../../benchmark-lab/VALIDATION_CHECKLIST.md)
+- [benchmark-lab/README.md](../../benchmark-lab/README.md)
+- [../00-start-here/current-state.md](../00-start-here/current-state.md)
+- [../07-progress/build-status.md](../07-progress/build-status.md)

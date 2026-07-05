@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "benchmark.promoted_evidence.v1",
+  "evidenceId": "hybrid-weather-cli-evidence-v1",
+  "sourceRunId": "hybrid-loc-hybrid-weather-001-1783220768439",
+  "suiteId": "basic-tool-use-v1",
+  "trackId": "basic-tool-use",
+  "contractId": "basic-tool-use-v1",
+  "approvedAt": "2026-07-05T03:13:22.454Z",
+  "approvedBy": "Operator Review",
+  "summary": {
+    "schemaVersion": "benchmark.run_summary.v1",
+    "runId": "hybrid-loc-hybrid-weather-001-1783220768439",
+    "suiteId": "basic-tool-use-v1",
+    "trackId": "basic-tool-use",
+    "contractId": "basic-tool-use-v1",
+    "runtime": {
+      "provider": "tool-eval",
+      "modelId": "llama3.2-local",
+      "runtimeModelName": "llama3.2"
+    },
+    "startedAt": "2026-07-05T03:06:08.440Z",
+    "completedAt": "2026-07-05T03:06:10.831Z",
+    "caseCount": 1,
+    "passed": 1,
+    "partial": 0,
+    "failed": 0,
+    "errors": 0,
+    "timeouts": 0,
+    "malformed": 0,
+    "caseResults": [
+      {
+        "caseId": "loc-hybrid-weather-001",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "aggregate",
+            "status": "pass",
+            "message": "3/3 passed"
+          }
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "Hybrid weather workflow: 3/3 PASS, probe verified, Ollama 0.31.1, llama3.2"
+  ]
+}

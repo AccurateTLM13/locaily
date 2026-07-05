@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "deterministic-transformation-v1",
+  "trackId": "deterministic-transformation",
+  "contractId": "deterministic-transformation-v1",
+  "description": "Deterministic transformation Track: transforms validated structured input into a declared output schema using registered code. No LLM involved.",
+  "requiredModelCapabilities": [],
+  "optionalModelCapabilities": [],
+  "transformers": {
+    "weather-tool-result-to-report": {
+      "module": "benchmark-lab/engine/transforms/weather-tool-result-to-report",
+      "version": "1.0.0",
+      "inputSchemaRef": "schemas/weather-tool-result.schema.json",
+      "outputSchemaRef": "schemas/weather-report.schema.json",
+      "allowTypeCoercion": true,
+      "allowMissingOptionalFields": true,
+      "allowInferredValues": false
+    }
+  }
+}

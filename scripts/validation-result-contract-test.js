@@ -4,7 +4,7 @@ const {
   isVerificationGateStep,
   validateStepOutput
 } = require("../companion/orchestration/run-plan-validator");
-const { loadTrack } = require("../companion/pit-crew/decomposer");
+const { loadTrack } = require("../companion/crew/decomposer");
 const { dealSniperTool } = require("../companion/tools/deal-sniper");
 const lighthouseParser = require("../tool-packs/lighthouse-parser-pack/index");
 const standardText = require("../tool-packs/standard-text-pack/index");
@@ -169,7 +169,7 @@ function checkOrchestrationStepGateShape() {
     {
       executor: {
         type: "model",
-        schema: "companion/pit-crew/schemas/prioritize-fixes.schema.json"
+        schema: "companion/crew/schemas/prioritize-fixes.schema.json"
       }
     },
     lighthouseTrack

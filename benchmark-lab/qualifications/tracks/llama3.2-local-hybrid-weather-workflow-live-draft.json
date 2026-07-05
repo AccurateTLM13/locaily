@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "llama3.2-local-hybrid-weather-workflow-live-draft",
+  "subject": {
+    "type": "track",
+    "id": "hybrid-weather-workflow",
+    "provider": "locaily"
+  },
+  "status": "screening",
+  "qualifiedFor": [
+    {
+      "role": "weather-workflow",
+      "trackId": "hybrid-weather",
+      "contractId": "hybrid-weather-v1",
+      "status": "conditional",
+      "score": 1,
+      "conditions": [
+        "Model: llama3.2-local (weather-tool-selection)",
+        "Transformer: weather-tool-result-to-report v1.0.0",
+        "Invalidation: model change, transformer change, schema change"
+      ]
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "live-hybrid-1783214975349"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/reports/drafts/live-hybrid-1783214975349/summary.json"
+    ]
+  },
+  "modelProfileId": "llama3.2-local",
+  "notes": [
+    "DRAFT — live combined hybrid workflow qualification",
+    "Support mode: hybrid-deterministic",
+    "Dependencies: model-capability + transformer-capability",
+    "Run: live-hybrid-1783214975349"
+  ],
+  "generatedAt": "2026-07-05T01:30:42.696Z"
+}

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://locaily.dev/schemas/internal/task-track.schema.json",
   "title": "Task Track Definition",
-  "description": "JSON shape for track files under companion/pit-crew/tracks/.",
+  "description": "JSON shape for track files under companion/crew/tracks/.",
   "type": "object",
   "required": ["track_id", "steps"],
   "properties": {

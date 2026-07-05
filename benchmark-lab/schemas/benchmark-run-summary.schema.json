@@ -91,6 +91,10 @@
       "type": "integer",
       "minimum": 0
     },
+    "partial": {
+      "type": "integer",
+      "minimum": 0
+    },
     "caseResults": {
       "type": "array",
       "items": {
@@ -108,6 +112,7 @@
           "verdict": {
             "enum": [
               "PASS",
+              "PARTIAL",
               "FAIL",
               "MALFORMED_OUTPUT",
               "TIMEOUT",

@@ -24,7 +24,7 @@
 
 ## Architectural change
 
-Locaily now has a workflow-facing layer above the Pit Crew track runner:
+Locaily now has a workflow-facing layer above the Crew track runner:
 
 ```txt
 Workflow request

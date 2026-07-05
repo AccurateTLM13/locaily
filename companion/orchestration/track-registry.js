@@ -1,6 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const { loadTrack } = require("../pit-crew/decomposer");
+const { loadTrack } = require("../crew/decomposer");
 
 const METADATA_PATH = path.join(__dirname, "registry", "track-metadata.json");
 

@@ -24,7 +24,7 @@ Markdown output support is **not removed**. It is reframed as an **export / rend
 | Validation results | JSON | Multiple contracts — see [validation-result-contract-audit.md](../04-validation/validation-result-contract-audit.md). `{ valid, errors }` verification gates; `{ ok, errors }` engine checks; priority-fix review is a separate shape |
 | Audit / run logs | JSONL | Normalized in `audit-log.js`; **runtime-enforced at write** for new records via `appendAuditRecord()` |
 | Routing decisions | JSON (partial) | Role → model mapping logged; full decision record spec only |
-| NearbyNode capability ads | JSON (spec) | Not implemented — schema defined for future connectors |
+| Relay Node capability ads | JSON (spec) | Not implemented — schema defined for future connectors |
 | Final output manifest | JSON (spec) | Lighthouse emits flat handoff + `markdown`; manifest wrapper **not** produced |
 
 Do **not** claim full JSON-first coverage across every subsystem until code validates each schema. See [internal-json-schemas.md](./internal-json-schemas.md) for per-schema implementation status.
@@ -48,7 +48,7 @@ The Local Brain should represent these concerns as structured JSON:
 - **Workflow plans** — ordered steps, worker types, status, timing
 - **Routing decisions** — selected track, role, provider, model, fallback path
 - **Task tracks** — step catalog, `input_map`, executor contracts
-- **Capability records** — tool registry entries, model registry entries, NearbyNode advertisements
+- **Capability records** — tool registry entries, model registry entries, Relay Node advertisements
 - **Validation results** — per-step and final checks with `valid` / `errors`
 - **Retries** — retry count, reason, escalation hint (partial today)
 - **Logs / audit records** — summary-only run events (no raw sensitive payloads)
@@ -102,8 +102,8 @@ See [../03-workflows/lighthouse-handoff.md](../03-workflows/lighthouse-handoff.m
 This decision does not change the platform thesis:
 
 - **Local Brain** coordinates work
-- **AI Pit Crew** defines specialized task tracks
-- **NearbyNode** advertises available capabilities (future)
+- **The Crew** (formerly AI Pit Crew) defines specialized task tracks
+- **Relay Nodes** advertise available capabilities (future)
 - Small local models, tools, and rules handle narrow jobs
 - Outputs are **validated** before final assembly
 
@@ -116,6 +116,6 @@ JSON-first internals make that thesis easier to test, audit, and extend. Markdow
 - [orchestration-flow.md](./orchestration-flow.md)
 - [internal-json-schemas.md](./internal-json-schemas.md)
 - [capability-registry.md](./capability-registry.md)
-- [nearby-node.md](./nearby-node.md)
+- [Relay Nodes (formerly NearbyNode)](./nearby-node.md)
 - [../02-track-system/run-plan-format.md](../02-track-system/run-plan-format.md)
 - [../02-track-system/track-definition-schema.md](../02-track-system/track-definition-schema.md)

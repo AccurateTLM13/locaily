@@ -49,7 +49,7 @@ Setup reference: [memory-bridge-local-setup.md](./memory-bridge-local-setup.md)
 |------|--------|----|-------------------------|--------------------------|-------|
 | Standard | off | off | No | seo at 80 | Deterministic compose only |
 | Memory-only | on | off | **Yes** | seo at 80 | Guardrails/disclaimer added |
-| AI-only | off | on (mock orchestrated) | No | seo at 80 | Pit crew analyze path |
+| AI-only | off | on (mock orchestrated) | No | seo at 80 | The Crew analyze path |
 | AI + Memory | on | on + compose | **Yes** | seo at 80 | AI summary + memory guardrails |
 
 ### Evaluation
@@ -100,7 +100,7 @@ Setup reference: [memory-bridge-local-setup.md](./memory-bridge-local-setup.md)
 1. **Stay Lighthouse-only** for one more cycle. Add `wiki/projects/Lighthouse Handoff.md` to the private vault with `## Constraints` and `## Decisions` before expanding to other workflows.
 2. Re-run validation after project page exists to confirm fewer warnings and richer constraints.
 3. Keep writeback proposal-only; review inbox manually before any future `/apply` work.
-4. Do **not** expand to embeddings/NearbyNode until a follow-up validation pass shows richer memory context from project pages.
+4. Do **not** expand to embeddings/Relay Nodes until a follow-up validation pass shows richer memory context from project pages.
 
 **L2 update (2026-06-13):** Live Ollama + Memory Bridge milestone recorded separately in [l2-live-ollama-memory-bridge.md](./l2-live-ollama-memory-bridge.md).
 

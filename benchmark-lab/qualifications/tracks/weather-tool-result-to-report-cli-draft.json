@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "weather-tool-result-to-report-cli-promoted",
+  "subject": {
+    "type": "worker_contract",
+    "id": "weather-tool-result-to-report",
+    "provider": "locaily-engine"
+  },
+  "status": "qualified",
+  "qualifiedFor": [
+    {
+      "role": "formatter",
+      "trackId": "deterministic-transformation",
+      "contractId": "deterministic-transformation-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": [
+        "Transformer: weather-tool-result-to-report v1.0.0",
+        "Checksum verified: sha256:66dd24bed49ee848437824435fdcc0554eba9f32af02a1994a009a94a2c58f7a",
+        "Invalidation: transformer source checksum change, version change, input/output schema change, coercion policy change, recommendation logic change, evaluator change"
+      ]
+    }
+  ],
+  "evidence": {
+    "evidenceIds": ["hybrid-weather-cli-evidence-v1"],
+    "summaryPaths": []
+  },
+  "modelProfileId": "weather-tool-result-to-report",
+  "notes": [
+    "PROMOTED — Transformer-stage qualification for weather-result-transformation",
+    "Version: 1.0.0",
+    "Checksum: sha256:66dd24bed49ee848437824435fdcc0554eba9f32af02a1994a009a94a2c58f7a",
+    "Run: hybrid-loc-hybrid-weather-001-1783220768439",
+    "Source schema: {location, temperature_celsius, condition}",
+    "Output schema: {location, temperature_celsius, condition, recommendation}",
+    "Coercion policy: numeric strings accepted, text strings rejected, no value invention",
+    "Fixture coverage: valid-complete, valid-extra-metadata, valid-numeric-string, invalid-missing-temperature"
+  ],
+  "generatedAt": "2026-07-04T23:30:00.000Z"
+}

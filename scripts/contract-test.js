@@ -51,7 +51,7 @@ const {
 const {
   executeModelStep,
   evaluateQualificationPolicy
-} = require("../companion/pit-crew/model-router");
+} = require("../companion/crew/model-router");
 
 function assert(condition, message) {
   if (!condition) {
