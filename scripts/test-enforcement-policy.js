@@ -11,6 +11,16 @@ function assert(condition, label) {
   else { console.error(`  FAIL: ${label}`); failed++; }
 }
 
+// Helper: create a policy that initializes immediately
+function createTestPolicy(opts = {}) {
+  return createEnforcementPolicy({
+    dataDir: opts.dataDir,
+    resolver: opts.resolver || null,
+    getProviderStatus: opts.getProviderStatus || (async () => ({ available: true, modelReady: true })),
+    ...opts
+  });
+}
+
 // ==================== Enforcement Policy Tests ====================
 
 function testDefaultState() {
@@ -20,13 +30,18 @@ function testDefaultState() {
   assert(p.getPolicySummary().defaultState === "shadow", "default constant");
 }
 
-function testSetTrackState() {
+async function testSetTrackState() {
   console.log("TEST: set track state");
   const p = createEnforcementPolicy({ resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }) });
-  assert(p.setTrackState("t", "eligible").ok === true, "set eligible ok");
-  assert(p.getTrackState("t") === "eligible", "get eligible");
-  assert(p.setTrackState("t", "invalid").ok === false, "invalid state rejected");
-  assert(p.getTrackState("t") === "eligible", "unchanged after invalid");
+  const r1 = await p.setTrackState("t", "disabled");
+  assert(r1.ok === true, "set disabled ok");
+  assert(p.getTrackState("t") === "disabled", "get disabled");
+  const r2 = await p.setTrackState("t", "shadow");
+  assert(r2.ok === true, "set shadow ok");
+  assert(p.getTrackState("t") === "shadow", "get shadow");
+  const r3 = await p.setTrackState("t", "invalid");
+  assert(r3.ok === false, "invalid state rejected");
+  assert(p.getTrackState("t") === "shadow", "unchanged after invalid");
 }
 
 function testEnforcementStates() {
@@ -39,37 +54,35 @@ function testEnforcementStates() {
   assert(ENFORCEMENT_STATES.includes("suspended"), "suspended");
 }
 
-function testOverrides() {
+async function testOverrides() {
   console.log("TEST: override CRUD");
   const p = createEnforcementPolicy({ resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }) });
-  p.setOverride({ trackId: "t", role: "r", modelId: "m", reason: "test" });
+  await p.setOverride({ trackId: "t", role: "r", modelId: "m", reason: "test" });
   assert(p.hasOverride({ trackId: "t", role: "r", modelId: "m" }) === true, "override exists");
   assert(p.hasOverride({ trackId: "t", role: "r", modelId: "other" }) === false, "other model no override");
   assert(p.getOverrides().length === 1, "1 override");
-  p.clearOverride({ trackId: "t", role: "r", modelId: "m" });
+  await p.clearOverride({ trackId: "t", role: "r", modelId: "m" });
   assert(p.getOverrides().length === 0, "0 after clear");
 }
 
-function testApproveTrack() {
+async function testApproveTrack() {
   console.log("TEST: track approval");
   const p = createEnforcementPolicy({ resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }) });
   assert(p.isTrackApproved("t") === false, "not approved initially");
-  p.approveTrack("t");
+  await p.approveTrack("t");
   assert(p.isTrackApproved("t") === true, "approved after call");
 }
 
-function testPolicySummary() {
+async function testPolicySummary() {
   console.log("TEST: policy summary");
   const p = createEnforcementPolicy({
     resolver: null,
     getProviderStatus: async () => ({ available: true, modelReady: true }),
-    trackStates: { a: "shadow", b: "eligible" },
-    approvedTracks: ["a"]
   });
-  p.setOverride({ trackId: "a", role: "r", modelId: "m", reason: "x" });
+  await p.approveTrack("a");
+  await p.setOverride({ trackId: "a", role: "r", modelId: "m", reason: "x" });
   const s = p.getPolicySummary();
   assert(s.states.length === 5, "5 states");
-  assert(s.trackCount === 2, "2 tracks");
   assert(s.approvedTracks.length === 1, "1 approved");
   assert(s.activeOverrides === 1, "1 override");
   assert(s.scoreThreshold === 0.7, "default threshold");
@@ -78,9 +91,9 @@ function testPolicySummary() {
 async function testEligibilityDisabled() {
   console.log("TEST: eligibility disabled state");
   const p = createEnforcementPolicy({
-    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }),
-    trackStates: { t: "disabled" }
+    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true })
   });
+  await p.setTrackState("t", "disabled");
   const r = await p.evaluateEligibility({ trackId: "t", role: "w", recommendedCapabilityId: "m", qualificationState: "qualified", comparisonState: "agree", score: 0.95 });
   assert(r.eligible === false, "not eligible");
   assert(r.blocks.some(b => b.includes("disabled")), "disabled reason");
@@ -89,9 +102,9 @@ async function testEligibilityDisabled() {
 async function testEligibilityShadow() {
   console.log("TEST: eligibility shadow state");
   const p = createEnforcementPolicy({
-    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }),
-    trackStates: { t: "shadow" }
+    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true })
   });
+  assert(p.getTrackState("t") === "shadow", "already shadow");
   const r = await p.evaluateEligibility({ trackId: "t", role: "w", recommendedCapabilityId: "m", qualificationState: "qualified", comparisonState: "agree", score: 0.95 });
   assert(r.eligible === false, "not eligible");
   assert(r.blocks.some(b => b.includes("shadow")), "shadow reason");
@@ -100,9 +113,12 @@ async function testEligibilityShadow() {
 async function testEligibilitySuspended() {
   console.log("TEST: eligibility suspended state");
   const p = createEnforcementPolicy({
-    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }),
-    trackStates: { t: "suspended" }
+    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true })
   });
+  await p.approveTrack("t");
+  await p.setTrackState("t", "eligible", { forceGate: true });
+  await p.setTrackState("t", "enforced", { forceGate: true });
+  await p.setTrackState("t", "suspended");
   const r = await p.evaluateEligibility({ trackId: "t", role: "w", recommendedCapabilityId: "m", qualificationState: "qualified", comparisonState: "agree", score: 0.95 });
   assert(r.eligible === false, "not eligible");
   assert(r.blocks.some(b => b.includes("suspended")), "suspended reason");
@@ -111,9 +127,9 @@ async function testEligibilitySuspended() {
 async function testEligibilityNotApproved() {
   console.log("TEST: eligibility not approved");
   const p = createEnforcementPolicy({
-    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }),
-    trackStates: { t: "eligible" }
+    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true })
   });
+  await p.setTrackState("t", "eligible", { forceGate: true });
   const r = await p.evaluateEligibility({ trackId: "t", role: "w", recommendedCapabilityId: "m", qualificationState: "qualified", comparisonState: "agree", score: 0.95 });
   assert(r.eligible === false, "not eligible");
   assert(r.blocks.some(b => b.includes("not approved")), "approval reason");
@@ -122,9 +138,10 @@ async function testEligibilityNotApproved() {
 async function testEligibilityNotQualified() {
   console.log("TEST: eligibility not qualified state");
   const p = createEnforcementPolicy({
-    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }),
-    trackStates: { t: "eligible" }, approvedTracks: ["t"]
+    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true })
   });
+  await p.approveTrack("t");
+  await p.setTrackState("t", "eligible", { forceGate: true });
   const r = await p.evaluateEligibility({ trackId: "t", role: "w", recommendedCapabilityId: null, qualificationState: "untested", comparisonState: "insufficient-evidence" });
   assert(r.eligible === false, "not eligible");
   assert(r.blocks.some(b => b.includes("insufficient-evidence")), "evidence reason");
@@ -133,9 +150,10 @@ async function testEligibilityNotQualified() {
 async function testEligibilityBelowScore() {
   console.log("TEST: eligibility below score threshold");
   const p = createEnforcementPolicy({
-    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }),
-    trackStates: { t: "eligible" }, approvedTracks: ["t"], scoreThreshold: 0.8
+    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true })
   });
+  await p.approveTrack("t");
+  await p.setTrackState("t", "eligible", { forceGate: true });
   const r = await p.evaluateEligibility({ trackId: "t", role: "w", recommendedCapabilityId: "m", qualificationState: "qualified", comparisonState: "agree", score: 0.6 });
   assert(r.eligible === false, "not eligible");
   assert(r.blocks.some(b => b.includes("threshold")), "threshold reason");
@@ -144,10 +162,11 @@ async function testEligibilityBelowScore() {
 async function testEligibilityOverride() {
   console.log("TEST: eligibility blocked by override");
   const p = createEnforcementPolicy({
-    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }),
-    trackStates: { t: "eligible" }, approvedTracks: ["t"]
+    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true })
   });
-  p.setOverride({ trackId: "t", role: "w", modelId: "m", reason: "manual" });
+  await p.approveTrack("t");
+  await p.setTrackState("t", "eligible", { forceGate: true });
+  await p.setOverride({ trackId: "t", role: "w", modelId: "m", reason: "manual" });
   const r = await p.evaluateEligibility({ trackId: "t", role: "w", recommendedCapabilityId: "m", qualificationState: "qualified", comparisonState: "agree", score: 0.95 });
   assert(r.eligible === false, "not eligible");
   assert(r.blocks.some(b => b.includes("override")), "override reason");
@@ -156,9 +175,10 @@ async function testEligibilityOverride() {
 async function testEligibilityRuntimeUnavailable() {
   console.log("TEST: eligibility runtime unavailable");
   const p = createEnforcementPolicy({
-    resolver: null, getProviderStatus: async () => ({ available: false, modelReady: false }),
-    trackStates: { t: "eligible" }, approvedTracks: ["t"]
+    resolver: null, getProviderStatus: async () => ({ available: false, modelReady: false })
   });
+  await p.approveTrack("t");
+  await p.setTrackState("t", "eligible", { forceGate: true });
   const r = await p.evaluateEligibility({ trackId: "t", role: "w", recommendedCapabilityId: "m", qualificationState: "qualified", comparisonState: "agree", score: 0.95 });
   assert(r.eligible === false, "not eligible");
   assert(r.blocks.some(b => b.includes("Runtime")), "runtime reason");
@@ -167,9 +187,11 @@ async function testEligibilityRuntimeUnavailable() {
 async function testEligibilityFullyMet() {
   console.log("TEST: eligibility fully met (enforced state)");
   const p = createEnforcementPolicy({
-    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }),
-    trackStates: { t: "enforced" }, approvedTracks: ["t"], scoreThreshold: 0.7
+    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true })
   });
+  await p.approveTrack("t");
+  await p.setTrackState("t", "eligible", { forceGate: true });
+  await p.setTrackState("t", "enforced", { forceGate: true });
   const r = await p.evaluateEligibility({ trackId: "t", role: "w", recommendedCapabilityId: "m", qualificationState: "qualified", comparisonState: "agree", score: 0.95 });
   assert(r.eligible === true, "eligible");
   assert(r.canEnforce === true, "can enforce");
@@ -180,9 +202,10 @@ async function testEligibilityFullyMet() {
 async function testEligibilityEligibleNotEnforced() {
   console.log("TEST: eligible but not enforced");
   const p = createEnforcementPolicy({
-    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true }),
-    trackStates: { t: "eligible" }, approvedTracks: ["t"]
+    resolver: null, getProviderStatus: async () => ({ available: true, modelReady: true })
   });
+  await p.approveTrack("t");
+  await p.setTrackState("t", "eligible", { forceGate: true });
   const r = await p.evaluateEligibility({ trackId: "t", role: "w", recommendedCapabilityId: "m", qualificationState: "qualified", comparisonState: "agree", score: 0.95 });
   assert(r.eligible === true, "eligible");
   assert(r.canEnforce === false, "not enforced");
@@ -259,16 +282,16 @@ function testPerTrack() {
 // ==================== Run ====================
 
 testDefaultState();
-testSetTrackState();
 testEnforcementStates();
-testOverrides();
-testApproveTrack();
-testPolicySummary();
 testEvidenceReviewBasic();
 testEvidenceReviewEmpty();
 testPerTrack();
 
 (async () => {
+  await testSetTrackState();
+  await testOverrides();
+  await testApproveTrack();
+  await testPolicySummary();
   await testEligibilityDisabled();
   await testEligibilityShadow();
   await testEligibilitySuspended();

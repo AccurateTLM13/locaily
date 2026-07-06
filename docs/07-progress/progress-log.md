@@ -503,4 +503,53 @@ Complete the enforcement pipeline by integrating the policy engine into the mode
 ### Next
 
 Pilot Enforcement Validation and Multi-Model Track Expansion — activate enforcement for one qualified track once qualification evidence exists. Expand multi-model testing with runtime performance feedback. Add human correction records.
+
+---
+
+## 2026-07-05 — Durable Enforcement Policy
+
+### Changed
+
+- Created `companion/schemas/internal/enforcement-policy.schema.json` — canonical policy document schema (v1) with tracks, overrides, metadata, `additionalProperties: false`, strict JSON Schema validation.
+- Created `companion/schemas/internal/enforcement-policy-audit-event.schema.json` — 10 event types (policy.created, state.changed, approved, revoked, override.added, override.cleared, override.cleared-all, policy.corrupt, policy.recovered, policy.imported) with before/after state and revision tracking.
+- Created `companion/core/enforcement-policy-audit.js` — JSONL append-only audit module, validates events against schema, normalizes event shape, writes to `data/enforcement-policy-audit.jsonl`.
+- Created `companion/core/enforcement-policy-store.js` — durable policy store with:
+  - Synchronous eager initialization from disk (`readFileSync`)
+  - Async mutation API with serialization through a queue (no concurrent writes)
+  - Atomic write sequence: validate input → build candidate document → validate schema → write temp file → rename → update in-memory state → write audit event
+  - Full state transition graph: disabled↔shadow→eligible↔enforced, eligible↔suspended, enforced→{eligible,shadow}, suspended→{shadow,eligible,disabled}
+  - Compound approval mutation (eligible + approved in one op)
+  - Compound revocation mutation (eligible→shadow or enforced→suspended atomically)
+  - Override CRUD with composite key identity (trackId+role+modelId); duplicate rejection
+  - Override clear by overrideId or composite key
+  - Corrupt-file fallback with mutex lock; writes audit event synchronously before returning
+  - Pure in-memory mode when dataDir is not provided (test isolation without filesystem)
+  - Health status: healthy or degraded (safe fallback with loadError); enforcement locked when degraded
+- Modified `companion/core/enforcement-policy.js` — refactored to delegate to store instance; configurable score threshold added; backward-compatible `syncApi._seedTrackStateSync`, `syncApi._seedApprovalSync`, `syncApi._seedOverrideSync` for legacy constructor option seeding; legacy tests pass without changes.
+- Modified `companion/server.js` — added `GET /enforcement/policy`, `POST /enforcement/revoke`, `POST /enforcement/override/clear` endpoints; updated `POST /enforcement/set`, `POST /enforcement/approve`, `POST /enforcement/override` with `reason` and `updatedBy` query parameters; enforcement policy health in root status response; explicit store initialization at startup with `dataDir`.
+- Created `scripts/test-enforcement-policy-store.js` — 123 tests covering: loading and validation (20), persistence (20), state transitions (25), approval and revocation (16), overrides (18), audit (12), regression (12).
+- Modified `scripts/test-enforcement-policy.js` — updated to 62 tests with async-aware assertions; backward compatible with legacy option-based constructor.
+
+### Why
+
+Enforcement policy was previously in-memory only — all track states, approvals, and overrides were lost on server restart. For enforcement to be a practical rollout mechanism, policy state must survive restarts, audit history must be append-only and immutable, and corrupt data must have a safe recovery path. The store design mirrors the existing append-only evidence store pattern.
+
+### Evidence
+
+- 123/123 enforcement policy store tests pass.
+- 62/62 enforcement policy tests pass (backward compatible, async-aware).
+- 91/91 enforcement routing tests pass (backward compatible).
+- 31/31 shadow routing tests pass (backward compatible).
+- 25/25 qualification resolver tests pass (backward compatible).
+- 18/18 crew track run record tests pass (backward compatible).
+- 4/4 schema tests pass (backward compatible).
+- Contract tests pass.
+- benchmark:test passes.
+- 56/56 smoke tests pass (including new enforcement endpoints).
+- Enforcement remains disabled for all tracks — no pilot activated.
+- No absolute filesystem paths exposed in API responses.
+
+### Next
+
+Pilot Enforcement Validation and Multi-Model Track Expansion — activate enforcement for one qualified track once qualification evidence exists. Expand multi-model testing with runtime performance feedback. Add human correction records.
 ```

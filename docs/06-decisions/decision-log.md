@@ -839,7 +839,7 @@ Built an enforcement policy engine with 5 per-track rollout states (`disabled`, 
 
 ### Why
 
-Shadow routing proved the system can detect when the current model is the best-qualified choice, when a better model exists, when the selected model is unqualified, when coverage is missing, and when evidence is insufficient. The next step before turning on enforcement is defining a safe policy that gates enforcement behind explicit conditions. The 5-state model (disabled → shadow → eligible → enforced → suspended) provides granular control without a single global switch. The evidence review layer enables data-driven decisions about which tracks are safe to enforce.
+Shadow routing proved the system can detect when the current model is the best-qualified choice, when a better model exists, when the selected model is unqualified, when coverage is missing, and when evidence is insufficient. The next step before turning on enforcement is defining a safe policy that gates enforcement behind explicit conditions. The 5-state model (disabled, shadow, eligible, enforced, suspended) provides granular control without a single global switch. The evidence review layer enables data-driven decisions about which tracks are safe to enforce.
 
 ### Consequences
 
@@ -862,9 +862,45 @@ Policy engine: `companion/core/enforcement-policy.js`. Evidence review: `compani
 
 ---
 
-## Template
+## 2026-07-05 — Durable Enforcement Policy
 
-```md
+### Decision
+
+Make enforcement policy configuration durable across companion server restarts using atomic file write + rename, with synchronous eager initialization at startup, async mutations serialized through a queue, strict state transition enforcement, append-only JSONL audit logging, corrupt-file fallback recovery, and pure in-memory mode for test isolation.
+
+### Why
+
+The enforcement policy engine was previously in-memory only — all track states, approvals, and overrides were lost on server restart. For enforcement to be a practical rollout mechanism, operators need policy state to survive restarts, audit history to be append-only and immutable, and corrupt data to have a safe recovery path. The store design mirrors the existing append-only evidence store pattern already proven in the codebase.
+
+### Consequences
+
+- New files: `companion/core/enforcement-policy-store.js`, `companion/core/enforcement-policy-audit.js`, `companion/schemas/internal/enforcement-policy.schema.json`, `companion/schemas/internal/enforcement-policy-audit-event.schema.json`, `scripts/test-enforcement-policy-store.js`
+- Modified files: `companion/core/enforcement-policy.js` (delegates to store with sync legacy seeding), `companion/server.js` (3 new endpoints, store init, reason/updatedBy parameters)
+- Atomic persistence sequence: validate input → build candidate document → validate schema → write temp file → rename → update in-memory state → audit event
+- Full state transition graph strictly enforced: `disabled↔shadow→eligible↔enforced`, `eligible↔suspended`, `enforced→{eligible,shadow}`, `suspended→{shadow,eligible,disabled}`
+- Compound approval mutation: eligible + approved in one operation
+- Compound revocation mutation: eligible → shadow or enforced → suspended atomically
+- Override identity is composite key (trackId + role + modelId); duplicates rejected
+- Corrupt-file fallback reads audit event synchronously before init returns
+- Pure in-memory mode when no dataDir provided (enables test isolation without filesystem)
+- Default score threshold: 0.7
+- Policy file path: `data/policy/enforcement-policy.json` (not exposed in API responses)
+- Audit file path: `data/enforcement-policy-audit.jsonl`
+- Schema version: `enforcement-policy.v1`
+- 123 store tests, 62 backward-compatible policy tests, 91 routing tests, 56/56 smoke tests pass
+- Enforcement remains disabled for all tracks — no pilot activated
+
+### Status
+
+Confirmed.
+
+### Notes
+
+Store: `companion/core/enforcement-policy-store.js`. Audit: `companion/core/enforcement-policy-audit.js`. Policy schema: `companion/schemas/internal/enforcement-policy.schema.json`. Audit schema: `companion/schemas/internal/enforcement-policy-audit-event.schema.json`. Wrapper: `companion/core/enforcement-policy.js`. Store tests: `scripts/test-enforcement-policy-store.js` (123 tests). Build slice result: `docs/07-progress/latest-build-result.json`.
+
+---
+
+## Template```md
 ## YYYY-MM-DD — Title
 ### Decision
 ### Why

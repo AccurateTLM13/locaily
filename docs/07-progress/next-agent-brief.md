@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-05 (Guarded Qualification-Aware Routing Enforcement complete)
+**Updated:** 2026-07-05 (Durable Enforcement Policy complete)
 
 ## Read First
 
@@ -66,13 +66,17 @@ An enforcement policy engine (`companion/core/enforcement-policy.js`) now define
 
 Enforcement evaluation is now integrated into the canonical model router (`companion/crew/model-router.js`). The routing sequence: current selection → shadow recommendation → policy evaluation → final selection → execution. Enforcement decision recorded in Track Run Records via optional `routing.enforcementDecision`. Fallback: enforced capability failure triggers re-execution with original selected model. Evidence review extended with enforcement outcome metrics (attempts, applied, blocked, fallback, success rates). Additive endpoints: `GET /enforcement/pilot`, `GET /enforcement/decisions`. Safe state change enforcement on `POST /enforcement/set`. 83 tests cover all policy states, eligibility failures, routing evidence, runtime failures, and compatibility.
 
+### Durable Enforcement Policy
+
+Enforcement policy configuration is now durable across companion server restarts (`companion/core/enforcement-policy-store.js`). Atomic persistence via writeFile + rename to `data/policy/enforcement-policy.json`. Synchronous eager init at startup; async mutations serialized through a queue. Full state transition graph: disabled↔shadow→eligible↔enforced, eligible↔suspended, enforced→{eligible,shadow}, suspended→{shadow,eligible,disabled}. Compound mutations for approval/revocation. Override CRUD with composite key identity (trackId+role+modelId). Corrupt-file fallback with lock preserves existing data. Append-only JSONL audit (`companion/core/enforcement-policy-audit.js`, `data/enforcement-policy-audit.jsonl`) for all 10 event types, validated against `enforcement-policy-audit-event.schema.json`. Canonical policy document schema (`companion/schemas/internal/enforcement-policy.schema.json`) with `additionalProperties: false`. Pure in-memory mode when no dataDir for test isolation. Additive endpoints: `GET /enforcement/policy`, `POST /enforcement/revoke`, `POST /enforcement/override/clear`. 123 store tests in `scripts/test-enforcement-policy-store.js`. Wrapper at `companion/core/enforcement-policy.js` updated with sync legacy seeding via `syncApi`.
+
 ## Current Task
 
-Guarded Enforcement is complete. **No pilot Track activated** — no companion track has a current, valid `qualified` model capability with sufficient shadow routing evidence. All tracks remain in shadow mode. Enforcement machinery is implemented, tested, and ready for pilot activation.
+Durable Enforcement Policy is complete. **No pilot Track activated** — no companion track has a current, valid `qualified` model capability with sufficient shadow routing evidence. All tracks remain in shadow mode. Enforcement machinery is durable, tested, and ready for pilot activation.
 
 ## Next Task
 
-Pilot Enforcement Validation and Multi-Model Track Expansion. Activate enforcement for one qualified track once qualification evidence exists. Expand multi-model testing with runtime performance feedback. Add human correction records.
+Pilot Enforcement Validation and Multi-Model Track Expansion. Activate enforcement for one qualified track once qualification evidence exists. Expand multi-model testing with runtime performance feedback. Add human correction records. Broader model qualification coverage and live qualification depth.
 
 ## Do Not
 
@@ -86,8 +90,10 @@ Pilot Enforcement Validation and Multi-Model Track Expansion. Activate enforceme
 - Implement RelayNode routing, hardware recommendations, or remote execution dispatch in this slice
 - Import `benchmark-lab/engine/` modules from the Local Brain companion or any code under `companion/`
 - Enable enforcement for any Track without explicit evidence review
-- Modify the qualification-resolver, capability-registry, evidence-linker, shadow-routing, enforcement-policy, or shadow-evidence-review modules unless extending them for enforcement
+- Modify the qualification-resolver, capability-registry, evidence-linker, shadow-routing, enforcement-policy, enforcement-policy-store, enforcement-policy-audit, or shadow-evidence-review modules unless extending them for enforcement
+- Modify the policy schema (`companion/schemas/internal/enforcement-policy.schema.json`) or audit event schema (`companion/schemas/internal/enforcement-policy-audit-event.schema.json`) without updating all consumers
 - Enable global enforcement — per-track states only
+- Hardcode absolute filesystem paths in enforcement API responses
 
 ## Architecture Reminder
 
@@ -125,7 +131,11 @@ Target routing principle: smallest qualified capability.
 | Capability Registry | `companion/core/capability-registry.js` (qualification-aware capability index) |
 | Qualification Evidence Linker | `companion/evidence/qualification-evidence-linker.js` (links quals to Track Run Records) |
 | Shadow Router | `companion/core/shadow-routing.js` (compares current routing vs qualification recommendation) |
-| Enforcement Policy | `companion/core/enforcement-policy.js` (per-track enforcement states, eligibility evaluation) |
+| Enforcement Policy | `companion/core/enforcement-policy.js` (per-track enforcement states, eligibility evaluation, durable store wrapper) |
+| Enforcement Policy Store | `companion/core/enforcement-policy-store.js` (durable persistence with atomic writes, state transitions, override CRUD, corrupt-file recovery) |
+| Enforcement Policy Audit | `companion/core/enforcement-policy-audit.js` (append-only JSONL audit log with schema validation) |
+| Policy Schema | `companion/schemas/internal/enforcement-policy.schema.json` (canonical policy document schema with additionalProperties: false) |
+| Audit Event Schema | `companion/schemas/internal/enforcement-policy-audit-event.schema.json` (10 event types with before/after and revision) |
 | Shadow Evidence Review | `companion/evidence/shadow-evidence-review.js` (aggregates shadow comparison statistics) |
 | Proof workflows | `lighthouse-handoff.track.json`, `dealsniper.track.json` |
 
@@ -137,6 +147,9 @@ Run the appropriate non-live validation commands:
 npm.cmd run benchmark:test
 npm.cmd run benchmark:status-smoke
 node scripts/contract-test.js
+node scripts/test-enforcement-policy-store.js
+node scripts/test-enforcement-policy.js
+node scripts/test-enforcement-routing.js
 ```
 
 Do not require a live Ollama runtime unless your changes specifically affect Ollama interaction. If the companion server is running, also run:

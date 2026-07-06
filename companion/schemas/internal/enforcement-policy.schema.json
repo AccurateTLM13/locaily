@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/enforcement-policy.schema.json",
+  "title": "Enforcement Policy Document",
+  "description": "Canonical durable enforcement policy state for the Local Brain companion server.",
+  "type": "object",
+  "required": ["schemaVersion", "revision", "createdAt", "updatedAt", "updatedBy", "tracks", "overrides", "metadata"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": ["enforcement-policy.v1"],
+      "description": "Schema version identifier for migration detection."
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonic revision counter incremented per committed mutation."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp of initial document creation."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp of last mutation."
+    },
+    "updatedBy": {
+      "type": "string",
+      "description": "Actor identifier for the last mutation."
+    },
+    "tracks": {
+      "type": "object",
+      "description": "Per-track enforcement policy records.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["state", "approved", "updatedAt", "updatedBy"],
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": ["disabled", "shadow", "eligible", "enforced", "suspended"],
+            "description": "Current enforcement state for this track."
+          },
+          "approved": {
+            "type": "boolean",
+            "description": "Whether this track is explicitly approved for enforcement."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of last track-level mutation."
+          },
+          "updatedBy": {
+            "type": "string",
+            "description": "Actor identifier for last track-level mutation."
+          },
+          "reason": {
+            "type": ["string", "null"],
+            "description": "Optional operator-provided reason for state change."
+          }
+        }
+      },
+      "default": {}
+    },
+    "overrides": {
+      "type": "array",
+      "description": "Active capability overrides.",
+      "items": {
+        "type": "object",
+        "required": ["overrideId", "trackId", "role", "modelId", "reason", "createdAt", "createdBy"],
+        "additionalProperties": false,
+        "properties": {
+          "overrideId": {
+            "type": "string",
+            "description": "Stable unique override identifier."
+          },
+          "trackId": {
+            "type": "string",
+            "description": "Track this override applies to."
+          },
+          "role": {
+            "type": "string",
+            "description": "Model role this override applies to."
+          },
+          "modelId": {
+            "type": "string",
+            "description": "Model identifier to use instead of the recommended capability."
+          },
+          "reason": {
+            "type": ["string", "null"],
+            "description": "Operator-provided reason for the override."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of override creation."
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "Actor identifier for override creation."
+          },
+          "expiresAt": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Optional expiration timestamp."
+          }
+        }
+      },
+      "default": []
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["defaultState", "minimumScoreThreshold"],
+      "additionalProperties": false,
+      "properties": {
+        "defaultState": {
+          "type": "string",
+          "enum": ["disabled", "shadow", "eligible", "enforced", "suspended"],
+          "description": "Default enforcement state for unconfigured tracks."
+        },
+        "minimumScoreThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Minimum qualification score required for enforcement."
+        }
+      }
+    }
+  }
+}
