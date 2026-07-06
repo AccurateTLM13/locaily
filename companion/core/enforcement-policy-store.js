@@ -525,7 +525,8 @@ function createEnforcementPolicyStore(options = {}) {
         expectedState: "eligible",
         expectedApproved: isTrackApproved(trackId),
         expectedModelId: best ? best.modelId : null,
-        hasOverride: best ? hasOverride({ trackId, role: opts.role || best.role, modelId: best.modelId }) : false
+        expectedScore: best ? (best.score || 0) : 0,
+        expectedThreshold: policy.metadata.minimumScoreThreshold
       };
 
       const asyncGate = await checkEnforcementGateAsync(trackId, opts);
@@ -562,6 +563,26 @@ function createEnforcementPolicyStore(options = {}) {
             message: `Track '${trackId}' approval status changed before the transition could commit.`,
             nextStep: "Retry the transition."
           };
+        }
+        if (gateToken.expectedModelId) {
+          const currentBest = getBestQualifiedCapability(trackId, opts.role);
+          if (!currentBest || currentBest.modelId !== gateToken.expectedModelId) {
+            return {
+              ok: false,
+              code: "QUALIFICATION_CHANGED_DURING_TRANSITION",
+              message: `The qualified capability for track '${trackId}' changed (expected '${gateToken.expectedModelId}', ${currentBest ? "got '" + currentBest.modelId + "'" : "none available"}) before enforcement could commit.`,
+              nextStep: "Retry the transition."
+            };
+          }
+          const currentScore = currentBest.score || 0;
+          if (currentScore < gateToken.expectedThreshold) {
+            return {
+              ok: false,
+              code: "SCORE_CHANGED_DURING_TRANSITION",
+              message: `Score for '${currentBest.modelId}' fell to ${currentScore} (below threshold ${gateToken.expectedThreshold}) before enforcement could commit.`,
+              nextStep: "Retry the transition."
+            };
+          }
         }
       }
 

@@ -144,12 +144,8 @@ const enforcementPolicy = createEnforcementPolicy({
   },
   getCapabilityRegistry: () => capabilityRegistry,
   getShadowEvidence: async (trackId) => {
-    try {
-      const comparisons = await getShadowComparisons(trackId);
-      return comparisons.filter((c) => c.comparison && c.comparison !== "recommendation-unavailable" && c.comparison !== "insufficient-evidence");
-    } catch {
-      return [];
-    }
+    const comparisons = await getShadowComparisons(trackId);
+    return comparisons.filter((c) => c.comparison && c.comparison !== "recommendation-unavailable" && c.comparison !== "insufficient-evidence");
   }
 });
 
