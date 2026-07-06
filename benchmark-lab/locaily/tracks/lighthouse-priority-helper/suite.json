@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "lighthouse-priority-helper-v1",
+  "name": "Lighthouse Handoff Priority Helper V1",
+  "mode": "qualification",
+  "trackId": "website_audit.lighthouse_handoff",
+  "contractId": "lighthouse-priority-helper-v1",
+  "runtime": {
+    "provider": "lighthouse-priority",
+    "modelManifest": "lfm25-1p2b-thinking-local",
+    "baseUrl": "http://127.0.0.1:11434",
+    "timeoutMs": 120000,
+    "temperature": 0,
+    "numPredict": 4096
+  },
+  "scenarioModule": "scenarios.js",
+  "outputSchema": "output.schema.json",
+  "evaluationRubric": "evaluation-rubric.json"
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "benchmark.model_card_source.v1",
+  "modelId": "lfm25-1p2b-thinking-local",
+  "runtimeModelName": "hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest",
+  "generatedAt": "2026-07-06T21:12:03.045Z",
+  "evidenceIds": [
+    "lfm25-1p2b-thinking-lighthouse-priority-v1"
+  ],
+  "trackQualifications": [
+    {
+      "trackId": "website_audit.lighthouse_handoff",
+      "status": "screening",
+      "evidenceIds": [
+        "lfm25-1p2b-thinking-lighthouse-priority-v1"
+      ]
+    }
+  ],
+  "limitations": [
+    "Draft model card only. No Locaily routing qualification is claimed by this artifact."
+  ]
+}

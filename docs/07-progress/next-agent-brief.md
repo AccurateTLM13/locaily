@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-05 (Durable Enforcement Policy complete)
+**Updated:** 2026-07-06 (Lighthouse Priority Helper qualification)
 
 ## Read First
 
@@ -68,15 +68,19 @@ Enforcement evaluation is now integrated into the canonical model router (`compa
 
 ### Durable Enforcement Policy
 
-Enforcement policy configuration is now durable across companion server restarts (`companion/core/enforcement-policy-store.js`). Atomic persistence via writeFile + rename to `data/policy/enforcement-policy.json`. Synchronous eager init at startup; async mutations serialized through a queue. Full state transition graph: disabled↔shadow→eligible↔enforced, eligible↔suspended, enforced→{eligible,shadow}, suspended→{shadow,eligible,disabled}. Async enforcement gate (`checkEnforcementGateAsync`) verifies runtime availability, model readiness, shadow evidence sufficiency (min 3 comparisons), approval, qualified capability, score threshold, and active override before committing `enforced`. Audit degradation surfaced via `auditHealthy` flag and `POLICY_AUDIT_WRITE_FAILED` warnings. Schema locks `defaultState` to `const: "shadow"`. `expiresAt` removed. Compound mutations for approval/revocation. Override CRUD with composite key identity (trackId+role+modelId). Corrupt-file fallback with lock preserves existing data. Append-only JSONL audit (`companion/core/enforcement-policy-audit.js`, `data/enforcement-policy-audit.jsonl`) for all 10 event types, validated against `enforcement-policy-audit-event.schema.json`. Canonical policy document schema (`companion/schemas/internal/enforcement-policy.schema.json`) with `additionalProperties: false`. Pure in-memory mode when no dataDir for test isolation. Additive endpoints: `GET /enforcement/policy`, `POST /enforcement/revoke`, `POST /enforcement/override/clear`. 143 store tests in `scripts/test-enforcement-policy-store.js`. Wrapper at `companion/core/enforcement-policy.js` updated with sync legacy seeding via `syncApi`.
+Enforcement policy configuration is now durable across companion server restarts (`companion/core/enforcement-policy-store.js`). Atomic persistence via writeFile + rename to `data/policy/enforcement-policy.json`. Synchronous eager init at startup; async mutations serialized through a queue. Full state transition graph: disabled↔shadow→eligible↔enforced, eligible↔suspended, enforced→{eligible,shadow}, suspended→{shadow,eligible,disabled}. Async enforcement gate (`checkEnforcementGateAsync`) verifies runtime availability, model readiness, shadow evidence sufficiency (min 3 comparisons), approval, qualified capability, score threshold, and active override before committing `enforced`. Audit degradation surfaced via `auditHealthy` flag and `POLICY_AUDIT_WRITE_FAILED` warnings. Schema locks `defaultState` to `const: "shadow"`. `expiresAt` removed. Compound mutations for approval/revocation. Override CRUD with composite key identity (trackId+role+modelId). Corrupt-file fallback with lock preserves existing data. Append-only JSONL audit (`companion/core/enforcement-policy-audit.js`, `data/enforcement-policy-audit.jsonl`) for all 10 event types, validated against `enforcement-policy-audit-event.schema.json`. Canonical policy document schema (`companion/schemas/internal/enforcement-policy.schema.json`) with `additionalProperties: false`. Pure in-memory mode when no dataDir for test isolation. Additive endpoints: `GET /enforcement/policy`, `POST /enforcement/revoke`, `POST /enforcement/override/clear`. 149 store tests (was 143) in `scripts/test-enforcement-policy-store.js`. Wrapper at `companion/core/enforcement-policy.js` updated with sync legacy seeding via `syncApi`.
+
+### Lighthouse Priority Helper Qualification
+
+LFM2.5-1.2B-Thinking is the first qualified model capability for a companion server runtime track. Benchmark Lab evaluation against a 12-scenario Lighthouse priority helper suite: 11/12 PASS (91.7% pass rate, score 0.9167). One INVENTED_AUDIT failure on a complex cross-referencing scenario — the model produced an audit ID not present in the input. Evidence promoted (`lfm25-1p2b-thinking-lighthouse-priority-v1`), model card generated, qualification record generated with status `qualified` for role `priority_helper`, track `website_audit.lighthouse_handoff`. Local Brain health endpoint now reports `qualified: 1` for this track/role combination. This is the first prerequisite for Pilot Enforcement Validation. Enforcement remains disabled for all tracks.
 
 ## Current Task
 
-Durable Enforcement Policy is complete. **No pilot Track activated** — no companion track has a current, valid `qualified` model capability with sufficient shadow routing evidence. All tracks remain in shadow mode. Enforcement machinery is durable, tested, and ready for pilot activation.
+Pilot Enforcement Validation prerequisites partially met. `website_audit.lighthouse_handoff` (role `priority_helper`) now has a qualified model capability (LFM2.5-1.2B-Thinking, score 0.9167). The second prerequisite — sufficient shadow routing evidence (3-5 comparisons showing consistent recommendation agreement) — has not yet accumulated. All tracks remain in shadow mode. Enforcement machinery is durable, tested, and ready for pilot activation once shadow evidence exists.
 
 ## Next Task
 
-Pilot Enforcement Validation and Multi-Model Track Expansion. Activate enforcement for one qualified track once qualification evidence exists. Expand multi-model testing with runtime performance feedback. Add human correction records. Broader model qualification coverage and live qualification depth.
+Accumulate shadow routing evidence for `website_audit.lighthouse_handoff`/`priority_helper` by running live Track executions. Once 3-5 shadow comparisons show consistent agreement, activate pilot enforcement. Expand multi-model testing with runtime performance feedback. Add human correction records. Broader model qualification coverage and live qualification depth.
 
 ## Do Not
 

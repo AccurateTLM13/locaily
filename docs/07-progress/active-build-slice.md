@@ -29,15 +29,15 @@ Durable Enforcement Policy — **complete**.
 
 Selected: **None**. No companion Track satisfies all pilot requirements:
 
-- **At least one current, valid `qualified` capability exists**: The only model qualification record with non-`candidate`/non-`screening` status is `llama3.2-local-weather-tool-selection-cli-promoted` (status `conditional`, resolves to `qualified`), which qualifies `llama3.2-local` for role `fast_worker`, track `hybrid-weather`. This is a Benchmark Lab track, not a companion server runtime track. All other model qualification records have status `candidate` or `screening`, resolving to `untested`.
-- **Companion tracks with model steps**: `website_audit.lighthouse_handoff` (role `priority_helper`), `publishing.operator_log_discovery` (role `reasoning_worker`), `publishing.operator_log_draft` (role `default_worker`). None have qualified capabilities.
-- **Sufficient shadow-routing evidence**: No shadow routing evidence exists for any companion track — enforcement has never been active.
+- **At least one current, valid `qualified` capability exists**: LFM2.5-1.2B-Thinking is now qualified for `website_audit.lighthouse_handoff` (role `priority_helper`, score 0.9167, status `qualified`). This is the first companion server runtime track with a qualified model capability.
+- **Companion tracks with model steps**: `website_audit.lighthouse_handoff` (role `priority_helper` — now has qualified capability), `publishing.operator_log_discovery` (role `reasoning_worker`), `publishing.operator_log_draft` (role `default_worker`).
+- **Sufficient shadow-routing evidence**: No shadow routing evidence exists for any companion track — enforcement has never been active. The first prerequisite (qualified capability) is now met, but 3-5 shadow routing comparisons must accumulate for `website_audit.lighthouse_handoff`/`priority_helper` before pilot activation.
 
-**Decision:** Implement enforcement machinery with enforcement inactive. Document conditions for future pilot activation.
+**Decision:** First prerequisite (qualified capability for a companion track) is now met. The second prerequisite (sufficient shadow routing evidence) remains unfulfilled. Continue shadow routing accumulation.
 
 **Qualification records that would need to exist for a pilot:**
-- A companion track (e.g., `website_audit.lighthouse_handoff` or `publishing.operator_log_discovery`) with model role having a `qualified` (or `conditional`) qualification record where record status is not `candidate`/`screening`.
-- At least 3-5 shadow routing comparisons showing consistent recommendation agreement.
+- ✅ A companion track (`website_audit.lighthouse_handoff`) with model role (`priority_helper`) having a `qualified` qualification record where record status is not `candidate`/`screening`.
+- ❌ At least 3-5 shadow routing comparisons showing consistent recommendation agreement — not yet accumulated.
 
 ### Enforcement Gates
 

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Lighthouse Priority Helper Output",
+  "description": "Structured output for the lighthouse-priority-helper benchmark track. Every priorityIssue must reference an auditId present in the input.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "priorityIssues"],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "priorityIssues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["auditId", "priority", "reason", "recommendedAction", "verification"],
+        "properties": {
+          "auditId": { "type": "string", "minLength": 1 },
+          "priority": { "enum": ["critical", "high", "medium", "low"] },
+          "reason": { "type": "string", "minLength": 1 },
+          "recommendedAction": { "type": "string", "minLength": 1 },
+          "risk": {},
+          "verification": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "guardrails": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Constraints the developer must respect when implementing fixes"
+    },
+    "assumptions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Assumptions the model made that are not provable from the input"
+    },
+    "needsInspection": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Areas where implementation details require manual inspection before acting"
+    }
+  }
+}

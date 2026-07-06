@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "lfm25-1p2b-thinking-local-model-card-markdown",
+  "artifactType": "model_card_markdown",
+  "artifactPath": "benchmark-lab/model-cards/published/lfm25-1p2b-thinking-local.md",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:4d1d36a20697204785ec334b4994d3ffa6ecfbd694dc4ab462f2d0511ba9924e",
+  "generatedAt": "2026-07-06T21:12:03.055Z"
+}

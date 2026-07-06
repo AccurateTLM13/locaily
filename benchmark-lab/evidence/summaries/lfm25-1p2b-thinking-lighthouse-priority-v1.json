@@ -1,0 +1,1041 @@
+{
+  "schemaVersion": "benchmark.promoted_evidence.v1",
+  "evidenceId": "lfm25-1p2b-thinking-lighthouse-priority-v1",
+  "sourceRunId": "run-lh-priority-20260706T210944Z",
+  "suiteId": "lighthouse-priority-helper-v1",
+  "trackId": "website_audit.lighthouse_handoff",
+  "contractId": "lighthouse-priority-helper-v1",
+  "approvedAt": "2026-07-06T21:11:23.188Z",
+  "approvedBy": "agent",
+  "summary": {
+    "schemaVersion": "benchmark.run_summary.v1",
+    "runId": "run-lh-priority-20260706T210944Z",
+    "suiteId": "lighthouse-priority-helper-v1",
+    "trackId": "website_audit.lighthouse_handoff",
+    "contractId": "lighthouse-priority-helper-v1",
+    "runtime": {
+      "provider": "lighthouse-priority",
+      "modelId": "lfm25-1p2b-thinking-local",
+      "runtimeModelName": "hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest"
+    },
+    "startedAt": "2026-07-06T21:09:44.572Z",
+    "completedAt": "2026-07-06T21:10:24.001Z",
+    "caseCount": 12,
+    "passed": 11,
+    "partial": 0,
+    "failed": 1,
+    "errors": 0,
+    "timeouts": 0,
+    "malformed": 0,
+    "caseResults": [
+      {
+        "caseId": "lh-priority-001",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "pass",
+            "score": 100,
+            "summary": "Score: 100%",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 1,
+              "priorityScore": 1,
+              "actionabilityScore": 1,
+              "guardrailScore": 1,
+              "schemaScore": 1,
+              "completenessScore": 1,
+              "clarityScore": 1,
+              "totalScore": 1,
+              "autoFail": null,
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "factual-grounding",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "prioritization-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "actionability",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "guardrail-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "completeness",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "clarity",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "total-score",
+                  "status": "pass",
+                  "score": 1
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      },
+      {
+        "caseId": "lh-priority-002",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "pass",
+            "score": 100,
+            "summary": "Score: 100%",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 1,
+              "priorityScore": 1,
+              "actionabilityScore": 1,
+              "guardrailScore": 1,
+              "schemaScore": 1,
+              "completenessScore": 1,
+              "clarityScore": 1,
+              "totalScore": 1,
+              "autoFail": null,
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "factual-grounding",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "prioritization-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "actionability",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "guardrail-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "completeness",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "clarity",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "total-score",
+                  "status": "pass",
+                  "score": 1
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      },
+      {
+        "caseId": "lh-priority-003",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "pass",
+            "score": 89,
+            "summary": "Score: 89%",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 1,
+              "priorityScore": 1,
+              "actionabilityScore": 0.5,
+              "guardrailScore": 0.75,
+              "schemaScore": 1,
+              "completenessScore": 1,
+              "clarityScore": 1,
+              "totalScore": 0.8875,
+              "autoFail": null,
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "factual-grounding",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "prioritization-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "actionability",
+                  "status": "fail",
+                  "score": 0.5
+                },
+                {
+                  "validator": "guardrail-quality",
+                  "status": "pass",
+                  "score": 0.75,
+                  "details": [
+                    "Constraint 'Do not recommend removing analytics without stakeholder review' not reflected in guardrails"
+                  ]
+                },
+                {
+                  "validator": "completeness",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "clarity",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "total-score",
+                  "status": "pass",
+                  "score": 0.89
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      },
+      {
+        "caseId": "lh-priority-004",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "pass",
+            "score": 88,
+            "summary": "Score: 88%",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 0.8,
+              "priorityScore": 1,
+              "actionabilityScore": 0.5,
+              "guardrailScore": 1,
+              "schemaScore": 1,
+              "completenessScore": 1,
+              "clarityScore": 1,
+              "totalScore": 0.875,
+              "autoFail": null,
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "factual-grounding",
+                  "status": "pass",
+                  "score": 0.8,
+                  "details": [
+                    "Required audit 'bootup-time' missing from priority issues"
+                  ]
+                },
+                {
+                  "validator": "prioritization-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "actionability",
+                  "status": "fail",
+                  "score": 0.5
+                },
+                {
+                  "validator": "guardrail-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "completeness",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "clarity",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "total-score",
+                  "status": "pass",
+                  "score": 0.88
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      },
+      {
+        "caseId": "lh-priority-005",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "pass",
+            "score": 96,
+            "summary": "Score: 96%",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 1,
+              "priorityScore": 1,
+              "actionabilityScore": 1,
+              "guardrailScore": 0.75,
+              "schemaScore": 1,
+              "completenessScore": 1,
+              "clarityScore": 1,
+              "totalScore": 0.9624999999999999,
+              "autoFail": null,
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "factual-grounding",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "prioritization-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "actionability",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "guardrail-quality",
+                  "status": "pass",
+                  "score": 0.75,
+                  "details": [
+                    "Output should mention 'next-gen format|WebP|AVIF'"
+                  ]
+                },
+                {
+                  "validator": "completeness",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "clarity",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "total-score",
+                  "status": "pass",
+                  "score": 0.96
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      },
+      {
+        "caseId": "lh-priority-006",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "pass",
+            "score": 100,
+            "summary": "Score: 100%",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 1,
+              "priorityScore": 1,
+              "actionabilityScore": 1,
+              "guardrailScore": 1,
+              "schemaScore": 1,
+              "completenessScore": 1,
+              "clarityScore": 1,
+              "totalScore": 1,
+              "autoFail": null,
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "factual-grounding",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "prioritization-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "actionability",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "guardrail-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "completeness",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "clarity",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "total-score",
+                  "status": "pass",
+                  "score": 1
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      },
+      {
+        "caseId": "lh-priority-007",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "pass",
+            "score": 93,
+            "summary": "Score: 93%",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 1,
+              "priorityScore": 1,
+              "actionabilityScore": 0.5,
+              "guardrailScore": 1,
+              "schemaScore": 1,
+              "completenessScore": 1,
+              "clarityScore": 1,
+              "totalScore": 0.925,
+              "autoFail": null,
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "factual-grounding",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "prioritization-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "actionability",
+                  "status": "fail",
+                  "score": 0.5
+                },
+                {
+                  "validator": "guardrail-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "completeness",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "clarity",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "total-score",
+                  "status": "pass",
+                  "score": 0.93
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      },
+      {
+        "caseId": "lh-priority-008",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "pass",
+            "score": 88,
+            "summary": "Score: 88%",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 0.8,
+              "priorityScore": 1,
+              "actionabilityScore": 0.5,
+              "guardrailScore": 1,
+              "schemaScore": 1,
+              "completenessScore": 1,
+              "clarityScore": 1,
+              "totalScore": 0.875,
+              "autoFail": null,
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "factual-grounding",
+                  "status": "pass",
+                  "score": 0.8,
+                  "details": [
+                    "Required audit 'total-blocking-time' missing from priority issues"
+                  ]
+                },
+                {
+                  "validator": "prioritization-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "actionability",
+                  "status": "fail",
+                  "score": 0.5
+                },
+                {
+                  "validator": "guardrail-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "completeness",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "clarity",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "total-score",
+                  "status": "pass",
+                  "score": 0.88
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      },
+      {
+        "caseId": "lh-priority-009",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "pass",
+            "score": 84,
+            "summary": "Score: 84%",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 0.8,
+              "priorityScore": 1,
+              "actionabilityScore": 0.5,
+              "guardrailScore": 0.75,
+              "schemaScore": 1,
+              "completenessScore": 1,
+              "clarityScore": 1,
+              "totalScore": 0.8375,
+              "autoFail": null,
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "factual-grounding",
+                  "status": "pass",
+                  "score": 0.8,
+                  "details": [
+                    "Required audit 'unused-javascript' missing from priority issues"
+                  ]
+                },
+                {
+                  "validator": "prioritization-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "actionability",
+                  "status": "fail",
+                  "score": 0.5
+                },
+                {
+                  "validator": "guardrail-quality",
+                  "status": "pass",
+                  "score": 0.75,
+                  "details": [
+                    "Constraint 'Do not assume server access or admin panel access' not reflected in guardrails"
+                  ]
+                },
+                {
+                  "validator": "completeness",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "clarity",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "total-score",
+                  "status": "pass",
+                  "score": 0.84
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      },
+      {
+        "caseId": "lh-priority-010",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "pass",
+            "score": 81,
+            "summary": "Score: 81%",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 1,
+              "priorityScore": 1,
+              "actionabilityScore": 0.5,
+              "guardrailScore": 0.25,
+              "schemaScore": 1,
+              "completenessScore": 1,
+              "clarityScore": 1,
+              "totalScore": 0.8125,
+              "autoFail": null,
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "factual-grounding",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "prioritization-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "actionability",
+                  "status": "fail",
+                  "score": 0.5
+                },
+                {
+                  "validator": "guardrail-quality",
+                  "status": "fail",
+                  "score": 0.25,
+                  "details": [
+                    "Output should mention 'third-party|Shopify'",
+                    "Constraint 'Do not recommend removing Shopify platform dependencies' not reflected in guardrails",
+                    "Constraint 'Do not assume control over third-party app loading' not reflected in guardrails"
+                  ]
+                },
+                {
+                  "validator": "completeness",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "clarity",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "total-score",
+                  "status": "pass",
+                  "score": 0.81
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      },
+      {
+        "caseId": "lh-priority-011",
+        "verdict": "FAIL",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "fail",
+            "score": 0,
+            "summary": "Auto-fail: INVENTED_AUDIT: 'unknown' not found in input audits",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 0,
+              "priorityScore": 0,
+              "actionabilityScore": 0,
+              "guardrailScore": 0,
+              "schemaScore": 1,
+              "completenessScore": 0,
+              "clarityScore": 0,
+              "totalScore": 0,
+              "autoFail": "INVENTED_AUDIT: 'unknown' not found in input audits",
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "auto-fail",
+                  "status": "fail",
+                  "message": "INVENTED_AUDIT: 'unknown' not found in input audits"
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      },
+      {
+        "caseId": "lh-priority-012",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "lighthouse-priority",
+            "status": "pass",
+            "score": 93,
+            "summary": "Score: 93%",
+            "details": {
+              "parsed": true,
+              "schemaValid": true,
+              "groundingScore": 1,
+              "priorityScore": 1,
+              "actionabilityScore": 1,
+              "guardrailScore": 0.5,
+              "schemaScore": 1,
+              "completenessScore": 1,
+              "clarityScore": 1,
+              "totalScore": 0.9249999999999999,
+              "autoFail": null,
+              "checks": [
+                {
+                  "validator": "json-parse",
+                  "status": "pass"
+                },
+                {
+                  "validator": "json-schema",
+                  "status": "pass",
+                  "details": []
+                },
+                {
+                  "validator": "factual-grounding",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "prioritization-quality",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "actionability",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "guardrail-quality",
+                  "status": "fail",
+                  "score": 0.5,
+                  "details": [
+                    "Output should mention 'inspection|needsInspection'",
+                    "Constraint 'Do not recommend specific implementation techniques that require knowledge of the stack' not reflected in guardrails"
+                  ]
+                },
+                {
+                  "validator": "completeness",
+                  "status": "pass",
+                  "score": 1,
+                  "details": []
+                },
+                {
+                  "validator": "clarity",
+                  "status": "pass",
+                  "score": 1
+                },
+                {
+                  "validator": "total-score",
+                  "status": "pass",
+                  "score": 0.93
+                }
+              ],
+              "details": {}
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "LFM2.5 1.2B Thinking - Lighthouse Priority Helper V1 qualification evaluation. 11/12 PASS, 91.7% pass rate. Live Ollama evaluation on 2026-07-06."
+  ]
+}

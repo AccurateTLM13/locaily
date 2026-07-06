@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-lighthouse-priority-v1-qualification",
+  "artifactType": "qualification_record",
+  "artifactPath": "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-lighthouse-priority-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:6f943f2ede828cac7649a340ab69535786f50dbe2f6579d2a3662b05cf152425",
+  "generatedAt": "2026-07-06T21:12:09.389Z"
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "lfm25-1p2b-thinking-lighthouse-priority-v1-promoted-evidence",
+  "artifactType": "promoted_evidence",
+  "artifactPath": "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-lighthouse-priority-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:4691e5d76ef6b5dc65056d37d3f5d802a3a81ea8ee578f8a5fd675ba5752dc88",
+  "generatedAt": "2026-07-06T21:11:23.196Z"
+}

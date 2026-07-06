@@ -927,7 +927,43 @@ Confirmed.
 
 Async gate: `companion/core/enforcement-policy-store.js` `checkEnforcementGateAsync()`. Audit health: `auditHealthy` flag, `getStoreHealth()`, `executeMutation()` warnings. Schema: `companion/schemas/internal/enforcement-policy.schema.json` `defaultState` → `const`. Test count: 143 in `scripts/test-enforcement-policy-store.js`.
 
----```md
+---
+
+## 2026-07-06 — Lighthouse Priority Helper Qualification
+
+### Decision
+
+Qualify LFM2.5-1.2B-Thinking as `qualified` for role `priority_helper`, track `website_audit.lighthouse_handoff`, after evaluating 3 local models (LFM2.5-1.2B-Thinking, llama3.2, LFM2.5-350M) against a 12-scenario Benchmark Lab suite. Create a custom benchmark track `lighthouse-priority-helper` with output schema, evaluation rubric, mock responses, and custom runner. Promote evidence, generate model card, generate qualification record.
+
+### Why
+
+Before this slice, no companion server runtime track had a `qualified` model capability — the primary blocker for the Pilot Enforcement Validation slice. The `website_audit.lighthouse_handoff` track and `priority_helper` role were the natural first candidates because Lighthouse Handoff is the project's first proof workflow and already exercised in the codebase. LFM2.5-1.2B-Thinking was selected as the best candidate (91.7% pass rate, ~40s runtime — strong accuracy-to-latency ratio versus llama3.2's ~6min runtime at 75% score or 350M's 2 invented-audit failures). The model card and qualification record follow existing Benchmark Lab conventions.
+
+### Consequences
+
+- Custom benchmark track created at `benchmark-lab/locaily/tracks/lighthouse-priority-helper/` with 12 scenarios, output schema, evaluation rubric, mock responses
+- Custom runner (`benchmark-lab/engine/runners/lighthouse-priority-runner.js`) and CLI (`benchmark-lab/engine/cli/lighthouse-priority-run.js`)
+- Three model evaluations completed: llama3.2 (9 PASS/2 PARTIAL/1 FAIL, ~6min), LFM2.5-1.2B-Thinking (11 PASS/1 FAIL, ~40s), LFM2.5-350M (9 PASS/1 PARTIAL/2 FAIL, ~8s)
+- Evidence promoted: `lfm25-1p2b-thinking-lighthouse-priority-v1` (summary + approved + checksums)
+- Model card generated: `benchmark-lab/model-cards/published/lfm25-1p2b-thinking-local.source.json` + `.md`
+- Qualification record generated: `benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-lighthouse-priority-v1.json` — status `qualified`, score 0.9167
+- Local Brain now reports `qualified: 1` for `website_audit.lighthouse_handoff` and `priority_helper` (from 4 total records, 2 qualified)
+- First prerequisite for Pilot Enforcement Validation met (qualified companion track capability)
+- All existing tests pass: 14/14 schemas, 25 resolver tests, 149 store tests, 62 policy tests, 91 routing tests, 31 shadow routing tests, 56/56 smoke tests
+- Enforcement remains disabled for all tracks — second prerequisite (shadow routing evidence) not yet accumulated
+- No existing evidence, qualification records, or checksums modified
+
+### Status
+
+Confirmed.
+
+### Notes
+
+Custom runner uses `npm.cmd run lighthouse-priority:run` and `npm.cmd run lighthouse-priority:test`. Template for future model qualification work: companion track → benchmark suite → mock test → live evaluation across candidates → evidence promotion → model card → qualification record → verification.
+
+---
+
+```md
 ## YYYY-MM-DD — Title
 ### Decision
 ### Why

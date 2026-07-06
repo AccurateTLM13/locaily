@@ -1,80 +1,100 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "durable-enforcement-policy",
+  "build_slice": "lighthouse-priority-helper-qualification",
   "status": "complete",
-  "objective": "Make enforcement policy configuration durable across companion server restarts with safe operator workflows for state changes, approvals, revocation, suspension, restoration, overrides, inspection, auditing, and corrupt-policy recovery.",
+  "objective": "Qualify one exact local model as 'qualified' for the website_audit.lighthouse_handoff track with priority_helper role, using the Benchmark Lab workflow.",
   "pilot": {
     "selected": null,
-    "reason": "No companion track has a current, valid 'qualified' model capability with sufficient shadow routing evidence. Durable Enforcement Policy slice does not change pilot status. Prior pilot selection requirements remain in effect.",
+    "reason": "First prerequisite (qualified model capability for a companion track) now met. Second prerequisite (sufficient shadow routing evidence, min 3-5 comparisons) not yet accumulated.",
     "requiredForActivation": [
-      "Companion track with model role having 'qualified' or 'conditional' qualification record (non-candidate/non-screening status)",
-      "At least 3-5 shadow routing comparisons showing consistent recommendation agreement",
+      "✅ Companion track with model role having 'qualified' qualification record — LFM2.5-1.2B-Thinking qualified for website_audit.lighthouse_handoff/priority_helper (score 0.9167)",
+      "❌ At least 3-5 shadow routing comparisons showing consistent recommendation agreement — not yet accumulated",
       "Qualification record must be current (not expired or stale)",
       "Runtime availability and model readiness verifiable"
-    ]
+    ],
+    "firstPrerequisiteMet": {
+      "modelId": "lfm25-1p2b-thinking-local",
+      "role": "priority_helper",
+      "trackId": "website_audit.lighthouse_handoff",
+      "score": 0.9167,
+      "evidenceId": "lfm25-1p2b-thinking-lighthouse-priority-v1",
+      "qualificationRecordId": "lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-lighthouse-priority-v1"
+    }
   },
   "validation": {
     "passed": true,
     "commands": [
+      "node scripts/benchmark-lighthouse-priority-test.js",
+      "npm.cmd run model-card:generate -- --model lfm25-1p2b-thinking-local --evidence lfm25-1p2b-thinking-lighthouse-priority-v1",
+      "npm.cmd run qualification:generate -- --model lfm25-1p2b-thinking-local --evidence lfm25-1p2b-thinking-lighthouse-priority-v1 --role priority_helper --status qualified --role-status qualified",
+      "npm.cmd run benchmark:test",
+      "npm.cmd run benchmark:status-smoke",
+      "node scripts/contract-test.js",
+      "node scripts/test-qualification-resolver.js",
       "node scripts/test-enforcement-policy-store.js",
       "node scripts/test-enforcement-policy.js",
       "node scripts/test-enforcement-routing.js",
       "node scripts/test-shadow-routing.js",
-      "node scripts/test-qualification-resolver.js",
-      "node scripts/track-run-record-schema-test.js",
-      "node scripts/crew-track-run-record-test.js",
-      "node scripts/contract-test.js",
-      "npm.cmd run benchmark:test",
-      "npm.cmd run benchmark:status-smoke",
       "node scripts/smoke-test.js"
     ],
     "results": [
-      "143/143 enforcement policy store tests pass (loading, validation, persistence, state transitions, approval/revocation, overrides, audit, regression, async enforcement gate, audit degradation, audit after-state)",
-      "62/62 enforcement-policy tests pass (backward compatible, async-aware)",
-      "91/91 enforcement routing tests pass (backward compatible)",
-      "31/31 shadow-routing tests pass (backward compatible)",
-      "25/25 qualification-resolver tests pass (backward compatible)",
-      "18/18 crew track run record tests pass (backward compatible)",
-      "4/4 track-run-record schema tests pass (backward compatible)",
+      "Benchmark Lighthouse Priority mock test: 12/12 PASS",
+      "LFM2.5-1.2B-Thinking live evaluation: 11/12 PASS (91.7%, score 0.9167)",
+      "Model card generated and checksummed",
+      "Qualification record generated: status 'qualified', role 'priority_helper', track 'website_audit.lighthouse_handoff', score 0.9167",
+      "Evidence promoted and checksummed (canonical_text_v1, byte_exact)",
+      "All schemas validated (14/14)",
+      "benchmark:status-smoke passes",
       "Contract tests pass",
-      "benchmark:test passes",
-      "56/56 smoke tests pass (including new enforcement endpoints)",
-      "Enforcement remains disabled for all tracks by default",
-      "No pilot track activated"
+      "25/25 qualification-resolver tests pass",
+      "149/149 enforcement-policy-store tests pass (was 143)",
+      "62/62 enforcement-policy tests pass",
+      "91/91 enforcement-routing tests pass",
+      "31/31 shadow-routing tests pass",
+      "56/56 smoke tests pass",
+      "Local Brain /health reports qualified capability for website_audit.lighthouse_handoff/priority_helper (2 qualified capabilities total, up from 1)"
     ]
   },
   "acceptance_criteria": {
     "passed": [
-      "Policy document schema with additionalProperties: false, strict validation",
-      "Audit event schema with 10 event types, before/after, revision tracking",
-      "Append-only JSONL audit module with schema validation",
-      "Synchronous eager init from disk at startup",
-      "Async mutations serialized through queue (no concurrent writes)",
-      "Atomic persistence: validate → build candidate → validate schema → write temp file → rename → update in-memory → audit",
-      "Never truncate target before valid replacement exists",
-      "Increment revision exactly once per committed mutation",
-      "Full state transition graph strictly enforced: disabled↔shadow→eligible↔enforced, eligible↔suspended, enforced→{eligible,shadow}, suspended→{shadow,eligible,disabled}",
-      "Compound mutation operations for approval (eligible + approved) and revocation (eligible→shadow, enforced→suspended)",
-      "Override CRUD with composite key identity (trackId + role + modelId), duplicate rejection",
-      "Override clear by overrideId or composite key",
-      "Corrupt-file fallback with lock preserves existing data, writes audit event",
-      "Pure in-memory mode when dataDir not provided (test isolation)",
-      "Backward-compatible wrapper (companion/core/enforcement-policy.js) with sync legacy seeding via syncApi",
-      "Additive endpoints: GET /enforcement/policy, POST /enforcement/revoke, POST /enforcement/override/clear",
-      "Existing endpoints updated with reason/updatedBy parameters",
-      "Enforcement policy health in root status (distinguishes healthy from degraded)",
-      "No absolute filesystem paths exposed in API responses",
-      "Async enforcement gate checks runtime availability, model readiness, and shadow evidence sufficiency (RUNTIME_UNAVAILABLE, MODEL_NOT_READY, INSUFFICIENT_EVIDENCE)",
-      "Enforcement gate checks include approval, qualified capability, score threshold, and active override (all synchronous pre-checks)",
-      "Audit degradation surfaced in store health (auditHealthy flag) and mutation results (POLICY_AUDIT_WRITE_FAILED warning)",
-      "defaultState locked to const: 'shadow' in policy schema — unsafe non-shadow defaults rejected at validation",
-      "expiresAt removed from schema, store, wrapper, and server — no unused dead field",
-      "Revocation audit after-state contains actual committed state (not null)",
-      "Override creation audit contains generated overrideId (not null)",
-      "All prior acceptance criteria remain passing"
+      "Custom benchmark track created at benchmark-lab/locaily/tracks/lighthouse-priority-helper/ with suite.json, output.schema.json, evaluation-rubric.json, mock-responses.json",
+      "12 scenario cases covering core and edge Lighthouse priority behaviors",
+      "Mock test passes 12/12 without Ollama dependency",
+      "Custom runner and CLI work independently of generic suite-runner",
+      "All 3 live candidate models evaluated against real Ollama (llama3.2, LFM2.5-1.2B-Thinking, LFM2.5-350M)",
+      "Evidence promoted for best candidate (LFM2.5-1.2B-Thinking)",
+      "Model card generated from promoted evidence",
+      "Qualification record generated with status 'qualified'",
+      "Local Brain consumes qualification record and reports correct state",
+      "Non-candidate models with lower performance do not produce misleading qualification records",
+      "No existing evidence, qualification records, or checksums modified",
+      "All existing test suites pass without regression"
     ],
     "failed": [],
     "blockers": []
   },
-  "updated_at": "2026-07-05"
+  "models_evaluated": {
+    "lfm25-1p2b-thinking-local": {
+      "result": "promoted and qualified",
+      "passRate": "11/12 (91.7%)",
+      "score": 0.9167,
+      "runtimeMs": 39000,
+      "evidenceId": "lfm25-1p2b-thinking-lighthouse-priority-v1"
+    },
+    "llama3.2-local": {
+      "result": "not promoted (weaker performance)",
+      "passRate": "9/12 + 2 PARTIAL (91.7% pass+partial)",
+      "score": 0.75,
+      "runtimeMs": 380000,
+      "evidenceId": null
+    },
+    "lfm25-350m-local": {
+      "result": "not promoted (2 invented audits)",
+      "passRate": "9/12 + 1 PARTIAL (83.3% pass+partial)",
+      "score": null,
+      "runtimeMs": 8000,
+      "evidenceId": null
+    }
+  },
+  "updated_at": "2026-07-06"
 }

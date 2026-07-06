@@ -1,0 +1,65 @@
+{
+  "rubricId": "lighthouse-priority-helper-v1",
+  "trackId": "website_audit.lighthouse_handoff",
+  "role": "priority_helper",
+  "description": "Evaluation rubric for Lighthouse Handoff priority_helper qualification",
+  "dimensions": [
+    {
+      "id": "factual-grounding",
+      "name": "Factual grounding",
+      "weight": 0.25,
+      "description": "Every claim must be traceable to input data. No invented audits, metrics, scores, technologies, or page conditions."
+    },
+    {
+      "id": "prioritization-quality",
+      "name": "Prioritization quality",
+      "weight": 0.20,
+      "description": "Issues are prioritized correctly based on severity and impact. Critical issues are identified first."
+    },
+    {
+      "id": "actionability",
+      "name": "Actionability",
+      "weight": 0.15,
+      "description": "Recommended actions are specific, implementable, and appropriate. Vague advice like 'optimize performance' is penalized."
+    },
+    {
+      "id": "guardrail-quality",
+      "name": "Guardrail quality",
+      "weight": 0.15,
+      "description": "Guardrails are relevant, specific, and respect known constraints. No unsupported implementation advice."
+    },
+    {
+      "id": "schema-compliance",
+      "name": "Output-schema compliance",
+      "weight": 0.10,
+      "description": "Output is valid JSON matching the output schema. All required fields present."
+    },
+    {
+      "id": "completeness",
+      "name": "Completeness",
+      "weight": 0.10,
+      "description": "All high-severity issues from input are addressed. No critical omissions."
+    },
+    {
+      "id": "clarity",
+      "name": "Clarity",
+      "weight": 0.05,
+      "description": "Language is clear, concise, and useful for developers and coding agents."
+    }
+  ],
+  "autoFailConditions": [
+    "INVENTED_AUDIT",
+    "INVENTED_METRIC",
+    "UNSUPPORTED_TECH_ASSUMPTION",
+    "MALFORMED_OUTPUT",
+    "MISSING_ALL_HIGH_SEVERITY",
+    "CONSTRAINT_CONFLICT",
+    "SCORE_INCREASE_GUARANTEE"
+  ],
+  "qualificationThreshold": 0.7,
+  "additionalRequirements": [
+    "No critical grounding failures",
+    "High structured-output pass rate (>= 80%)",
+    "Human review approval"
+  ]
+}

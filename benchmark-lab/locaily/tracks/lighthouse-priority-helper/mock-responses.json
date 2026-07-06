@@ -1,0 +1,445 @@
+{
+  "lh-priority-001": {
+    "output": {
+      "summary": "The hero image is causing severe LCP delay at 8.2s. The hero image is served at 2400px width but displayed at 1200px, and render-blocking CSS adds 1800ms of delay. Prioritize resizing and compressing the hero image, then address render-blocking resources.",
+      "priorityIssues": [
+        {
+          "auditId": "largest-contentful-paint-element",
+          "priority": "critical",
+          "reason": "At 8.2s, LCP is well above the 2.5s threshold. The hero image is 2400px wide but displayed at 1200px, wasting bandwidth and decode time.",
+          "recommendedAction": "Resize the hero image to match the 1200px display width. Convert to WebP/AVIF format with compression. Add explicit width/height attributes to prevent layout shift.",
+          "risk": "Visually identical results require proper responsive image markup; verify with testing.",
+          "verification": "Run Lighthouse after changes; target LCP under 2.5s."
+        },
+        {
+          "auditId": "render-blocking-resources",
+          "priority": "high",
+          "reason": "style.css and font-awesome.css block rendering for 1800ms total. This delays FCP and contributes to poor LCP.",
+          "recommendedAction": "Inline critical CSS for above-the-fold content and defer non-critical stylesheets with media attributes or loadCSS.",
+          "risk": null,
+          "verification": "Check that the page renders above-fold content without waiting for external stylesheets."
+        },
+        {
+          "auditId": "uses-responsive-images",
+          "priority": "medium",
+          "reason": "The hero image is served at 2400px but displayed at 1200px, wasting 75% of pixels.",
+          "recommendedAction": "Use srcset with sizes to serve the correct image size for each viewport.",
+          "risk": null,
+          "verification": "Verify with Lighthouse responsive image audit that images match display size."
+        }
+      ],
+      "guardrails": [
+        "Do not assume server-side changes are possible without verification",
+        "Verify image dimensions match design requirements before resizing"
+      ],
+      "assumptions": [
+        "The hero image is intended to display at 1200px width"
+      ],
+      "needsInspection": [
+        "Verify whether the hero image needs to support retina displays at 2x resolution"
+      ]
+    }
+  },
+  "lh-priority-002": {
+    "output": {
+      "summary": "Render-blocking CSS and excessive unused JavaScript are the primary performance bottlenecks. Bootstrap.css and custom-theme.css block rendering for 2700ms combined, and 350KB of JavaScript is unused.",
+      "priorityIssues": [
+        {
+          "auditId": "render-blocking-resources",
+          "priority": "critical",
+          "reason": "Bootstrap.css (1800ms) and custom-theme.css (900ms) block rendering, adding 2.7s of delay to initial paint.",
+          "recommendedAction": "Inline critical CSS for above-the-fold content, defer non-critical stylesheets. Bootstrap CSS can likely be reduced to only the components used.",
+          "risk": "Improper critical CSS extraction may cause flash-of-unstyled-content.",
+          "verification": "Run Lighthouse render-blocking audit after changes."
+        },
+        {
+          "auditId": "unused-javascript",
+          "priority": "high",
+          "reason": "520KB total JS with 350KB wasted (67%). This contributes to 520ms TBT.",
+          "recommendedAction": "Implement code splitting to load JavaScript on demand. Remove unused libraries. Use dynamic imports for non-critical functionality.",
+          "risk": null,
+          "verification": "Run Lighthouse unused-javascript audit after code splitting."
+        }
+      ],
+      "guardrails": [
+        "Do not remove analytics.js without stakeholder review"
+      ],
+      "assumptions": [],
+      "needsInspection": [
+        "Review which parts of Bootstrap are actually used before inlining CSS"
+      ]
+    }
+  },
+  "lh-priority-003": {
+    "output": {
+      "summary": "Third-party scripts are the dominant performance issue, contributing 890ms TBT and 6.4s LCP. AdSense alone adds 650ms of blocking time and 120KB of transfer size.",
+      "priorityIssues": [
+        {
+          "auditId": "third-party-summary",
+          "priority": "critical",
+          "reason": "Four third-party scripts consume 255KB and cause 1360ms of blocking time. AdSense is the largest contributor at 650ms blocking.",
+          "recommendedAction": "Audit third-party scripts for necessity. Implement deferred loading with async/defer attributes. Consider loading non-critical widgets after interaction.",
+          "risk": "Removing or deferring analytics requires stakeholder coordination.",
+          "verification": "Use Lighthouse third-party summary to verify blocking time reduction."
+        },
+        {
+          "auditId": "total-blocking-time",
+          "priority": "high",
+          "reason": "890ms TBT exceeds the 200ms target. Third-party scripts are the primary cause.",
+          "recommendedAction": "After deferring third-party scripts, remeasure TBT. Target under 200ms.",
+          "risk": null,
+          "verification": "Run Lighthouse after deferring scripts."
+        }
+      ],
+      "guardrails": [
+        "Do not recommend removing analytics without stakeholder review",
+        "Defer, do not delete — verify business requirements for each third-party script"
+      ],
+      "assumptions": [
+        "Analytics and tracking scripts are business-critical"
+      ],
+      "needsInspection": [
+        "Review each third-party script's impact on business metrics before deferring"
+      ]
+    }
+  },
+  "lh-priority-004": {
+    "output": {
+      "summary": "Excessive unused JavaScript is the critical bottleneck. 1.4MB of 1.8MB total JavaScript is unused, causing 2100ms TBT. Chart.js, moment.js, lodash, and bootstrap.bundle.js are primary contributors.",
+      "priorityIssues": [
+        {
+          "auditId": "unused-javascript",
+          "priority": "critical",
+          "reason": "78% of JavaScript is unused (1.4MB of 1.8MB). Chart.js wastes 87%, moment.js wastes 87%, lodash wastes 67%.",
+          "recommendedAction": "Remove unused libraries. Replace moment.js with a smaller date library. Use lodash tree-shaking or per-function imports. Implement dynamic imports for chart rendering.",
+          "risk": "Removing libraries may require refactoring dependent code.",
+          "verification": "Verify after changes: Lighthouse unused-javascript should show < 100KB wasted."
+        },
+        {
+          "auditId": "total-blocking-time",
+          "priority": "high",
+          "reason": "2100ms TBT is 10x the 200ms target. Unused JavaScript is the primary cause of long main-thread work.",
+          "recommendedAction": "After removing unused JavaScript, TBT should drop significantly. Measure and iterate.",
+          "risk": null,
+          "verification": "Run Lighthouse after JS cleanup."
+        },
+        {
+          "auditId": "bootup-time",
+          "priority": "high",
+          "reason": "3200ms bootup time indicates excessive script evaluation overhead.",
+          "recommendedAction": "Code-split application bundles. Load dashboard features lazily.",
+          "risk": null,
+          "verification": "Monitor bootup-time after implementing code splitting."
+        }
+      ],
+      "guardrails": [
+        "Do not remove libraries used by dynamic features without testing",
+        "Test code splitting with real user flows before deploying"
+      ],
+      "assumptions": [
+        "Chart.js is only used on pages with charts"
+      ],
+      "needsInspection": [
+        "Confirm which features use each library before removing"
+      ]
+    }
+  },
+  "lh-priority-005": {
+    "output": {
+      "summary": "Image optimization is the primary opportunity. Three images waste 560KB through unnecessary size and outdated formats. Converting to WebP/AVIF and optimizing compression would reduce load time.",
+      "priorityIssues": [
+        {
+          "auditId": "uses-optimized-images",
+          "priority": "critical",
+          "reason": "Three images waste 560KB of compressed data. photo2.png (420KB, 300KB wasted) is the worst offender.",
+          "recommendedAction": "Compress all images with aggressive lossy compression. Convert PNG to JPEG if no transparency is needed.",
+          "risk": "Excessive compression may cause visible artifacts; verify visually.",
+          "verification": "Run Lighthouse efficiently-encode-images audit; target near-zero wasted bytes."
+        },
+        {
+          "auditId": "modern-image-formats",
+          "priority": "high",
+          "reason": "Two images (photo1.jpg, photo2.png) could save significant bytes by using WebP or AVIF format.",
+          "recommendedAction": "Serve WebP images with AVIF as a fallback via picture element. Both formats offer superior compression for photographic content.",
+          "risk": "Verify browser support for WebP/AVIF in the target audience.",
+          "verification": "Check that WebP images are served and render correctly in Lighthouse."
+        }
+      ],
+      "guardrails": [
+        "Preserve original images for fallback if browser doesn't support next-gen formats"
+      ],
+      "assumptions": [
+        "The site targets modern browsers that support WebP"
+      ],
+      "needsInspection": [
+        "Check browser analytics to determine WebP/AVIF compatibility requirements"
+      ]
+    }
+  },
+  "lh-priority-006": {
+    "output": {
+      "summary": "Font loading is causing visible text delays and layout shifts. Google Fonts are loaded without font-display and without preconnect hints, causing 1000ms of invisible text.",
+      "priorityIssues": [
+        {
+          "auditId": "font-display",
+          "priority": "critical",
+          "reason": "Roboto and Open Sans fonts show invisible text for 600ms and 400ms respectively. No font-display CSS property is set.",
+          "recommendedAction": "Add font-display: swap to @font-face declarations. This ensures text remains visible during web font load.",
+          "risk": "FOUT (flash of unstyled text) may occur if system fonts differ significantly.",
+          "verification": "Run Lighthouse font-display audit; the issue should resolve."
+        },
+        {
+          "auditId": "uses-rel-preconnect",
+          "priority": "high",
+          "reason": "fonts.googleapis.com and fonts.gstatic.com are not preconnected, adding DNS and connection latency.",
+          "recommendedAction": "Add <link rel=preconnect> for both origins in the document head.",
+          "risk": null,
+          "verification": "Lighthouse preconnect audit should show connected origins."
+        },
+        {
+          "auditId": "cumulative-layout-shift",
+          "priority": "medium",
+          "reason": "0.15 CLS suggests text reflows as fonts load. Using font-display: swap with explicit font-size fallbacks reduces shift.",
+          "recommendedAction": "Set explicit size dimensions for text containers to match both system and web font metrics.",
+          "risk": null,
+          "verification": "Monitor CLS after font changes."
+        }
+      ],
+      "guardrails": [
+        "Test fallback fonts to ensure readable text during font load"
+      ],
+      "assumptions": [
+        "Google Fonts are loaded from the default Google Fonts CDN"
+      ],
+      "needsInspection": [
+        "Verify font-weight and font-family declarations in CSS to ensure font-display is properly applied"
+      ]
+    }
+  },
+  "lh-priority-007": {
+    "output": {
+      "summary": "The page is performing well with an 88 performance score. No critical or high-severity issues found. Minor opportunities are limited to passive event listeners and HTTP/2 usage, none of which meaningfully affect user experience.",
+      "priorityIssues": [],
+      "guardrails": [
+        "Do not make changes that would degrade the current user experience",
+        "Focus on maintaining current performance levels during feature development"
+      ],
+      "assumptions": [
+        "The low-severity items are not affecting user experience measurably"
+      ],
+      "needsInspection": [
+        "Review whether passive event listeners cause any noticeable scroll jank"
+      ]
+    }
+  },
+  "lh-priority-008": {
+    "output": {
+      "summary": "Mixed mobile performance issues: render-blocking resources (3.6s combined), 620KB unused JavaScript, and 950ms TBT. CSS and JS bundles are the primary bottleneck.",
+      "priorityIssues": [
+        {
+          "auditId": "render-blocking-resources",
+          "priority": "critical",
+          "reason": "app.bundle.css (2100ms) and vendor.bundle.css (1500ms) block rendering for 3.6s total.",
+          "recommendedAction": "Extract critical CSS for each route. Defer vendor.bundle.css and load asynchronously.",
+          "risk": "Route-specific critical CSS is more complex but avoids loading unused styles.",
+          "verification": "Lighthouse render-blocking audit should show reduced blocking time."
+        },
+        {
+          "auditId": "unused-javascript",
+          "priority": "high",
+          "reason": "67% of JavaScript (620KB of 920KB) is unused, contributing to 950ms TBT.",
+          "recommendedAction": "Implement route-based code splitting. Use webpack dynamic imports or equivalent for lazy loading.",
+          "risk": null,
+          "verification": "Run Lighthouse unused-javascript audit after code splitting."
+        },
+        {
+          "auditId": "total-blocking-time",
+          "priority": "high",
+          "reason": "950ms TBT is 4.75x the 200ms target. Blocked by unused JS and bootup time.",
+          "recommendedAction": "Reducing unused JS and render-blocking resources will directly reduce TBT.",
+          "risk": null,
+          "verification": "Target TBT under 200ms after cleanup."
+        }
+      ],
+      "guardrails": [
+        "Do not remove assets without verifying they are unused in analytics"
+      ],
+      "assumptions": [],
+      "needsInspection": [
+        "Audit vendor.bundle.css contents to determine what styles are needed"
+      ]
+    }
+  },
+  "lh-priority-009": {
+    "output": {
+      "summary": "Multiple performance issues: excessive render-blocking resources (4.3s), 1.7MB unused JavaScript, 520KB unused CSS, and 3200ms TBT. Asset bloat suggests significant cleanup is needed.",
+      "priorityIssues": [
+        {
+          "auditId": "render-blocking-resources",
+          "priority": "critical",
+          "reason": "Theme stylesheet, dashicons.css, and two plugin CSS files block rendering for 4300ms total.",
+          "recommendedAction": "Identify which plugins are actually used and dequeue unnecessary stylesheets. Inline critical CSS for above-the-fold content.",
+          "risk": "Removing plugin assets may break plugin functionality.",
+          "verification": "Check each plugin is still functional after dequeueing its CSS."
+        },
+        {
+          "auditId": "unused-javascript",
+          "priority": "critical",
+          "reason": "81% of JavaScript (1.7MB of 2.1MB) is unused, the leading cause of 3200ms TBT.",
+          "recommendedAction": "Audit plugins and theme JavaScript. Dequeue unused scripts per page template. Consider a lightweight plugin that conditionally loads assets.",
+          "risk": null,
+          "verification": "Run Lighthouse unused-javascript audit after cleanup."
+        },
+        {
+          "auditId": "unused-css-rules",
+          "priority": "high",
+          "reason": "520KB of unused CSS rules suggests multiple plugins and theme stylesheets loading unnecessary styles.",
+          "recommendedAction": "Use a CSS audit tool to identify unused rules. Dequeue plugin stylesheets on pages that don't use them.",
+          "risk": null,
+          "verification": "Measure waste bytes after cleanup."
+        }
+      ],
+      "guardrails": [
+        "Do not assume server access or admin panel access",
+        "Test each plugin after dequeueing its assets"
+      ],
+      "assumptions": [
+        "The site uses a CMS with plugin-based asset loading"
+      ],
+      "needsInspection": [
+        "Review each plugin's functionality before removing its assets",
+        "Check if a caching/performance plugin can help with asset management"
+      ]
+    }
+  },
+  "lh-priority-010": {
+    "output": {
+      "summary": "Six third-party scripts (including Shopify Analytics, Facebook Pixel, TikTok Pixel, Google Tag Manager, Recharge, Judge.me) consume 270KB and add 1290ms of blocking time. Combined with 1.1MB unused JS and 3.9s render-blocking CSS, this is a severe performance issue.",
+      "priorityIssues": [
+        {
+          "auditId": "third-party-summary",
+          "priority": "critical",
+          "reason": "Six third-party scripts collectively block the main thread for 1290ms. Recharge is the largest contributor at 350ms.",
+          "recommendedAction": "Audit each third-party script for necessity and loading strategy. Use async/defer where possible. Consider self-hosting critical third-party scripts.",
+          "risk": "Deferring Recharge may affect subscription widget load timing.",
+          "verification": "Use Lighthouse third-party summary audit to verify blocking time reduction."
+        },
+        {
+          "auditId": "unused-javascript",
+          "priority": "critical",
+          "reason": "73% of JavaScript (1.1MB of 1.5MB) is unused, causing 1500ms TBT.",
+          "recommendedAction": "Implement dynamic imports for app-specific features. Review Shopify app scripts for unused functionality.",
+          "risk": null,
+          "verification": "Run Lighthouse unused-javascript audit."
+        },
+        {
+          "auditId": "render-blocking-resources",
+          "priority": "high",
+          "reason": "theme.css (1800ms), product.css (1200ms), and apps.css (900ms) block rendering for 3900ms.",
+          "recommendedAction": "Inline critical above-the-fold CSS. Asynchronously load theme and product CSS.",
+          "risk": "Flash-of-unstyled-content may occur with deferred CSS loading.",
+          "verification": "Run Lighthouse render-blocking audit."
+        }
+      ],
+      "guardrails": [
+        "Do not recommend removing Shopify platform dependencies",
+        "Do not assume control over third-party app loading behavior",
+        "Coordinate with marketing team before adjusting analytics loading"
+      ],
+      "assumptions": [
+        "Shopify platform limits control over app asset loading"
+      ],
+      "needsInspection": [
+        "Review Recharge and Judge.me configuration for async loading options",
+        "Check Shopify theme editor for CSS optimization settings"
+      ]
+    }
+  },
+  "lh-priority-011": {
+    "output": {
+      "summary": "Severe performance (score 15) with multiple competing high-priority issues spanning performance and accessibility. Critical path: reduce render-blocking (7.4s), eliminate unused JS (2.2MB), and address main-thread work (9.2s) before tackling accessibility issues.",
+      "priorityIssues": [
+        {
+          "auditId": "render-blocking-resources",
+          "priority": "critical",
+          "reason": "Framework.js (2400ms), app.css (3200ms), and vendor.css (1800ms) block rendering for 7400ms. This is the single largest contributor to slow loading.",
+          "recommendedAction": "Split framework.js into critical and deferred chunks. Inline critical CSS. Defer vendor.css.",
+          "risk": "Framework changes may require build tool configuration.",
+          "verification": "Render-blocking time should drop below 1000ms."
+        },
+        {
+          "auditId": "unused-javascript",
+          "priority": "critical",
+          "reason": "79% of JavaScript (2.2MB of 2.8MB) is unused, causing 4500ms TBT.",
+          "recommendedAction": "Implement aggressive code splitting by route. Remove unused libraries. Consider lazy-loading non-essential features.",
+          "risk": null,
+          "verification": "Unused JavaScript should drop below 500KB."
+        },
+        {
+          "auditId": "total-blocking-time",
+          "priority": "critical",
+          "reason": "4500ms TBT is 22.5x the 200ms target. Caused by 2.2MB of unused JS and 5.5s bootup time.",
+          "recommendedAction": "Removing unused JS and implementing code splitting will directly reduce TBT.",
+          "risk": null,
+          "verification": "Target TBT under 200ms after cleanup."
+        }
+      ],
+      "guardrails": [
+        "Do not recommend full redesign — focus on incremental improvements",
+        "Do not assume backend changes are possible",
+        "Prioritize performance fixes before accessibility — performance affects all users"
+      ],
+      "assumptions": [
+        "Not all frameworks and libraries are used on every page"
+      ],
+      "needsInspection": [
+        "Route-level code splitting requires understanding of navigation patterns",
+        "Confirm which parts of the framework JS are actually used during initial load"
+      ]
+    }
+  },
+  "lh-priority-012": {
+    "output": {
+      "summary": "Render-blocking resources are the primary issue with 2400ms of blocking time. However, without knowledge of the tech stack, specific implementation recommendations are limited. The root cause of render blocking should be investigated.",
+      "priorityIssues": [
+        {
+          "auditId": "render-blocking-resources",
+          "priority": "high",
+          "reason": "bundle.css (1600ms) and core.js (800ms) block rendering. The 2.4s delay directly impacts LCP and FCP.",
+          "recommendedAction": "Identify assets that are critical for initial render versus deferred content. Investigate whether the build tool supports code splitting or CSS extraction.",
+          "risk": "Implementation details depend on the unknown tech stack. General advice: extract critical CSS, defer non-critical resources.",
+          "verification": "Run Lighthouse render-blocking audit after changes."
+        },
+        {
+          "auditId": "uses-optimized-images",
+          "priority": "medium",
+          "reason": "The banner image at 220KB can likely be compressed further regardless of tech stack.",
+          "recommendedAction": "Compress the banner image using available tooling. Implement responsive images with srcset if not already present.",
+          "risk": null,
+          "verification": "Check image byte savings in Lighthouse."
+        },
+        {
+          "auditId": "unused-css-rules",
+          "priority": "medium",
+          "reason": "85KB of unused CSS should be audited regardless of tech stack. Unused rules increase download size and parsing time.",
+          "recommendedAction": "Use CSS coverage tools in browser DevTools to identify and remove unused rules.",
+          "risk": "Removing CSS that appears unused but is used dynamically could break functionality.",
+          "verification": "Run Lighthouse to verify waste bytes drop."
+        }
+      ],
+      "guardrails": [
+        "Do not recommend framework-specific solutions — the tech stack is unknown",
+        "Do not assume access to server configuration or build tools",
+        "Focus on portable, stack-agnostic improvements"
+      ],
+      "assumptions": [
+        "The image CDN supports standard compression"
+      ],
+      "needsInspection": [
+        "Inspect the build configuration to understand how bundle.css and core.js are generated",
+        "Check if the project already has a CSS optimization step in the build pipeline",
+        "Verify the CDN supports on-the-fly image optimization before implementing responsive images"
+      ]
+    }
+  }
+}

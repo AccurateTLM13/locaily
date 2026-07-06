@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-lighthouse-priority-v1",
+  "subject": {
+    "type": "model",
+    "id": "lfm25-1p2b-thinking-local",
+    "provider": "ollama",
+    "runtimeModelName": "hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest",
+    "digest": "unknown"
+  },
+  "status": "qualified",
+  "qualifiedFor": [
+    {
+      "role": "priority_helper",
+      "trackId": "website_audit.lighthouse_handoff",
+      "contractId": "lighthouse-priority-helper-v1",
+      "status": "qualified",
+      "score": 0.9167,
+      "conditions": []
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "lfm25-1p2b-thinking-lighthouse-priority-v1"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-lighthouse-priority-v1.json"
+    ]
+  },
+  "modelProfileId": "lfm25-1p2b-thinking-local",
+  "notes": [
+    "Generated from explicitly promoted Benchmark Lab evidence.",
+    "Qualified for website_audit.lighthouse_handoff priority_helper role. 11/12 PASS, 91.7% structured-output pass rate. Live Ollama evaluation 2026-07-06."
+  ],
+  "generatedAt": "2026-07-06T21:12:09.384Z"
+}
