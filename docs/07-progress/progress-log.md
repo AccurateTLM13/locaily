@@ -469,17 +469,38 @@ See [../06-decisions/decision-log.md](../06-decisions/decision-log.md) and [../0
 
 ---
 
-## YYYY-MM-DD — Short title
+## 2026-07-05 — Guarded Qualification-Aware Routing Enforcement
 
 ### Changed
-- ...
+
+- Extended `companion/crew/model-router.js` — added `evaluateEnforcement()` function and integrated enforcement evaluation in `executeModelStep()` after shadow routing and before execution. Added fallback handling: enforced capability failure triggers re-execution with original model. Exported `evaluateEnforcement`.
+- Extended `companion/evidence/schemas/track-run-record.schema.json` — added optional `routing.enforcementDecision` to parent and child record schemas. Additive, validated, backwards-compatible.
+- Extended `companion/evidence/track-run-record-builder.js` — passes `enforcementDecision` through to `routing`; omitted when not provided.
+- Extended `companion/crew/runtime-track-run-recorder.js` — `buildStepChildRecord()` passes enforcement decision through to child records.
+- Extended `companion/evidence/shadow-evidence-review.js` — added `buildEnforcementMetrics()` reporting enforcement attempts, applied, blocked, fallback, per-capability success rates, qualification record usage, failed conditions. Added `getEnforcementDecisions()` for list retrieval. Exported new functions.
+- Modified `companion/server.js` — added `enforcementPolicy` to `buildModelRoutingOptions()` wiring it to model router. Added `GET /enforcement/pilot` (pilot status), `GET /enforcement/decisions` (enforcement decisions list). Extended `GET /enforcement/status` with pilot reason. Extended `POST /enforcement/set` with safe state change enforcement (requires approval, qualified capability, non-suspended).
+- Created `scripts/test-enforcement-routing.js` — 83 tests covering: 5 policy states, 10 eligibility failures, 7 routing evidence, 5 runtime failures, 3 enforcement metrics, 2 builder integration, 2 shadow compatibility, 1 non-pilot compatibility.
+- Updated all documentation files.
 
 ### Why
-- ...
+
+Complete the enforcement pipeline by integrating the policy engine into the model router. The model router is the central authority for model selection — enforcement evaluation belongs here alongside shadow routing and qualification policy evaluation. Implementation is complete but no pilot track is activated because no companion track has a current, valid `qualified` model capability.
 
 ### Evidence
-- ...
+
+- 83/83 enforcement routing tests pass.
+- 60/60 enforcement policy tests pass (backward compatible).
+- 31/31 shadow routing tests pass (backward compatible).
+- 25/25 qualification resolver tests pass (backward compatible).
+- 18/18 crew track run record tests pass (backward compatible).
+- 4/4 schema tests pass (backward compatible).
+- Contract tests pass.
+- Zero companion imports from `benchmark-lab/engine/` — architectural boundary preserved.
+- All tracks remain in shadow mode — enforcement inactive.
+- No pilot track activated — documented with activation requirements.
+- Qualification records, evidence, and checksums remain unchanged.
 
 ### Next
-- ...
+
+Pilot Enforcement Validation and Multi-Model Track Expansion — activate enforcement for one qualified track once qualification evidence exists. Expand multi-model testing with runtime performance feedback. Add human correction records.
 ```

@@ -69,7 +69,7 @@ function createEnforcementPolicy(options = {}) {
     return approvedTracks.has(trackId);
   }
 
-  async function evaluateEligibility({ trackId, role, recommendedCapabilityId, contractId, score, qualificationState, comparisonState }) {
+  async function evaluateEligibility({ trackId, role, recommendedCapabilityId, contractId, score, qualificationState, comparisonState, selectedQualificationState, recommendedQualificationState }) {
     const trackState = getTrackState(trackId);
     const eligibility = {
       eligible: false,
@@ -114,9 +114,10 @@ function createEnforcementPolicy(options = {}) {
       return eligibility;
     }
 
-    if (qualificationState !== "qualified") {
-      eligibility.blocks.push(`Recommended capability state is '${qualificationState}', not 'qualified'.`);
-      eligibility.checks.push({ check: "qualification_state", passed: false, detail: `State is '${qualificationState}'` });
+    const effectiveQualificationState = recommendedQualificationState || qualificationState;
+    if (effectiveQualificationState !== "qualified") {
+      eligibility.blocks.push(`Recommended capability state is '${effectiveQualificationState}', not 'qualified'.`);
+      eligibility.checks.push({ check: "qualification_state", passed: false, detail: `State is '${effectiveQualificationState}'` });
       return eligibility;
     }
     eligibility.checks.push({ check: "qualification_state", passed: true });
@@ -136,7 +137,7 @@ function createEnforcementPolicy(options = {}) {
     eligibility.checks.push({ check: "active_override", passed: true });
 
     try {
-      const providerStatus = await getProviderStatus();
+      const providerStatus = await getProviderStatus(recommendedCapabilityId);
       if (!providerStatus.available) {
         eligibility.blocks.push("Runtime is not available.");
         eligibility.checks.push({ check: "runtime_available", passed: false, detail: "Provider unavailable." });
@@ -144,7 +145,7 @@ function createEnforcementPolicy(options = {}) {
       }
       eligibility.checks.push({ check: "runtime_available", passed: true });
 
-      if (recommendedCapabilityId && !providerStatus.modelReady) {
+      if (!providerStatus.modelReady) {
         eligibility.blocks.push("Recommended model is not ready on the runtime.");
         eligibility.checks.push({ check: "model_ready", passed: false, detail: `Model '${recommendedCapabilityId}' not ready.` });
         return eligibility;

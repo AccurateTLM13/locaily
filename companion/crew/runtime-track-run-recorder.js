@@ -69,6 +69,7 @@ function buildStepChildRecord({ step, trackId, correlationId, parentRunId, optio
     provider: step.provider || options?.provider || null,
     qualificationRecordId: step.qualification?.recordId || null,
     shadowRecommendation: step.shadowRouting || undefined,
+    enforcementDecision: step.enforcementDecision || undefined,
     routingReason: step.role ? `role:${step.role}` : null
   };
 

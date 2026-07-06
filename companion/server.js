@@ -52,7 +52,7 @@ const { createCapabilityRegistry } = require("./core/capability-registry");
 const { createQualificationEvidenceLinker } = require("./evidence/qualification-evidence-linker");
 const { createShadowRouter } = require("./core/shadow-routing");
 const { createEnforcementPolicy } = require("./core/enforcement-policy");
-const { getEvidenceReview, getTrackReview, getDisagreements } = require("./evidence/shadow-evidence-review");
+const { getEvidenceReview, getTrackReview, getDisagreements, getEnforcementDecisions, buildEnforcementMetrics } = require("./evidence/shadow-evidence-review");
 
 const PLATFORM_VERSION = "0.1.0";
 const SERVICE_NAME = "local-ai-platform";
@@ -133,9 +133,9 @@ const qualificationEvidenceLinker = createQualificationEvidenceLinker({
 const shadowRouter = createShadowRouter({ resolver: qualificationResolver });
 const enforcementPolicy = createEnforcementPolicy({
   resolver: qualificationResolver,
-  getProviderStatus: async () => {
+  getProviderStatus: async (modelId) => {
     try {
-      const state = await checkRuntimeState();
+      const state = await checkRuntimeState(modelId || null);
       return { available: state.available, modelReady: state.modelReady };
     } catch {
       return { available: false, modelReady: false };
@@ -369,10 +369,13 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.method === "GET" && url.pathname === "/enforcement/status") {
+      const review = await getEvidenceReview();
       return sendJson(response, 200, {
         ok: true,
         policy: enforcementPolicy.getPolicySummary(),
-        review: await getEvidenceReview()
+        review,
+        pilotTrack: null,
+        pilotReason: "No track has valid qualified capability and sufficient shadow coverage. Implementation complete with enforcement inactive."
       });
     }
 
@@ -396,6 +399,38 @@ const server = http.createServer(async (request, response) => {
           message: "trackId and state are required.",
           nextStep: "Provide trackId and state in the request body."
         });
+      }
+
+      if (state === "enforced") {
+        if (!enforcementPolicy.isTrackApproved(trackId)) {
+          return sendJson(response, 400, {
+            ok: false,
+            code: "TRACK_NOT_APPROVED",
+            message: `Track '${trackId}' is not approved for enforcement.`,
+            nextStep: `Use POST /enforcement/approve with trackId '${trackId}' first.`
+          });
+        }
+
+        const caps = capabilityRegistry.listCapabilities();
+        const relevant = caps.filter((c) => c.trackId === trackId && c.state === "qualified");
+        if (relevant.length === 0) {
+          return sendJson(response, 400, {
+            ok: false,
+            code: "NO_QUALIFIED_CAPABILITY",
+            message: `Track '${trackId}' has no qualified capabilities. Enforcement cannot proceed.`,
+            nextStep: "Run Benchmark Lab to generate qualification evidence for this track."
+          });
+        }
+
+        const trackState = enforcementPolicy.getTrackState(trackId);
+        if (trackState === "suspended") {
+          return sendJson(response, 400, {
+            ok: false,
+            code: "TRACK_SUSPENDED",
+            message: `Track '${trackId}' is suspended. Clear suspension before setting to enforced.`,
+            nextStep: `Set track '${trackId}' to a non-suspended state first.`
+          });
+        }
       }
 
       const result = enforcementPolicy.setTrackState(trackId, state);
@@ -445,6 +480,32 @@ const server = http.createServer(async (request, response) => {
         : { summary: await getEvidenceReview(), disagreements: await getDisagreements() };
 
       return sendJson(response, 200, { ok: true, ...review });
+    }
+
+    if (request.method === "GET" && url.pathname === "/enforcement/pilot") {
+      const review = await getEvidenceReview();
+      const allCaps = capabilityRegistry.listCapabilities();
+      const qualified = allCaps.filter((c) => c.state === "qualified");
+      return sendJson(response, 200, {
+        ok: true,
+        pilotTrack: null,
+        qualifiedCapabilities: qualified.length,
+        qualifiedCapabilitiesList: qualified.map((c) => ({
+          modelId: c.modelId,
+          role: c.role,
+          trackId: c.trackId,
+          score: c.score
+        })),
+        eligibleTracks: Object.keys(review.enforcement?.byTrack || {}),
+        review: review.enforcement || { hasEnforcement: false },
+        reason: "No pilot activated. No companion track has a qualified model capability with sufficient shadow evidence. All tracks remain in shadow mode."
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/enforcement/decisions") {
+      const trackId = url.searchParams.get("trackId");
+      const decisions = await getEnforcementDecisions(trackId);
+      return sendJson(response, 200, { ok: true, decisions, count: decisions.length });
     }
 
     if (request.method === "GET" && url.pathname === "/enforcement/eligibility") {
@@ -1466,6 +1527,7 @@ function buildModelRoutingOptions(extra = {}) {
     },
     resolveModelForRole: (role) => resolveModelForRole(role),
     shadowRouter: (shadowOpts) => shadowRouter.computeShadowRecommendation(shadowOpts),
+    enforcementPolicy,
     toolRegistry,
     memoryBridge: {
       adapter: vaultAdapter

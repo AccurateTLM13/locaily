@@ -48,6 +48,40 @@ The June 2026 direction document clarified that Locaily is not a model launcher,
 
 Accepted direction; implementation remains incremental.
 
+---
+
+## 2026-07-05 — Guarded Qualification-Aware Routing Enforcement
+
+### Decision
+
+Implement guarded enforcement evaluation in the canonical model router (`companion/crew/model-router.js`), extending the shadow routing → enforcement policy pipeline into active model selection. Enforcement decision is recorded in Track Run Records via optional `routing.enforcementDecision`. Fallback on enforced execution failure: re-execute with original selected model. Keep all tracks in shadow mode by default. Do not activate a pilot track — no companion track has a current, valid `qualified` model capability with sufficient shadow coverage.
+
+### Why
+
+The enforcement policy engine and shadow routing were already implemented as separate modules but not wired into routing decisions. The model router is the correct integration point — it is the central authority for model selection, used by all track and workflow executions. Integration inside `executeModelStep()` keeps enforcement logic alongside existing shadow recommendation computation and qualification policy evaluation.
+
+No pilot track was activated because:
+- Model qualification records for companion tracks are either `candidate` or `screening` status (resolve to `untested`)
+- The only `qualified` model capability targets the Benchmark Lab `hybrid-weather` track, which is not a companion server runtime track
+- No shadow routing evidence exists for any companion track
+
+### Consequences
+
+- `companion/crew/model-router.js` extended with `evaluateEnforcement()` function and integration in `executeModelStep()`
+- `companion/evidence/schemas/track-run-record.schema.json` extended with optional `routing.enforcementDecision`
+- `companion/evidence/track-run-record-builder.js` passes `enforcementDecision` through
+- `companion/crew/runtime-track-run-recorder.js` passes enforcement decision to child records
+- `companion/evidence/shadow-evidence-review.js` extended with `buildEnforcementMetrics()` reporting enforcement attempts, applied, blocked, fallback, and success rates
+- `companion/server.js` updated with enforcement policy wiring, safe state change enforcement on `/enforcement/set`, and new endpoints `/enforcement/pilot`, `/enforcement/decisions`
+- All tracks remain in `shadow` state by default
+- 83 tests cover all policy states, eligibility failures, routing evidence, runtime failures, metrics, and compatibility
+- All existing tests (60 enforcement policy, 31 shadow routing, 25 qualification resolver, 4 schema, 18 crew track run record) remain passing
+- Qualification records, evidence, checksums remain unchanged
+
+### Status
+
+Implemented and verified.
+
 ### Notes
 
 Source: attached project direction document, "LocAIly North Star", June 2026.

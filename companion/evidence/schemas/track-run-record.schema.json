@@ -147,6 +147,8 @@
             "recommendedCapabilityId": { "type": "string" },
             "recommendedScore": { "type": "number" },
             "state": { "type": "string" },
+            "selectedQualificationState": { "type": "string", "description": "Qualification state of the currently selected capability" },
+            "recommendedQualificationState": { "type": "string", "description": "Qualification state of the recommended capability" },
             "comparison": {
               "enum": [
                 "agree",
@@ -161,6 +163,94 @@
             "notEnforcedReason": { "type": "string" },
             "qualificationRecordId": { "type": "string" },
             "fallbackRecommendation": { "type": "string" }
+          }
+        },
+        "enforcementDecision": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Guarded qualification-aware enforcement decision. Present only when enforcement was evaluated.",
+          "properties": {
+            "state": {
+              "type": "string",
+              "description": "Enforcement state at time of decision"
+            },
+            "eligible": {
+              "type": "boolean",
+              "description": "Whether the recommendation was eligible"
+            },
+            "attempted": {
+              "type": "boolean",
+              "description": "Whether enforcement was attempted"
+            },
+            "applied": {
+              "type": "boolean",
+              "description": "Whether enforcement was applied"
+            },
+            "reason": {
+              "type": "string",
+              "description": "Human-readable reason for the decision"
+            },
+            "failedConditions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "condition": { "type": "string" },
+                  "detail": { "type": "string" }
+                }
+              },
+              "description": "Conditions that prevented enforcement"
+            },
+            "overrideApplied": {
+              "type": "boolean",
+              "description": "Whether an override blocked enforcement"
+            },
+            "fallbackCapabilityId": {
+              "type": "string",
+              "description": "Capability used as fallback"
+            },
+            "fallbackTriggered": {
+              "type": "boolean",
+              "description": "Whether fallback execution occurred"
+            },
+            "fallbackSucceeded": {
+              "type": "boolean",
+              "description": "Whether fallback execution succeeded"
+            },
+            "originalError": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "Original error when enforced execution failed",
+              "properties": {
+                "message": { "type": "string" },
+                "code": { "type": "string" }
+              }
+            },
+            "selectedCapabilityId": {
+              "type": "string",
+              "description": "Original capability selected before enforcement"
+            },
+            "selectedQualificationState": {
+              "type": "string",
+              "description": "Qualification state of the selected capability at time of enforcement evaluation"
+            },
+            "recommendedCapabilityId": {
+              "type": "string",
+              "description": "Capability recommended by qualification"
+            },
+            "recommendedQualificationState": {
+              "type": "string",
+              "description": "Qualification state of the recommended capability at time of enforcement evaluation"
+            },
+            "executedCapabilityId": {
+              "type": "string",
+              "description": "Final capability that executed"
+            },
+            "qualificationRecordId": {
+              "type": "string",
+              "description": "Qualification record that supported the recommendation"
+            }
           }
         }
       }
@@ -487,11 +577,37 @@
                   "recommendedCapabilityId": { "type": "string" },
                   "recommendedScore": { "type": "number" },
                   "state": { "type": "string" },
+                  "selectedQualificationState": { "type": "string" },
+                  "recommendedQualificationState": { "type": "string" },
                   "comparison": { "enum": ["agree", "disagree", "no-qualified-capability", "insufficient-evidence", "current-selection-unqualified", "recommendation-unavailable"] },
                   "reason": { "type": "string" },
                   "notEnforcedReason": { "type": "string" },
                   "qualificationRecordId": { "type": "string" },
                   "fallbackRecommendation": { "type": "string" }
+                }
+              },
+              "enforcementDecision": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Guarded qualification-aware enforcement decision.",
+                "properties": {
+                  "state": { "type": "string" },
+                  "eligible": { "type": "boolean" },
+                  "attempted": { "type": "boolean" },
+                  "applied": { "type": "boolean" },
+                  "reason": { "type": "string" },
+                  "failedConditions": { "type": "array", "items": { "type": "object", "additionalProperties": false, "properties": { "condition": { "type": "string" }, "detail": { "type": "string" } } } },
+                  "overrideApplied": { "type": "boolean" },
+                  "fallbackCapabilityId": { "type": "string" },
+                  "fallbackTriggered": { "type": "boolean" },
+                  "fallbackSucceeded": { "type": "boolean" },
+                  "originalError": { "type": "object", "additionalProperties": false, "properties": { "message": { "type": "string" }, "code": { "type": "string" } } },
+                  "selectedCapabilityId": { "type": "string" },
+                  "selectedQualificationState": { "type": "string" },
+                  "recommendedCapabilityId": { "type": "string" },
+                  "recommendedQualificationState": { "type": "string" },
+                  "executedCapabilityId": { "type": "string" },
+                  "qualificationRecordId": { "type": "string" }
                 }
               }
             }

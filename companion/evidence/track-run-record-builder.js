@@ -39,11 +39,15 @@ function buildTrackRunRecord(options = {}) {
     qualificationRecordId: options.qualificationRecordId || null,
     routingReason: options.routingReason || null,
     fallbackCandidates: options.fallbackCandidates || [],
-    shadowRecommendation: options.shadowRecommendation || undefined
+    shadowRecommendation: options.shadowRecommendation || undefined,
+    enforcementDecision: options.enforcementDecision || undefined
   };
 
   if (!record.routing.shadowRecommendation) {
     delete record.routing.shadowRecommendation;
+  }
+  if (!record.routing.enforcementDecision) {
+    delete record.routing.enforcementDecision;
   }
 
   const execution = {
