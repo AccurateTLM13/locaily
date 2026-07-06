@@ -1,9 +1,51 @@
 const { listAllRecords } = require("./track-run-record-store");
 
+function extractShadowRecords(records) {
+  const result = [];
+  for (const record of records) {
+    if (record.routing && record.routing.shadowRecommendation && record.routing.shadowRecommendation.enabled) {
+      result.push(record);
+    }
+    if (record.childRuns && Array.isArray(record.childRuns)) {
+      for (const child of record.childRuns) {
+        if (child.routing && child.routing.shadowRecommendation && child.routing.shadowRecommendation.enabled) {
+          result.push({
+            ...child,
+            trackId: child.trackId || record.trackId || "unknown",
+            timestamps: child.timestamps || record.timestamps,
+            execution: child.execution || record.execution
+          });
+        }
+      }
+    }
+  }
+  return result;
+}
+
+function extractEnforcementRecords(records) {
+  const result = [];
+  for (const record of records) {
+    if (record.routing && record.routing.enforcementDecision) {
+      result.push(record);
+    }
+    if (record.childRuns && Array.isArray(record.childRuns)) {
+      for (const child of record.childRuns) {
+        if (child.routing && child.routing.enforcementDecision) {
+          result.push({
+            ...child,
+            trackId: child.trackId || record.trackId || "unknown",
+            timestamps: child.timestamps || record.timestamps,
+            execution: child.execution || record.execution
+          });
+        }
+      }
+    }
+  }
+  return result;
+}
+
 function buildEvidenceReview(records) {
-  const shadowRecords = records.filter(
-    (r) => r.routing && r.routing.shadowRecommendation && r.routing.shadowRecommendation.enabled
-  );
+  const shadowRecords = extractShadowRecords(records);
 
   const total = shadowRecords.length;
   const byComparison = {};
@@ -76,9 +118,7 @@ function buildEvidenceReview(records) {
 }
 
 function buildEnforcementMetrics(records) {
-  const enforcementRecords = records.filter(
-    (r) => r.routing && r.routing.enforcementDecision
-  );
+  const enforcementRecords = extractEnforcementRecords(records);
 
   const totalEnforcementDecisions = enforcementRecords.length;
   let appliedCount = 0;
@@ -221,9 +261,10 @@ async function getTrackReview(trackId) {
 
 async function getDisagreements(trackId) {
   const allRecords = await listAllRecords();
+  const shadowRecords = extractShadowRecords(allRecords);
   const relevant = trackId
-    ? allRecords.filter((r) => r.trackId === trackId)
-    : allRecords;
+    ? shadowRecords.filter((r) => r.trackId === trackId)
+    : shadowRecords;
 
   return relevant
     .filter(
@@ -245,9 +286,10 @@ async function getDisagreements(trackId) {
 
 async function getEnforcementDecisions(trackId) {
   const allRecords = await listAllRecords();
+  const enfRecords = extractEnforcementRecords(allRecords);
   const relevant = trackId
-    ? allRecords.filter((r) => r.trackId === trackId)
-    : allRecords;
+    ? enfRecords.filter((r) => r.trackId === trackId)
+    : enfRecords;
 
   return relevant
     .filter((r) => r.routing && r.routing.enforcementDecision)
@@ -270,9 +312,10 @@ async function getEnforcementDecisions(trackId) {
 
 async function getShadowComparisons(trackId) {
   const allRecords = await listAllRecords();
+  const shadowRecords = extractShadowRecords(allRecords);
   const relevant = trackId
-    ? allRecords.filter((r) => r.trackId === trackId)
-    : allRecords;
+    ? shadowRecords.filter((r) => r.trackId === trackId)
+    : shadowRecords;
 
   return relevant.filter(
     (r) => r.routing && r.routing.shadowRecommendation
@@ -295,5 +338,7 @@ module.exports = {
   getEnforcementDecisions,
   getShadowComparisons,
   buildEvidenceReview,
-  buildEnforcementMetrics
+  buildEnforcementMetrics,
+  extractShadowRecords,
+  extractEnforcementRecords
 };

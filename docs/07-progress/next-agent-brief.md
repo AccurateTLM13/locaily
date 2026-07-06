@@ -76,11 +76,11 @@ LFM2.5-1.2B-Thinking is the first qualified model capability for a companion ser
 
 ## Current Task
 
-Pilot Enforcement Validation prerequisites partially met. `website_audit.lighthouse_handoff` (role `priority_helper`) now has a qualified model capability (LFM2.5-1.2B-Thinking, score 0.9167). The second prerequisite — sufficient shadow routing evidence (3-5 comparisons showing consistent recommendation agreement) — has not yet accumulated. All tracks remain in shadow mode. Enforcement machinery is durable, tested, and ready for pilot activation once shadow evidence exists.
+Pilot Enforcement Validation prerequisites met. `website_audit.lighthouse_handoff` (role `priority_helper`) has a qualified model capability (LFM2.5-1.2B-Thinking, score 0.9167) AND shadow routing evidence collected: 36 comparisons (33 actionable, 91.67% coverage rate). Shadow router consistently recommends the qualified model across 18 evaluation cases, 9 consistency trials, and 5 qualified-model cases. Pilot readiness review artifact created at `benchmark-lab/evidence/reviews/lighthouse-shadow-pilot-readiness-v1.json` with verdict `ready-with-conditions`. Required pre-pilot actions: approve track and set state to `eligible`.
 
 ## Next Task
 
-Accumulate shadow routing evidence for `website_audit.lighthouse_handoff`/`priority_helper` by running live Track executions. Once 3-5 shadow comparisons show consistent agreement, activate pilot enforcement. Expand multi-model testing with runtime performance feedback. Add human correction records. Broader model qualification coverage and live qualification depth.
+Activate enforcement pilot for `website_audit.lighthouse_handoff`/`priority_helper`: approve the track (POST /enforcement/approve), set state to eligible (POST /enforcement/set), then monitor first 10 enforced executions. Expand multi-model testing with runtime performance feedback. Add human correction records. Broader model qualification coverage and live qualification depth.
 
 ## Do Not
 

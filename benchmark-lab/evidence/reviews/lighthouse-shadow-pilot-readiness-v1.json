@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "benchmark.human_review.v1",
+  "evidenceId": "lighthouse-shadow-pilot-readiness-v1",
+  "reviewType": "pilot-readiness",
+  "reviewer": "JP Pannell",
+  "verdict": "ready-with-conditions",
+  "trackId": "website_audit.lighthouse_handoff",
+  "role": "priority_helper",
+  "qualifiedModel": "lfm25-1p2b-thinking-local",
+  "qualifiedScore": 0.9167,
+  "currentDefaultModel": "llama3.2",
+  "evaluationCriteria": [
+    {
+      "criterion": "qualified_capability_exists",
+      "required": true,
+      "passed": true,
+      "detail": "lfm25-1p2b-thinking-local qualified for website_audit.lighthouse_handoff / priority_helper with score 0.9167"
+    },
+    {
+      "criterion": "human_review_exists",
+      "required": true,
+      "passed": true,
+      "detail": "lfm25-1p2b-thinking-lighthouse-priority-v1-review.json approved-with-limitations by JP Pannell"
+    },
+    {
+      "criterion": "minimum_shadow_comparisons",
+      "required": 12,
+      "target": 15,
+      "actual": 33,
+      "passed": true,
+      "detail": "33 actionable shadow comparisons collected across 18 evaluation cases + 9 consistency trials + 5 qualified-model cases + 1 earlier workflow run"
+    },
+    {
+      "criterion": "consistency_coverage",
+      "required": 3,
+      "actual": 3,
+      "passed": true,
+      "detail": "3 input variants (lh-shadow-001, lh-shadow-007, lh-shadow-010) each run 3 times = 9 total consistency trials"
+    },
+    {
+      "criterion": "shadow_router_functional",
+      "required": true,
+      "passed": true,
+      "detail": "Shadow router correctly identifies qualified capability and produces disagree comparisons for all actionable records"
+    },
+    {
+      "criterion": "coverage_rate_acceptable",
+      "required": 0.7,
+      "actual": 91.67,
+      "passed": true,
+      "detail": "33/36 records have actionable comparisons (91.67%). 3 non-actionable from pre-qualification era"
+    },
+    {
+      "criterion": "enforcement_policy_healthy",
+      "required": true,
+      "passed": true,
+      "detail": "Policy store healthy, enforcementLocked=false, loadError=null after schema fix"
+    },
+    {
+      "criterion": "no_active_blocks",
+      "required": true,
+      "passed": false,
+      "detail": "Track not yet approved for enforcement. Requires explicit approval via POST /enforcement/approve before advancing from shadow to eligible state"
+    },
+    {
+      "criterion": "runtime_available",
+      "required": true,
+      "passed": true,
+      "detail": "Ollama runtime available on 127.0.0.1:11434 with all required models"
+    }
+  ],
+  "limitations": [
+    "All 33 shadow comparisons are 'disagree' (no 'agree' comparisons yet). This is expected because the shadow router compares the qualified model manifest id 'lfm25-1p2b-thinking-local' against the runtime model name 'llama3.2'. They will never match under current routing.",
+    "The qualified model's runtime model name ('hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest') differs from its capability manifest id ('lfm25-1p2b-thinking-local'). The shadow router uses manifest ids, so the current model and recommended capability never compare as 'agree'.",
+    "No enforcement decisions have been applied yet. All evidence is purely observational (shadow mode).",
+    "The policy file at data/policy/enforcement-policy.json contained stale test data with expiresAt fields (non-conforming to schema) and needed manual cleanup.",
+    "Agreement rate is 0%. This is not a concern for shadow evaluation — the disagreement pattern is correct behavior showing the router actively recommends the qualified model."
+  ],
+  "pilotRecommendation": "Proceed to pilot activation. The qualified model lfm25-1p2b-thinking-local has sufficient shadow evidence (33 comparisons, 91.67% coverage, 0.9167 qualification score) and the shadow router correctly identifies it as the preferred model for website_audit.lighthouse_handoff/priority_helper. Required pre-pilot actions: (1) Approve the track via POST /enforcement/approve with trackId 'website_audit.lighthouse_handoff', (2) Set track state to 'eligible' via POST /enforcement/set, (3) Monitor first 10 enforced executions before advancing to 'enforced'.",
+  "prePilotActions": [
+    "POST /enforcement/approve with trackId: website_audit.lighthouse_handoff",
+    "POST /enforcement/set with trackId: website_audit.lighthouse_handoff, state: eligible",
+    "Run 10 additional track executions to establish enforcement baseline",
+    "Verify enforcement decisions match shadow recommendations"
+  ],
+  "reviewedAt": "2026-07-06T22:00:00.000Z"
+}

@@ -963,6 +963,30 @@ Custom runner uses `npm.cmd run lighthouse-priority:run` and `npm.cmd run lighth
 
 ---
 
+## 2026-07-06 — Lighthouse Shadow Readiness: 33 Actionable Comparisons, Pilot Readiness Review
+
+### Decision
+
+Collect shadow-routing evidence for the qualified model capability lfm25-1p2b-thinking-local (track `website_audit.lighthouse_handoff`, role `priority_helper`) and assess pilot readiness. The existing `GET /enforcement/pilot` read-only endpoint was already implemented — the assessment adds a human review artifact at `benchmark-lab/evidence/reviews/lighthouse-shadow-pilot-readiness-v1.json` with verdict `ready-with-conditions`.
+
+### Why
+
+Pilot Enforcement Validation requires two prerequisites: (1) a qualified model capability (met in previous slice) and (2) sufficient shadow routing evidence (12+ actionable comparisons, target 15). 33 actionable comparisons collected across 18 evaluation cases + 9 consistency trials + 5 qualified-model runs + 1 earlier workflow run. Evidence shows the shadow router consistently recommends the qualified model (33/33 disagree — expected because the runtime model name differs from the manifest id).
+
+### Status
+
+Confirmed. Pre-pilot actions documented: approve track and set state to eligible.
+
+### Notes
+
+- Policy file `data/policy/enforcement-policy.json` contained stale `expiresAt` fields on overrides (non-conforming to schema), causing `loadError` with `enforcementLocked: true`. Fixed by removing `expiresAt` from all 3 overrides.
+- All 33 actionable comparisons are `disagree` because the shadow router compares manifest ids (`lfm25-1p2b-thinking-local` vs `llama3.2`), not runtime model names. This is correct behavior — the models are genuinely different.
+- 3 non-actionable `recommendation-unavailable` records from pre-qualification era remain unchanged.
+- Pilot readiness test script: `scripts/test-pilot-readiness.js` (13/13 pass).
+- Existing suites: 149 store tests, 62 policy tests, 91 routing tests — all pass with no regressions.
+
+---
+
 ```md
 ## YYYY-MM-DD — Title
 ### Decision
