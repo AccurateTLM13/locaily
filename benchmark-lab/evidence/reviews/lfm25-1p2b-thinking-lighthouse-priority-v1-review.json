@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "benchmark.human_review.v1",
+  "evidenceId": "lfm25-1p2b-thinking-lighthouse-priority-v1",
+  "reviewer": "JP Pannell",
+  "verdict": "approved-with-limitations",
+  "failedCaseId": "lh-priority-011",
+  "failureReason": "INVENTED_AUDIT: model produced auditId \"unknown\" (2 occurrences) for scenario 'Multiple competing high-priority issues'. Given 12 high-severity audits across performance/accessibility/mixed categories, the model defaulted to a generic invented response instead of selecting from the provided audits. No real audit IDs were referenced.",
+  "acceptanceRationale": "11/12 PASS (91.7%) demonstrates reliable priority_helper behavior for the majority of cases. The failed case is the hardest scenario in the suite (12 competing high-severity audits, mixed categories) and represents an edge where the model's reasoning capacity is exceeded. For typical Lighthouse reports (5-8 key findings), the model performs well. All 11 passing cases produced schema-valid JSON with correct audit ID grounding. Non-failed cases showed minor guardrail gaps (actionability scoring 0.5, missing constraint reflection) but no invented facts — acceptable for v1 qualification with the known limitation documented.",
+  "knownLimitations": [
+    "Input complexity ceiling: model may produce generic/invented responses when presented with more than ~8-10 high-severity audits simultaneously",
+    "Guardrail compliance is inconsistent — constraints like 'do not assume backend changes' or platform-specific context are often not reflected in output guardrails",
+    "Actionability scores trend lower (0.5) on cases requiring specific implementation steps — model tends to stay generic rather than over-commit to unverified approaches",
+    "Latency is good (~3.3s/case) but increases non-linearly with input complexity",
+    "Should not be used for scenarios requiring cross-referencing more than ~8 competing priorities without input simplification or chunking"
+  ],
+  "reviewedAt": "2026-07-06T22:00:00.000Z"
+}

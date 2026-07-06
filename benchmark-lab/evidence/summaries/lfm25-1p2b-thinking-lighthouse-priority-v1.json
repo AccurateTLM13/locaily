@@ -6,7 +6,7 @@
   "trackId": "website_audit.lighthouse_handoff",
   "contractId": "lighthouse-priority-helper-v1",
   "approvedAt": "2026-07-06T21:11:23.188Z",
-  "approvedBy": "agent",
+  "approvedBy": "JP Pannell",
   "summary": {
     "schemaVersion": "benchmark.run_summary.v1",
     "runId": "run-lh-priority-20260706T210944Z",

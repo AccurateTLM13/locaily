@@ -5,6 +5,6 @@
   "artifactPath": "benchmark-lab/evidence/approved/lfm25-1p2b-thinking-lighthouse-priority-v1.json",
   "algorithm": "sha256",
   "checksumMode": "canonical_text_v1",
-  "checksum": "sha256:9110d5e995a01f61c82b79e543edafec86e150bfbbf18d97a3afc780042a0562",
-  "generatedAt": "2026-07-06T21:11:23.199Z"
+  "checksum": "sha256:5ec74a81e0e8d7a39d30c8d346040bfc715e6d43e28e198697a64cc460a06a0e",
+  "generatedAt": "2026-07-06T21:27:56.041Z"
 }

@@ -21,6 +21,21 @@
       "qualificationRecordId": "lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-lighthouse-priority-v1"
     }
   },
+  "humanReview": {
+    "passed": true,
+    "reviewer": "JP Pannell",
+    "verdict": "approved-with-limitations",
+    "failedCaseId": "lh-priority-011",
+    "failureReason": "INVENTED_AUDIT: model produced auditId 'unknown' for 'Multiple competing high-priority issues' scenario (12 high-severity audits). Model defaulted to generic invented response instead of selecting from real audits.",
+    "acceptanceRationale": "11/12 PASS (91.7%) reliable for typical Lighthouse reports (5-8 findings). Failed case is hardest scenario — 12 competing audits exceeds model's reasoning ceiling. No invented facts in any passing case. Minor guardrail gaps acceptable for v1 qualification.",
+    "knownLimitations": [
+      "Input complexity ceiling ~8-10 high-severity audits before degradation",
+      "Guardrail compliance inconsistent — platform/stack constraints often omitted",
+      "Actionability scores lower (0.5) on cases needing specific implementation steps"
+    ],
+    "reviewArtifactPath": "benchmark-lab/evidence/reviews/lfm25-1p2b-thinking-lighthouse-priority-v1-review.json",
+    "reviewedAt": "2026-07-06T22:00:00.000Z"
+  },
   "validation": {
     "passed": true,
     "commands": [
@@ -35,7 +50,10 @@
       "node scripts/test-enforcement-policy.js",
       "node scripts/test-enforcement-routing.js",
       "node scripts/test-shadow-routing.js",
-      "node scripts/smoke-test.js"
+      "node scripts/smoke-test.js",
+      "npm.cmd run checksum:verify -- --checksum benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-lighthouse-priority-v1-approved-summary.json",
+      "npm.cmd run checksum:verify -- --checksum benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-lighthouse-priority-v1-promoted-evidence.json",
+      "npm.cmd run checksum:verify -- --checksum benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-lighthouse-priority-v1-review.json"
     ],
     "results": [
       "Benchmark Lighthouse Priority mock test: 12/12 PASS",
@@ -43,6 +61,8 @@
       "Model card generated and checksummed",
       "Qualification record generated: status 'qualified', role 'priority_helper', track 'website_audit.lighthouse_handoff', score 0.9167",
       "Evidence promoted and checksummed (canonical_text_v1, byte_exact)",
+      "Human review: approved-with-limitations by JP Pannell — failed case lh-priority-011 documented",
+      "Review artifact created: benchmark-lab/evidence/reviews/lfm25-1p2b-thinking-lighthouse-priority-v1-review.json",
       "All schemas validated (14/14)",
       "benchmark:status-smoke passes",
       "Contract tests pass",
@@ -52,6 +72,7 @@
       "91/91 enforcement-routing tests pass",
       "31/31 shadow-routing tests pass",
       "56/56 smoke tests pass",
+      "3/3 checksum verifications pass (approved, promoted, review)",
       "Local Brain /health reports qualified capability for website_audit.lighthouse_handoff/priority_helper (2 qualified capabilities total, up from 1)"
     ]
   },
