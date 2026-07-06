@@ -506,6 +506,7 @@ function createEnforcementPolicyStore(options = {}) {
       if (!syncGate.ok) return syncGate;
     }
 
+    let gateToken = null;
     if (targetState === "enforced") {
       if (currentState !== "eligible") {
         return {
@@ -515,6 +516,18 @@ function createEnforcementPolicyStore(options = {}) {
           nextStep: "Set the track to 'eligible' state first, then request 'enforced'."
         };
       }
+      // Capture gate token BEFORE async checks to prevent TOCTOU race.
+      // The token records revision, state, and approval at this deterministic point.
+      // After async checks (which may yield), the mutation revalidates against this token.
+      const best = getBestQualifiedCapability(trackId, opts.role);
+      gateToken = {
+        expectedRevision: policy.revision,
+        expectedState: "eligible",
+        expectedApproved: isTrackApproved(trackId),
+        expectedModelId: best ? best.modelId : null,
+        hasOverride: best ? hasOverride({ trackId, role: opts.role || best.role, modelId: best.modelId }) : false
+      };
+
       const asyncGate = await checkEnforcementGateAsync(trackId, opts);
       if (!asyncGate.ok) return asyncGate;
     }
@@ -522,6 +535,35 @@ function createEnforcementPolicyStore(options = {}) {
     return mutate((candidate) => {
       const actor = opts.updatedBy || "operator";
       const reason = opts.reason || null;
+
+      if (targetState === "enforced" && gateToken && opts.forceGate !== true) {
+        const candidateRec = candidate.tracks[trackId];
+        const candidateState = candidateRec ? candidateRec.state : DEFAULT_STATE;
+        if (candidateState !== gateToken.expectedState) {
+          return {
+            ok: false,
+            code: "STATE_CHANGED_DURING_TRANSITION",
+            message: `Track '${trackId}' state changed from '${gateToken.expectedState}' to '${candidateState}' before the transition could commit.`,
+            nextStep: "Retry the transition."
+          };
+        }
+        if (candidate.revision !== gateToken.expectedRevision) {
+          return {
+            ok: false,
+            code: "REVISION_CHANGED_DURING_TRANSITION",
+            message: "Policy was modified by another operation before this transition could commit.",
+            nextStep: "Retry the transition."
+          };
+        }
+        if (gateToken.expectedApproved !== (candidateRec ? candidateRec.approved : false)) {
+          return {
+            ok: false,
+            code: "APPROVAL_CHANGED_DURING_TRANSITION",
+            message: `Track '${trackId}' approval status changed before the transition could commit.`,
+            nextStep: "Retry the transition."
+          };
+        }
+      }
 
       if (!candidate.tracks[trackId]) {
         candidate.tracks[trackId] = {

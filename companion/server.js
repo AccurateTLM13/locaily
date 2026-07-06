@@ -52,7 +52,7 @@ const { createCapabilityRegistry } = require("./core/capability-registry");
 const { createQualificationEvidenceLinker } = require("./evidence/qualification-evidence-linker");
 const { createShadowRouter } = require("./core/shadow-routing");
 const { createEnforcementPolicy } = require("./core/enforcement-policy");
-const { getEvidenceReview, getTrackReview, getDisagreements, getEnforcementDecisions, buildEnforcementMetrics } = require("./evidence/shadow-evidence-review");
+const { getEvidenceReview, getTrackReview, getDisagreements, getEnforcementDecisions, getShadowComparisons, buildEnforcementMetrics } = require("./evidence/shadow-evidence-review");
 
 const PLATFORM_VERSION = "0.1.0";
 const SERVICE_NAME = "local-ai-platform";
@@ -142,7 +142,15 @@ const enforcementPolicy = createEnforcementPolicy({
       return { available: false, modelReady: false };
     }
   },
-  getCapabilityRegistry: () => capabilityRegistry
+  getCapabilityRegistry: () => capabilityRegistry,
+  getShadowEvidence: async (trackId) => {
+    try {
+      const comparisons = await getShadowComparisons(trackId);
+      return comparisons.filter((c) => c.comparison && c.comparison !== "recommendation-unavailable" && c.comparison !== "insufficient-evidence");
+    } catch {
+      return [];
+    }
+  }
 });
 
 function getConfiguredProviderIds() {

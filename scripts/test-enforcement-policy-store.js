@@ -885,6 +885,90 @@ async function testOverrideCreationAuditRecordsOverrideId() {
   });
 }
 
+// ==================== TOCTOU Race (Finding #2 - Review Round 2) ====================
+
+async function testTOCTOURaceByApprovalRevocation() {
+  console.log("TEST: TOCTOU race — concurrent approval revocation blocks enforced transition");
+  await withTempDir(async (dir) => {
+    const store = createEnforcementPolicyStore({
+      dataDir: dir,
+      getCapabilityRegistry: () => ({
+        listCapabilities: () => [{
+          trackId: "race-track", role: "worker", modelId: "model-r",
+          state: "qualified", score: 0.9
+        }]
+      }),
+      getProviderStatus: async () => {
+        // Yield control on the first call to allow interleaving
+        await new Promise((r) => setImmediate(r));
+        return { available: true, modelReady: true };
+      },
+      getShadowEvidence: async () => {
+        await new Promise((r) => setImmediate(r));
+        return Array.from({ length: 5 }, (_, i) => ({ comparisonId: `c${i}` }));
+      }
+    });
+    await store.initialize();
+    await store.approveTrack("race-track");
+    await store.setTrackState("race-track", "eligible", { forceGate: true });
+    assert(store.getTrackState("race-track") === "eligible", "eligible before race");
+
+    const [enforceResult] = await Promise.all([
+      store.setTrackState("race-track", "enforced"),
+      store.revokeApproval("race-track")
+    ]);
+
+    const validCodes = [
+      "REVISION_CHANGED_DURING_TRANSITION",
+      "STATE_CHANGED_DURING_TRANSITION",
+      "APPROVAL_CHANGED_DURING_TRANSITION",
+      "TRACK_NOT_APPROVED"
+    ];
+    assert(enforceResult.ok === false, "TOCTOU race detected (enforced rejected)");
+    assert(validCodes.includes(enforceResult.code), `correct TOCTOU code: ${enforceResult.code}`);
+  });
+}
+
+async function testTOCTOURaceByStateChange() {
+  console.log("TEST: TOCTOU race — concurrent state change blocks enforced transition");
+  await withTempDir(async (dir) => {
+    const store = createEnforcementPolicyStore({
+      dataDir: dir,
+      getCapabilityRegistry: () => ({
+        listCapabilities: () => [{
+          trackId: "race2", role: "worker", modelId: "model-r2",
+          state: "qualified", score: 0.9
+        }]
+      }),
+      getProviderStatus: async () => {
+        await new Promise((r) => setImmediate(r));
+        return { available: true, modelReady: true };
+      },
+      getShadowEvidence: async () => {
+        await new Promise((r) => setImmediate(r));
+        return Array.from({ length: 5 }, (_, i) => ({ comparisonId: `c${i}` }));
+      }
+    });
+    await store.initialize();
+    await store.approveTrack("race2");
+    await store.setTrackState("race2", "eligible", { forceGate: true });
+    assert(store.getTrackState("race2") === "eligible", "eligible before race");
+
+    const [enforceResult] = await Promise.all([
+      store.setTrackState("race2", "enforced"),
+      store.setTrackState("race2", "shadow")
+    ]);
+
+    const validCodes = [
+      "REVISION_CHANGED_DURING_TRANSITION",
+      "STATE_CHANGED_DURING_TRANSITION",
+      "APPROVAL_CHANGED_DURING_TRANSITION"
+    ];
+    assert(enforceResult.ok === false, "TOCTOU race detected (enforced rejected)");
+    assert(validCodes.includes(enforceResult.code), `correct TOCTOU code: ${enforceResult.code}`);
+  });
+}
+
 // ==================== Run ====================
 
 const tests = [
@@ -934,7 +1018,9 @@ const tests = [
   testAuditHealthyFlagInStoreHealth,
   testAuditWarningInResultWhenDegraded,
   testRevocationAuditRecordsActualState,
-  testOverrideCreationAuditRecordsOverrideId
+  testOverrideCreationAuditRecordsOverrideId,
+  testTOCTOURaceByApprovalRevocation,
+  testTOCTOURaceByStateChange
 ];
 
 (async () => {
