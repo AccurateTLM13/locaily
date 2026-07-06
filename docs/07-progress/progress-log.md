@@ -523,8 +523,9 @@ Pilot Enforcement Validation and Multi-Model Track Expansion — activate enforc
   - Override CRUD with composite key identity (trackId+role+modelId); duplicate rejection
   - Override clear by overrideId or composite key
   - Corrupt-file fallback with mutex lock; writes audit event synchronously before returning
-  - Pure in-memory mode when dataDir is not provided (test isolation without filesystem)
+    - Pure in-memory mode when dataDir is not provided (test isolation without filesystem)
   - Health status: healthy or degraded (safe fallback with loadError); enforcement locked when degraded
+  - Async enforcement gate (`checkEnforcementGateAsync`) verifying runtime availability, model readiness, shadow evidence (min 3), approval, qualified capability, score threshold, and active override before committing `enforced`
 - Modified `companion/core/enforcement-policy.js` — refactored to delegate to store instance; configurable score threshold added; backward-compatible `syncApi._seedTrackStateSync`, `syncApi._seedApprovalSync`, `syncApi._seedOverrideSync` for legacy constructor option seeding; legacy tests pass without changes.
 - Modified `companion/server.js` — added `GET /enforcement/policy`, `POST /enforcement/revoke`, `POST /enforcement/override/clear` endpoints; updated `POST /enforcement/set`, `POST /enforcement/approve`, `POST /enforcement/override` with `reason` and `updatedBy` query parameters; enforcement policy health in root status response; explicit store initialization at startup with `dataDir`.
 - Created `scripts/test-enforcement-policy-store.js` — 123 tests covering: loading and validation (20), persistence (20), state transitions (25), approval and revocation (16), overrides (18), audit (12), regression (12).
@@ -548,6 +549,50 @@ Enforcement policy was previously in-memory only — all track states, approvals
 - 56/56 smoke tests pass (including new enforcement endpoints).
 - Enforcement remains disabled for all tracks — no pilot activated.
 - No absolute filesystem paths exposed in API responses.
+
+### Next
+
+Pilot Enforcement Validation and Multi-Model Track Expansion — activate enforcement for one qualified track once qualification evidence exists. Expand multi-model testing with runtime performance feedback. Add human correction records.
+
+---
+
+## 2026-07-05 — Durable Enforcement Policy: Code Review Corrections
+
+### Changed
+
+- Modified `companion/core/enforcement-policy-store.js`:
+  - Added `MIN_SHADOW_EVIDENCE_COUNT = 3` constant.
+  - Added `auditHealthy` state variable tracking audit write health.
+  - Refactored `setTrackState()` — moved all gate checks before `mutate()` for `enforced` target, enabling async gate evaluation.
+  - Added `checkEnforcementGateAsync()` — async gate checking runtime availability, model readiness, shadow evidence sufficiency, approval, qualified capability, score threshold, and active override. Error codes: `RUNTIME_UNAVAILABLE`, `MODEL_NOT_READY`, `INSUFFICIENT_EVIDENCE`, `RUNTIME_CHECK_FAILED`, `EVIDENCE_CHECK_FAILED`.
+  - Removed dead sync `checkEnforcementGate()` (replaced by async version).
+  - Updated `getStoreHealth()` — includes `auditHealthy`.
+  - Updated `executeMutation()` — fills in audit `overrideId` from mutation result; fills in audit `after` state from `candidate.tracks[trackId]` when available; appends `POLICY_AUDIT_WRITE_FAILED` warnings to success results when audit is degraded.
+  - Updated `safeAudit()` — sets `auditHealthy = false` on write failure.
+  - Updated `setOverride()` — removed `expiresAt` parameter.
+  - Updated `syncApi._seedOverrideSync()` — removed `expiresAt: null`.
+  - Added `MIN_SHADOW_EVIDENCE_COUNT` to exports.
+  - Updated `revokeApproval()` — mutation returns `auditAfter: { approved: false, state: record.state }` for accurate audit records.
+- Modified `companion/schemas/internal/enforcement-policy.schema.json`:
+  - Changed `defaultState` from `enum` (5 states) to `const: "shadow"`.
+  - Removed `expiresAt` from overrides items properties.
+- Modified `companion/core/enforcement-policy.js`:
+  - Removed `expiresAt` from `setOverride()` parameter and `store.setOverride()` call.
+  - Added `auditHealthy` to `getPolicySummary()` `storeHealth`.
+- Modified `companion/server.js` — removed `expiresAt` from override endpoint handler.
+- Modified `scripts/test-enforcement-policy-store.js` — added 20 new tests covering: runtime unavailable gate, model not ready gate, insufficient evidence gate, all conditions met, forceGate bypass, auditHealthy flag, audit warnings, revocation after-state accuracy, override creation audit.
+
+### Why
+
+Address five code review findings. The enforced transition gate was the critical issue — it did not verify runtime readiness or shadow evidence, breaking the declared safety contract for the durable `enforced` state. Audit failures were invisible. Schema permitted unsafe defaults. `expiresAt` was dead code. Audit after-state was inaccurate.
+
+### Evidence
+
+- 143/143 store tests pass (20 new: async gate, audit health, audit accuracy).
+- 62/62 enforcement policy tests pass (backward compatible).
+- 91/91 enforcement routing tests pass (backward compatible).
+- 31/31 shadow routing, 25 qualification resolver, contract, benchmark:test, benchmark:status-smoke, 56/56 smoke tests — all pass.
+- Runtime/evidence checks now gate the durable `eligible → enforced` transition, matching the original safety contract.
 
 ### Next
 

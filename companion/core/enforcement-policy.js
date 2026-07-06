@@ -78,13 +78,13 @@ function createEnforcementPolicy(options = {}) {
     });
   }
 
-  async function setOverride({ trackId, role, modelId, reason, updatedBy, expiresAt }) {
+  async function setOverride({ trackId, role, modelId, reason, updatedBy }) {
     await ensureSeeded();
     if (hasOverride({ trackId, role, modelId })) {
       return { ok: false, code: "DUPLICATE_OVERRIDE", message: `Override already exists for ${trackId}:${role}:${modelId}.` };
     }
     if (options.dataDir && store.syncApi) {
-      return store.setOverride({ trackId, role, modelId, reason, updatedBy: updatedBy || "operator", expiresAt });
+      return store.setOverride({ trackId, role, modelId, reason, updatedBy: updatedBy || "operator" });
     }
     if (store.syncApi) {
       store.syncApi._seedOverrideSync({ trackId, role, modelId, reason: reason || "Manual override" });
@@ -232,6 +232,7 @@ function createEnforcementPolicy(options = {}) {
       trackCount: Object.keys(store.getCanonical()?.tracks || {}).length,
       storeHealth: {
         healthy: health.healthy,
+        auditHealthy: health.auditHealthy,
         safeFallback: health.safeFallback,
         enforcementLocked: health.enforcementLocked,
         revision: health.revision,

@@ -12,6 +12,7 @@ const {
 const ALLOWED_STATES = ["disabled", "shadow", "eligible", "enforced", "suspended"];
 const DEFAULT_STATE = "shadow";
 const MIN_SCORE = 0.7;
+const MIN_SHADOW_EVIDENCE_COUNT = 3;
 const POLICY_VERSION = "enforcement-policy.v1";
 
 const ALLOWED_TRANSITIONS = {
@@ -38,6 +39,7 @@ function createEnforcementPolicyStore(options = {}) {
   let loadError = null;
   let safeFallback = false;
   let enforcementLocked = false;
+  let auditHealthy = true;
 
   function createNullAudit() {
     return { record: async () => {} };
@@ -90,8 +92,7 @@ function createEnforcementPolicyStore(options = {}) {
           trackId, role, modelId,
           reason: reason || "Legacy seed",
           createdAt: new Date().toISOString(),
-          createdBy: "system",
-          expiresAt: null
+          createdBy: "system"
         });
       }
     }
@@ -245,7 +246,7 @@ function createEnforcementPolicyStore(options = {}) {
     flushing = false;
   }
 
-  async function executeMutation(mutationFn, auditData) {
+  async function executeMutation(mutationFn, auditData, { skipAuditFill } = {}) {
     const beforeRevision = policy.revision;
     const candidate = deepClone(policy);
     const auditPayload = { before: null, after: null, ...auditData };
@@ -325,7 +326,20 @@ function createEnforcementPolicyStore(options = {}) {
 
       policy = candidate;
 
-      const sucEvent = normalizeAuditEvent({
+      let auditAfter = auditPayload.after;
+      if (!skipAuditFill && mutationResult && typeof mutationResult === "object") {
+        if (mutationResult.overrideId && !auditPayload.overrideId) {
+          auditPayload.overrideId = mutationResult.overrideId;
+        }
+        if (mutationResult.auditAfter) {
+          auditAfter = mutationResult.auditAfter;
+        } else if (auditPayload.trackId && candidate.tracks[auditPayload.trackId]) {
+          const track = candidate.tracks[auditPayload.trackId];
+          auditAfter = { ...(auditAfter || {}), state: track.state, approved: track.approved };
+        }
+      }
+
+      await safeAudit(normalizeAuditEvent({
         action: auditPayload.action || "track.state.changed",
         actor: auditPayload.actor || "operator",
         trackId: auditPayload.trackId || null,
@@ -333,14 +347,27 @@ function createEnforcementPolicyStore(options = {}) {
         previousRevision: beforeRevision,
         committedRevision: candidate.revision,
         before: auditPayload.before || null,
-        after: auditPayload.after || null,
+        after: auditAfter,
         reason: auditPayload.reason || null,
         result: "success"
-      });
-      await safeAudit(sucEvent);
+      }));
     }
 
-    return { ok: true, revision: policy.revision, ...(mutationResult === true ? {} : (mutationResult || {})) };
+    const result = {
+      ok: true,
+      revision: policy.revision,
+      ...(mutationResult === true ? {} : (mutationResult || {}))
+    };
+
+    if (!auditHealthy) {
+      result.warnings = result.warnings || [];
+      result.warnings.push({
+        code: "POLICY_AUDIT_WRITE_FAILED",
+        message: "Policy was committed but its audit event could not be recorded."
+      });
+    }
+
+    return result;
   }
 
   async function atomicWrite(candidate) {
@@ -367,6 +394,7 @@ function createEnforcementPolicyStore(options = {}) {
     return {
       initialized: true,
       healthy: !loadError,
+      auditHealthy,
       safeFallback,
       enforcementLocked,
       revision: policy ? policy.revision : 0,
@@ -469,11 +497,29 @@ function createEnforcementPolicyStore(options = {}) {
       };
     }
 
-    return mutate((candidate) => {
-      const currentState = getTrackState(trackId);
-      const transitionResult = validateStateTransition(currentState, targetState);
-      if (!transitionResult.ok) return transitionResult;
+    const currentState = getTrackState(trackId);
+    const transitionResult = validateStateTransition(currentState, targetState);
+    if (!transitionResult.ok) return transitionResult;
 
+    if (targetState === "eligible" && opts.forceGate !== true) {
+      const syncGate = checkEligibilityGate(trackId, opts);
+      if (!syncGate.ok) return syncGate;
+    }
+
+    if (targetState === "enforced") {
+      if (currentState !== "eligible") {
+        return {
+          ok: false,
+          code: "INVALID_STATE_TRANSITION",
+          message: "Cannot transition directly to 'enforced'. Track must be in 'eligible' state first.",
+          nextStep: "Set the track to 'eligible' state first, then request 'enforced'."
+        };
+      }
+      const asyncGate = await checkEnforcementGateAsync(trackId, opts);
+      if (!asyncGate.ok) return asyncGate;
+    }
+
+    return mutate((candidate) => {
       const actor = opts.updatedBy || "operator";
       const reason = opts.reason || null;
 
@@ -485,24 +531,6 @@ function createEnforcementPolicyStore(options = {}) {
           updatedBy: "system",
           reason: null
         };
-      }
-
-      if (targetState === "eligible") {
-        const gateResult = checkEligibilityGate(trackId, opts);
-        if (!gateResult.ok) return gateResult;
-      }
-
-      if (targetState === "enforced") {
-        if (currentState !== "eligible") {
-          return {
-            ok: false,
-            code: "INVALID_STATE_TRANSITION",
-            message: "Cannot transition directly to 'enforced'. Track must be in 'eligible' state first.",
-            nextStep: "Set the track to 'eligible' state first, then request 'enforced'."
-          };
-        }
-        const gateResult = checkEnforcementGate(trackId, opts);
-        if (!gateResult.ok) return gateResult;
       }
 
       candidate.tracks[trackId].state = targetState;
@@ -558,46 +586,93 @@ function createEnforcementPolicyStore(options = {}) {
     return { ok: true };
   }
 
-  function checkEnforcementGate(trackId, opts) {
-    if (opts.forceGate !== true) {
-      if (!isTrackApproved(trackId)) {
-        return {
-          ok: false,
-          code: "TRACK_NOT_APPROVED",
-          message: `Track '${trackId}' is not approved.`,
-          nextStep: "Approve the track first."
-        };
-      }
+  async function checkEnforcementGateAsync(trackId, opts) {
+    if (opts.forceGate === true) return { ok: true };
 
-      const best = getBestQualifiedCapability(trackId, opts.role);
-      if (!best) {
-        return {
-          ok: false,
-          code: "NO_QUALIFIED_CAPABILITY",
-          message: `Track '${trackId}' has no currently qualified capability for enforcement.`,
-          nextStep: "Run Benchmark Lab and ensure a qualified capability exists."
-        };
-      }
+    if (!isTrackApproved(trackId)) {
+      return {
+        ok: false,
+        code: "TRACK_NOT_APPROVED",
+        message: `Track '${trackId}' is not approved.`,
+        nextStep: "Approve the track first."
+      };
+    }
 
-      const score = best.score || 0;
-      const threshold = policy.metadata.minimumScoreThreshold;
-      if (score < threshold) {
-        return {
-          ok: false,
-          code: "INSUFFICIENT_SCORE",
-          message: `Score ${score} is below the minimum threshold ${threshold}.`,
-          nextStep: "Improve model qualification score."
-        };
-      }
+    const best = getBestQualifiedCapability(trackId, opts.role);
+    if (!best) {
+      return {
+        ok: false,
+        code: "NO_QUALIFIED_CAPABILITY",
+        message: `Track '${trackId}' has no currently qualified capability for enforcement.`,
+        nextStep: "Run Benchmark Lab and ensure a qualified capability exists."
+      };
+    }
 
-      if (hasOverride({ trackId, role: opts.role || best.role, modelId: best.modelId })) {
+    const score = best.score || 0;
+    const threshold = policy.metadata.minimumScoreThreshold;
+    if (score < threshold) {
+      return {
+        ok: false,
+        code: "INSUFFICIENT_SCORE",
+        message: `Score ${score} is below the minimum threshold ${threshold}.`,
+        nextStep: "Improve model qualification score."
+      };
+    }
+
+    if (hasOverride({ trackId, role: opts.role || best.role, modelId: best.modelId })) {
+      return {
+        ok: false,
+        code: "ACTIVE_OVERRIDE",
+        message: `An active override blocks the recommended capability for track '${trackId}'.`,
+        nextStep: "Clear the override before enforcing."
+      };
+    }
+
+    try {
+      const providerStatus = await getProviderStatus(best.modelId);
+      if (!providerStatus.available) {
         return {
           ok: false,
-          code: "ACTIVE_OVERRIDE",
-          message: `An active override blocks the recommended capability for track '${trackId}'.`,
-          nextStep: "Clear the override before enforcing."
+          code: "RUNTIME_UNAVAILABLE",
+          message: `Runtime is not available for model '${best.modelId}'.`,
+          nextStep: "Start the runtime provider (e.g. Ollama) and ensure it is accessible."
         };
       }
+      if (!providerStatus.modelReady) {
+        return {
+          ok: false,
+          code: "MODEL_NOT_READY",
+          message: `Model '${best.modelId}' is not ready on the runtime.`,
+          nextStep: "Pull the model on the runtime provider."
+        };
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        code: "RUNTIME_CHECK_FAILED",
+        message: `Failed to check runtime status: ${error.message}`,
+        nextStep: "Verify runtime provider connectivity."
+      };
+    }
+
+    try {
+      const evidence = await getShadowEvidence(trackId);
+      const count = (evidence && Array.isArray(evidence)) ? evidence.length : 0;
+      if (count < MIN_SHADOW_EVIDENCE_COUNT) {
+        return {
+          ok: false,
+          code: "INSUFFICIENT_EVIDENCE",
+          message: `Track '${trackId}' has ${count} shadow comparisons; at least ${MIN_SHADOW_EVIDENCE_COUNT} required.`,
+          nextStep: `Run the track in shadow mode to collect at least ${MIN_SHADOW_EVIDENCE_COUNT} shadow comparisons.`
+        };
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        code: "EVIDENCE_CHECK_FAILED",
+        message: `Failed to check shadow evidence: ${error.message}`,
+        nextStep: "Verify the shadow evidence store."
+      };
     }
 
     return { ok: true };
@@ -701,7 +776,8 @@ function createEnforcementPolicyStore(options = {}) {
         compound: {
           approvalRevoked: true,
           stateTransition: currentState !== record.state ? { from: currentState, to: record.state } : null
-        }
+        },
+        auditAfter: { approved: false, state: record.state }
       };
     }, {
       action: "track.approval.revoked",
@@ -734,7 +810,7 @@ function createEnforcementPolicyStore(options = {}) {
 
   // ========== Overrides ==========
 
-  async function setOverride({ trackId, role, modelId, reason, updatedBy, expiresAt }, opts = {}) {
+  async function setOverride({ trackId, role, modelId, reason, updatedBy }, opts = {}) {
     const actor = updatedBy || "operator";
 
     return mutate((candidate) => {
@@ -759,8 +835,7 @@ function createEnforcementPolicyStore(options = {}) {
         modelId,
         reason: reason || null,
         createdAt: now,
-        createdBy: actor,
-        expiresAt: expiresAt || null
+        createdBy: actor
       };
 
       candidate.overrides.push(overrideRec);
@@ -876,6 +951,7 @@ function createEnforcementPolicyStore(options = {}) {
     try {
       await audit.record(event);
     } catch (error) {
+      auditHealthy = false;
       console.error("[Enforcement Policy Audit] Failed to record audit event:", error.message);
       try {
         await audit.record(normalizeAuditEvent({
@@ -926,6 +1002,7 @@ module.exports = {
   createEnforcementPolicyStore,
   ALLOWED_STATES,
   DEFAULT_STATE,
+  MIN_SHADOW_EVIDENCE_COUNT,
   POLICY_VERSION,
   ALLOWED_TRANSITIONS
 };

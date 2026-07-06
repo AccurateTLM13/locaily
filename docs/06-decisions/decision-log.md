@@ -900,7 +900,34 @@ Store: `companion/core/enforcement-policy-store.js`. Audit: `companion/core/enfo
 
 ---
 
-## Template```md
+## 2026-07-05 — Durable Enforcement Policy: Code Review Corrections
+
+### Decision
+
+Address five findings from code review: (1) make the `enforced` state transition gate verify runtime readiness and shadow evidence; (2) surface audit degradation in store health and mutation results; (3) lock `defaultState` to `const: "shadow"` in schema; (4) remove `expiresAt` from schema, store, wrapper, and server; (5) fix audit after-state to contain actual committed state for revocation and override creation.
+
+### Why
+
+The durable enforcement gate for `eligible → enforced` did not verify that the runtime was available, the model was ready, or that sufficient shadow evidence existed — a direct mismatch with the declared safety contract. Audit failures were silently swallowed, making the system appear fully healthy after audit write failures. The schema allowed unsafe defaults like `defaultState: "enforced"`. The `expiresAt` field was accepted but never enforced. Audit events for revocation recorded `state: null` instead of the actual committed state.
+
+### Consequences
+
+- **Finding #1 (High)**: `checkEnforcementGateAsync()` now runs all gate checks (approval, qualified capability, score threshold, active override, runtime availability, model readiness, shadow evidence count) before entering the mutation queue for `enforced` transitions. New error codes: `RUNTIME_UNAVAILABLE`, `MODEL_NOT_READY`, `INSUFFICIENT_EVIDENCE`, `RUNTIME_CHECK_FAILED`, `EVIDENCE_CHECK_FAILED`. Minimum shadow evidence count: 3 (`MIN_SHADOW_EVIDENCE_COUNT`).
+- **Finding #2 (Medium)**: `safeAudit()` sets `auditHealthy = false` on write failure. `getStoreHealth()` exposes `auditHealthy`. `executeMutation()` appends `POLICY_AUDIT_WRITE_FAILED` warnings to successful mutation results when audit is degraded.
+- **Finding #3 (Medium)**: Schema `defaultState` changed from `enum` with all 5 states to `const: "shadow"`. Previously persisted documents with non-shadow defaults will fail schema validation and trigger corrupt-file fallback on restart.
+- **Finding #4 (Medium)**: `expiresAt` removed from schema `overrides.items.properties`, store `setOverride()`, wrapper `setOverride()`, and server endpoint handler.
+- **Finding #5 (Low)`: Revocation mutation returns `auditAfter: { approved: false, state: record.state }`; `executeMutation()` uses it to populate the success audit event. Override creation audit now records the generated `overrideId` instead of `null`.
+- 143 store tests (20 new), 62 enforcement policy, 91 enforcement routing, all prior suites pass. 56/56 smoke tests pass.
+
+### Status
+
+Confirmed.
+
+### Notes
+
+Async gate: `companion/core/enforcement-policy-store.js` `checkEnforcementGateAsync()`. Audit health: `auditHealthy` flag, `getStoreHealth()`, `executeMutation()` warnings. Schema: `companion/schemas/internal/enforcement-policy.schema.json` `defaultState` → `const`. Test count: 143 in `scripts/test-enforcement-policy-store.js`.
+
+---```md
 ## YYYY-MM-DD — Title
 ### Decision
 ### Why

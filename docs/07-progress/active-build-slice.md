@@ -20,10 +20,10 @@ Durable Enforcement Policy — **complete**.
 | Durable policy store | Complete | `companion/core/enforcement-policy-store.js` — sync eager init from disk, async mutations, atomic writeFile+rename, state transition graph, compound approval/revocation, override CRUD, corrupt-file fallback with lock, pure in-memory mode |
 | Backward-compatible wrapper | Complete | `companion/core/enforcement-policy.js` — delegates to store, sync legacy seeding via `syncApi`, configurable score threshold |
 | Server integration | Complete | `companion/server.js` — `GET /enforcement/policy`, `POST /enforcement/revoke`, `POST /enforcement/override/clear`, explicit store init at startup with dataDir, existing endpoints updated with reason/updatedBy |
-| Store automated tests | Complete | `scripts/test-enforcement-policy-store.js` — 123 tests covering loading, validation, persistence, state transitions, approval/revocation, overrides, audit, regression |
+| Store automated tests | Complete | `scripts/test-enforcement-policy-store.js` — 143 tests covering loading, validation, persistence, state transitions, approval/revocation, overrides, audit, regression, async enforcement gate, audit degradation |
 | Legacy policy tests | Complete | `scripts/test-enforcement-policy.js` — 62 tests, async-aware, backward compatible |
 | Smoke tests | Complete | 56/56 checks pass including enforcement endpoints |
-| Backward compatibility | Complete | All existing tests pass: 83 enforcement routing, 91 enforcement routing (updated), 62 enforcement policy, 31 shadow routing, 25 qualification resolver, contract, benchmark:test |
+| Backward compatibility | Complete | All existing tests pass: 143 store, 62 enforcement policy, 91 enforcement routing, 31 shadow routing, 25 qualification resolver, contract, benchmark:test |
 
 ## Pilot Track Selection
 

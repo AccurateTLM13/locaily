@@ -25,10 +25,11 @@
       "node scripts/crew-track-run-record-test.js",
       "node scripts/contract-test.js",
       "npm.cmd run benchmark:test",
+      "npm.cmd run benchmark:status-smoke",
       "node scripts/smoke-test.js"
     ],
     "results": [
-      "123/123 enforcement policy store tests pass (loading, validation, persistence, state transitions, approval/revocation, overrides, audit, regression)",
+      "143/143 enforcement policy store tests pass (loading, validation, persistence, state transitions, approval/revocation, overrides, audit, regression, async enforcement gate, audit degradation, audit after-state)",
       "62/62 enforcement-policy tests pass (backward compatible, async-aware)",
       "91/91 enforcement routing tests pass (backward compatible)",
       "31/31 shadow-routing tests pass (backward compatible)",
@@ -63,6 +64,13 @@
       "Existing endpoints updated with reason/updatedBy parameters",
       "Enforcement policy health in root status (distinguishes healthy from degraded)",
       "No absolute filesystem paths exposed in API responses",
+      "Async enforcement gate checks runtime availability, model readiness, and shadow evidence sufficiency (RUNTIME_UNAVAILABLE, MODEL_NOT_READY, INSUFFICIENT_EVIDENCE)",
+      "Enforcement gate checks include approval, qualified capability, score threshold, and active override (all synchronous pre-checks)",
+      "Audit degradation surfaced in store health (auditHealthy flag) and mutation results (POLICY_AUDIT_WRITE_FAILED warning)",
+      "defaultState locked to const: 'shadow' in policy schema — unsafe non-shadow defaults rejected at validation",
+      "expiresAt removed from schema, store, wrapper, and server — no unused dead field",
+      "Revocation audit after-state contains actual committed state (not null)",
+      "Override creation audit contains generated overrideId (not null)",
       "All prior acceptance criteria remain passing"
     ],
     "failed": [],

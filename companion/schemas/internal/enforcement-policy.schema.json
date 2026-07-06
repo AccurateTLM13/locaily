@@ -101,11 +101,6 @@
           "createdBy": {
             "type": "string",
             "description": "Actor identifier for override creation."
-          },
-          "expiresAt": {
-            "type": ["string", "null"],
-            "format": "date-time",
-            "description": "Optional expiration timestamp."
           }
         }
       },
@@ -117,9 +112,8 @@
       "additionalProperties": false,
       "properties": {
         "defaultState": {
-          "type": "string",
-          "enum": ["disabled", "shadow", "eligible", "enforced", "suspended"],
-          "description": "Default enforcement state for unconfigured tracks."
+          "const": "shadow",
+          "description": "Default enforcement state for unconfigured tracks. Must always be 'shadow'."
         },
         "minimumScoreThreshold": {
           "type": "number",

@@ -555,12 +555,12 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 400, { ok: false, code: "BAD_JSON" });
       }
 
-      const { trackId, role, modelId, reason, updatedBy, expiresAt } = bodyResult.body || {};
+      const { trackId, role, modelId, reason, updatedBy } = bodyResult.body || {};
       if (!trackId || !role || !modelId) {
         return sendJson(response, 400, { ok: false, code: "MISSING_PARAMS", message: "trackId, role, and modelId are required." });
       }
 
-      const result = await enforcementPolicy.setOverride({ trackId, role, modelId, reason, updatedBy, expiresAt });
+      const result = await enforcementPolicy.setOverride({ trackId, role, modelId, reason, updatedBy });
       return sendJson(response, result.ok ? 200 : 400, result);
     }
 
