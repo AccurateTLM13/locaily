@@ -1,85 +1,138 @@
-const ENFORCEMENT_STATES = ["disabled", "shadow", "eligible", "enforced", "suspended"];
-const DEFAULT_ENFORCEMENT_STATE = "shadow";
+const { createEnforcementPolicyStore, ALLOWED_STATES, DEFAULT_STATE } = require("./enforcement-policy-store");
+
+const ENFORCEMENT_STATES = ALLOWED_STATES;
+const DEFAULT_ENFORCEMENT_STATE = DEFAULT_STATE;
 const MIN_SCORE_THRESHOLD = 0.7;
+
+function getScoreThreshold(options, store) {
+  if (options.scoreThreshold != null) return options.scoreThreshold;
+  const canonical = store.getCanonical();
+  if (canonical && canonical.metadata && canonical.metadata.minimumScoreThreshold != null) {
+    return canonical.metadata.minimumScoreThreshold;
+  }
+  return MIN_SCORE_THRESHOLD;
+}
 
 function createEnforcementPolicy(options = {}) {
   const resolver = options.resolver;
   const getProviderStatus = options.getProviderStatus || (async () => ({ available: true, modelReady: true }));
-  const trackStates = new Map(Object.entries(options.trackStates || {}));
-  const overrides = new Map(Object.entries(options.overrides || {}));
-  const approvedTracks = new Set(options.approvedTracks || []);
-  const scoreThreshold = options.scoreThreshold != null ? options.scoreThreshold : MIN_SCORE_THRESHOLD;
+
+  const store = createEnforcementPolicyStore({
+    dataDir: options.dataDir,
+    getCapabilityRegistry: options.getCapabilityRegistry,
+    getProviderStatus,
+    getShadowEvidence: options.getShadowEvidence
+  });
+
+  // Synchronously seed initial state from legacy constructor options
+  if (store.syncApi) {
+    if (options.trackStates) {
+      for (const [trackId, state] of Object.entries(options.trackStates)) {
+        store.syncApi._seedTrackStateSync(trackId, state);
+      }
+    }
+    if (options.approvedTracks) {
+      for (const trackId of options.approvedTracks) {
+        store.syncApi._seedApprovalSync(trackId);
+      }
+    }
+    if (options.overrides) {
+      for (const [key, override] of Object.entries(options.overrides)) {
+        store.syncApi._seedOverrideSync({
+          trackId: override.trackId || key.split(":")[0],
+          role: override.role || key.split(":")[1],
+          modelId: override.modelId || key.split(":")[2],
+          reason: override.reason || "Legacy override"
+        });
+      }
+    }
+  }
+
+  async function ensureSeeded() {
+    // Seeding was done synchronously in constructor, no-op
+  }
 
   function getTrackState(trackId) {
-    return trackStates.get(trackId) || DEFAULT_ENFORCEMENT_STATE;
+    return store.getTrackState(trackId);
   }
 
   function getTrackStates() {
-    const result = {};
-    for (const [trackId, state] of trackStates) {
-      result[trackId] = state;
+    return store.getTrackStates();
+  }
+
+  async function setTrackState(trackId, state, opts = {}) {
+    await ensureSeeded();
+    const transitionResult = store.validateStateTransition
+      ? store.validateStateTransition(getTrackState(trackId), state)
+      : { ok: ALLOWED_STATES.includes(state) };
+
+    if (!transitionResult.ok) {
+      return transitionResult;
     }
-    return result;
+
+    return store.setTrackState(trackId, state, {
+      updatedBy: opts.updatedBy || opts.actor || "operator",
+      reason: opts.reason || null,
+      role: opts.role,
+      forceGate: opts.forceGate
+    });
   }
 
-  function setTrackState(trackId, state) {
-    if (!ENFORCEMENT_STATES.includes(state)) {
-      return {
-        ok: false,
-        error: {
-          code: "INVALID_ENFORCEMENT_STATE",
-          message: `'${state}' is not a valid enforcement state.`,
-          nextStep: `Use one of: ${ENFORCEMENT_STATES.join(", ")}.`
-        }
-      };
+  async function setOverride({ trackId, role, modelId, reason, updatedBy }) {
+    await ensureSeeded();
+    if (hasOverride({ trackId, role, modelId })) {
+      return { ok: false, code: "DUPLICATE_OVERRIDE", message: `Override already exists for ${trackId}:${role}:${modelId}.` };
     }
-    trackStates.set(trackId, state);
-    return { ok: true, trackId, state };
+    if (options.dataDir && store.syncApi) {
+      return store.setOverride({ trackId, role, modelId, reason, updatedBy: updatedBy || "operator" });
+    }
+    if (store.syncApi) {
+      store.syncApi._seedOverrideSync({ trackId, role, modelId, reason: reason || "Manual override" });
+    }
+    return { ok: true, overrideId: "sync_override" };
   }
 
-  function setOverride({ trackId, role, modelId, reason }) {
-    const key = `${trackId}:${role}:${modelId}`;
-    overrides.set(key, { trackId, role, modelId, reason, createdAt: new Date().toISOString() });
-    return { ok: true, key };
-  }
-
-  function clearOverride({ trackId, role, modelId }) {
-    const key = `${trackId}:${role}:${modelId}`;
-    return overrides.delete(key);
+  async function clearOverride(identifier, opts = {}) {
+    await ensureSeeded();
+    return store.clearOverride(identifier, { updatedBy: opts.updatedBy || "operator", reason: opts.reason || null });
   }
 
   function getOverrides() {
-    return Array.from(overrides.values());
+    return store.getOverrides();
   }
 
   function hasOverride({ trackId, role, modelId }) {
-    const key = `${trackId}:${role}:${modelId}`;
-    return overrides.has(key);
+    return store.hasOverride({ trackId, role, modelId });
   }
 
-  function approveTrack(trackId) {
-    approvedTracks.add(trackId);
-    if (!trackStates.has(trackId)) {
-      trackStates.set(trackId, "shadow");
-    }
-    return { ok: true, trackId };
+  async function approveTrack(trackId, opts = {}) {
+    await ensureSeeded();
+    return store.approveTrack(trackId, { updatedBy: opts.updatedBy || "operator", reason: opts.reason || null });
+  }
+
+  async function revokeApproval(trackId, opts = {}) {
+    await ensureSeeded();
+    return store.revokeApproval(trackId, { updatedBy: opts.updatedBy || "operator", reason: opts.reason || null });
   }
 
   function isTrackApproved(trackId) {
-    return approvedTracks.has(trackId);
+    return store.isTrackApproved(trackId);
   }
 
-  async function evaluateEligibility({ trackId, role, recommendedCapabilityId, contractId, score, qualificationState, comparisonState, selectedQualificationState, recommendedQualificationState }) {
+  let scoreThreshold = getScoreThreshold(options, store);
+
+  async function evaluateEligibility({
+    trackId, role, recommendedCapabilityId, contractId, score,
+    qualificationState, comparisonState,
+    selectedQualificationState, recommendedQualificationState
+  }) {
+    await ensureSeeded();
+    scoreThreshold = getScoreThreshold(options, store);
     const trackState = getTrackState(trackId);
     const eligibility = {
       eligible: false,
-      trackId,
-      role,
-      recommendedCapabilityId,
-      trackState,
-      checks: [],
-      blocks: [],
-      canEnforce: false
+      trackId, role, recommendedCapabilityId,
+      trackState, checks: [], blocks: [], canEnforce: false
     };
 
     if (trackState === "disabled") {
@@ -87,7 +140,6 @@ function createEnforcementPolicy(options = {}) {
       eligibility.checks.push({ check: "track_state", passed: false, detail: `Track state is '${trackState}'` });
       return eligibility;
     }
-
     eligibility.checks.push({ check: "track_state", passed: true, detail: `Track state is '${trackState}'` });
 
     if (trackState === "shadow") {
@@ -167,15 +219,31 @@ function createEnforcementPolicy(options = {}) {
   }
 
   function getPolicySummary() {
+    const health = store.getStoreHealth();
     return {
-      states: ENFORCEMENT_STATES,
-      defaultState: DEFAULT_ENFORCEMENT_STATE,
-      scoreThreshold,
+      states: ALLOWED_STATES,
+      defaultState: DEFAULT_STATE,
+      scoreThreshold: getScoreThreshold(options, store),
       trackStates: getTrackStates(),
-      approvedTracks: Array.from(approvedTracks),
+      approvedTracks: Object.entries(store.getCanonical()?.tracks || {})
+        .filter(([_, rec]) => rec.approved)
+        .map(([id]) => id),
       activeOverrides: getOverrides().length,
-      trackCount: trackStates.size
+      trackCount: Object.keys(store.getCanonical()?.tracks || {}).length,
+      storeHealth: {
+        healthy: health.healthy,
+        auditHealthy: health.auditHealthy,
+        safeFallback: health.safeFallback,
+        enforcementLocked: health.enforcementLocked,
+        revision: health.revision,
+        schemaVersion: health.schemaVersion,
+        loadError: health.loadError
+      }
     };
+  }
+
+  function getStore() {
+    return store;
   }
 
   return {
@@ -188,9 +256,12 @@ function createEnforcementPolicy(options = {}) {
     getOverrides,
     hasOverride,
     approveTrack,
+    revokeApproval,
     isTrackApproved,
     evaluateEligibility,
-    getPolicySummary
+    getPolicySummary,
+    getStore,
+    store
   };
 }
 

@@ -52,7 +52,7 @@ const { createCapabilityRegistry } = require("./core/capability-registry");
 const { createQualificationEvidenceLinker } = require("./evidence/qualification-evidence-linker");
 const { createShadowRouter } = require("./core/shadow-routing");
 const { createEnforcementPolicy } = require("./core/enforcement-policy");
-const { getEvidenceReview, getTrackReview, getDisagreements, getEnforcementDecisions, buildEnforcementMetrics } = require("./evidence/shadow-evidence-review");
+const { getEvidenceReview, getTrackReview, getDisagreements, getEnforcementDecisions, getShadowComparisons, buildEnforcementMetrics } = require("./evidence/shadow-evidence-review");
 
 const PLATFORM_VERSION = "0.1.0";
 const SERVICE_NAME = "local-ai-platform";
@@ -132,6 +132,7 @@ const qualificationEvidenceLinker = createQualificationEvidenceLinker({
 });
 const shadowRouter = createShadowRouter({ resolver: qualificationResolver });
 const enforcementPolicy = createEnforcementPolicy({
+  dataDir: join(__dirname, "..", "data"),
   resolver: qualificationResolver,
   getProviderStatus: async (modelId) => {
     try {
@@ -140,6 +141,11 @@ const enforcementPolicy = createEnforcementPolicy({
     } catch {
       return { available: false, modelReady: false };
     }
+  },
+  getCapabilityRegistry: () => capabilityRegistry,
+  getShadowEvidence: async (trackId) => {
+    const comparisons = await getShadowComparisons(trackId);
+    return comparisons.filter((c) => c.comparison && c.comparison !== "recommendation-unavailable" && c.comparison !== "insufficient-evidence");
   }
 });
 
@@ -370,13 +376,72 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && url.pathname === "/enforcement/status") {
       const review = await getEvidenceReview();
+      const storeHealth = enforcementPolicy.getStore ? enforcementPolicy.getStore().getStoreHealth() : {};
       return sendJson(response, 200, {
         ok: true,
         policy: enforcementPolicy.getPolicySummary(),
         review,
+        storeHealth,
         pilotTrack: null,
         pilotReason: "No track has valid qualified capability and sufficient shadow coverage. Implementation complete with enforcement inactive."
       });
+    }
+
+    if (request.method === "GET" && url.pathname === "/enforcement/policy") {
+      const store = enforcementPolicy.getStore ? enforcementPolicy.getStore() : null;
+      const health = store ? store.getStoreHealth() : { healthy: false, initialized: false };
+      const canonical = store ? store.getCanonical() : null;
+
+      if (!canonical) {
+        return sendJson(response, 503, {
+          ok: false,
+          code: "ENFORCEMENT_POLICY_INVALID",
+          message: "Policy store is not initialized.",
+          nextStep: "Restart the companion server."
+        });
+      }
+
+      const policyResponse = {
+        schemaVersion: canonical.schemaVersion,
+        revision: canonical.revision,
+        createdAt: canonical.createdAt,
+        updatedAt: canonical.updatedAt,
+        updatedBy: canonical.updatedBy,
+        tracks: canonical.tracks,
+        overrides: canonical.overrides.map((o) => ({
+          overrideId: o.overrideId,
+          trackId: o.trackId,
+          role: o.role,
+          modelId: o.modelId,
+          reason: o.reason,
+          createdAt: o.createdAt,
+          createdBy: o.createdBy,
+          expiresAt: o.expiresAt
+        })),
+        metadata: canonical.metadata,
+        storeHealth: {
+          healthy: health.healthy,
+          safeFallback: health.safeFallback,
+          enforcementLocked: health.enforcementLocked,
+          revision: health.revision,
+          schemaVersion: health.schemaVersion
+        },
+        loadStatus: health.loadError ? {
+          error: true,
+          code: health.loadError.code,
+          message: health.loadError.message
+        } : { error: false }
+      };
+
+      if (health.safeFallback) {
+        policyResponse.warning = "Policy store is using safe in-memory fallback.";
+      }
+
+      if (health.enforcementLocked) {
+        policyResponse.warning = (policyResponse.warning ? policyResponse.warning + " " : "") + "Escalation to eligible/enforced is locked due to policy file corruption.";
+      }
+
+      return sendJson(response, 200, { ok: true, policy: policyResponse });
     }
 
     if (request.method === "POST" && url.pathname === "/enforcement/set") {
@@ -391,7 +456,7 @@ const server = http.createServer(async (request, response) => {
         });
       }
 
-      const { trackId, state } = bodyResult.body || {};
+      const { trackId, state, reason, updatedBy } = bodyResult.body || {};
       if (!trackId || !state) {
         return sendJson(response, 400, {
           ok: false,
@@ -408,6 +473,16 @@ const server = http.createServer(async (request, response) => {
             code: "TRACK_NOT_APPROVED",
             message: `Track '${trackId}' is not approved for enforcement.`,
             nextStep: `Use POST /enforcement/approve with trackId '${trackId}' first.`
+          });
+        }
+
+        const currentState = enforcementPolicy.getTrackState(trackId);
+        if (currentState !== "eligible") {
+          return sendJson(response, 400, {
+            ok: false,
+            code: "INVALID_STATE_TRANSITION",
+            message: `Cannot transition directly to 'enforced'. Track '${trackId}' is in '${currentState}' state. Must be 'eligible' first.`,
+            nextStep: `Set track '${trackId}' to 'eligible' state first, then request 'enforced'.`
           });
         }
 
@@ -433,7 +508,7 @@ const server = http.createServer(async (request, response) => {
         }
       }
 
-      const result = enforcementPolicy.setTrackState(trackId, state);
+      const result = await enforcementPolicy.setTrackState(trackId, state, { reason, updatedBy, forceGate: false });
       return sendJson(response, result.ok ? 200 : 400, result);
     }
 
@@ -448,13 +523,33 @@ const server = http.createServer(async (request, response) => {
         });
       }
 
-      const { trackId } = bodyResult.body || {};
+      const { trackId, reason, updatedBy } = bodyResult.body || {};
       if (!trackId) {
         return sendJson(response, 400, { ok: false, code: "MISSING_PARAMS", message: "trackId is required." });
       }
 
-      const result = enforcementPolicy.approveTrack(trackId);
+      const result = await enforcementPolicy.approveTrack(trackId, { reason, updatedBy });
       return sendJson(response, 200, result);
+    }
+
+    if (request.method === "POST" && url.pathname === "/enforcement/revoke") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON."
+        });
+      }
+
+      const { trackId, reason, updatedBy } = bodyResult.body || {};
+      if (!trackId) {
+        return sendJson(response, 400, { ok: false, code: "MISSING_PARAMS", message: "trackId is required." });
+      }
+
+      const result = await enforcementPolicy.revokeApproval(trackId, { reason, updatedBy });
+      return sendJson(response, result.ok ? 200 : 400, result);
     }
 
     if (request.method === "POST" && url.pathname === "/enforcement/override") {
@@ -464,13 +559,40 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 400, { ok: false, code: "BAD_JSON" });
       }
 
-      const { trackId, role, modelId, reason } = bodyResult.body || {};
+      const { trackId, role, modelId, reason, updatedBy } = bodyResult.body || {};
       if (!trackId || !role || !modelId) {
         return sendJson(response, 400, { ok: false, code: "MISSING_PARAMS", message: "trackId, role, and modelId are required." });
       }
 
-      const result = enforcementPolicy.setOverride({ trackId, role, modelId, reason });
-      return sendJson(response, 200, result);
+      const result = await enforcementPolicy.setOverride({ trackId, role, modelId, reason, updatedBy });
+      return sendJson(response, result.ok ? 200 : 400, result);
+    }
+
+    if (request.method === "POST" && url.pathname === "/enforcement/override/clear") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, { ok: false, code: "BAD_JSON" });
+      }
+
+      const { overrideId, trackId, role, modelId, reason, updatedBy } = bodyResult.body || {};
+
+      let identifier;
+      if (overrideId) {
+        identifier = overrideId;
+      } else if (trackId && role && modelId) {
+        identifier = { trackId, role, modelId };
+      } else {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "MISSING_PARAMS",
+          message: "Provide overrideId, or trackId + role + modelId to clear an override.",
+          nextStep: "Use overrideId from GET /enforcement/policy."
+        });
+      }
+
+      const result = await enforcementPolicy.clearOverride(identifier, { reason, updatedBy });
+      return sendJson(response, result.ok ? 200 : 400, result);
     }
 
     if (request.method === "GET" && url.pathname === "/enforcement/review") {
@@ -928,6 +1050,12 @@ server.on("error", (error) => {
 });
 
 server.listen(config.server.port, config.server.host, async () => {
+  try {
+    const store = enforcementPolicy.getStore ? enforcementPolicy.getStore() : null;
+    if (store) await store.initialize();
+  } catch (initError) {
+    console.warn("[Enforcement Policy] Initialization warning:", initError.message);
+  }
   await printStartupStatus();
 });
 
@@ -1023,6 +1151,9 @@ async function buildHealthResponse() {
   const runtimeState = await checkRuntimeState();
   const memoryStatus = vaultAdapter.getStatus();
   const benchmarkStatus = modelQualificationLoader.getStatus();
+  const enforcementStore = enforcementPolicy.getStore ? enforcementPolicy.getStore() : null;
+  const enforcementHealth = enforcementStore ? enforcementStore.getStoreHealth() : { healthy: false, initialized: false };
+
   const health = {
     ok: true,
     engine: "local-ai-engine-core",
@@ -1056,6 +1187,13 @@ async function buildHealthResponse() {
       summary: qualificationResolver.getAllSummary(),
       capabilitiesEndpoint: "/qualifications/capabilities",
       dryRunEndpoint: "/qualifications/dry-run"
+    },
+    enforcement_policy: {
+      healthy: enforcementHealth.healthy,
+      revision: enforcementHealth.revision,
+      safeFallback: enforcementHealth.safeFallback,
+      enforcementLocked: enforcementHealth.enforcementLocked,
+      policyEndpoint: "/enforcement/policy"
     }
   };
 

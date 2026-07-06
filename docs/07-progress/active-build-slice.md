@@ -2,29 +2,28 @@
 
 ## Objective
 
-Implement guarded qualification-aware routing for one explicitly approved Track.
+Make enforcement policy configuration durable across companion server restarts with safe operator workflows for state changes, approvals, revocation, suspension, restoration, overrides, inspection, auditing, and corrupt-policy recovery.
 
 ## Current Slice
 
-Guarded Qualification-Aware Routing Enforcement — **complete**.
+Durable Enforcement Policy — **complete**.
 
-**Status:** Implementation complete. No pilot Track activated — no companion track has a current, valid `qualified` model capability with sufficient shadow routing evidence. Enforcement remains disabled for all tracks. The enforcement machinery is ready for pilot activation once a track meets all conditions.
+**Status:** Enforcement policy configuration now persists across companion server restarts. Atomic persistence, strict state transition enforcement, append-only JSONL audit, corrupt-file recovery, and pure in-memory test mode implemented. All prior enforcement machinery unchanged. Enforcement remains disabled for all tracks. No pilot activated.
 
 ### Completed Scope Items
 
 | Area | Status | Notes |
 |---|---|---|
-| Enforcement evaluation in model router | Complete | `evaluateEnforcement()` added to `companion/crew/model-router.js`. Evaluated inside `executeModelStep()` after shadow routing, before execution. |
-| Enforcement decision field in schema | Complete | Optional `routing.enforcementDecision` added to `locaily.track_run_record.v1` schema. Additive, validated, backwards-compatible. |
-| Enforcement decision in record builder | Complete | `buildTrackRunRecord()` passes `enforcementDecision` through to `routing`; omitted when not provided. |
-| Enforcement decision in runtime recorder | Complete | `buildStepChildRecord()` in `runtime-track-run-recorder.js` passes enforcement decision to child records. |
-| Guarded fallback behavior | Complete | Enforced capability failure triggers fallback to original selected model. Fallback decision, original error, and success/failure recorded. |
-| Evidence review enforcement metrics | Complete | `buildEnforcementMetrics()` in `shadow-evidence-review.js` reports enforcement attempts, applied, blocked, fallback counts, success rates per capability, qualification record usage, failed conditions. |
-| API visibility | Complete | `GET /enforcement/status` includes enforcement metrics. `GET /enforcement/pilot` reports pilot status. `GET /enforcement/decisions` lists enforcement decisions. |
-| Safe state change enforcement | Complete | `POST /enforcement/set` to `enforced` requires track approval, qualified capability, and non-suspended state. |
-| Pilot Track selection | Complete | No track selected. See pilot selection documentation for details. |
-| Automated tests | Complete | `scripts/test-enforcement-routing.js` — 83 tests covering all policy states, eligibility failures, routing evidence, runtime failures, enforcement metrics, builder integration, and compatibility. |
-| Backward compatibility | Complete | All existing tests pass: 60 enforcement policy, 31 shadow routing, 25 qualification resolver, 4 schema, 18 crew track run record, contract tests. |
+| Canonical policy document schema | Complete | `companion/schemas/internal/enforcement-policy.schema.json` — v1, `additionalProperties: false`, strict validation |
+| Audit event schema | Complete | `companion/schemas/internal/enforcement-policy-audit-event.schema.json` — 10 event types, before/after, revision tracking |
+| Audit module | Complete | `companion/core/enforcement-policy-audit.js` — JSONL append-only, schema-validated, normalize events |
+| Durable policy store | Complete | `companion/core/enforcement-policy-store.js` — sync eager init from disk, async mutations, atomic writeFile+rename, state transition graph, compound approval/revocation, override CRUD, corrupt-file fallback with lock, pure in-memory mode |
+| Backward-compatible wrapper | Complete | `companion/core/enforcement-policy.js` — delegates to store, sync legacy seeding via `syncApi`, configurable score threshold |
+| Server integration | Complete | `companion/server.js` — `GET /enforcement/policy`, `POST /enforcement/revoke`, `POST /enforcement/override/clear`, explicit store init at startup with dataDir, existing endpoints updated with reason/updatedBy |
+| Store automated tests | Complete | `scripts/test-enforcement-policy-store.js` — 143 tests covering loading, validation, persistence, state transitions, approval/revocation, overrides, audit, regression, async enforcement gate, audit degradation |
+| Legacy policy tests | Complete | `scripts/test-enforcement-policy.js` — 62 tests, async-aware, backward compatible |
+| Smoke tests | Complete | 56/56 checks pass including enforcement endpoints |
+| Backward compatibility | Complete | All existing tests pass: 143 store, 62 enforcement policy, 91 enforcement routing, 31 shadow routing, 25 qualification resolver, contract, benchmark:test |
 
 ## Pilot Track Selection
 
@@ -90,5 +89,9 @@ All tracks. No track is configured for enforcement. All default to `shadow`.
 **Pilot Enforcement Validation and Multi-Model Track Expansion**
 
 Activate enforcement for one qualified track once qualification evidence exists. Expand multi-model testing with runtime performance feedback. Add human correction records.
+
+## Prior Slice (Guarded Qualification-Aware Routing Enforcement)
+
+Prior slice implemented enforcement evaluation in the model router, enforcement decision in Track Run Records, fallback behavior, enforcement metrics in evidence review, pilot/decisions endpoints, safe state change enforcement, and 83 routing tests. All prior scope items remain operational and unchanged.
 
 

@@ -268,11 +268,32 @@ async function getEnforcementDecisions(trackId) {
     }));
 }
 
+async function getShadowComparisons(trackId) {
+  const allRecords = await listAllRecords();
+  const relevant = trackId
+    ? allRecords.filter((r) => r.trackId === trackId)
+    : allRecords;
+
+  return relevant.filter(
+    (r) => r.routing && r.routing.shadowRecommendation
+  ).map((r) => ({
+    recordId: r.recordId,
+    trackId: r.trackId,
+    timestamp: r.timestamps?.createdAt,
+    comparison: r.routing.shadowRecommendation.comparison,
+    selectedCapabilityId: r.routing.shadowRecommendation.selectedCapabilityId,
+    recommendedCapabilityId: r.routing.shadowRecommendation.recommendedCapabilityId,
+    reason: r.routing.shadowRecommendation.reason,
+    recommendedScore: r.routing.shadowRecommendation.recommendedScore
+  }));
+}
+
 module.exports = {
   getEvidenceReview,
   getTrackReview,
   getDisagreements,
   getEnforcementDecisions,
+  getShadowComparisons,
   buildEvidenceReview,
   buildEnforcementMetrics
 };

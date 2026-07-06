@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/enforcement-policy-audit-event.schema.json",
+  "title": "Enforcement Policy Audit Event",
+  "description": "Append-only audit event record for enforcement policy mutations.",
+  "type": "object",
+  "required": ["eventId", "timestamp", "actor", "action", "previousRevision", "committedRevision", "result"],
+  "additionalProperties": false,
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "description": "Unique event identifier."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp of the event."
+    },
+    "actor": {
+      "type": "string",
+      "description": "Actor identifier that triggered the event."
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "policy.initialized",
+        "policy.loaded",
+        "policy.load.rejected",
+        "track.state.changed",
+        "track.approved",
+        "track.approval.revoked",
+        "override.added",
+        "override.cleared",
+        "policy.write.failed",
+        "policy.audit.failed"
+      ],
+      "description": "Type of enforcement policy event."
+    },
+    "trackId": {
+      "type": ["string", "null"],
+      "description": "Track identifier, if applicable."
+    },
+    "overrideId": {
+      "type": ["string", "null"],
+      "description": "Override identifier, if applicable."
+    },
+    "previousRevision": {
+      "type": ["integer", "null"],
+      "description": "Revision before the mutation."
+    },
+    "committedRevision": {
+      "type": ["integer", "null"],
+      "description": "Revision committed by the mutation."
+    },
+    "before": {
+      "type": ["object", "null"],
+      "description": "Previous state snapshot (track state, override, etc.)."
+    },
+    "after": {
+      "type": ["object", "null"],
+      "description": "New state snapshot after mutation."
+    },
+    "reason": {
+      "type": ["string", "null"],
+      "description": "Operator-provided reason."
+    },
+    "result": {
+      "type": "string",
+      "enum": ["success", "rejected", "failed"],
+      "description": "Event outcome."
+    },
+    "errorCode": {
+      "type": ["string", "null"],
+      "description": "Error code if result is rejected or failed."
+    },
+    "errorMessage": {
+      "type": ["string", "null"],
+      "description": "Human-readable error detail."
+    }
+  }
+}
