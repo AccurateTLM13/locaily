@@ -645,6 +645,7 @@ Review enforced output quality beyond transport success, add human correction re
 - Added `POST /runs/:id/review` to create/update a human review for a Track Run Record.
 - Added `GET /runs/:id/review` to retrieve the review layer without reading model output from the review record.
 - Added `GET /enforcement/quality-summary` to aggregate human-reviewed output quality.
+- Added `scripts/quality-review.js` and `npm.cmd run quality-review` so operators can list, inspect, review, and summarize runs without hand-written API calls.
 - Added `scripts/test-human-review-records.js` and `npm.cmd run quality-review:test`.
 - Extended smoke tests with human review endpoint coverage.
 
@@ -661,7 +662,10 @@ Review enforced output quality beyond transport success, add human correction re
 - `npm.cmd run benchmark:test` passes.
 - `npm.cmd run benchmark:status-smoke` passes.
 - 57/57 smoke checks pass, including human review endpoints.
+- `node --check scripts/quality-review.js` passes.
+- `npm.cmd run quality-review -- summary` reads the review store.
+- `npm.cmd run quality-review -- list --limit 3` reads Track Run Records.
 
 ### Next
 
-Apply real human reviews to the first enforced Lighthouse pilot outputs and use quality-summary results to decide whether to continue, suspend, narrow, or broaden the pilot.
+Apply real human reviews to the first enforced Lighthouse pilot outputs with `npm.cmd run quality-review -- list --track website_audit.lighthouse_handoff`, then use `npm.cmd run quality-review -- summary` to decide whether to continue, suspend, narrow, or broaden the pilot.

@@ -19,6 +19,7 @@ Output Quality Review + Human Correction Records - **complete**.
 | Review create/update API | Complete | `POST /runs/:id/review` |
 | Review read API | Complete | `GET /runs/:id/review` |
 | Quality summary API | Complete | `GET /enforcement/quality-summary` |
+| Operator CLI | Complete | `npm.cmd run quality-review -- list`, `show`, `pass`, `needs-edit`, `fail`, `summary` |
 | Original output preservation | Complete | Review/correction records are separate JSON artifacts keyed by `trackRunId` |
 | Summary aggregation | Complete | Counts verdicts, pass/correction rates, averages, common failure reasons, critical risk count |
 | Tests | Complete | `node scripts/test-human-review-records.js`; smoke covers HTTP review endpoints |
@@ -57,6 +58,17 @@ Output Quality Review + Human Correction Records - **complete**.
 - average usefulness, accuracy, and structure scores
 - common failure reasons
 - critical risk count
+
+The simpler operator path does not require the server:
+
+```bash
+npm.cmd run quality-review -- list --track website_audit.lighthouse_handoff
+npm.cmd run quality-review -- show <trackRunId>
+npm.cmd run quality-review -- pass <trackRunId> --notes "Useful as-is"
+npm.cmd run quality-review -- needs-edit <trackRunId> --correction "Corrected handoff text"
+npm.cmd run quality-review -- fail <trackRunId> --reason "invented_audit"
+npm.cmd run quality-review -- summary
+```
 
 ## Key Principle
 

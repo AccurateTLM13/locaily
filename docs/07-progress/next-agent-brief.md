@@ -80,7 +80,7 @@ The first enforcement pilot is active. `website_audit.lighthouse_handoff` is app
 
 ### Output Quality Review Foundation
 
-Human review records can now be attached to Track Run Records without mutating original model output or enforcement decisions. Review/correction records live separately under `data/evidence/human-reviews/`. APIs: `POST /runs/:id/review`, `GET /runs/:id/review`, `GET /enforcement/quality-summary`. The summary reports verdict counts, pass/correction rates, score averages, common failure reasons, and critical risk count. Tests: `node scripts/test-human-review-records.js` or `npm.cmd run quality-review:test`.
+Human review records can now be attached to Track Run Records without mutating original model output or enforcement decisions. Review/correction records live separately under `data/evidence/human-reviews/`. APIs: `POST /runs/:id/review`, `GET /runs/:id/review`, `GET /enforcement/quality-summary`. Operator CLI: `npm.cmd run quality-review -- list|show|pass|needs-edit|fail|summary` works without the server. The summary reports verdict counts, pass/correction rates, score averages, common failure reasons, and critical risk count. Tests: `node scripts/test-human-review-records.js` or `npm.cmd run quality-review:test`.
 
 ## Current Task
 
@@ -88,7 +88,7 @@ Output Quality Review + Human Correction Records is complete. The system can now
 
 ## Next Task
 
-Apply real human reviews to the first enforced Lighthouse pilot outputs. Use `POST /runs/:id/review` to record `pass`, `needs_edit`, or `fail` with corrections and failure reasons, then use `/enforcement/quality-summary` to decide whether to continue, suspend, narrow, or broaden the pilot. Multi-model track expansion and live qualification depth are follow-on candidates, not automatic scope.
+Apply real human reviews to the first enforced Lighthouse pilot outputs. Start with `npm.cmd run quality-review -- list --track website_audit.lighthouse_handoff`, inspect with `show`, record `pass`, `needs-edit`, or `fail`, then use `summary` to decide whether to continue, suspend, narrow, or broaden the pilot. Multi-model track expansion and live qualification depth are follow-on candidates, not automatic scope.
 
 ## Do Not
 

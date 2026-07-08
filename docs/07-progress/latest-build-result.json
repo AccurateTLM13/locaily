@@ -11,6 +11,18 @@
       "GET /runs/:id/review",
       "GET /enforcement/quality-summary"
     ],
+    "operatorCli": {
+      "script": "scripts/quality-review.js",
+      "npmScript": "npm.cmd run quality-review",
+      "commands": [
+        "list",
+        "show",
+        "summary",
+        "pass",
+        "needs-edit",
+        "fail"
+      ]
+    },
     "testScript": "scripts/test-human-review-records.js",
     "npmScript": "npm.cmd run quality-review:test"
   },
@@ -69,7 +81,10 @@
       "node scripts/contract-test.js",
       "npm.cmd run benchmark:test",
       "npm.cmd run benchmark:status-smoke",
-      "node scripts/smoke-test.js"
+      "node scripts/smoke-test.js",
+      "node --check scripts/quality-review.js",
+      "npm.cmd run quality-review -- summary",
+      "npm.cmd run quality-review -- list --limit 3"
     ],
     "results": [
       "25/25 human review assertions pass",
@@ -82,7 +97,10 @@
       "Contract helpers pass",
       "benchmark:test passes",
       "benchmark:status-smoke passes",
-      "57/57 smoke checks pass including human review endpoints"
+      "57/57 smoke checks pass including human review endpoints",
+      "quality-review CLI syntax check passes",
+      "quality-review summary command reads review store",
+      "quality-review list command reads Track Run Records"
     ]
   },
   "acceptance_criteria": {
