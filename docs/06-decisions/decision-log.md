@@ -987,6 +987,64 @@ Confirmed. Pre-pilot actions documented: approve track and set state to eligible
 
 ---
 
+## 2026-07-08 — Enforcement Uses Qualification Runtime Model Names
+
+### Decision
+
+Guarded enforcement keeps stable capability ids in policy and evidence, but runtime readiness checks and model execution use the qualification record's `subject.runtimeModelName` when present.
+
+### Why
+
+The first pilot capability is identified as `lfm25-1p2b-thinking-local`, while Ollama exposes the executable model as `hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest`. Checking or executing the stable capability id directly caused the `eligible -> enforced` gate to fail with `MODEL_NOT_READY`, even though the tested runtime model was installed and ready.
+
+### Consequences
+
+- Capability registry and qualification resolver expose `runtimeModelName`.
+- Shadow recommendations carry `recommendedRuntimeModelName`.
+- Enforcement gates check runtime/model readiness against `runtimeModelName`.
+- Applied enforcement executes `runtimeModelName` but records `executedCapabilityId=lfm25-1p2b-thinking-local`.
+- Track Run Records now allow `recommendedRuntimeModelName` and enforcement `checks`.
+- First pilot for `website_audit.lighthouse_handoff` / `priority_helper` is active and produced 10/10 monitored successful enforced executions.
+
+### Status
+
+Confirmed.
+
+### Notes
+
+Do not rewrite approved qualification artifacts just to align model ids with runtime names. Stable ids and runtime names are separate fields by design.
+
+---
+
+## 2026-07-08 — Human Reviews Are Separate Evidence Records
+
+### Decision
+
+Store human output-quality reviews and corrections as separate records keyed by `trackRunId`, not as mutations to Track Run Records or model outputs.
+
+### Why
+
+Pilot enforcement proved routing and execution, but not judgment quality. Locaily needs to preserve the model-generated output exactly as evidence while allowing a human reviewer to mark usefulness, accuracy, structure, clarity, risk, verdict, failure reasons, and corrections.
+
+### Consequences
+
+- Review records live under `data/evidence/human-reviews/`.
+- `POST /runs/:id/review` creates or updates the separate review layer.
+- `GET /runs/:id/review` reads the review layer.
+- `GET /enforcement/quality-summary` aggregates human-reviewed quality independently from enforcement success.
+- Track Run Records and `routing.enforcementDecision` remain immutable for review purposes.
+- A run can be transport-successful and enforcement-successful while receiving a human `needs_edit` or `fail` verdict.
+
+### Status
+
+Confirmed.
+
+### Notes
+
+This is the evidence foundation only. No UI was added.
+
+---
+
 ```md
 ## YYYY-MM-DD — Title
 ### Decision

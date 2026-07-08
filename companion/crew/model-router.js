@@ -101,6 +101,7 @@ async function executeModelStep({ step, context, runtime, options }) {
         role: modelResolution.role,
         contractId: executor.contract || executor.contract_id || null,
         recommendedCapabilityId: shadowRouting.recommendedCapabilityId,
+        recommendedRuntimeModelName: shadowRouting.recommendedRuntimeModelName,
         score: shadowRouting.recommendedScore,
         qualificationState: shadowRouting.recommendedQualificationState || shadowRouting.state,
         selectedQualificationState: shadowRouting.selectedQualificationState || shadowRouting.state,
@@ -115,7 +116,7 @@ async function executeModelStep({ step, context, runtime, options }) {
   }
 
   if (enforcementDecision && enforcementDecision.applied) {
-    modelResolution.model = enforcementDecision.recommendedCapabilityId;
+    modelResolution.model = shadowRouting.recommendedRuntimeModelName || enforcementDecision.recommendedCapabilityId;
     modelResolution.source = "enforcement";
   }
 
@@ -285,6 +286,7 @@ async function evaluateEnforcement({
   role,
   contractId,
   recommendedCapabilityId,
+  recommendedRuntimeModelName,
   score,
   qualificationState,
   selectedQualificationState,
@@ -337,6 +339,7 @@ async function evaluateEnforcement({
     trackId,
     role,
     recommendedCapabilityId,
+    recommendedRuntimeModelName,
     contractId: contractId || undefined,
     score: score != null ? score : null,
     qualificationState: qualificationState || "untested",

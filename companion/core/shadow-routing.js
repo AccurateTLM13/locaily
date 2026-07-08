@@ -13,13 +13,14 @@ function createShadowRouter({ resolver }) {
       .filter((c) => c.state === "qualified")
       .sort((a, b) => (b.score || 0) - (a.score || 0));
 
-    const currentCap = relevantCaps.find((c) => c.modelId === currentModelId);
+    const currentCap = relevantCaps.find((c) => c.modelId === currentModelId || c.runtimeModelName === currentModelId);
     const currentState = currentCap ? currentCap.state : "untested";
 
     let comparison;
     let recommendedCapabilityId = null;
     let recommendedScore = null;
     let recommendedQualificationState = null;
+    let recommendedRuntimeModelName = null;
     let recommendedRecordId = null;
     let reason;
     let fallbackRecommendation = null;
@@ -27,6 +28,7 @@ function createShadowRouter({ resolver }) {
     if (qualifiedCaps.length > 0) {
       const best = qualifiedCaps[0];
       recommendedQualificationState = best.state;
+      recommendedRuntimeModelName = best.runtimeModelName || null;
       recommendedRecordId = best.recordId;
 
       if (best.modelId === currentModelId) {
@@ -75,6 +77,7 @@ function createShadowRouter({ resolver }) {
         fallbackRecommendation = bestByScore[0].modelId;
         const fallbackCap = bestByScore[0];
         recommendedQualificationState = fallbackCap.state;
+        recommendedRuntimeModelName = fallbackCap.runtimeModelName || null;
         recommendedRecordId = fallbackCap.recordId;
       }
     } else {
@@ -87,6 +90,7 @@ function createShadowRouter({ resolver }) {
       enforced: false,
       selectedCapabilityId: currentModelId,
       recommendedCapabilityId,
+      recommendedRuntimeModelName,
       recommendedScore,
       state: currentState,
       selectedQualificationState: currentState,

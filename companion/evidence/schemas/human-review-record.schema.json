@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/human-review-record.schema.json",
+  "title": "Human Track Run Review Record",
+  "description": "Human quality review and optional correction layer for a Track Run Record. This record must not overwrite model output.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "reviewId",
+    "trackRunId",
+    "trackId",
+    "roleId",
+    "capabilityId",
+    "executedCapabilityId",
+    "reviewer",
+    "reviewedAt",
+    "usefulnessScore",
+    "accuracyScore",
+    "structureScore",
+    "clarityScore",
+    "riskScore",
+    "riskFlags",
+    "verdict",
+    "correctionRequired",
+    "correctionText",
+    "reviewerNotes",
+    "failureReasons",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "locaily.human_review_record.v1" },
+    "reviewId": { "type": "string", "minLength": 1 },
+    "trackRunId": { "type": "string", "minLength": 1 },
+    "trackId": { "type": "string", "minLength": 1 },
+    "roleId": { "type": "string", "minLength": 1 },
+    "capabilityId": { "type": "string", "minLength": 1 },
+    "executedCapabilityId": { "type": "string", "minLength": 1 },
+    "reviewer": { "type": "string", "minLength": 1 },
+    "reviewedAt": { "type": "string", "minLength": 1 },
+    "usefulnessScore": { "type": "number", "minimum": 0, "maximum": 5 },
+    "accuracyScore": { "type": "number", "minimum": 0, "maximum": 5 },
+    "structureScore": { "type": "number", "minimum": 0, "maximum": 5 },
+    "clarityScore": { "type": "number", "minimum": 0, "maximum": 5 },
+    "riskScore": { "type": "number", "minimum": 0, "maximum": 5 },
+    "riskFlags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "verdict": {
+      "enum": ["pass", "needs_edit", "fail"]
+    },
+    "correctionRequired": { "type": "boolean" },
+    "correctionText": { "type": "string" },
+    "reviewerNotes": { "type": "string" },
+    "failureReasons": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "createdAt": { "type": "string", "minLength": 1 },
+    "updatedAt": { "type": "string", "minLength": 1 }
+  }
+}

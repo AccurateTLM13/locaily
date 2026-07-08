@@ -53,6 +53,13 @@ const { createQualificationEvidenceLinker } = require("./evidence/qualification-
 const { createShadowRouter } = require("./core/shadow-routing");
 const { createEnforcementPolicy } = require("./core/enforcement-policy");
 const { getEvidenceReview, getTrackReview, getDisagreements, getEnforcementDecisions, getShadowComparisons, buildEnforcementMetrics } = require("./evidence/shadow-evidence-review");
+const { loadRecord: loadTrackRunRecord } = require("./evidence/track-run-record-store");
+const {
+  loadReview,
+  upsertReview,
+  listReviews,
+  buildQualitySummary
+} = require("./evidence/human-review-record-store");
 
 const PLATFORM_VERSION = "0.1.0";
 const SERVICE_NAME = "local-ai-platform";
@@ -604,23 +611,40 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, 200, { ok: true, ...review });
     }
 
+    if (request.method === "GET" && url.pathname === "/enforcement/quality-summary") {
+      const reviews = await listReviews();
+      return sendJson(response, 200, {
+        ok: true,
+        summary: buildQualitySummary(reviews)
+      });
+    }
+
     if (request.method === "GET" && url.pathname === "/enforcement/pilot") {
       const review = await getEvidenceReview();
       const allCaps = capabilityRegistry.listCapabilities();
       const qualified = allCaps.filter((c) => c.state === "qualified");
+      const trackStates = enforcementPolicy.getTrackStates ? enforcementPolicy.getTrackStates() : {};
+      const enforcedTracks = Object.entries(trackStates)
+        .filter(([trackId, state]) => state === "enforced" && enforcementPolicy.isTrackApproved(trackId))
+        .map(([trackId]) => trackId);
+      const evidenceTracks = Object.keys(review.enforcement?.byTrack || {});
+      const pilotTrack = enforcedTracks.find((trackId) => evidenceTracks.includes(trackId)) || enforcedTracks[0] || null;
       return sendJson(response, 200, {
         ok: true,
-        pilotTrack: null,
+        pilotTrack,
         qualifiedCapabilities: qualified.length,
         qualifiedCapabilitiesList: qualified.map((c) => ({
           modelId: c.modelId,
+          runtimeModelName: c.runtimeModelName || null,
           role: c.role,
           trackId: c.trackId,
           score: c.score
         })),
-        eligibleTracks: Object.keys(review.enforcement?.byTrack || {}),
+        eligibleTracks: enforcedTracks,
         review: review.enforcement || { hasEnforcement: false },
-        reason: "No pilot activated. No companion track has a qualified model capability with sufficient shadow evidence. All tracks remain in shadow mode."
+        reason: pilotTrack
+          ? `Pilot enforcement active for '${pilotTrack}'.`
+          : "No pilot activated. No approved track is currently in enforced state."
       });
     }
 
@@ -628,6 +652,61 @@ const server = http.createServer(async (request, response) => {
       const trackId = url.searchParams.get("trackId");
       const decisions = await getEnforcementDecisions(trackId);
       return sendJson(response, 200, { ok: true, decisions, count: decisions.length });
+    }
+
+    const runReviewMatch = url.pathname.match(/^\/runs\/([^/]+)\/review$/);
+    if (runReviewMatch && request.method === "GET") {
+      const trackRunId = decodeURIComponent(runReviewMatch[1]);
+      const review = await loadReview(trackRunId);
+      if (!review) {
+        return sendJson(response, 404, {
+          ok: false,
+          code: "REVIEW_NOT_FOUND",
+          message: `No human review record found for Track Run '${trackRunId}'.`
+        });
+      }
+      return sendJson(response, 200, { ok: true, review });
+    }
+
+    if (runReviewMatch && request.method === "POST") {
+      const trackRunId = decodeURIComponent(runReviewMatch[1]);
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON."
+        });
+      }
+
+      const trackRun = await loadTrackRunRecord(trackRunId);
+      if (!trackRun) {
+        return sendJson(response, 404, {
+          ok: false,
+          code: "TRACK_RUN_NOT_FOUND",
+          message: `Track Run '${trackRunId}' was not found.`,
+          nextStep: "Create a Track Run Record before adding a human review."
+        });
+      }
+
+      try {
+        const result = await upsertReview({ trackRun, body: bodyResult.body || {} });
+        return sendJson(response, result.created ? 201 : 200, {
+          ok: true,
+          review: result.review,
+          created: result.created
+        });
+      } catch (error) {
+        if (error.code === "HUMAN_REVIEW_SCHEMA_INVALID") {
+          return sendJson(response, 400, {
+            ok: false,
+            code: error.code,
+            message: error.message,
+            errors: error.validation ? error.validation.errors : []
+          });
+        }
+        throw error;
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/enforcement/eligibility") {
@@ -652,6 +731,7 @@ const server = http.createServer(async (request, response) => {
         trackId,
         role,
         recommendedCapabilityId: bestQualified ? bestQualified.modelId : null,
+        recommendedRuntimeModelName: bestQualified ? bestQualified.runtimeModelName : null,
         score: bestQualified ? bestQualified.score : null,
         qualificationState: bestQualified ? bestQualified.state : "untested",
         comparisonState: bestQualified ? "agree" : "no-qualified-capability"

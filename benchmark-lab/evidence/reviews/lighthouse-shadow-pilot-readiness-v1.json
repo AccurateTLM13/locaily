@@ -2,33 +2,79 @@
   "schemaVersion": "benchmark.human_review.v1",
   "evidenceId": "lighthouse-shadow-pilot-readiness-v1",
   "reviewType": "pilot-readiness",
-  "reviewer": "JP Pannell",
-  "verdict": "ready-with-conditions",
+  "reviewer": "agent",
+  "verdict": "needs-human-review",
   "trackId": "website_audit.lighthouse_handoff",
   "role": "priority_helper",
   "qualifiedModel": "lfm25-1p2b-thinking-local",
   "qualifiedScore": 0.9167,
   "currentDefaultModel": "llama3.2",
+  "shadowEvidenceSummary": {
+    "totalShadowRecords": 37,
+    "actionableRecords": 34,
+    "disagree": 34,
+    "agree": 0,
+    "recommendationUnavailable": 3,
+    "coverageRatePercent": 91.89,
+    "derivedFromEndpoint": "GET /enforcement/review?trackId=website_audit.lighthouse_handoff",
+    "generatedAt": "2026-07-06T23:42:30.885Z",
+    "evidenceRecordIds": [
+      "step-model-mr9rktc5-32eaa91c",
+      "step-model-mr9rc6rc-ecac8166",
+      "step-model-mr9rc1t3-95cac1ab",
+      "step-model-mr9rbuu9-0ab4e3ea",
+      "step-model-mr9rbnsj-f8b8e78e",
+      "step-model-mr9rbexe-50a985f8",
+      "step-model-mr9r4oli-18133f26",
+      "step-model-mr9r4gzs-285dc5ea",
+      "step-model-mr9r49fc-3b76e4eb",
+      "step-model-mr9r42oe-3342eff6",
+      "step-model-mr9r3wq8-1f06f3d1",
+      "step-model-mr9r3qor-b9f7b6d5",
+      "step-model-mr9r3jre-57c8026f",
+      "step-model-mr9r3fiy-08495544",
+      "step-model-mr9r3a8x-2b3d0e65",
+      "step-model-mr9r336v-bf8548a9",
+      "step-model-mr9r2wbz-7bcf0a4f",
+      "step-model-mr9r2r8e-26ef169f",
+      "step-model-mr9r2j73-07c7f92f",
+      "step-model-mr9r2eg3-6bdd1bdf",
+      "step-model-mr9r2954-8c6f68ca",
+      "step-model-mr9r22mi-66d9a3dd",
+      "step-model-mr9r1wtv-553e68fe",
+      "step-model-mr9r1p3u-4460d9ad",
+      "step-model-mr9r1ig2-5b2dbd72",
+      "step-model-mr9r1c1q-c2388c09",
+      "step-model-mr9r15rf-50b00ce4",
+      "step-model-mr9r0yb2-9331a50d",
+      "step-model-mr9r0rq6-156e7fad",
+      "step-model-mr9r0ky1-8f0f1155",
+      "step-model-mr9r0f71-3ae7ec31",
+      "step-model-mr9r08b4-66a182b8",
+      "step-model-mr9r023r-a10e34d0",
+      "step-model-mr9pv5yf-c884f2a1"
+    ]
+  },
   "evaluationCriteria": [
     {
       "criterion": "qualified_capability_exists",
       "required": true,
       "passed": true,
-      "detail": "lfm25-1p2b-thinking-local qualified for website_audit.lighthouse_handoff / priority_helper with score 0.9167"
+      "detail": "lfm25-1p2b-thinking-local qualified for website_audit.lighthouse_handoff / priority_helper with score 0.9167. Benchmark Lab evidence: 11/12 PASS."
     },
     {
-      "criterion": "human_review_exists",
+      "criterion": "human_review_of_qualification",
       "required": true,
       "passed": true,
-      "detail": "lfm25-1p2b-thinking-lighthouse-priority-v1-review.json approved-with-limitations by JP Pannell"
+      "detail": "Qualification evidence approved-with-limitations by JP Pannell at benchmark-lab/evidence/reviews/lfm25-1p2b-thinking-lighthouse-priority-v1-review.json"
     },
     {
       "criterion": "minimum_shadow_comparisons",
       "required": 12,
       "target": 15,
-      "actual": 33,
+      "actual": 34,
       "passed": true,
-      "detail": "33 actionable shadow comparisons collected across 18 evaluation cases + 9 consistency trials + 5 qualified-model cases + 1 earlier workflow run"
+      "detail": "34 actionable shadow comparisons collected (37 total minus 3 non-actionable recommendation-unavailable)"
     },
     {
       "criterion": "consistency_coverage",
@@ -46,15 +92,21 @@
     {
       "criterion": "coverage_rate_acceptable",
       "required": 0.7,
-      "actual": 91.67,
+      "actual": 91.89,
       "passed": true,
-      "detail": "33/36 records have actionable comparisons (91.67%). 3 non-actionable from pre-qualification era"
+      "detail": "34/37 records have actionable comparisons (91.89%). 3 non-actionable from pre-qualification era"
     },
     {
       "criterion": "enforcement_policy_healthy",
       "required": true,
       "passed": true,
       "detail": "Policy store healthy, enforcementLocked=false, loadError=null after schema fix"
+    },
+    {
+      "criterion": "paired_output_review_complete",
+      "required": true,
+      "passed": false,
+      "detail": "No human-reviewed paired comparison of current vs qualified model outputs has been performed. Shadow records validate routing recommendation only — they do not establish output quality of the qualified model for these specific inputs."
     },
     {
       "criterion": "no_active_blocks",
@@ -70,18 +122,56 @@
     }
   ],
   "limitations": [
-    "All 33 shadow comparisons are 'disagree' (no 'agree' comparisons yet). This is expected because the shadow router compares the qualified model manifest id 'lfm25-1p2b-thinking-local' against the runtime model name 'llama3.2'. They will never match under current routing.",
+    "Shadow records validate routing recommendation only — all 34 actionable records are 'disagree' because the current model (llama3.2) differs from the qualified capability (lfm25-1p2b-thinking-local). These records do not contain execution output from the qualified model.",
+    "No human has reviewed the paired outputs. The 'needs-human-review' verdict means the evidence supports shadow routing integration but does not yet support pilot activation.",
     "The qualified model's runtime model name ('hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest') differs from its capability manifest id ('lfm25-1p2b-thinking-local'). The shadow router uses manifest ids, so the current model and recommended capability never compare as 'agree'.",
+    "Slice 1 qualification evidence (benchmark-lab/ evidence) provides the 11/12 PASS evaluation of the qualified model against a 12-scenario suite. This is the primary output-quality evidence for the model — the shadow records do not duplicate this.",
     "No enforcement decisions have been applied yet. All evidence is purely observational (shadow mode).",
-    "The policy file at data/policy/enforcement-policy.json contained stale test data with expiresAt fields (non-conforming to schema) and needed manual cleanup.",
-    "Agreement rate is 0%. This is not a concern for shadow evaluation — the disagreement pattern is correct behavior showing the router actively recommends the qualified model."
+    "Agreement rate is 0%. This is expected and correct — the router identifies a different model as preferred."
   ],
-  "pilotRecommendation": "Proceed to pilot activation. The qualified model lfm25-1p2b-thinking-local has sufficient shadow evidence (33 comparisons, 91.67% coverage, 0.9167 qualification score) and the shadow router correctly identifies it as the preferred model for website_audit.lighthouse_handoff/priority_helper. Required pre-pilot actions: (1) Approve the track via POST /enforcement/approve with trackId 'website_audit.lighthouse_handoff', (2) Set track state to 'eligible' via POST /enforcement/set, (3) Monitor first 10 enforced executions before advancing to 'enforced'.",
-  "prePilotActions": [
-    "POST /enforcement/approve with trackId: website_audit.lighthouse_handoff",
-    "POST /enforcement/set with trackId: website_audit.lighthouse_handoff, state: eligible",
-    "Run 10 additional track executions to establish enforcement baseline",
-    "Verify enforcement decisions match shadow recommendations"
+  "pilotRecommendation": "Do not activate pilot yet. Shadow router integration is validated (34 actionable disagree records, 91.89% coverage). Slice 1 qualification evidence exists (11/12 PASS, score 0.9167). But no human-reviewed paired output comparison has been performed for specific Track inputs. Required before pilot: (1) Run paired current-vs-qualified model evaluations on representative cases, (2) Human review of paired outputs with per-disagreement records, (3) Approve track and set state to eligible after review passes.",
+  "requiredActions": [
+    "Run paired evaluations: same Track input with current model (llama3.2) and qualified model (lfm25-1p2b-thinking-local)",
+    "Human review of paired outputs: record per-case preference, grounding problems, schema validity",
+    "Produce per-disagreement review records with record ID, case ID, preferred result, and pilot-blocking issues",
+    "After human review passes: POST /enforcement/approve, POST /enforcement/set to eligible",
+    "Document policy migration for legacy expiresAt on overrides (see docs/06-decisions/decision-log.md)"
   ],
-  "reviewedAt": "2026-07-06T22:00:00.000Z"
+  "shadowEvidenceRecordIds": [
+    "step-model-mr9rktc5-32eaa91c",
+    "step-model-mr9rc6rc-ecac8166",
+    "step-model-mr9rc1t3-95cac1ab",
+    "step-model-mr9rbuu9-0ab4e3ea",
+    "step-model-mr9rbnsj-f8b8e78e",
+    "step-model-mr9rbexe-50a985f8",
+    "step-model-mr9r4oli-18133f26",
+    "step-model-mr9r4gzs-285dc5ea",
+    "step-model-mr9r49fc-3b76e4eb",
+    "step-model-mr9r42oe-3342eff6",
+    "step-model-mr9r3wq8-1f06f3d1",
+    "step-model-mr9r3qor-b9f7b6d5",
+    "step-model-mr9r3jre-57c8026f",
+    "step-model-mr9r3fiy-08495544",
+    "step-model-mr9r3a8x-2b3d0e65",
+    "step-model-mr9r336v-bf8548a9",
+    "step-model-mr9r2wbz-7bcf0a4f",
+    "step-model-mr9r2r8e-26ef169f",
+    "step-model-mr9r2j73-07c7f92f",
+    "step-model-mr9r2eg3-6bdd1bdf",
+    "step-model-mr9r2954-8c6f68ca",
+    "step-model-mr9r22mi-66d9a3dd",
+    "step-model-mr9r1wtv-553e68fe",
+    "step-model-mr9r1p3u-4460d9ad",
+    "step-model-mr9r1ig2-5b2dbd72",
+    "step-model-mr9r1c1q-c2388c09",
+    "step-model-mr9r15rf-50b00ce4",
+    "step-model-mr9r0yb2-9331a50d",
+    "step-model-mr9r0rq6-156e7fad",
+    "step-model-mr9r0ky1-8f0f1155",
+    "step-model-mr9r0f71-3ae7ec31",
+    "step-model-mr9r08b4-66a182b8",
+    "step-model-mr9r023r-a10e34d0",
+    "step-model-mr9pv5yf-c884f2a1"
+  ],
+  "reviewedAt": "2026-07-06T23:45:00.000Z"
 }

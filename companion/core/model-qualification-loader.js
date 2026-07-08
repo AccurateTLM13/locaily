@@ -89,6 +89,7 @@ function createModelQualificationLoader(options = {}) {
           matches.push({
             recordId: record.recordId,
             modelId: record.subject.id,
+            runtimeModelName: record.subject.runtimeModelName || null,
             status: entry.status,
             role: entry.role,
             trackId: entry.trackId,

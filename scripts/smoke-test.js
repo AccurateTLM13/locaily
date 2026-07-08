@@ -22,6 +22,7 @@ const results = [];
 let observedTaskRunId = null;
 let observedFailedTaskRunId = null;
 let observedMockPermissionRunId = null;
+let observedTrackRunRecordId = null;
 
 async function request(path, options = {}) {
   const response = await fetch(`${BASE_URL}${path}`, options);
@@ -1025,6 +1026,8 @@ async function checkTracksRunMockProvider() {
     assert(Array.isArray(trackRun.body.meta.steps), "Expected track step metadata.");
     assert(trackRun.body.meta.steps.length >= 7, "Expected seven track steps.");
     assert(trackRun.body.meta.job_id, "Expected job_id in track run metadata.");
+    assert(trackRun.body.evidence && trackRun.body.evidence.trackRunRecordId, "Expected track run evidence id.");
+    observedTrackRunRecordId = trackRun.body.evidence.trackRunRecordId;
   } finally {
     await request("/providers/set", {
       method: "POST",
@@ -1032,6 +1035,46 @@ async function checkTracksRunMockProvider() {
       body: JSON.stringify({ provider: "ollama" })
     });
   }
+}
+
+async function checkHumanReviewEndpoints() {
+  assert(observedTrackRunRecordId, "Expected a Track Run Record id from prior /tracks/run smoke.");
+
+  const reviewBody = {
+    reviewer: "smoke-test",
+    usefulnessScore: 4,
+    accuracyScore: 4,
+    structureScore: 5,
+    clarityScore: 4,
+    riskScore: 1,
+    riskFlags: [],
+    verdict: "pass",
+    correctionRequired: false,
+    correctionText: "",
+    reviewerNotes: "Smoke review confirms API persistence.",
+    failureReasons: []
+  };
+
+  const created = await request(`/runs/${encodeURIComponent(observedTrackRunRecordId)}/review`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(reviewBody)
+  });
+  assert(created.response.status === 201 || created.response.status === 200, "Expected review upsert to succeed.");
+  assert(created.body.ok === true, "Expected review upsert ok.");
+  assert(created.body.review.trackRunId === observedTrackRunRecordId, "Expected review trackRunId.");
+  assert(created.body.review.verdict === "pass", "Expected review verdict.");
+
+  const loaded = await request(`/runs/${encodeURIComponent(observedTrackRunRecordId)}/review`);
+  assert(loaded.response.status === 200, "Expected review retrieval to return HTTP 200.");
+  assert(loaded.body.ok === true, "Expected review retrieval ok.");
+  assert(loaded.body.review.reviewer === "smoke-test", "Expected stored reviewer.");
+
+  const summary = await request("/enforcement/quality-summary");
+  assert(summary.response.status === 200, "Expected quality summary HTTP 200.");
+  assert(summary.body.ok === true, "Expected quality summary ok.");
+  assert(summary.body.summary.totalReviewedRuns >= 1, "Expected at least one reviewed run.");
+  assert(typeof summary.body.summary.passRate === "number", "Expected numeric pass rate.");
 }
 
 async function checkTracksRunDealSniperMockProvider() {
@@ -1749,6 +1792,7 @@ async function main() {
   await runCheck("track declarative input_map", checkTrackDeclarativeInputMap);
   await runCheck("GET /tracks", checkTracksCatalog);
   await runCheck("POST /tracks/run mock provider", checkTracksRunMockProvider);
+  await runCheck("human review endpoints", checkHumanReviewEndpoints);
   await runCheck("POST /tracks/run DealSniper mock provider", checkTracksRunDealSniperMockProvider);
   await runCheck("GET /orchestration/tracks", checkOrchestrationTrackRegistry);
   await runCheck("GET /orchestration/workflows", checkOrchestrationWorkflowRegistry);

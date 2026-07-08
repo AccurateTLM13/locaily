@@ -1,5 +1,25 @@
 const { listAllRecords } = require("./track-run-record-store");
 
+function deduplicateByRecordId(records) {
+  const seen = new Set();
+  const result = [];
+  for (const r of records) {
+    const key = computeRecordKey(r);
+    if (!key || !seen.has(key)) {
+      if (key) seen.add(key);
+      result.push(r);
+    }
+  }
+  return result;
+}
+
+function computeRecordKey(record) {
+  if (record.recordId) return record.recordId;
+  if (record.parentRunId && record.stepId) return record.parentRunId + ":" + record.stepId;
+  if (record.parentRunId && record.executorType) return record.parentRunId + ":" + record.executorType;
+  return record.parentRunId || record.correlationId || null;
+}
+
 function extractShadowRecords(records) {
   const result = [];
   for (const record of records) {
@@ -19,7 +39,7 @@ function extractShadowRecords(records) {
       }
     }
   }
-  return result;
+  return deduplicateByRecordId(result);
 }
 
 function extractEnforcementRecords(records) {
@@ -41,7 +61,7 @@ function extractEnforcementRecords(records) {
       }
     }
   }
-  return result;
+  return deduplicateByRecordId(result);
 }
 
 function buildEvidenceReview(records) {

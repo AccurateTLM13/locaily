@@ -1,92 +1,106 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "lighthouse-shadow-readiness",
+  "build_slice": "output-quality-review-corrections",
   "status": "complete",
-  "objective": "Collect, validate, and review real shadow-routing evidence for the qualified companion capability lfm25-1p2b-thinking-local on track website_audit.lighthouse_handoff / role priority_helper, then determine pilot-readiness.",
-  "pilot": {
-    "selected": null,
-    "reason": "Both prerequisites met: (1) qualified model capability (lfm25-1p2b-thinking-local, score 0.9167) for website_audit.lighthouse_handoff/priority_helper, (2) 33 actionable shadow routing comparisons (91.67% coverage rate) collected. Pilot readiness review: ready-with-conditions. Required pre-pilot action: approve track and set state to eligible.",
-    "requiredForActivation": [
-      "✅ Companion track with model role having 'qualified' qualification record — LFM2.5-1.2B-Thinking qualified for website_audit.lighthouse_handoff/priority_helper (score 0.9167)",
-      "✅ At least 12 shadow routing comparisons — 33 actionable comparisons collected (target 15, exceeded 2x)",
-      "✅ Human review of qualification evidence — approved-with-limitations by JP Pannell",
-      "❌ Track not yet explicitly approved for enforcement — POST /enforcement/approve required",
-      "❌ Track state not yet advanced to 'eligible' — POST /enforcement/set required",
-      "Qualification record must be current (not expired or stale) — verified current",
-      "Runtime availability and model readiness verifiable — verified Ollama available"
+  "objective": "Add a separate human output-quality review and correction layer for Track Run Records so judgment quality can be evaluated independently from transport and enforcement success.",
+  "implemented": {
+    "schema": "companion/evidence/schemas/human-review-record.schema.json",
+    "store": "companion/evidence/human-review-record-store.js",
+    "apis": [
+      "POST /runs/:id/review",
+      "GET /runs/:id/review",
+      "GET /enforcement/quality-summary"
     ],
-    "shadowEvidence": {
-      "totalComparisons": 36,
-      "actionable": 33,
-      "coverageMissing": 3,
-      "coverageRate": 91.67,
-      "disagree": 33,
-      "agree": 0,
-      "evaluationCases": 18,
-      "consistencyTrials": 9,
-      "qualifiedModelCases": 5,
-      "earlierRecords": 1
-    },
-    "firstPrerequisiteMet": {
-      "modelId": "lfm25-1p2b-thinking-local",
-      "role": "priority_helper",
-      "trackId": "website_audit.lighthouse_handoff",
-      "score": 0.9167,
-      "evidenceId": "lfm25-1p2b-thinking-lighthouse-priority-v1",
-      "qualificationRecordId": "lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-lighthouse-priority-v1"
-    }
+    "testScript": "scripts/test-human-review-records.js",
+    "npmScript": "npm.cmd run quality-review:test"
   },
-  "shadowReview": {
-    "passed": true,
-    "artifactPath": "benchmark-lab/evidence/reviews/lighthouse-shadow-pilot-readiness-v1.json",
-    "verdict": "ready-with-conditions",
-    "reviewer": "JP Pannell",
-    "evaluationCriteria": {
-      "qualifiedCapabilityExists": true,
-      "humanReviewExists": true,
-      "minimumShadowComparisons": true,
-      "consistencyCoverage": true,
-      "shadowRouterFunctional": true,
-      "coverageRateAcceptable": true,
-      "enforcementPolicyHealthy": true,
-      "noActiveBlocks": false,
-      "runtimeAvailable": true
-    },
-    "pilotRecommendation": "Proceed to pilot activation after completing pre-pilot actions: approve track and set state to eligible."
+  "reviewRecordCaptures": [
+    "trackRunId",
+    "trackId",
+    "roleId",
+    "capabilityId",
+    "executedCapabilityId",
+    "reviewer",
+    "reviewedAt",
+    "usefulnessScore",
+    "accuracyScore",
+    "structureScore",
+    "clarityScore",
+    "riskScore",
+    "riskFlags",
+    "verdict",
+    "correctionRequired",
+    "correctionText",
+    "reviewerNotes",
+    "failureReasons",
+    "createdAt",
+    "updatedAt"
+  ],
+  "qualitySummary": {
+    "reports": [
+      "total reviewed runs",
+      "pass count",
+      "needs-edit count",
+      "fail count",
+      "pass rate",
+      "correction rate",
+      "average usefulness score",
+      "average accuracy score",
+      "average structure score",
+      "common failure reasons",
+      "critical risk count"
+    ]
+  },
+  "preservation": {
+    "originalModelOutput": "preserved",
+    "enforcementDecisionRecords": "not mutated",
+    "corrections": "stored separately under data/evidence/human-reviews/"
   },
   "validation": {
     "passed": true,
     "commands": [
-      "node scripts/collect-lighthouse-shadow-evidence.js",
-      "node scripts/test-pilot-readiness.js"
+      "node scripts/test-human-review-records.js",
+      "node scripts/test-enforcement-policy-store.js",
+      "node scripts/test-enforcement-policy.js",
+      "node scripts/test-enforcement-routing.js",
+      "node scripts/test-shadow-routing.js",
+      "node scripts/test-qualification-resolver.js",
+      "node scripts/track-run-record-schema-test.js",
+      "node scripts/contract-test.js",
+      "npm.cmd run benchmark:test",
+      "npm.cmd run benchmark:status-smoke",
+      "node scripts/smoke-test.js"
     ],
     "results": [
-      "18/18 evaluation cases successful (all disagree comparisons)",
-      "9/9 consistency trials successful (3 inputs x 3 trials each)",
-      "5/5 qualified-model cases successful",
-      "13/13 pilot-readiness tests pass"
+      "25/25 human review assertions pass",
+      "149/149 enforcement policy store tests pass",
+      "62/62 enforcement policy tests pass",
+      "91/91 enforcement routing tests pass",
+      "31/31 shadow routing tests pass",
+      "25/25 qualification resolver tests pass",
+      "Track Run Record schema fixtures pass",
+      "Contract helpers pass",
+      "benchmark:test passes",
+      "benchmark:status-smoke passes",
+      "57/57 smoke checks pass including human review endpoints"
     ]
   },
   "acceptance_criteria": {
     "passed": [
-      "Slice 1 (Lighthouse Pilot Qualification) merged into main — human review artifact committed",
-      "Shadow evidence review updated to extract child-run shadow recommendations",
-      "18 evaluation cases designed and executed across low/medium/high severity, mixed categories, edge cases",
-      "3 input variants run 3 times each for consistency verification",
-      "5 cases executed with qualified model for agree-pattern evidence",
-      "36 total shadow records collected (33 actionable, 3 non-actionable from pre-qualification era)",
-      "Shadow router correctly identifies qualified capability in all actionable cases",
-      "91.67% coverage rate (33/36 actionable)",
-      "Enforcement policy file schema error fixed (expiresAt removed from overrides)",
-      "Pilot readiness review artifact created with ready-with-conditions verdict",
-      "All required pre-pilot actions documented",
-      "13 pilot-readiness tests pass"
+      "Existing test suites still pass",
+      "New review tests pass",
+      "A completed Track Run Record can receive a human review",
+      "Original model output remains unchanged",
+      "Correction records persist separately",
+      "Quality summary aggregates reviewed runs",
+      "System now distinguishes transport success, enforcement success, and human-reviewed output quality"
     ],
     "failed": [],
-    "blockers": [
-      "Track not yet approved for enforcement (requires POST /enforcement/approve)",
-      "Track state not yet advanced to 'eligible' (requires POST /enforcement/set)"
-    ]
+    "blockers": []
   },
-  "updated_at": "2026-07-06"
+  "next": [
+    "Apply real human reviews to the first enforced Lighthouse pilot outputs.",
+    "Use quality summary results to decide whether to continue, suspend, narrow, or broaden the pilot."
+  ],
+  "updated_at": "2026-07-08"
 }

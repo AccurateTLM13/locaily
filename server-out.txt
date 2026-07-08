@@ -1,0 +1,14 @@
+Local AI Platform
+Server URL: http://127.0.0.1:31313
+Canonical API: POST /tasks/run
+Track API: POST /tracks/run
+Workflow API: POST /workflows/plan, POST /workflows/run
+Compatibility API: POST /analyze
+Active provider: ollama
+Provider status: available
+Provider endpoint: http://127.0.0.1:11434
+Model profile: Balanced (smart_load)
+Default model role: default_worker
+Selected model: hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF (ready)
+Registered tools: 17
+Smoke test: node scripts\smoke-test.js

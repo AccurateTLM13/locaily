@@ -145,6 +145,7 @@
             "enforced": { "type": "boolean", "const": false },
             "selectedCapabilityId": { "type": "string" },
             "recommendedCapabilityId": { "type": "string" },
+            "recommendedRuntimeModelName": { "type": "string" },
             "recommendedScore": { "type": "number" },
             "state": { "type": "string" },
             "selectedQualificationState": { "type": "string", "description": "Qualification state of the currently selected capability" },
@@ -201,6 +202,14 @@
                 }
               },
               "description": "Conditions that prevented enforcement"
+            },
+            "checks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "description": "Policy checks evaluated during enforcement"
             },
             "overrideApplied": {
               "type": "boolean",
@@ -575,6 +584,7 @@
                   "enforced": { "type": "boolean", "const": false },
                   "selectedCapabilityId": { "type": "string" },
                   "recommendedCapabilityId": { "type": "string" },
+                  "recommendedRuntimeModelName": { "type": "string" },
                   "recommendedScore": { "type": "number" },
                   "state": { "type": "string" },
                   "selectedQualificationState": { "type": "string" },
@@ -597,6 +607,7 @@
                   "applied": { "type": "boolean" },
                   "reason": { "type": "string" },
                   "failedConditions": { "type": "array", "items": { "type": "object", "additionalProperties": false, "properties": { "condition": { "type": "string" }, "detail": { "type": "string" } } } },
+                  "checks": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
                   "overrideApplied": { "type": "boolean" },
                   "fallbackCapabilityId": { "type": "string" },
                   "fallbackTriggered": { "type": "boolean" },

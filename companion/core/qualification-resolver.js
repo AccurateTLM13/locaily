@@ -100,6 +100,7 @@ function createQualificationResolver(options = {}) {
         const resolution = resolveEntryState(entry, record);
         capabilities.push({
           modelId: record.subject?.id || "unknown",
+          runtimeModelName: record.subject?.runtimeModelName || null,
           role: entry.role,
           trackId: entry.trackId,
           contractId: entry.contractId,
@@ -144,6 +145,7 @@ function createQualificationResolver(options = {}) {
       const resolution = resolveEntryState(entry, record);
       results.push({
         modelId: match.modelId,
+        runtimeModelName: match.runtimeModelName || null,
         role: match.role,
         trackId: match.trackId,
         contractId: match.contractId,

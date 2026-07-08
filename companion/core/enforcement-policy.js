@@ -123,6 +123,7 @@ function createEnforcementPolicy(options = {}) {
 
   async function evaluateEligibility({
     trackId, role, recommendedCapabilityId, contractId, score,
+    recommendedRuntimeModelName,
     qualificationState, comparisonState,
     selectedQualificationState, recommendedQualificationState
   }) {
@@ -189,7 +190,8 @@ function createEnforcementPolicy(options = {}) {
     eligibility.checks.push({ check: "active_override", passed: true });
 
     try {
-      const providerStatus = await getProviderStatus(recommendedCapabilityId);
+      const runtimeModelName = recommendedRuntimeModelName || recommendedCapabilityId;
+      const providerStatus = await getProviderStatus(runtimeModelName);
       if (!providerStatus.available) {
         eligibility.blocks.push("Runtime is not available.");
         eligibility.checks.push({ check: "runtime_available", passed: false, detail: "Provider unavailable." });
@@ -199,7 +201,7 @@ function createEnforcementPolicy(options = {}) {
 
       if (!providerStatus.modelReady) {
         eligibility.blocks.push("Recommended model is not ready on the runtime.");
-        eligibility.checks.push({ check: "model_ready", passed: false, detail: `Model '${recommendedCapabilityId}' not ready.` });
+        eligibility.checks.push({ check: "model_ready", passed: false, detail: `Model '${runtimeModelName}' not ready.` });
         return eligibility;
       }
       eligibility.checks.push({ check: "model_ready", passed: true });

@@ -692,12 +692,13 @@ function createEnforcementPolicyStore(options = {}) {
     }
 
     try {
-      const providerStatus = await getProviderStatus(best.modelId);
+      const runtimeModelName = best.runtimeModelName || best.modelId;
+      const providerStatus = await getProviderStatus(runtimeModelName);
       if (!providerStatus.available) {
         return {
           ok: false,
           code: "RUNTIME_UNAVAILABLE",
-          message: `Runtime is not available for model '${best.modelId}'.`,
+          message: `Runtime is not available for model '${runtimeModelName}'.`,
           nextStep: "Start the runtime provider (e.g. Ollama) and ensure it is accessible."
         };
       }
@@ -705,7 +706,7 @@ function createEnforcementPolicyStore(options = {}) {
         return {
           ok: false,
           code: "MODEL_NOT_READY",
-          message: `Model '${best.modelId}' is not ready on the runtime.`,
+          message: `Model '${runtimeModelName}' is not ready on the runtime.`,
           nextStep: "Pull the model on the runtime provider."
         };
       }

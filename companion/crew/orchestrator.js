@@ -106,6 +106,7 @@ async function runTrack({
       suitability: stepResult.meta.suitability || null,
       qualification: stepResult.meta.qualification || null,
       shadowRouting: stepResult.meta.shadowRouting || null,
+      enforcementDecision: stepResult.meta.enforcementDecision || null,
       durationMs: stepResult.meta.durationMs,
       output: stepResult.output
     });

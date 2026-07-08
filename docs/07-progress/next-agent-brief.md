@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-06 (Lighthouse Priority Helper qualification)
+**Updated:** 2026-07-08 (Output Quality Review foundation complete)
 
 ## Read First
 
@@ -74,13 +74,21 @@ Enforcement policy configuration is now durable across companion server restarts
 
 LFM2.5-1.2B-Thinking is the first qualified model capability for a companion server runtime track. Benchmark Lab evaluation against a 12-scenario Lighthouse priority helper suite: 11/12 PASS (91.7% pass rate, score 0.9167). One INVENTED_AUDIT failure on a complex cross-referencing scenario — the model produced an audit ID not present in the input. Evidence promoted (`lfm25-1p2b-thinking-lighthouse-priority-v1`), model card generated, qualification record generated with status `qualified` for role `priority_helper`, track `website_audit.lighthouse_handoff`. Local Brain health endpoint now reports `qualified: 1` for this track/role combination. This is the first prerequisite for Pilot Enforcement Validation. Enforcement remains disabled for all tracks.
 
+### Pilot Enforcement Validation
+
+The first enforcement pilot is active. `website_audit.lighthouse_handoff` is approved and in `enforced` state for role `priority_helper`. The qualified capability id is `lfm25-1p2b-thinking-local`; runtime execution uses `hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest` from the qualification record's `runtimeModelName`. First 10 monitored enforced executions succeeded, with persisted Track Run Records showing `routing.enforcementDecision.applied=true`, `executedCapabilityId=lfm25-1p2b-thinking-local`, no fallback, and the Thinking runtime model in model step metadata.
+
+### Output Quality Review Foundation
+
+Human review records can now be attached to Track Run Records without mutating original model output or enforcement decisions. Review/correction records live separately under `data/evidence/human-reviews/`. APIs: `POST /runs/:id/review`, `GET /runs/:id/review`, `GET /enforcement/quality-summary`. The summary reports verdict counts, pass/correction rates, score averages, common failure reasons, and critical risk count. Tests: `node scripts/test-human-review-records.js` or `npm.cmd run quality-review:test`.
+
 ## Current Task
 
-Pilot Enforcement Validation prerequisites met. `website_audit.lighthouse_handoff` (role `priority_helper`) has a qualified model capability (LFM2.5-1.2B-Thinking, score 0.9167) AND shadow routing evidence collected: 36 comparisons (33 actionable, 91.67% coverage rate). Shadow router consistently recommends the qualified model across 18 evaluation cases, 9 consistency trials, and 5 qualified-model cases. Pilot readiness review artifact created at `benchmark-lab/evidence/reviews/lighthouse-shadow-pilot-readiness-v1.json` with verdict `ready-with-conditions`. Required pre-pilot actions: approve track and set state to `eligible`.
+Output Quality Review + Human Correction Records is complete. The system can now distinguish transport success, enforcement success, and human-reviewed output quality.
 
 ## Next Task
 
-Activate enforcement pilot for `website_audit.lighthouse_handoff`/`priority_helper`: approve the track (POST /enforcement/approve), set state to eligible (POST /enforcement/set), then monitor first 10 enforced executions. Expand multi-model testing with runtime performance feedback. Add human correction records. Broader model qualification coverage and live qualification depth.
+Apply real human reviews to the first enforced Lighthouse pilot outputs. Use `POST /runs/:id/review` to record `pass`, `needs_edit`, or `fail` with corrections and failure reasons, then use `/enforcement/quality-summary` to decide whether to continue, suspend, narrow, or broaden the pilot. Multi-model track expansion and live qualification depth are follow-on candidates, not automatic scope.
 
 ## Do Not
 
@@ -94,9 +102,10 @@ Activate enforcement pilot for `website_audit.lighthouse_handoff`/`priority_help
 - Implement RelayNode routing, hardware recommendations, or remote execution dispatch in this slice
 - Import `benchmark-lab/engine/` modules from the Local Brain companion or any code under `companion/`
 - Enable enforcement for any Track without explicit evidence review
+- Enable global enforcement — per-track states only
+- Claim model quality is validated from execution success alone
 - Modify the qualification-resolver, capability-registry, evidence-linker, shadow-routing, enforcement-policy, enforcement-policy-store, enforcement-policy-audit, or shadow-evidence-review modules unless extending them for enforcement
 - Modify the policy schema (`companion/schemas/internal/enforcement-policy.schema.json`) or audit event schema (`companion/schemas/internal/enforcement-policy-audit-event.schema.json`) without updating all consumers
-- Enable global enforcement — per-track states only
 - Hardcode absolute filesystem paths in enforcement API responses
 
 ## Architecture Reminder

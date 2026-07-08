@@ -598,3 +598,70 @@ Address five code review findings. The enforced transition gate was the critical
 
 Pilot Enforcement Validation and Multi-Model Track Expansion — activate enforcement for one qualified track once qualification evidence exists. Expand multi-model testing with runtime performance feedback. Add human correction records.
 ```
+
+---
+
+## 2026-07-08 - Pilot Enforcement Validation Active
+
+### Changed
+
+- Activated first guarded enforcement pilot for `website_audit.lighthouse_handoff` / `priority_helper`.
+- Approved the track, moved it to `eligible`, then moved it to `enforced` through the guarded policy gate.
+- Updated qualification capability plumbing so Local Brain carries `runtimeModelName` from qualification records.
+- Updated shadow recommendations and enforcement gates to use `runtimeModelName` for runtime readiness and execution while preserving stable capability ids in policy/evidence.
+- Updated runtime track recording so model child records persist `routing.enforcementDecision`.
+- Updated Track Run Record schema for `recommendedRuntimeModelName` and enforcement `checks`.
+- Fixed `/enforcement/pilot` so it reports the active enforced pilot instead of stale no-pilot text.
+- Fixed shadow/evidence review deduplication so records without stable ids are not collapsed in tests.
+
+### Evidence
+
+- `GET /enforcement/pilot` reports `pilotTrack=website_audit.lighthouse_handoff`.
+- First 10 monitored enforced executions succeeded with `hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest`.
+- Enforcement review reports applied decisions for `lfm25-1p2b-thinking-local`, no fallback, and 100% enforced success for the monitored pilot records.
+- 149/149 enforcement policy store tests pass.
+- 62/62 enforcement policy tests pass.
+- 91/91 enforcement routing tests pass.
+- 31/31 shadow routing tests pass.
+- 25/25 qualification resolver tests pass.
+- Track Run Record schema fixtures pass.
+- Contract helpers pass.
+- `npm.cmd run benchmark:test` passes.
+- `npm.cmd run benchmark:status-smoke` passes.
+- 56/56 smoke tests pass.
+
+### Next
+
+Review enforced output quality beyond transport success, add human correction records for Lighthouse priority decisions, and then decide whether to continue, suspend, or broaden the pilot.
+
+---
+
+## 2026-07-08 - Output Quality Review + Human Correction Records
+
+### Changed
+
+- Added human review schema at `companion/evidence/schemas/human-review-record.schema.json`.
+- Added separate review/correction store at `companion/evidence/human-review-record-store.js`.
+- Added `POST /runs/:id/review` to create/update a human review for a Track Run Record.
+- Added `GET /runs/:id/review` to retrieve the review layer without reading model output from the review record.
+- Added `GET /enforcement/quality-summary` to aggregate human-reviewed output quality.
+- Added `scripts/test-human-review-records.js` and `npm.cmd run quality-review:test`.
+- Extended smoke tests with human review endpoint coverage.
+
+### Evidence
+
+- 25/25 human review assertions pass.
+- 149/149 enforcement policy store tests pass.
+- 62/62 enforcement policy tests pass.
+- 91/91 enforcement routing tests pass.
+- 31/31 shadow routing tests pass.
+- 25/25 qualification resolver tests pass.
+- Track Run Record schema fixtures pass.
+- Contract helpers pass.
+- `npm.cmd run benchmark:test` passes.
+- `npm.cmd run benchmark:status-smoke` passes.
+- 57/57 smoke checks pass, including human review endpoints.
+
+### Next
+
+Apply real human reviews to the first enforced Lighthouse pilot outputs and use quality-summary results to decide whether to continue, suspend, narrow, or broaden the pilot.

@@ -1,6 +1,6 @@
 # Build Status
 
-**Updated:** 2026-07-04
+**Updated:** 2026-07-08
 
 ## Current Stage
 
@@ -74,9 +74,9 @@ North Star direction is now documented as a local capability network: route trac
 
 ## Current Priority
 
-**Now:** Build Canonical Track Run Records as the first Track Learning Evidence Loop slice. Records must stay summary-safe and must not store raw sensitive inputs or outputs by default.
+**Now:** Output Quality Review foundation is complete. Track Run Records can receive separate human review/correction records, and `GET /enforcement/quality-summary` reports reviewed-run quality metrics distinct from transport/enforcement success.
 
-**Next:** Benchmark Lab live qualification depth, extension bridge, or Memory Bridge private vault validation.
+**Next:** Review the actual enforced Lighthouse pilot outputs using the new review API, then decide whether to continue, suspend, narrow, or broaden the pilot. Benchmark Lab live qualification depth, extension bridge, or Memory Bridge private vault validation remain candidates.
 
 **Benchmark Lab:** Milestone 1 complete and operator-ready. Broader model, track, hardware, and live qualification coverage remain follow-on work — not yet scoped or scheduled.
 
