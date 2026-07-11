@@ -10,6 +10,61 @@ Complete the first full Lighthouse Handoff product loop — add `testing_checkli
 
 **Status:** All objectives met. No active build slice. Awaiting next direction.
 
+## Next Slice: M6 — Trusted Relay Execution and Actual-Placement Evidence
+
+The M5 architectural review identified four issues that need attention before the relay system can be used outside trusted development networks. M6 addresses these gaps.
+
+### M6 Objectives
+
+| # | Objective | Status |
+|---|---|---|
+| 1 | Node pairing and authentication — pre-shared credentials or bearer tokens for relay node registration and step execution | Pending |
+| 2 | Capability verification — validate that nodes advertising capabilities actually possess them | Pending |
+| 3 | Allowed-network and URL restrictions — restrict relay traffic to private LAN ranges | Pending |
+| 4 | Minimal-context envelopes — send only the minimum required context to relay nodes, not entire workflow state | Pending |
+| 5 | Planned-versus-actual placement records — separate `plannedPlacement` from `actualExecutionPlacement` in run results | Pending |
+| 6 | Remote output schema validation — validate relay responses against expected output schemas | Pending |
+| 7 | Explicit relay fallback reasons — record why fallback occurred (node missing, unhealthy, disabled, connector unavailable) | Pending |
+| 8 | One real two-device pilot — prove the system works on actual hardware | Pending |
+| 9 | Performance comparison — local-only vs. relay-only vs. distributed | Pending |
+| 10 | Human-readable operator view — show where each step actually ran | Pending |
+
+### M6 Review Findings (from M5 architectural review)
+
+**High: Relay communication has no visible trust boundary**
+- No authentication token, signature, node certificate, request nonce, or pairing credential
+- Registration and heartbeat calls are unauthenticated
+- A rogue or accidentally registered LAN node could receive workflow context and user-derived content
+- Current state: Trusted-development-network only
+
+**Medium: Planned relay placement can silently become local execution**
+- When an assigned node is missing or unhealthy, `executeStepWithAssignedNode()` falls back to local execution without recording a fallback audit
+- Run reports placement plan assigning step to relay node, but actual execution occurred locally with no recorded reason
+- Consequence: Planned and executed topology can diverge silently, weakening the evidence system
+
+**Medium: `local_first` defaults to effectively local-only**
+- Every role is treated as locally capable when `localCapableRoles` is omitted
+- `local_first` immediately assigns locally when the role is considered locally capable
+- Consequence: Without explicit local-capability data, relay nodes are never used for model steps
+
+**Medium: "Approved evidence" was written with an agent as approver**
+- Several new evidence records use `"approvedBy": "locaily-agent"`
+- Blurs distinction between generated, promoted, machine-reviewed, human-reviewed, and approved for qualification
+- Fix: Use `promotionActor` instead of `approvedBy`; reserve `approvedBy` for actual human approval
+
+### M6 Success Criteria
+
+1. Relay nodes cannot register or execute steps without valid authentication
+2. Capability advertisements are verified before routing decisions
+3. Relay traffic is restricted to private LAN ranges
+4. Relay nodes receive only minimum required context (not entire workflow state)
+5. Run results clearly separate planned placement from actual execution placement
+6. Relay responses are validated against expected output schemas
+7. All fallback events include explicit reasons (node missing, unhealthy, disabled, connector unavailable)
+8. One real two-device pilot completes successfully with M6 trust boundary active
+9. Performance comparison shows measurable difference between local-only, relay-only, and distributed execution
+10. Operator can view where each step actually ran vs. where it was planned to run
+
 ## New: testing_checklist_writer
 
 | Area | Status | Notes |

@@ -1,5 +1,46 @@
 # Decision Log
 
+## 2026-07-11 — M5 Architectural Review: Trust Boundary, Placement Evidence, and M6 Scope
+
+### Decision
+
+Accept the findings from the M5 architectural review and define M6 (Trusted Relay Execution and Actual-Placement Evidence) as the next milestone. The review identified four issues that need attention before the relay system can be used outside trusted development networks:
+
+1. **High: Relay communication has no visible trust boundary** — no authentication, pairing, or signed requests between orchestrator and relay nodes
+2. **Medium: Planned relay placement can silently become local execution** — fallback to local execution does not update the placement record
+3. **Medium: `local_first` defaults to effectively local-only** — unknown capabilities treated as locally capable unless caller provides explicit `localCapableRoles`
+4. **Medium: "Approved evidence" was written with an agent as approver** — blurs distinction between generated, promoted, machine-reviewed, human-reviewed, and approved for qualification
+
+### Why
+
+The M5 milestone proved Locaily's architecture can distribute work across multiple devices. However, the current implementation has gaps that prevent safe deployment outside trusted development networks:
+
+- A rogue or accidentally registered LAN node could receive workflow context and user-derived content
+- Planned and executed topology can diverge silently, weakening the evidence system
+- `local_first` behavior is misleading without explicit capability data
+- Evidence approval semantics need clarification to maintain the evidence system's integrity
+
+The review correctly identifies that the next danger is "scope excitement" — adding more node types or a bigger autonomous scheduler before making today's architecture honest and safe.
+
+### Consequences
+
+- M6 defined with 10 specific objectives: node pairing/authentication, capability verification, allowed-network restrictions, minimal-context envelopes, planned-versus-actual placement records, remote output schema validation, explicit relay fallback reasons, one real two-device pilot, performance comparison, and human-readable operator view
+- Relay nodes remain explicitly marked as "trusted-development-network only" until M6 completes
+- `local_first` behavior documented as requiring explicit `localCapableRoles` for correct operation
+- Evidence approval semantics clarified: use `promotionActor` for agent-generated evidence, reserve `approvedBy` for human approval
+- Planned placement records must be separated from actual execution placement in run results
+- Current M4/M5 implementation remains valid for prototype and testing purposes
+
+### Status
+
+Accepted.
+
+### Notes
+
+Review source: GitHub review of Locaily work completed July 11, 2026. The review noted that today's work "passes as a major milestone" with "disciplined, modular, test-oriented" architecture aligned with the Locaily thesis. The recommended M6 scope converts "it can distribute work" into "we can trust and evaluate distributed work."
+
+---
+
 ## 2026-07-11 — M4 Relay Nodes: Ephemeral Execution Targets, Localhost-Only, Opt-In Memory
 
 ### Decision

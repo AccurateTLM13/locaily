@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-11 (M5 complete + post-completion review: 4 issues found and fixed, test harness bug fixed)
+**Updated:** 2026-07-11 (M5 complete + post-completion review: 4 implementation issues fixed + architectural review identifying M6 scope)
 
 ## Read First
 
@@ -121,7 +121,28 @@ Real URL validation set:
 
 ## Current Task
 
-Lighthouse Handoff Assembly Pilot is complete. The system can now distinguish transport success, enforcement success, human-reviewed output quality, packet-level gate decisions, and adjacent-role assembly quality.
+M5 is complete and reviewed. The system can now distribute workflow steps across multiple relay nodes with local fallback. The architectural review identified four issues that need attention before the relay system can be used outside trusted development networks:
+
+### High: Relay communication has no visible trust boundary
+- No authentication token, signature, node certificate, request nonce, or pairing credential
+- Registration and heartbeat calls are unauthenticated
+- A rogue or accidentally registered LAN node could receive workflow context, user-derived content, and return manipulated results
+- **Current state:** Trusted-development-network only
+
+### Medium: Planned relay placement can silently become local execution
+- When an assigned node is missing or unhealthy, `executeStepWithAssignedNode()` falls back to local execution without recording a fallback audit
+- Run reports placement plan assigning step to relay node, but actual execution occurred locally with no recorded reason
+- **Consequence:** Planned and executed topology can diverge silently, weakening the evidence system
+
+### Medium: `local_first` defaults to effectively local-only
+- Every role is treated as locally capable when `localCapableRoles` is omitted
+- `local_first` immediately assigns locally when the role is considered locally capable
+- **Consequence:** Without explicit local-capability data, relay nodes are never used for model steps
+
+### Medium: "Approved evidence" was written with an agent as approver
+- Several new evidence records use `"approvedBy": "locaily-agent"`
+- Blurs distinction between generated, promoted, machine-reviewed, human-reviewed, and approved for qualification
+- **Fix:** Use `promotionActor` instead of `approvedBy`; reserve `approvedBy` for actual human approval
 
 ## Completed Since Last Update
 
@@ -138,31 +159,22 @@ Lighthouse Handoff Assembly Pilot is complete. The system can now distinguish tr
 
 ## Next Task
 
-M2 and M3 are both complete (reviewed and reconciled 2026-07-11 — see `docs/07-progress/m2-m3-review-issues.md`).
+**M6: Trusted Relay Execution and Actual-Placement Evidence** is the recommended next milestone. Do not immediately add more node types or a bigger autonomous scheduler.
 
-**M3 is complete:**
-- Model-backed track planner (`/tracks/plan`, `companion/tools/track-planner.js`) decomposes free-form requests into run plans; qualification-gated (no blind LLM calls) — `reasoning_worker` is qualified for `llama3.2-local`.
-- DAG runner (`companion/core/dag-graph.js`, `dag-executor.js`) executes steps in dependency order with parallel independent steps; used by both `/tracks/run` (`useDag`) and workflow orchestration (`run-plan-executor.js`).
-- Graph validation (cycle detection, missing-step detection) in `dag-graph.js`.
-- Plan → Run bridge into `POST /workflows/plan` and `POST /workflows/run`.
-- Backward compatible — linear runner stays as fallback (`useDag: false`).
+Build the layer that makes today's architecture honest and safe:
 
-**M5 is complete (built on M4):**
-- Placement planner (`companion/relay/placement.js`): `createPlacementPlanner` + `buildPlacementFromTrack`; policies `distribute`, `local_first`, `local_only` (M4 policies unchanged).
-- `POST /relay/plan` previews assignments + summary for a track.
-- `executeStepWithAssignedNode` routes each step to its assigned node; falls back locally with `RELAY_FALLBACK` audit on failure.
-- Wired into `/tracks/run` and `/workflows/run` for `relay_policy=distribute`; responses include `relay_placement`.
-- Acceptance verified by `scripts/test-multi-device-e2e.cjs` (22/22): three servers (orchestrator + 2 relay nodes), distributed run, node-kill fallback.
+1. **Node pairing and authentication** — pre-shared credentials or bearer tokens for relay node registration and step execution
+2. **Capability verification** — validate that nodes advertising capabilities actually possess them
+3. **Allowed-network and URL restrictions** — restrict relay traffic to private LAN ranges
+4. **Minimal-context envelopes** — send only the minimum required context to relay nodes, not entire workflow state
+5. **Planned-versus-actual placement records** — separate `plannedPlacement` from `actualExecutionPlacement` in run results
+6. **Remote output schema validation** — validate relay responses against expected output schemas
+7. **Explicit relay fallback reasons** — record why fallback occurred (node missing, unhealthy, disabled, connector unavailable)
+8. **One real two-device pilot** — prove the system works on actual hardware
+9. **Performance comparison** — local-only vs. relay-only vs. distributed
+10. **Human-readable operator view** — show where each step actually ran
 
-**M4 is complete:**
-- Relay Node protocol (`companion/relay/*`): `protocol.js`, `registry.js`, `connector.js`, `router.js`.
-- Endpoints: `GET /relay/protocol`, `GET /relay/nodes`, `POST /relay/register`, `POST /relay/heartbeat`, `POST /relay/unregister`, `POST /relay/step`.
-- Node registry tracks capabilities + health; discovery is registry-based (no mDNS yet).
-- Cross-node routing wired into `companion/crew/orchestrator.js` and `companion/orchestration/run-plan-executor.js`; policy via `options.relay_policy` (`route_if_unavailable` default, `prefer_relay`, `local_only`).
-- Local fallback on relay failure with `RELAY_FALLBACK` audit event; relay nodes marked unhealthy.
-- Memory Bridge v1: `POST /memory/search` (allowlisted ranked search) and `POST /memory/writeback/apply` (opt-in, vault-path-gated, `memory.writeback.apply` permission).
-- Acceptance verified by `scripts/test-relay-e2e.cjs` (11/11): two servers, discovery, routing to node B, local fallback after B killed, fallback audit event.
-- CI workflow added at `.github/workflows/ci.yml` (offline suites + server smoke + relay e2e).
+This converts today's architecture from "it can distribute work" into "we can trust and evaluate distributed work."
 
 **Do not:**
 - Remove linear track runner
@@ -190,6 +202,8 @@ M2 follow-on candidates remain: qualify recommender roles (a11y_recommender, bud
 - Modify the qualification-resolver, capability-registry, evidence-linker, shadow-routing, enforcement-policy, enforcement-policy-store, enforcement-policy-audit, or shadow-evidence-review modules unless extending them for enforcement
 - Modify the policy schema (`companion/schemas/internal/enforcement-policy.schema.json`) or audit event schema (`companion/schemas/internal/enforcement-policy-audit-event.schema.json`) without updating all consumers
 - Hardcode absolute filesystem paths in enforcement API responses
+- Use relay nodes outside trusted development networks without completing M6 trust boundary requirements
+- Assume planned placement equals actual execution without explicit placement evidence records
 
 ## Architecture Reminder
 

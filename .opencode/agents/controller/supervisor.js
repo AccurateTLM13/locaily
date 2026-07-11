@@ -54,6 +54,7 @@ const DEFAULT_STATE = {
   max_corrections_per_task: 2,
   max_consecutive_failures: 2,
   current_task: null,
+  recommended_worker_agent: null,
   worker_branch: null,
   last_worker_status: "idle",
   last_review_status: null,
@@ -254,7 +255,16 @@ function renderWorkerPrompt(state) {
 function runCli(phase, prompt, cfg) {
   ensureDir(RUNS_DIR);
   const logFile = path.join(RUNS_DIR, `${tsFile()}-${phase}.log`);
-  const who = phase === "worker" ? agentFor("worker", cfg) : agentFor("supervisor", cfg);
+  let who;
+  if (phase === "worker") {
+    who = agentFor("worker", cfg);
+    const st = readJson(STATE_PATH, {});
+    if (st.recommended_worker_agent) {
+      who = { name: st.recommended_worker_agent, model: null };
+    }
+  } else {
+    who = agentFor("supervisor", cfg);
+  }
   const args = [...(cfg.cli.args || ["run"])];
   if (who.name && who.name !== "build") args.push("--agent", who.name);
   if (who.model) args.push("-m", who.model);
@@ -312,6 +322,8 @@ function reconcileAfterPlan(state, cfg, cliOk, prevTaskText) {
   }
   if (!id || id === "pending-first-plan") id = `task-${state.iteration}`;
   state.current_task = id;
+  const recMatch = taskText.match(/##\s*Recommended Worker\s*\n+\s*(\S+)/i);
+  state.recommended_worker_agent = recMatch ? recMatch[1].trim().toLowerCase() : null;
   state.phase = "worker";
   state.last_worker_status = "pending";
   snapshotHistory("plan", state, null);

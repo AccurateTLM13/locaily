@@ -89,6 +89,9 @@ Also obey the project-wide rules in `AGENTS.md` and
    ## Acceptance Criteria
    - <bullet>
 
+   ## Recommended Worker
+   worker | worker-complex | worker-high-volume
+
    ## Correction         <!-- only on re-plan after rejection -->
    <from latest-review.json correction, plus what the worker must do differently>
    ```

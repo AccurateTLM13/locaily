@@ -9,17 +9,28 @@
   "agents": {
     "supervisor": {
       "agent": "supervisor",
-      "model": "opencode-go/kimi-k2.7-code"
+      "model": "opencode-go/deepseek-v4-pro"
     },
     "worker": {
       "agent": "worker",
-      "model": "opencode-go/kimi-k2.7-code"
+      "model": "opencode-go/qwen3.7-plus"
+    }
+  },
+  "models": {
+    "primary": {
+      "supervisor": "opencode-go/deepseek-v4-pro",
+      "worker": "opencode-go/qwen3.7-plus"
+    },
+    "fallbacks": {
+      "complex_coding": "opencode-go/kimi-k2.7-code",
+      "high_volume": "opencode-go/deepseek-v4-flash",
+      "supervisor": "opencode-go/qwen3.7-max"
     }
   },
   "loop": {
-    "max_iterations": 3,
-    "max_corrections_per_task": 2,
-    "max_consecutive_failures": 2,
+    "max_iterations": 10,
+    "max_corrections_per_task": 3,
+    "max_consecutive_failures": 3,
     "stop_on_blocker": true,
     "seconds_between_steps": 1
   },

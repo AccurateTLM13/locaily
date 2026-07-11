@@ -2,7 +2,7 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-07-11 (M5 complete + post-completion review: 4 issues found and fixed — registry least-loaded sort, placement dedupe, missing assigned-node unit tests, protocol doc M5; test harness bug fixed so async checks actually run)
+**Updated:** 2026-07-11 (M5 complete + post-completion review: 4 implementation issues found and fixed + architectural review identifying M6 scope: trust boundary, placement evidence, `local_first` capability source, evidence approval semantics)
 
 ## What Works
 
@@ -61,6 +61,9 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Console validation** - local validation UI exists; not a finished product surface
 - **Fallback ladder** - partial (`retry_same_model_once`); no full escalation handler
 - **Step input mapping** - declarative `input_map` on all track steps; legacy step-id fallbacks removed from `step-input.js`
+- **Relay trust boundary** — no authentication, pairing, or signed requests between orchestrator and relay nodes; current design is trusted-development-network only
+- **Planned vs. actual placement** — placement plan shows intended execution, but silent fallback to local execution does not update the placement record
+- **`local_first` capability source** — treats unknown capabilities as locally capable unless caller provides explicit `localCapableRoles`
 
 ## What Is Not Built Yet
 
@@ -127,9 +130,9 @@ The North Star is now documented as a local capability network: decompose work i
 
 | Layer | Focus |
 |---|---|
-| **Now** | M5 complete + reviewed: Multi-Device Workflow Coordination — placement planner, `POST /relay/plan`, distributed step execution across relay nodes with local fallback on node failure. Review fixed 4 issues (registry least-loaded sort, placement dedupe, assigned-node unit tests, protocol doc M5); test harness bug fixed. Test counts: unit 17/17, placement 14/14, multi-device e2e 22/22. |
-| **Next** | Broader model qualification coverage; live Ollama qualification runs; operator-log tracks qualification; Global scheduler / latency-aware placement (current placement is capability + health + least-loaded) |
-| **Later** | Model Garage evaluation harness; automatic track classification; multi-device workflow coordination with retry/rebalance beyond per-step local fallback |
+| **Now** | M6: Trusted Relay Execution and Actual-Placement Evidence — node pairing/authentication, capability verification, allowed-network restrictions, minimal-context envelopes, planned-vs-actual placement records, remote output schema validation, explicit relay fallback reasons, one real two-device pilot |
+| **Next** | Broader model qualification coverage; live Ollama qualification runs; operator-log tracks qualification; Model Garage evaluation harness (Phase 2 — spec only until evidence) |
+| **Later** | Lighthouse canonical-path documentation; workflow audit summary hardening; Desktop Companion UI (deferred); automatic track classification |
 | **Archive** | Old companion-only architecture, pre-track planning docs |
 
 LFM2.5-1.2B-Thinking is now the first enforced qualified model capability for a companion server runtime track (`website_audit.lighthouse_handoff`, role `priority_helper`). Runtime execution uses `runtimeModelName` from the qualification record; policy and evidence keep the stable capability id `lfm25-1p2b-thinking-local`. Enforcement is still per-track only; no global enforcement is enabled.

@@ -6,6 +6,63 @@ Dated record of meaningful build and planning sessions.
 
 ---
 
+## 2026-07-11 — M5 Architectural Review: Trust Boundary, Placement Evidence, and M6 Scope
+
+### Changed
+
+- **Architectural review accepted:** GitHub review of Locaily work completed July 11, 2026 identified four issues needing attention before relay system can be used outside trusted development networks
+- **M6 defined:** Trusted Relay Execution and Actual-Placement Evidence — 10 specific objectives to harden the relay system
+- **Documentation updated:** current-state.md, next-agent-brief.md, active-build-slice.md, decision-log.md, latest-build-result.json all updated with review findings and M6 scope
+
+### Review Findings
+
+**High: Relay communication has no visible trust boundary**
+- No authentication token, signature, node certificate, request nonce, or pairing credential
+- Registration and heartbeat calls are unauthenticated
+- A rogue or accidentally registered LAN node could receive workflow context, user-derived content, and return manipulated results
+- Current state: Trusted-development-network only
+
+**Medium: Planned relay placement can silently become local execution**
+- When an assigned node is missing or unhealthy, `executeStepWithAssignedNode()` falls back to local execution without recording a fallback audit
+- Run reports placement plan assigning step to relay node, but actual execution occurred locally with no recorded reason
+- Consequence: Planned and executed topology can diverge silently, weakening the evidence system
+
+**Medium: `local_first` defaults to effectively local-only**
+- Every role is treated as locally capable when `localCapableRoles` is omitted
+- `local_first` immediately assigns locally when the role is considered locally capable
+- Consequence: Without explicit local-capability data, relay nodes are never used for model steps
+
+**Medium: "Approved evidence" was written with an agent as approver**
+- Several new evidence records use `"approvedBy": "locaily-agent"`
+- Blurs distinction between generated, promoted, machine-reviewed, human-reviewed, and approved for qualification
+- Fix: Use `promotionActor` instead of `approvedBy`; reserve `approvedBy` for actual human approval
+
+### M6 Objectives
+
+1. Node pairing and authentication — pre-shared credentials or bearer tokens
+2. Capability verification — validate node capability advertisements
+3. Allowed-network and URL restrictions — restrict relay traffic to private LAN ranges
+4. Minimal-context envelopes — send only minimum required context to relay nodes
+5. Planned-versus-actual placement records — separate planned from actual execution
+6. Remote output schema validation — validate relay responses against expected schemas
+7. Explicit relay fallback reasons — record why fallback occurred
+8. One real two-device pilot — prove system works on actual hardware
+9. Performance comparison — local-only vs. relay-only vs. distributed
+10. Human-readable operator view — show where each step actually ran
+
+### Evidence
+
+- Documentation updates: current-state.md, next-agent-brief.md, active-build-slice.md, decision-log.md, latest-build-result.json
+- All existing M5 tests remain passing (unit 17/17, placement 14/14, multi-device e2e 22/22)
+
+### Scope notes
+
+- M6 converts "it can distribute work" into "we can trust and evaluate distributed work"
+- Relay nodes remain explicitly marked as "trusted-development-network only" until M6 completes
+- No implementation changes in this entry — documentation and planning only
+
+---
+
 ## 2026-07-11 — M5 Completed: Multi-Device Workflow Coordination
 
 ### Changed
@@ -1109,7 +1166,7 @@ M3: Dynamic Track Planning & DAG Execution. See `docs/07-progress/roadmap-milest
 
 Remaining M3 scope: DAG integration into run-plan-executor.js for workflow orchestration, DAG tests in CI, track-level DAG documentation.
 
-## 2026-07-11 � M4 + M5 Post-Completion Review
+## 2026-07-11 � M4 + M5 Post-Completion Review
 
 Reviewed completed M4 (Relay Nodes) and M5 (Multi-Device Workflow Coordination) for bugs, mistakes, and unfinished items. Found and fixed 4 issues plus a hidden test-harness bug:
 
@@ -1123,8 +1180,8 @@ Reviewed completed M4 (Relay Nodes) and M5 (Multi-Device Workflow Coordination) 
 
 Verification after fixes:
 
-- scripts/test-relay-unit.cjs � 17/17 PASS
-- scripts/test-relay-placement.cjs � 14/14 PASS
-- scripts/test-multi-device-e2e.cjs � 22/22 PASS
+- scripts/test-relay-unit.cjs � 17/17 PASS
+- scripts/test-relay-placement.cjs � 14/14 PASS
+- scripts/test-multi-device-e2e.cjs � 22/22 PASS
 
 M4 + M5 acceptance criteria met; no blockers remaining. See docs/07-progress/latest-build-result.json eview_2026-07-11.

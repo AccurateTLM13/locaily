@@ -1,7 +1,7 @@
 ---
-description: Worker in the .opencode/agents control loop. Implements exactly one bounded task per invocation, runs tests, commits, writes a structured result. Invoked via the controller for the worker phase.
+description: Worker (complex tasks) — deeper reasoning model for multi-file refactors, schema changes, and architecture decisions.
 mode: primary
-model: opencode-go/qwen3.7-plus
+model: opencode-go/kimi-k2.7-code
 permission:
   edit:
     "*": allow

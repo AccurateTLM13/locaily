@@ -83,8 +83,42 @@
     "Failures degrade gracefully to local execution (no data loss)"
   ],
   "last_fresh_validation": "2026-07-11 (M5 complete + review fixes — multi-device workflow coordination)",
-  "next_milestones": "Follow-on candidates: broader model/track qualification coverage, live Ollama qualification runs, Model Garage evaluation harness (Phase 2)",
+  "next_milestones": "M6: Trusted Relay Execution and Actual-Placement Evidence — node pairing/authentication, capability verification, allowed-network restrictions, minimal-context envelopes, planned-vs-actual placement records, remote output schema validation, explicit relay fallback reasons, one real two-device pilot, performance comparison, human-readable operator view",
   "updated_at": "2026-07-11",
+  "architectural_review_2026-07-11": {
+    "scope": "M5 architectural review for safety, evidence integrity, and deployment readiness",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Relay communication has no visible trust boundary",
+        "description": "No authentication token, signature, node certificate, request nonce, or pairing credential. Registration and heartbeat calls are unauthenticated. A rogue or accidentally registered LAN node could receive workflow context, user-derived content, and return manipulated results.",
+        "current_state": "Trusted-development-network only",
+        "fix": "M6 objective #1: Node pairing and authentication"
+      },
+      {
+        "severity": "medium",
+        "title": "Planned relay placement can silently become local execution",
+        "description": "When an assigned node is missing or unhealthy, executeStepWithAssignedNode() falls back to local execution without recording a fallback audit. Run reports placement plan assigning step to relay node, but actual execution occurred locally with no recorded reason.",
+        "consequence": "Planned and executed topology can diverge silently, weakening the evidence system",
+        "fix": "M6 objective #5: Planned-versus-actual placement records"
+      },
+      {
+        "severity": "medium",
+        "title": "local_first defaults to effectively local-only",
+        "description": "Every role is treated as locally capable when localCapableRoles is omitted. local_first immediately assigns locally when the role is considered locally capable.",
+        "consequence": "Without explicit local-capability data, relay nodes are never used for model steps",
+        "fix": "Document that local_first requires explicit localCapableRoles for correct behavior"
+      },
+      {
+        "severity": "medium",
+        "title": "Approved evidence was written with an agent as approver",
+        "description": "Several new evidence records use approvedBy: locaily-agent. Blurs distinction between generated, promoted, machine-reviewed, human-reviewed, and approved for qualification.",
+        "fix": "Use promotionActor instead of approvedBy; reserve approvedBy for actual human approval"
+      }
+    ],
+    "recommendation": "M6: Trusted Relay Execution and Actual-Placement Evidence — harden one real two-device path, prove the evidence is truthful, and measure whether distribution creates value",
+    "assessment": "Today's work passes as a major milestone. The structure is disciplined, modular, test-oriented, and aligned with the Locaily thesis. The system did not take the lazy route of bolting HTTP calls onto the workflow runner; it created actual placement, registry, protocol, routing, evidence, and fallback concepts. The next danger is scope excitement."
+  },
   "review_2026-07-11": {
     "scope": "Post-completion review of M4 + M5 for bugs, mistakes, and unfinished items",
     "issues_found": [
