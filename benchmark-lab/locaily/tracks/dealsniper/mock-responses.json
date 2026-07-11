@@ -1,0 +1,23 @@
+{
+  "ds-001": {
+    "isDeal": true,
+    "dealScore": 8.5,
+    "analysis": "The Canon AE-1 in excellent condition with the 50mm f/1.8 lens typically sells for $250-$350. At $175 with replaced light seals and original accessories, this is well below market value. The seller has excellent reputation.",
+    "risks": ["Film photography has ongoing costs for film and development", "No returns on vintage camera sales typical"],
+    "negotiationTips": ["At $175, this is already priced well below market. Offer $160 if you want to try, but risk losing it."]
+  },
+  "ds-002": {
+    "isDeal": false,
+    "dealScore": 2.0,
+    "analysis": "An iPhone 14 Pro Max with a scratched screen, low battery health (87%), no original box, and from a new seller with only 67% positive feedback at $1,099 is overpriced. A refurbished unit with warranty from a reputable seller can be found for $850-$950.",
+    "risks": ["New seller with limited feedback history", "Scratched screen may worsen over time", "No original box reduces resale value", "Low battery health may require $99 replacement soon"],
+    "negotiationTips": ["Fair price considering condition is around $750-$800", "Ask for additional photos of screen scratch", "Consider buying Apple refurbished with full warranty instead"]
+  },
+  "ds-003": {
+    "isDeal": true,
+    "dealScore": 7.0,
+    "analysis": "A solid walnut 6ft dining table for $400 is a good price. Comparable tables sell for $800-$1500. The water marks are cosmetic and refinishing is straightforward. The seller has strong positive feedback history.",
+    "risks": ["Local pickup only in Portland - must arrange transportation", "Water marks may require professional refinishing ($100-$200)", "Solid walnut is heavy - need truck or trailer for pickup"],
+    "negotiationTips": ["Offer $350 citing refinishing cost for water marks", "Ask for detailed photos of water marks to assess refinishing difficulty", "Confirm table dimensions fit your space before pickup"]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DealSniper Analysis Output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["isDeal", "dealScore", "analysis"],
+  "properties": {
+    "isDeal": { "type": "boolean" },
+    "dealScore": { "type": "number", "minimum": 0, "maximum": 10 },
+    "analysis": { "type": "string", "minLength": 1 },
+    "marketComparison": { "type": "string" },
+    "risks": { "type": "array", "items": { "type": "string" } },
+    "negotiationTips": { "type": "array", "items": { "type": "string" } }
+  }
+}

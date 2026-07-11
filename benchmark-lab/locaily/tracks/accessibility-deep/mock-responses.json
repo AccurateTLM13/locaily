@@ -1,0 +1,28 @@
+{
+  "a11y-001": {
+    "summary": "The product page has critical accessibility issues: images lack alt text and links lack discernible names. These prevent screen reader users from understanding page content and navigating.",
+    "findings": [
+      { "auditId": "image-alt", "title": "Image elements do not have [alt] attributes", "severity": "critical", "wcagCriteria": "1.1.1", "finding": "Product images lack descriptive alt text, making product information inaccessible to screen reader users." },
+      { "auditId": "link-name", "title": "Links do not have a discernible name", "severity": "high", "wcagCriteria": "2.4.4", "finding": "Navigation and action links lack accessible names, preventing keyboard and screen reader users from understanding link destinations." }
+    ]
+  },
+  "a11y-002": {
+    "summary": "Low text contrast ratio on the landing page creates readability barriers for users with low vision.",
+    "findings": [
+      { "auditId": "color-contrast", "title": "Background and foreground colors do not have a sufficient contrast ratio", "severity": "high", "wcagCriteria": "1.4.3", "finding": "Text colors do not meet minimum contrast ratio of 4.5:1 for normal text, reducing readability." }
+    ]
+  },
+  "a11y-003": {
+    "summary": "Checkout form has multiple accessibility barriers including missing labels and hidden focusable elements.",
+    "findings": [
+      { "auditId": "label", "title": "Form elements do not have associated labels", "severity": "critical", "wcagCriteria": "1.3.1, 4.1.2", "finding": "Form inputs lack programmatically associated label elements, making form completion impossible for screen reader users." },
+      { "auditId": "select-name", "title": "Select elements do not have associated labels", "severity": "high", "wcagCriteria": "1.3.1, 4.1.2", "finding": "Dropdown select elements lack associated labels, preventing screen reader users from identifying form fields." },
+      { "auditId": "aria-hidden-focus", "title": "ARIA hidden element contains focusable elements", "severity": "medium", "wcagCriteria": "4.1.2", "finding": "A container with aria-hidden=true contains focusable elements, creating a focus trap for keyboard users." }
+    ]
+  },
+  "a11y-rec-001": {
+    "recommendations": [
+      { "auditId": "image-alt", "action": "Add descriptive alt attributes to all product images", "implementationGuide": "For each <img> element, add an alt attribute describing the product: <img src=\"chair.jpg\" alt=\"Ergonomic office chair with lumbar support, black mesh back\">. For decorative images, use alt=\"\".", "effort": "low", "affectedElements": "product images" }
+    ]
+  }
+}

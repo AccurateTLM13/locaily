@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "llama3.2-local-llama3.2-dealsniper-v1-qualification",
+  "artifactType": "qualification_record",
+  "artifactPath": "benchmark-lab/qualifications/models/llama3.2-local-llama3.2-dealsniper-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:13db8d7b0506475985eed39300c1f368869e75c2f4d42940f281827cb3daea94",
+  "generatedAt": "2026-07-11T13:43:40.174Z"
+}

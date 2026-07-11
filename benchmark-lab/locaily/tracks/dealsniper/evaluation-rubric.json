@@ -1,0 +1,43 @@
+{
+  "rubricId": "dealsniper-v1",
+  "trackId": "marketplace.dealsniper",
+  "role": "default_worker",
+  "description": "Evaluation rubric for DealSniper listing analysis qualification",
+  "dimensions": [
+    {
+      "id": "deal-assessment",
+      "name": "Deal assessment accuracy",
+      "weight": 0.30,
+      "description": "Correctly identifies whether a listing is a good deal based on price, condition, and market context."
+    },
+    {
+      "id": "reasoning-quality",
+      "name": "Reasoning quality",
+      "weight": 0.25,
+      "description": "Analysis provides specific, logical reasoning for the deal assessment."
+    },
+    {
+      "id": "risk-identification",
+      "name": "Risk identification",
+      "weight": 0.20,
+      "description": "Identifies relevant risks such as shipping costs, seller reputation, item condition concerns."
+    },
+    {
+      "id": "actionability",
+      "name": "Actionability",
+      "weight": 0.15,
+      "description": "Negotiation tips are specific and actionable, not generic advice."
+    },
+    {
+      "id": "schema-compliance",
+      "name": "Output-schema compliance",
+      "weight": 0.10,
+      "description": "Output is valid JSON matching the output schema."
+    }
+  ],
+  "passThreshold": 0.7,
+  "failConditions": [
+    "claiming a deal is good without supporting evidence",
+    "output fails schema validation"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "dealsniper-v1",
+  "name": "DealSniper Listing Analysis V1",
+  "mode": "qualification",
+  "trackId": "marketplace.dealsniper",
+  "contractId": "deal-sniper-v1",
+  "runtime": {
+    "provider": "ollama",
+    "modelManifest": "llama3.2-local",
+    "baseUrl": "http://127.0.0.1:11434",
+    "timeoutMs": 120000,
+    "temperature": 0,
+    "numPredict": 4096
+  },
+  "caseFiles": ["cases.json"],
+  "outputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "DealSniper Analysis Output",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["isDeal", "dealScore", "analysis", "label"],
+    "properties": {
+      "label": { "enum": ["extract"] },
+      "isDeal": { "type": "boolean" },
+      "dealScore": { "type": "number", "minimum": 0, "maximum": 10 },
+      "analysis": { "type": "string", "minLength": 1 },
+      "marketComparison": { "type": "string" },
+      "risks": { "type": "array", "items": { "type": "string" } },
+      "negotiationTips": { "type": "array", "items": { "type": "string" } }
+    }
+  },
+  "validators": ["json-parse", "json-schema"]
+}

@@ -27,6 +27,8 @@ const { runToolWithValidation } = require("./core/result-validator");
 const { createProviderRouter } = require("./providers/router");
 const { createToolRegistry } = require("./tools/registry");
 const { listTracks, runTrack, createJob, updateJob } = require("./crew");
+const { loadTrack } = require("./crew/decomposer");
+const { executeStep } = require("./crew/orchestrator");
 const { recordFailedExecution } = require("./crew/runtime-track-run-recorder");
 const {
   listTrackRegistry,
@@ -39,7 +41,7 @@ const { recordScoreboardEntry, getScoreboardSummary } = require("./core/scoreboa
 const { createVaultAdapter } = require("./memory/vault-adapter");
 const { WIKI_ALLOWED_PATHS } = require("./memory/allowlist-presets");
 const { buildContextPack } = require("./memory/context-pack-builder");
-const { createWritebackProposal } = require("./memory/writeback-proposal");
+const { createWritebackProposal, renderProposalMarkdown } = require("./memory/writeback-proposal");
 const { buildMemoryAuditEvent } = require("./core/audit-log");
 const { createConsoleController } = require("./console/controller");
 const { createRunStore } = require("./console/run-store");
@@ -49,6 +51,11 @@ const { configurePageSpeed, getPageSpeedStatus } = require("./console/pagespeed"
 const { normalizeValidationModel } = require("./console/model-slug");
 const { createQualificationResolver } = require("./core/qualification-resolver");
 const { createCapabilityRegistry } = require("./core/capability-registry");
+const { createRelayRegistry } = require("./relay/registry");
+const { createRelayConnector } = require("./relay/connector");
+const { createRelayRouter, executeStepViaRelayIfNeeded, ROUTING_POLICY } = require("./relay/router");
+const { buildPlacementFromTrack } = require("./relay/placement");
+const { describeProtocol } = require("./relay/protocol");
 const { createQualificationEvidenceLinker } = require("./evidence/qualification-evidence-linker");
 const { createShadowRouter } = require("./core/shadow-routing");
 const { createEnforcementPolicy } = require("./core/enforcement-policy");
@@ -111,14 +118,14 @@ const DEFAULT_CONFIG = {
     active: "balanced"
   },
   tools: {
-    enabled: ["deal-sniper", "lighthouse-handoff"]
+    enabled: ["deal-sniper", "lighthouse-handoff", "track-planner"]
   },
   audit: {
     filePath: join(__dirname, "..", "data", "audit.jsonl")
   },
   permissions: {
     filePath: join(__dirname, "..", "data", "permissions.json"),
-    approved: ["model.run", "memory.read", "memory.writeback.propose"],
+    approved: ["model.run", "memory.read", "memory.writeback.propose", "memory.writeback.apply"],
     denied: ["file.delete", "file.write", "network.send", "browser.write", "memory.delete"]
   },
   memoryBridge: {
@@ -200,6 +207,10 @@ const permissionManager = createPermissionManager(config.permissions);
 const localSetupStore = createLocalSetupStore({
   dataDir: join(__dirname, "..", "data")
 });
+
+const relayRegistry = createRelayRegistry({ staleMs: 60 * 1000 });
+const relayConnector = createRelayConnector({ timeoutMs: 15000 });
+const relayRouter = createRelayRouter({ registry: relayRegistry, connector: relayConnector, auditLog });
 
 configurePageSpeed({
   getApiKey: () => localSetupStore.getPageSpeedApiKey()
@@ -396,6 +407,35 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, 200, {
         ok: true,
         capabilities: capabilityRegistry.listCapabilities()
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/qualifications/dashboard") {
+      const allCapabilities = capabilityRegistry.listCapabilities();
+      const qualSummary = qualificationResolver.getAllSummary();
+      const enforcementSummary = enforcementPolicy.getPolicySummary ? enforcementPolicy.getPolicySummary() : {};
+      const trackStates = enforcementPolicy.getTrackStates ? enforcementPolicy.getTrackStates() : {};
+
+      return sendJson(response, 200, {
+        ok: true,
+        models: allCapabilities.reduce((acc, cap) => {
+          const modelId = cap.modelId || "unknown";
+          if (!acc[modelId]) acc[modelId] = { modelId, capabilities: [] };
+          acc[modelId].capabilities.push({
+            role: cap.role,
+            trackId: cap.trackId,
+            contractId: cap.contractId,
+            status: cap.status,
+            score: cap.score,
+            enforcementState: trackStates[cap.trackId] || "shadow"
+          });
+          return acc;
+        }, {}),
+        byStatus: qualSummary.byStatus || {},
+        byRole: qualSummary.byRole || {},
+        totalModels: new Set(allCapabilities.map(c => c.modelId)).size,
+        totalCapabilities: allCapabilities.length,
+        trackStates
       });
     }
 
@@ -803,6 +843,57 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, trackRunResult.statusCode, trackRunResult.body);
     }
 
+    if (request.method === "POST" && url.pathname === "/tracks/plan") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false, code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with request field."
+        });
+      }
+
+      const { request: userRequest, context: userContext } = bodyResult.body || {};
+      if (!userRequest || typeof userRequest !== "string" || userRequest.length < 3) {
+        return sendJson(response, 400, {
+          ok: false, code: "MISSING_REQUEST",
+          message: "A 'request' field with at least 3 characters is required."
+        });
+      }
+
+      const plannerTool = toolRegistry.get("track-planner");
+      if (!plannerTool) {
+        return sendJson(response, 503, {
+          ok: false, code: "PLANNER_UNAVAILABLE",
+          message: "Track planner tool is not available in this environment.",
+          nextStep: "Ensure track-planner is in the enabled tools list."
+        });
+      }
+
+      try {
+        const runtime = getActiveRuntime();
+        const planResult = await plannerTool.handle({
+          task: "plan",
+          input: { request: userRequest, context: userContext || "" },
+          runtime,
+          options: buildModelRoutingOptions({ useDag: true })
+        });
+
+        return sendJson(response, 200, {
+          ok: true,
+          result: planResult.ok ? planResult.result : planResult,
+          error: planResult.ok ? null : planResult.error,
+          warning: planResult.warning || null
+        });
+      } catch (err) {
+        return sendJson(response, 500, {
+          ok: false, code: "PLANNER_ERROR",
+          message: err.message
+        });
+      }
+    }
+
     if (request.method === "GET" && url.pathname === "/orchestration/tracks") {
       return sendJson(response, 200, {
         ok: true,
@@ -924,6 +1015,197 @@ const server = http.createServer(async (request, response) => {
       const setResult = setModelProfile(bodyResult.body);
 
       return sendJson(response, setResult.ok ? 200 : 400, setResult);
+    }
+
+    if (request.method === "GET" && url.pathname === "/relay/protocol") {
+      return sendJson(response, 200, {
+        ok: true,
+        protocol: describeProtocol()
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/relay/nodes") {
+      return sendJson(response, 200, {
+        ok: true,
+        nodes: relayRegistry.list(),
+        stats: relayRegistry.getStats()
+      });
+    }
+
+    if (request.method === "POST" && url.pathname === "/relay/register") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a relay node registration object."
+        });
+      }
+
+      const { nodeId, baseUrl, label, capabilities, hardware } = bodyResult.body || {};
+
+      try {
+        const node = relayRegistry.register({ nodeId, baseUrl, label, capabilities, hardware });
+        return sendJson(response, 200, { ok: true, node });
+      } catch (error) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: error.code || "RELAY_REGISTER_FAILED",
+          message: error.message
+        });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/relay/heartbeat") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON."
+        });
+      }
+
+      const { nodeId, capabilities, hardware } = bodyResult.body || {};
+      const node = relayRegistry.heartbeat(nodeId, { capabilities, hardware });
+
+      if (!node) {
+        return sendJson(response, 404, {
+          ok: false,
+          code: "RELAY_NODE_UNKNOWN",
+          message: `No registered relay node matches '${nodeId || ""}'.`
+        });
+      }
+
+      return sendJson(response, 200, { ok: true, node });
+    }
+
+    if (request.method === "POST" && url.pathname === "/relay/unregister") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON."
+        });
+      }
+
+      const { nodeId } = bodyResult.body || {};
+      const removed = relayRegistry.unregister(nodeId);
+
+      return sendJson(response, 200, { ok: true, nodeId, removed });
+    }
+
+    if (request.method === "POST" && url.pathname === "/relay/plan") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send { track_id, relay_policy, local_capable }."
+        });
+      }
+
+      const { track_id, relay_policy, local_capable } = bodyResult.body || {};
+
+      if (!track_id) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "TRACK_ID_REQUIRED",
+          message: "track_id is required for placement planning.",
+          nextStep: "Send a track id registered in the track registry."
+        });
+      }
+
+      try {
+        const track = loadTrack(track_id);
+        const policy = relay_policy || "distribute";
+        const placement = buildPlacementFromTrack({
+          registry: relayRegistry,
+          track,
+          policy,
+          localCapableRoles: local_capable === false ? [] : null
+        });
+
+        return sendJson(response, 200, {
+          ok: true,
+          track_id,
+          policy,
+          assignments: placement.assignments,
+          summary: placement.summary,
+          nodes: relayRegistry.list().map((node) => ({
+            nodeId: node.nodeId,
+            healthy: node.healthy,
+            capabilities: node.capabilities
+          }))
+        });
+      } catch (error) {
+        return sendJson(response, 404, {
+          ok: false,
+          code: error.code || "TRACK_NOT_FOUND",
+          message: error.message
+        });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/relay/step") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a relay step dispatch object."
+        });
+      }
+
+      const { step, context, options, meta } = bodyResult.body || {};
+
+      if (!step || typeof step !== "object" || !step.executor) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "INVALID_STEP",
+          message: "Relay step dispatch requires a step object with an executor.",
+          nextStep: "Send { step: { executor, ... }, context, options }."
+        });
+      }
+
+      try {
+        const stepResult = await executeStep({
+          step,
+          context: context || { input: {}, artifacts: {} },
+          runtime: getActiveRuntime(),
+          options: { ...(options || {}), relay: { enabled: false } },
+          toolRegistry,
+          meta: meta || {}
+        });
+
+        return sendJson(response, 200, {
+          protocolVersion: describeProtocol().version,
+          ok: true,
+          output: stepResult.output,
+          meta: stepResult.meta
+        });
+      } catch (error) {
+        return sendJson(response, 200, {
+          protocolVersion: describeProtocol().version,
+          ok: false,
+          output: null,
+          meta: {
+            error: {
+              code: error.code || "RELAY_STEP_FAILED",
+              message: error.message
+            }
+          }
+        });
+      }
     }
 
     if (request.method === "POST" && url.pathname === "/tasks/run") {
@@ -1078,6 +1360,90 @@ const server = http.createServer(async (request, response) => {
         statusCode: proposalResult.ok ? 200 : 400
       });
       return sendJson(response, proposalResult.ok ? 200 : 400, responseBody);
+    }
+
+    if (request.method === "POST" && url.pathname === "/memory/search") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with query.",
+          warnings: ["Invalid JSON body."]
+        });
+        await recordMemoryAudit({
+          identity, startedAt, endpoint: "memory/search",
+          requestBody: {}, responseBody, statusCode: 400
+        });
+        return sendJson(response, 400, responseBody);
+      }
+
+      const searchResult = vaultAdapter.search(bodyResult.body && bodyResult.body.query, {
+        limit: bodyResult.body && bodyResult.body.limit,
+        paths: bodyResult.body && bodyResult.body.paths
+      });
+      const responseBody = buildMemoryActionResponse({
+        identity, startedAt, actionResult: searchResult
+      });
+      await recordMemoryAudit({
+        identity, startedAt, endpoint: "memory/search",
+        requestBody: bodyResult.body, responseBody,
+        statusCode: searchResult.ok ? 200 : 400
+      });
+      return sendJson(response, searchResult.ok ? 200 : 400, responseBody);
+    }
+
+    if (request.method === "POST" && url.pathname === "/memory/writeback/apply") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity, startedAt, code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid writeback apply JSON object.",
+          warnings: ["Invalid JSON body."]
+        });
+        await recordMemoryAudit({
+          identity, startedAt, endpoint: "memory/writeback/apply",
+          requestBody: {}, responseBody, statusCode: 400
+        });
+        return sendJson(response, 400, responseBody);
+      }
+
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.writeback.apply"] },
+        requestedPermissions: ["memory.writeback.apply"]
+      });
+
+      if (!permissionResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity, startedAt, code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.writeback.apply permission denied."]
+        });
+        await recordMemoryAudit({
+          identity, startedAt, endpoint: "memory/writeback/apply",
+          requestBody: bodyResult.body, responseBody, statusCode: 403
+        });
+        return sendJson(response, 403, responseBody);
+      }
+
+      const { targetPath } = bodyResult.body || {};
+      const markdown = renderProposalMarkdown(bodyResult.body || {});
+      const applyResult = vaultAdapter.applyWriteback({ targetPath, content: markdown });
+      const responseBody = buildMemoryActionResponse({
+        identity, startedAt, actionResult: applyResult
+      });
+      await recordMemoryAudit({
+        identity, startedAt, endpoint: "memory/writeback/apply",
+        requestBody: bodyResult.body, responseBody,
+        statusCode: applyResult.ok ? 200 : 400
+      });
+      return sendJson(response, applyResult.ok ? 200 : 400, responseBody);
     }
 
     if (request.method === "POST" && url.pathname === "/analyze") {
@@ -1280,6 +1646,12 @@ async function buildHealthResponse() {
       checksums: benchmarkStatus.checksums,
       latest_generated_at: benchmarkStatus.latestGeneratedAt,
       statusEndpoint: "/benchmark/status"
+    },
+    relay: {
+      nodes: relayRegistry.getStats().total,
+      healthy: relayRegistry.getStats().healthy,
+      nodesEndpoint: "/relay/nodes",
+      protocolEndpoint: "/relay/protocol"
     },
     qualifications: {
       summary: qualificationResolver.getAllSummary(),
@@ -1736,6 +2108,37 @@ function getActiveModel(modelOverride = null) {
 
 function resolveModelForRole(modelRole) {
   return modelRoleManager.resolve(modelRole, getActiveProviderId());
+}
+
+function buildRelayOptions(bodyOptions = {}, localCapable = true) {
+  const policy = (bodyOptions && bodyOptions.relay_policy) || ROUTING_POLICY.ROUTE_IF_UNAVAILABLE;
+
+  return {
+    registry: relayRegistry,
+    router: relayRouter,
+    connector: relayConnector,
+    enabled: true,
+    policy,
+    localCapable
+  };
+}
+
+function applyRelayPlacement(relayOptions, trackId, localCapable) {
+  if (!relayOptions || relayOptions.policy !== "distribute") {
+    return relayOptions;
+  }
+
+  const track = loadTrack(trackId);
+  const placement = buildPlacementFromTrack({
+    registry: relayRegistry,
+    track,
+    policy: "distribute",
+    localCapableRoles: localCapable ? null : []
+  });
+
+  relayOptions.assignments = placement.assignments;
+  relayOptions.placementSummary = placement.summary;
+  return relayOptions;
 }
 
 function buildModelRoutingOptions(extra = {}) {
@@ -2321,15 +2724,19 @@ async function executeTrackRunRequest(body, context) {
   }
 
   try {
+    const trackOptions = buildModelRoutingOptions({
+      ...(body.options || {}),
+      model: requestedModel
+    });
+    trackOptions.relay = buildRelayOptions(body.options, runtimeState.available && runtimeState.modelReady);
+    applyRelayPlacement(trackOptions.relay, body.track_id, runtimeState.available && runtimeState.modelReady);
+
     const trackResult = await runTrack({
       trackId: body.track_id,
       input: body.input,
       runtime,
       toolRegistry,
-      options: buildModelRoutingOptions({
-        ...(body.options || {}),
-        model: requestedModel
-      }),
+      options: trackOptions,
       meta: {
         requestId: context.identity.requestId,
         run_id: context.identity.run_id,
@@ -2393,6 +2800,10 @@ async function executeTrackRunRequest(body, context) {
 
     if (evidenceRef) {
       trackSuccessBody.evidence = evidenceRef;
+    }
+
+    if (trackOptions.relay && trackOptions.relay.placementSummary) {
+      trackSuccessBody.relay_placement = trackOptions.relay.placementSummary;
     }
 
     return {
@@ -2709,14 +3120,18 @@ async function executeWorkflowRunRequest(body, context) {
   }
 
   try {
+    const runPlanOptions = buildModelRoutingOptions({
+      ...(body.options || {}),
+      model: requestedModel
+    });
+    runPlanOptions.relay = buildRelayOptions(body.options, runtimeState.available && runtimeState.modelReady);
+    applyRelayPlacement(runPlanOptions.relay, plan.track_id, runtimeState.available && runtimeState.modelReady);
+
     const execution = await executeRunPlan({
       plan,
       runtime,
       toolRegistry,
-      options: buildModelRoutingOptions({
-        ...(body.options || {}),
-        model: requestedModel
-      }),
+      options: runPlanOptions,
       meta: {
         requestId: context.identity.requestId,
         run_id: context.identity.run_id,
@@ -2834,6 +3249,10 @@ async function executeWorkflowRunRequest(body, context) {
 
     if (evidenceRef) {
       workflowSuccessBody.evidence = evidenceRef;
+    }
+
+    if (runPlanOptions.relay && runPlanOptions.relay.placementSummary) {
+      workflowSuccessBody.relay_placement = runPlanOptions.relay.placementSummary;
     }
 
     return {

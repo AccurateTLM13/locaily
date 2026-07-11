@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Track Planner Output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plan"],
+  "properties": {
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trackId", "steps"],
+      "properties": {
+        "trackId": { "type": "string", "minLength": 1 },
+        "reasoning": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["stepId", "description"],
+            "properties": {
+              "stepId": { "type": "string", "minLength": 1 },
+              "description": { "type": "string", "minLength": 1 },
+              "dependsOn": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    }
+  }
+}

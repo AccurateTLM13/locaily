@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "performance-budget-v1",
+  "name": "Performance Budget Audit V1",
+  "mode": "qualification",
+  "trackId": "website_audit.performance_budget",
+  "contractId": "budget-analyzer-v1",
+  "runtime": {
+    "provider": "ollama",
+    "modelManifest": "llama3.2-local",
+    "baseUrl": "http://127.0.0.1:11434",
+    "timeoutMs": 120000,
+    "temperature": 0,
+    "numPredict": 4096
+  },
+  "caseFiles": ["cases.json"],
+  "outputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Budget Analyzer Output",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["summary", "budgetGaps", "label"],
+    "properties": {
+      "label": { "enum": ["extract"] },
+      "summary": { "type": "string", "minLength": 1 },
+      "budgetGaps": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["auditId", "title", "currentValue", "target", "gapSeverity"],
+          "properties": {
+            "auditId": { "type": "string", "minLength": 1 },
+            "title": { "type": "string" },
+            "currentValue": { "type": "string" },
+            "target": { "type": "string" },
+            "gapSeverity": { "enum": ["critical", "significant", "moderate", "within_budget"] }
+          }
+        }
+      }
+    }
+  },
+  "validators": ["json-parse", "json-schema"]
+}

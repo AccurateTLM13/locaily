@@ -1,0 +1,22 @@
+{
+  "seo-001": {
+    "summary": "Blog post is missing a meta description, which will cause search engines to display generic snippets instead of compelling descriptions, reducing click-through rate from search results.",
+    "findings": [
+      { "auditId": "meta-description", "title": "Document does not have a meta description", "severity": "high", "impact": "Search snippets will show generic text, reducing CTR", "finding": "The blog post lacks a <meta name=\"description\"> tag, preventing search engines from displaying a tailored snippet." }
+    ]
+  },
+  "seo-002": {
+    "summary": "Product page has critical SEO issues: missing title tag prevents proper indexing, missing meta description reduces CTR, and non-descriptive link text harms internal link equity.",
+    "findings": [
+      { "auditId": "document-title", "title": "Document does not have a valid title", "severity": "critical", "impact": "Search engines cannot reliably determine page topic for ranking", "finding": "The <title> element is missing or empty, severely impacting search indexing and ranking." },
+      { "auditId": "meta-description", "title": "Document does not have a meta description", "severity": "high", "impact": "Search snippets show generic text, reducing organic CTR", "finding": "No meta description tag found. Each product page should have a unique, descriptive meta description." },
+      { "auditId": "link-text", "title": "Links do not have descriptive text", "severity": "medium", "impact": "Search engines lose contextual relevance signals from internal links", "finding": "Several links use generic text like 'click here' or 'read more' instead of descriptive anchor text." }
+    ]
+  },
+  "seo-rec-001": {
+    "recommendations": [
+      { "auditId": "document-title", "action": "Add a descriptive, keyword-rich title tag", "priority": "high", "rationale": "Title tags are the most important on-page SEO factor. Without one, search engines cannot properly index or rank the page.", "expectedImpact": "Immediate indexing improvement" },
+      { "auditId": "meta-description", "action": "Add a unique meta description summarizing the product", "priority": "high", "rationale": "Meta descriptions influence click-through rates from search results by providing compelling snippets.", "expectedImpact": "Improved organic CTR" }
+    ]
+  }
+}

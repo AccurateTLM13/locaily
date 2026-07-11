@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "benchmark.promoted_evidence.v1",
+  "evidenceId": "llama3.2-budget-analyzer-v1",
+  "sourceRunId": "run-20260711T134056Z",
+  "suiteId": "performance-budget-v1",
+  "trackId": "website_audit.performance_budget",
+  "contractId": "budget-analyzer-v1",
+  "approvedAt": "2026-07-11T13:42:58.038Z",
+  "approvedBy": "locaily-agent",
+  "summary": {
+    "schemaVersion": "benchmark.run_summary.v1",
+    "runId": "run-20260711T134056Z",
+    "suiteId": "performance-budget-v1",
+    "trackId": "website_audit.performance_budget",
+    "contractId": "budget-analyzer-v1",
+    "runtime": {
+      "provider": "ollama",
+      "modelId": "llama3.2-local",
+      "runtimeModelName": "llama3.2"
+    },
+    "startedAt": "2026-07-11T13:40:56.688Z",
+    "completedAt": "2026-07-11T13:41:51.648Z",
+    "caseCount": 2,
+    "passed": 2,
+    "failed": 0,
+    "errors": 0,
+    "timeouts": 0,
+    "malformed": 0,
+    "caseResults": [
+      {
+        "caseId": "budget-001",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "extract",
+            "actual": "extract"
+          }
+        ]
+      },
+      {
+        "caseId": "budget-002",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "extract",
+            "actual": "extract"
+          }
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "llama3.2 passes 2/2 performance budget analysis scenarios"
+  ]
+}

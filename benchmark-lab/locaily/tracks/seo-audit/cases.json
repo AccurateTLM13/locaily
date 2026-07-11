@@ -1,0 +1,26 @@
+[
+  {
+    "caseId": "seo-001",
+    "trackId": "website_audit.seo_audit",
+    "difficulty": "easy",
+    "responseMode": "json",
+    "input": {
+      "text": "Analyze the Lighthouse SEO audit results below.\nFor each failing audit, describe the search visibility impact and why it matters.\nUse only supplied Lighthouse audit IDs and titles. Do not invent audits.\nSeverity: critical (deindexing risk), high (significant ranking impact), medium (moderate impact), low (minor).\nReturn JSON only matching the schema.\n\nPage URL: https://example.com/blog/post-1\nFailing audits: 1\nExtracted audits: [{\"id\":\"meta-description\",\"title\":\"Document does not have a meta description\",\"severity\":\"high\"}]\n\nOutput must include: \"label\": \"extract\""
+    },
+    "expected": {
+      "label": "extract"
+    }
+  },
+  {
+    "caseId": "seo-002",
+    "trackId": "website_audit.seo_audit",
+    "difficulty": "medium",
+    "responseMode": "json",
+    "input": {
+      "text": "Analyze the Lighthouse SEO audit results below.\nFor each failing audit, describe the search visibility impact and why it matters.\nUse only supplied Lighthouse audit IDs and titles. Do not invent audits.\nSeverity: critical (deindexing risk), high (significant ranking impact), medium (moderate impact), low (minor).\nReturn JSON only matching the schema.\n\nPage URL: https://example.com/products/chair\nFailing audits: 3\nExtracted audits: [{\"id\":\"meta-description\",\"title\":\"Document does not have a meta description\",\"severity\":\"high\"},{\"id\":\"document-title\",\"title\":\"Document does not have a valid title\",\"severity\":\"critical\"},{\"id\":\"link-text\",\"title\":\"Links do not have descriptive text\",\"severity\":\"medium\"}]\n\nOutput must include: \"label\": \"extract\""
+    },
+    "expected": {
+      "label": "extract"
+    }
+  }
+]

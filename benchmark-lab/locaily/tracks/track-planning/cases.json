@@ -1,0 +1,42 @@
+[
+  {
+    "caseId": "plan-001",
+    "trackId": "core.track_planning",
+    "difficulty": "easy",
+    "tags": ["lighthouse", "multi-audit"],
+    "input": {
+      "text": "Audit example.com for performance and accessibility and write a developer handoff."
+    },
+    "expected": { "label": "classify" }
+  },
+  {
+    "caseId": "plan-002",
+    "trackId": "core.track_planning",
+    "difficulty": "easy",
+    "tags": ["dealsniper", "marketplace"],
+    "input": {
+      "text": "Find good marketplace deals for a used mirrorless camera under $800."
+    },
+    "expected": { "label": "route" }
+  },
+  {
+    "caseId": "plan-003",
+    "trackId": "core.track_planning",
+    "difficulty": "medium",
+    "tags": ["lighthouse", "summary"],
+    "input": {
+      "text": "Summarize this Lighthouse report and prioritize the fixes for a developer."
+    },
+    "expected": { "label": "summarize" }
+  },
+  {
+    "caseId": "plan-004",
+    "trackId": "core.track_planning",
+    "difficulty": "edge",
+    "tags": ["ambiguous"],
+    "input": {
+      "text": "Do something useful with this website."
+    },
+    "expected": { "label": "unknown" }
+  }
+]

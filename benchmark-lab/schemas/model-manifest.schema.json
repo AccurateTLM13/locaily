@@ -86,6 +86,16 @@
       "items": {
         "type": "string"
       }
+    },
+    "qualifications": {
+      "type": "object",
+      "description": "Per-track role qualification summary mirrored from Benchmark Lab qualification records. Maps trackId to a role->status map.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
     }
   }
 }

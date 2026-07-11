@@ -1,0 +1,38 @@
+[
+  {
+    "caseId": "a11y-001",
+    "trackId": "website_audit.accessibility_deep",
+    "difficulty": "easy",
+    "responseMode": "json",
+    "input": {
+      "text": "Analyze the Lighthouse accessibility audit results below.\nFor each failing audit, identify the relevant WCAG success criterion and describe the issue in plain language.\nUse only supplied Lighthouse audit IDs and titles. Do not invent audits not present in the input.\nSeverity: critical (blocks access), high (significant barrier), medium (moderate barrier), low (minor issue).\nReturn JSON only matching the schema.\n\nPage URL: https://example.com/products/chair\nAudit count: 4\nFailing audits: 2\nExtracted audits: [{\"id\":\"image-alt\",\"title\":\"Image elements do not have [alt] attributes\",\"severity\":\"high\"},{\"id\":\"link-name\",\"title\":\"Links do not have a discernible name\",\"severity\":\"high\"}]\n\nOutput must include: \"label\": \"extract\""
+    },
+    "expected": {
+      "label": "extract"
+    }
+  },
+  {
+    "caseId": "a11y-002",
+    "trackId": "website_audit.accessibility_deep",
+    "difficulty": "easy",
+    "responseMode": "json",
+    "input": {
+      "text": "Analyze the Lighthouse accessibility audit results below.\nFor each failing audit, identify the relevant WCAG success criterion and describe the issue in plain language.\nUse only supplied Lighthouse audit IDs and titles. Do not invent audits not present in the input.\nSeverity: critical (blocks access), high (significant barrier), medium (moderate barrier), low (minor issue).\nReturn JSON only matching the schema.\n\nPage URL: https://example.com/landing\nAudit count: 6\nFailing audits: 1\nExtracted audits: [{\"id\":\"color-contrast\",\"title\":\"Background and foreground colors do not have a sufficient contrast ratio\",\"severity\":\"high\"}]\n\nOutput must include: \"label\": \"extract\""
+    },
+    "expected": {
+      "label": "extract"
+    }
+  },
+  {
+    "caseId": "a11y-003",
+    "trackId": "website_audit.accessibility_deep",
+    "difficulty": "medium",
+    "responseMode": "json",
+    "input": {
+      "text": "Analyze the Lighthouse accessibility audit results below.\nFor each failing audit, identify the relevant WCAG success criterion and describe the issue in plain language.\nUse only supplied Lighthouse audit IDs and titles. Do not invent audits not present in the input.\nSeverity: critical (blocks access), high (significant barrier), medium (moderate barrier), low (minor issue).\nReturn JSON only matching the schema.\n\nPage URL: https://example.com/checkout\nAudit count: 8\nFailing audits: 3\nExtracted audits: [{\"id\":\"label\",\"title\":\"Form elements do not have associated labels\",\"severity\":\"high\"},{\"id\":\"select-name\",\"title\":\"Select elements do not have associated labels\",\"severity\":\"high\"},{\"id\":\"aria-hidden-focus\",\"title\":\"ARIA hidden element contains focusable elements\",\"severity\":\"medium\"}]\n\nOutput must include: \"label\": \"extract\""
+    },
+    "expected": {
+      "label": "extract"
+    }
+  }
+]

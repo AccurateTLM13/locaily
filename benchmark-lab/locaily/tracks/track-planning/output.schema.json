@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["track", "label", "confidence"],
+  "properties": {
+    "track": { "const": "classification" },
+    "label": {
+      "enum": ["extract", "summarize", "classify", "route", "unknown"]
+    },
+    "confidence": {
+      "enum": ["low", "medium", "high"]
+    }
+  }
+}

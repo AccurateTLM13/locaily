@@ -1,0 +1,26 @@
+[
+  {
+    "caseId": "budget-001",
+    "trackId": "website_audit.performance_budget",
+    "difficulty": "easy",
+    "responseMode": "json",
+    "input": {
+      "text": "Analyze the Lighthouse performance audit results and identify budget gaps.\nCompare current metric values against reasonable performance budget targets.\nUse only supplied Lighthouse audit IDs and scores. Do not invent metrics.\nTarget budgets: LCP < 2.5s, FCP < 1.8s, TBT < 200ms, CLS < 0.1, Speed Index < 3.4s, total JS < 300KB, total images < 1MB.\nGap severity: critical (>> 2x target), significant (> 1.5x target), moderate (exceeds target), within_budget.\nReturn JSON only matching the schema.\n\nPage URL: https://example.com/products/chair\nScores: {\"performance\":35,\"accessibility\":90,\"best-practices\":85,\"seo\":92}\nAudit count: 12\nExtracted audits: [{\"id\":\"largest-contentful-paint-element\",\"title\":\"Largest Contentful Paint element\",\"severity\":\"high\"},{\"id\":\"render-blocking-resources\",\"title\":\"Eliminate render-blocking resources\",\"severity\":\"high\"},{\"id\":\"unused-javascript\",\"title\":\"Reduce unused JavaScript\",\"severity\":\"medium\"}]\n\nOutput must include: \"label\": \"extract\""
+    },
+    "expected": {
+      "label": "extract"
+    }
+  },
+  {
+    "caseId": "budget-002",
+    "trackId": "website_audit.performance_budget",
+    "difficulty": "medium",
+    "responseMode": "json",
+    "input": {
+      "text": "Analyze the Lighthouse performance audit results and identify budget gaps.\nCompare current metric values against reasonable performance budget targets.\nUse only supplied Lighthouse audit IDs and scores. Do not invent metrics.\nTarget budgets: LCP < 2.5s, FCP < 1.8s, TBT < 200ms, CLS < 0.1, Speed Index < 3.4s, total JS < 300KB, total images < 1MB.\nGap severity: critical (>> 2x target), significant (> 1.5x target), moderate (exceeds target), within_budget.\nReturn JSON only matching the schema.\n\nPage URL: https://example.com/app\nScores: {\"performance\":22,\"accessibility\":78,\"best-practices\":80,\"seo\":85}\nAudit count: 15\nExtracted audits: [{\"id\":\"largest-contentful-paint-element\",\"title\":\"Largest Contentful Paint element\",\"severity\":\"high\"},{\"id\":\"render-blocking-resources\",\"title\":\"Eliminate render-blocking resources\",\"severity\":\"high\"},{\"id\":\"unused-javascript\",\"title\":\"Reduce unused JavaScript\",\"severity\":\"critical\"},{\"id\":\"mainthread-work-breakdown\",\"title\":\"Minimize main-thread work\",\"severity\":\"high\"},{\"id\":\"bootup-time\",\"title\":\"JavaScript execution time\",\"severity\":\"medium\"}]\n\nOutput must include: \"label\": \"extract\""
+    },
+    "expected": {
+      "label": "extract"
+    }
+  }
+]

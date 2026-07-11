@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "llama3.2-local-llama3.2-seo-analyzer-v1",
+  "subject": {
+    "type": "model",
+    "id": "llama3.2-local",
+    "provider": "ollama",
+    "runtimeModelName": "llama3.2",
+    "digest": "unknown"
+  },
+  "status": "qualified",
+  "qualifiedFor": [
+    {
+      "role": "seo_analyzer",
+      "trackId": "website_audit.seo_audit",
+      "contractId": "seo-analyzer-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": []
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "llama3.2-seo-analyzer-v1"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/evidence/summaries/llama3.2-seo-analyzer-v1.json"
+    ]
+  },
+  "modelProfileId": "llama3.2-local",
+  "notes": [
+    "Generated from explicitly promoted Benchmark Lab evidence.",
+    "llama3.2 qualifies for seo_analyzer role: 2/2 structured output scenarios pass"
+  ],
+  "generatedAt": "2026-07-11T13:44:35.750Z"
+}

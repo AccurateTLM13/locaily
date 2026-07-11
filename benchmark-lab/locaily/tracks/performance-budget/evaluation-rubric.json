@@ -1,0 +1,43 @@
+{
+  "rubricId": "performance-budget-v1",
+  "trackId": "website_audit.performance_budget",
+  "role": "budget_analyzer",
+  "description": "Evaluation rubric for Performance Budget Audit budget_analyzer qualification",
+  "dimensions": [
+    {
+      "id": "metric-accuracy",
+      "name": "Metric accuracy",
+      "weight": 0.30,
+      "description": "Budget gaps correctly identify which metrics exceed targets and by how much."
+    },
+    {
+      "id": "target-reasonableness",
+      "name": "Target reasonableness",
+      "weight": 0.25,
+      "description": "Target budgets are reasonable for the metric type and page context."
+    },
+    {
+      "id": "gap-severity",
+      "name": "Gap severity classification",
+      "weight": 0.20,
+      "description": "Gap severity correctly reflects how far current values exceed targets."
+    },
+    {
+      "id": "clarity",
+      "name": "Analysis clarity",
+      "weight": 0.15,
+      "description": "Summary clearly communicates which budgets are at risk and why."
+    },
+    {
+      "id": "schema-compliance",
+      "name": "Output-schema compliance",
+      "weight": 0.10,
+      "description": "Output is valid JSON matching the output schema."
+    }
+  ],
+  "passThreshold": 0.7,
+  "failConditions": [
+    "inventing metrics not present in input scores",
+    "output fails schema validation"
+  ]
+}

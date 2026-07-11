@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "llama3.2-budget-analyzer-v1-approved-summary",
+  "artifactType": "approved_evidence_summary",
+  "artifactPath": "benchmark-lab/evidence/approved/llama3.2-budget-analyzer-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:f9fe04ef4d2f9b7b8709f5c55066f9170937328335e2ae6e9a2dd78ad907aeb6",
+  "generatedAt": "2026-07-11T13:42:58.056Z"
+}

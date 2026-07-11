@@ -2,7 +2,7 @@
 
 Layered planning, not a six-month prophecy.
 
-**Updated:** 2026-07-04
+**Updated:** 2026-07-11
 
 ## Milestone 1A - Track System Explicit
 
@@ -110,12 +110,35 @@ The next major milestone has not yet been canonically selected. Follow-on candid
 
 ---
 
-## Future — Relay Nodes
+## Relay Nodes & Distributed Capability Network (M4)
 
-**Status:** Not built
+**Status:** Complete (2026-07-11)
 
-- Capability connector protocol (formerly NearbyNode protocol)
-- Device pairing — see [Relay Nodes doc](../01-architecture/nearby-node.md)
+- Relay Node protocol + connector module (`companion/relay/*`)
+- Node registry with capabilities + health (`/relay/nodes`, `/relay/register`, `/relay/heartbeat`, `/relay/unregister`)
+- Capability advertisement through registration
+- Cross-node routing with local fallback, wired into track + workflow step execution
+- Memory Bridge v1: structured search + writeback-apply (opt-in)
+
+**Completion note:** [milestone-4-relay-nodes-completion.md](./milestone-4-relay-nodes-completion.md)
+**Protocol doc:** [../05-integrations/relay-node-protocol.md](../05-integrations/relay-node-protocol.md)
+**Acceptance:** `scripts/test-relay-e2e.cjs` (11/11) — two Local Brain instances, discovery, routing to node B, local fallback on node failure.
+
+---
+
+## Multi-Device Workflow Coordination (M5)
+
+**Status:** Complete (2026-07-11)
+
+- Placement planner (`companion/relay/placement.js`): step-to-node assignment across healthy relay nodes
+- `distribute` policy spreads model steps across capable nodes (least-loaded); tool steps stay local
+- `POST /relay/plan` placement preview endpoint
+- `executeStepWithAssignedNode` routes each step to its assigned node; local fallback + `RELAY_FALLBACK` audit on failure
+- Wired into `/tracks/run` and `/workflows/run`; responses include `relay_placement` summary
+- `local_first` / `local_only` placement policies; M4 policies (`prefer_relay`, `route_if_unavailable`) unchanged
+
+**Completion note:** [milestone-5-multi-device-workflow-coordination.md](./milestone-5-multi-device-workflow-coordination.md)
+**Acceptance:** `scripts/test-multi-device-e2e.cjs` (22/22) — three Local Brain instances, distributed run across two relay nodes, local fallback after a node is killed; `scripts/test-relay-placement.cjs` (13/13).
 
 ---
 

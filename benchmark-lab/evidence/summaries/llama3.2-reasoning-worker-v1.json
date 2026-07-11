@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "benchmark.promoted_evidence.v1",
+  "evidenceId": "llama3.2-reasoning-worker-v1",
+  "sourceRunId": "run-20260711T162336Z",
+  "suiteId": "track-planning-v1",
+  "trackId": "core.track_planning",
+  "contractId": "track-planner-worker-v1",
+  "approvedAt": "2026-07-11T16:23:43.943Z",
+  "approvedBy": "locaily-agent",
+  "summary": {
+    "schemaVersion": "benchmark.run_summary.v1",
+    "runId": "run-20260711T162336Z",
+    "suiteId": "track-planning-v1",
+    "trackId": "core.track_planning",
+    "contractId": "track-planner-worker-v1",
+    "runtime": {
+      "provider": "mock",
+      "modelId": "mock-intent-classifier",
+      "runtimeModelName": "mock-intent-classifier"
+    },
+    "startedAt": "2026-07-11T16:23:36.836Z",
+    "completedAt": "2026-07-11T16:23:36.843Z",
+    "caseCount": 4,
+    "passed": 4,
+    "failed": 0,
+    "errors": 0,
+    "timeouts": 0,
+    "malformed": 0,
+    "caseResults": [
+      {
+        "caseId": "plan-001",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "classify",
+            "actual": "classify"
+          }
+        ]
+      },
+      {
+        "caseId": "plan-002",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "route",
+            "actual": "route"
+          }
+        ]
+      },
+      {
+        "caseId": "plan-003",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "summarize",
+            "actual": "summarize"
+          }
+        ]
+      },
+      {
+        "caseId": "plan-004",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "unknown",
+            "actual": "unknown"
+          }
+        ]
+      }
+    ]
+  },
+  "notes": []
+}

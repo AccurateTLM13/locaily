@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "llama3.2-a11y-analyzer-v1-approved-summary",
+  "artifactType": "approved_evidence_summary",
+  "artifactPath": "benchmark-lab/evidence/approved/llama3.2-a11y-analyzer-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:c53364372fb12b0225308d2504a9f5421403ebcc3d6c4961d40669d445d8d512",
+  "generatedAt": "2026-07-11T13:42:57.192Z"
+}

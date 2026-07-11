@@ -8,6 +8,8 @@ const {
 const { formatHandoffMarkdown } = require("../crew/markdown");
 const { validateStepOutput, validateWorkflowResult } = require("./run-plan-validator");
 const { recordWorkflowRun } = require("../crew/runtime-track-run-recorder");
+const { computeDependencyGraph, groupByLevel } = require("../core/dag-graph");
+const { executeStepViaRelayIfNeeded } = require("../relay/router");
 
 function describeWorkerUsed(stepResult, trackStep) {
   if (trackStep.executor.type === "model") {
@@ -16,14 +18,18 @@ function describeWorkerUsed(stepResult, trackStep) {
       role: stepResult.meta.role || trackStep.executor.role || "default_worker",
       model: stepResult.meta.model || null,
       profile_id: stepResult.meta.profile_id || null,
-      qualification: stepResult.meta.qualification || null
+      qualification: stepResult.meta.qualification || null,
+      node_id: stepResult.meta.nodeId || null,
+      routed_via: stepResult.meta.relay ? "relay" : "local"
     };
   }
 
   return {
     type: "tool",
     tool: stepResult.meta.tool || trackStep.executor.tool,
-    task: stepResult.meta.task || trackStep.executor.task
+    task: stepResult.meta.task || trackStep.executor.task,
+    node_id: stepResult.meta.nodeId || null,
+    routed_via: stepResult.meta.relay ? "relay" : "local"
   };
 }
 
@@ -35,6 +41,101 @@ function markStepFailed(plan, stepIndex, error) {
     message: error.message || "Step execution failed."
   };
   plan.status = "failed";
+}
+
+async function runSinglePlanStep({
+  plan,
+  planStep,
+  trackStep,
+  track,
+  context,
+  runtime,
+  options,
+  toolRegistry,
+  meta
+}) {
+  const index = plan.steps.findIndex((s) => s.step_id === planStep.step_id);
+  planStep.status = "running";
+  const stepStartedAt = Date.now();
+
+  try {
+    const stepResult = await executeStepViaRelayIfNeeded({
+      step: trackStep,
+      context,
+      runtime,
+      options: {
+        ...options,
+        track_id: track.track_id
+      },
+      toolRegistry,
+      meta,
+      stepId: trackStep.id,
+      localExecute: () => executeStep({
+        step: trackStep,
+        context,
+        runtime,
+        options: {
+          ...options,
+          track_id: track.track_id
+        },
+        toolRegistry,
+        meta
+      })
+    });
+
+    context.artifacts[trackStep.id] = stepResult.output;
+
+    if (trackStep.id === "write_handoff" && stepResult.output && typeof stepResult.output === "object") {
+      context.artifacts[trackStep.id] = {
+        ...stepResult.output,
+        markdown: formatHandoffMarkdown({
+          ...stepResult.output,
+          url: plan.input.url
+        })
+      };
+    }
+
+    const stepValidation = validateStepOutput(planStep, stepResult.output, trackStep, track);
+
+    if (!stepValidation.ok) {
+      const error = new Error(stepValidation.message);
+      error.code = stepValidation.code;
+      error.validationErrors = stepValidation.errors;
+
+      if (stepValidation.stepId) {
+        error.stepId = stepValidation.stepId;
+      }
+
+      if (stepValidation.toolId) {
+        error.toolId = stepValidation.toolId;
+      }
+
+      if (stepValidation.nextStep) {
+        error.nextStep = stepValidation.nextStep;
+      }
+
+      if (stepValidation.validation) {
+        error.validation = stepValidation.validation;
+      }
+
+      planStep.duration_ms = Date.now() - stepStartedAt;
+      planStep.worker_used = describeWorkerUsed(stepResult, trackStep);
+      markStepFailed(plan, index, error);
+      throw error;
+    }
+
+    planStep.status = "completed";
+    planStep.output = stepResult.output;
+    planStep.duration_ms = Date.now() - stepStartedAt;
+    planStep.worker_used = describeWorkerUsed(stepResult, trackStep);
+  } catch (error) {
+    if (planStep.status !== "failed") {
+      planStep.duration_ms = Date.now() - stepStartedAt;
+      markStepFailed(plan, index, error);
+    }
+
+    throw error;
+  }
 }
 
 async function executeRunPlan({
@@ -59,84 +160,66 @@ async function executeRunPlan({
   const startedAt = Date.now();
   plan.status = "running";
 
-  for (let index = 0; index < plan.steps.length; index += 1) {
-    const planStep = plan.steps[index];
-    const trackStep = trackStepById.get(planStep.step_id);
+  const stepIndexById = new Map();
+  plan.steps.forEach((planStep, idx) => stepIndexById.set(planStep.step_id, idx));
 
-    if (!trackStep) {
-      const error = new Error(`Run plan step '${planStep.step_id}' is not defined in track '${plan.track_id}'.`);
-      error.code = "RUN_PLAN_INVALID";
-      markStepFailed(plan, index, error);
-      throw error;
-    }
+  const useDag = options.useDag !== false;
+  const graph = useDag ? computeDependencyGraph(track) : null;
+  const levels = graph && graph.edges.length > 0 ? groupByLevel(graph.stepIds, graph.edges) : null;
 
-    planStep.status = "running";
-    const stepStartedAt = Date.now();
+  if (!levels) {
+    for (let index = 0; index < plan.steps.length; index += 1) {
+      const planStep = plan.steps[index];
+      const trackStep = trackStepById.get(planStep.step_id);
 
-    try {
-      const stepResult = await executeStep({
-        step: trackStep,
-        context,
-        runtime,
-        options: {
-          ...options,
-          track_id: track.track_id
-        },
-        toolRegistry,
-        meta
-      });
-
-      context.artifacts[trackStep.id] = stepResult.output;
-
-      if (trackStep.id === "write_handoff" && stepResult.output && typeof stepResult.output === "object") {
-        context.artifacts[trackStep.id] = {
-          ...stepResult.output,
-          markdown: formatHandoffMarkdown({
-            ...stepResult.output,
-            url: plan.input.url
-          })
-        };
-      }
-
-      const stepValidation = validateStepOutput(planStep, stepResult.output, trackStep, track);
-
-      if (!stepValidation.ok) {
-        const error = new Error(stepValidation.message);
-        error.code = stepValidation.code;
-        error.validationErrors = stepValidation.errors;
-
-        if (stepValidation.stepId) {
-          error.stepId = stepValidation.stepId;
-        }
-
-        if (stepValidation.toolId) {
-          error.toolId = stepValidation.toolId;
-        }
-
-        if (stepValidation.nextStep) {
-          error.nextStep = stepValidation.nextStep;
-        }
-
-        if (stepValidation.validation) {
-          error.validation = stepValidation.validation;
-        }
-        planStep.duration_ms = Date.now() - stepStartedAt;
-        planStep.worker_used = describeWorkerUsed(stepResult, trackStep);
+      if (!trackStep) {
+        const error = new Error(`Run plan step '${planStep.step_id}' is not defined in track '${plan.track_id}'.`);
+        error.code = "RUN_PLAN_INVALID";
         markStepFailed(plan, index, error);
         throw error;
       }
 
-      planStep.status = "completed";
-      planStep.output = stepResult.output;
-      planStep.duration_ms = Date.now() - stepStartedAt;
-      planStep.worker_used = describeWorkerUsed(stepResult, trackStep);
-    } catch (error) {
-      if (planStep.status !== "failed") {
-        planStep.duration_ms = Date.now() - stepStartedAt;
-        markStepFailed(plan, index, error);
+      await runSinglePlanStep({
+        plan,
+        planStep,
+        trackStep,
+        track,
+        context,
+        runtime,
+        options,
+        toolRegistry,
+        meta
+      });
+    }
+  } else {
+    const levelKeys = Object.keys(levels).sort((a, b) => Number(a) - Number(b));
+    const abortOnError = options.abortOnError !== false;
+
+    for (const level of levelKeys) {
+      if (abortOnError && plan.steps.some(s => s.status === "failed")) break;
+
+      const batch = [];
+      for (const stepId of levels[level]) {
+        const planStep = plan.steps[stepIndexById.get(stepId)];
+        const trackStep = trackStepById.get(stepId);
+        if (!planStep || !trackStep) continue;
+
+        batch.push(
+          runSinglePlanStep({
+            plan,
+            planStep,
+            trackStep,
+            track,
+            context,
+            runtime,
+            options,
+            toolRegistry,
+            meta
+          }).then(() => null)
+        );
       }
 
-      throw error;
+      await Promise.all(batch);
     }
   }
 

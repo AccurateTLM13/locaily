@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "track-planning-v1",
+  "name": "Track Planning V1",
+  "mode": "quick-screen",
+  "trackId": "core.track_planning",
+  "contractId": "track-planner-worker-v1",
+  "runtime": {
+    "provider": "mock",
+    "modelManifest": "mock-intent-classifier",
+    "responsesPath": "mock-responses.json"
+  },
+  "caseFiles": [
+    "cases.json"
+  ],
+  "outputSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["track", "label", "confidence"],
+    "properties": {
+      "track": { "const": "classification" },
+      "label": {
+        "enum": ["extract", "summarize", "classify", "route", "unknown"]
+      },
+      "confidence": {
+        "enum": ["low", "medium", "high"]
+      }
+    }
+  },
+  "validators": ["json-parse", "json-schema", "expected-label"]
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "llama3.2-seo-analyzer-v1-promoted-evidence",
+  "artifactType": "promoted_evidence",
+  "artifactPath": "benchmark-lab/evidence/summaries/llama3.2-seo-analyzer-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:7aa81b56dbb7075769740fcc84769bcd2a49446cdbb5e7f034aa52134ffce5ba",
+  "generatedAt": "2026-07-11T13:44:29.789Z"
+}

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "benchmark.approved_evidence_summary.v1",
+  "evidenceId": "llama3.2-dealsniper-v1",
+  "sourceRunId": "run-20260711T134304Z",
+  "approvedAt": "2026-07-11T13:43:31.684Z",
+  "approvedBy": "locaily-agent",
+  "summaryPath": "benchmark-lab/evidence/summaries/llama3.2-dealsniper-v1.json",
+  "claims": [
+    "Explicitly promoted benchmark evidence. No model qualification claim is made by this artifact."
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SEO Analyzer Output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "findings"],
+  "properties": {
+    "summary": { "type": "string", "minLength": 1 },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["auditId", "title", "severity", "finding"],
+        "properties": {
+          "auditId": { "type": "string", "minLength": 1 },
+          "title": { "type": "string" },
+          "severity": { "enum": ["critical", "high", "medium", "low"] },
+          "finding": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

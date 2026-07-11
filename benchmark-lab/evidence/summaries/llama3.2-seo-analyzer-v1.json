@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "benchmark.promoted_evidence.v1",
+  "evidenceId": "llama3.2-seo-analyzer-v1",
+  "sourceRunId": "run-20260711T134354Z",
+  "suiteId": "seo-audit-v1",
+  "trackId": "website_audit.seo_audit",
+  "contractId": "seo-analyzer-v1",
+  "approvedAt": "2026-07-11T13:44:29.777Z",
+  "approvedBy": "locaily-agent",
+  "summary": {
+    "schemaVersion": "benchmark.run_summary.v1",
+    "runId": "run-20260711T134354Z",
+    "suiteId": "seo-audit-v1",
+    "trackId": "website_audit.seo_audit",
+    "contractId": "seo-analyzer-v1",
+    "runtime": {
+      "provider": "ollama",
+      "modelId": "llama3.2-local",
+      "runtimeModelName": "llama3.2"
+    },
+    "startedAt": "2026-07-11T13:43:54.894Z",
+    "completedAt": "2026-07-11T13:44:22.131Z",
+    "caseCount": 2,
+    "passed": 2,
+    "failed": 0,
+    "errors": 0,
+    "timeouts": 0,
+    "malformed": 0,
+    "caseResults": [
+      {
+        "caseId": "seo-001",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "extract",
+            "actual": "extract"
+          }
+        ]
+      },
+      {
+        "caseId": "seo-002",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "extract",
+            "actual": "extract"
+          }
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "llama3.2 passes 2/2 SEO analysis scenarios"
+  ]
+}
