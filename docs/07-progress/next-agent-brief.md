@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-08 (Output Quality Review foundation complete)
+**Updated:** 2026-07-11 (Testing Checklist Writer qualification — 4 roles qualified, 10 track steps, full Lighthouse Handoff product loop complete)
 
 ## Read First
 
@@ -82,13 +82,51 @@ The first enforcement pilot is active. `website_audit.lighthouse_handoff` is app
 
 Human review records can now be attached to Track Run Records without mutating original model output or enforcement decisions. Review/correction records live separately under `data/evidence/human-reviews/`. APIs: `POST /runs/:id/review`, `GET /runs/:id/review`, `GET /enforcement/quality-summary`. Operator CLI: `npm.cmd run quality-review -- list|show|pass|needs-edit|fail|summary` works without the server. The summary reports verdict counts, pass/correction rates, score averages, common failure reasons, and critical risk count. Tests: `node scripts/test-human-review-records.js` or `npm.cmd run quality-review:test`.
 
+### Lighthouse Human Gate Packet
+
+`npm.cmd run lighthouse:run -- --url https://your-site.com` creates a Lighthouse Track Run Record from a simple URL command, using a synthetic Lighthouse payload unless scores/findings are supplied. `npm.cmd run quality-gate:lighthouse -- --url https://your-site.com --dry-run` locates enforced Lighthouse pilot runs for that URL, `website_audit.lighthouse_handoff` / `priority_helper` / `lfm25-1p2b-thinking-local`, generates deterministic draft reviews, and writes:
+
+- `benchmark-lab/evidence/reviews/lighthouse-human-gate-v1.md`
+- `benchmark-lab/evidence/reviews/lighthouse-human-gate-v1.json`
+- `benchmark-lab/evidence/reviews/lighthouse-human-gate-proposed-reviews-v1.json`
+- `benchmark-lab/evidence/reviews/lighthouse-human-gate-decision-v1.json`
+
+`npm.cmd run quality-gate:lighthouse -- --approve-safe` writes review records only for proposed `pass` items with no risk flags, `riskScore <= 1`, and no correction required. Gate filtering supports `--url`, `--latest-only`, `--latest-n 5`, and `--include-fixtures`. Fixture URLs such as `example.com` are excluded by default. Current generated URL-scoped packet for `https://doughboyvinyl.com/` found 1 candidate run, proposed 1 pass / 0 needs_edit / 0 fail, excluded 11 fixture runs, and recommends `continue`.
+
+### Lighthouse Handoff Assembly Pilot
+
+The Lighthouse track now adds `write_developer_tasks` after validated priority fixes. Role `developer_task_writer` consumes validated priority helper output plus Lighthouse issue context and emits:
+
+- `developerTasks`
+- `acceptanceCriteria`
+- `guardrails`
+- `testingChecklist`
+
+This role is adjacent to the enforced `priority_helper` path; it is not globally enforced or broadly qualified. The human gate heuristics now require a structurally complete task packet and surface missing task/guardrail/test content as quality exceptions.
+
+Real URL validation set:
+
+| URL | Runs | Pass | needs_edit | Fail | Critical Risk | Correction Rate | Avg Usefulness | Avg Accuracy | Decision |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| `https://doughboyvinyl.com` | 5 | 5 | 0 | 0 | 0 | 0% | 4 | 4 | continue |
+| `https://doughboyvinyl.com/25-mil-patterns` | 5 | 5 | 0 | 0 | 0 | 0% | 4 | 4 | continue |
+| `https://lemonteed.com` | 5 | 5 | 0 | 0 | 0 | 0% | 4 | 4 | continue |
+| `https://lemonteed.com/junk-drawer/` | 5 | 5 | 0 | 0 | 0 | 0% | 4 | 4 | continue |
+
 ## Current Task
 
-Output Quality Review + Human Correction Records is complete. The system can now distinguish transport success, enforcement success, and human-reviewed output quality.
+Lighthouse Handoff Assembly Pilot is complete. The system can now distinguish transport success, enforcement success, human-reviewed output quality, packet-level gate decisions, and adjacent-role assembly quality.
+
+## Completed Since Last Update
+
+- **Formal qualification for `developer_task_writer`**: Qualification record generated with status `qualified`, score 1.0. Evidence summary, approved marker, checksums, and model card all published. Local Brain now loads and surfaces developer_task_writer as qualified — `/health` reports `qualified: 3` total, `website_audit.lighthouse_handoff` track now has 2 qualified capabilities (priority_helper + developer_task_writer).
+- **Guarded Enforcement Pilot for developer_task_writer**: developer_task_writer activated through existing enforcement policy without modification — the track was already `enforced` and developer_task_writer was eligible (qualified score 1.0, all gates passed). Validated on 3 real URLs x 5 fresh enforced runs = 15 runs. All runs: enforcementDecision.applied=true, executedCapabilityId=lfm25-1p2b-thinking-local, fallbackTriggered=false. Quality gate: 15/15 safe approvals, 0 exceptions. Aggregate: 99 reviewed, 99 pass, 0 needs_edit, 0 fail, 0 critical risk. DTW enforcement: 16 applied/17 total.
+- **Guardrail writer qualification and guarded enforcement**: Added `guardrail_writer` as the next adjacent Lighthouse Handoff role. Created schema, prompt, track step (9 steps total), handoff integration, and quality gate checks. Formal qualification: score 1.0, 3/3 URL scenarios. Guarded enforcement validation: 3 URLs x 5 runs = 15 enforced runs, 15/15 applied, 0 blocked, 0 fallback. All 3 roles (PH, DT, GW) now enforced within `website_audit.lighthouse_handoff`. Capabilities: 6, Qualified: 4.
+- **Testing checklist writer qualification**: Added `testing_checklist_writer` as the fourth Lighthouse Handoff role. Created schema (6 required fields), prompt, track step (10 steps total), handoff integration (`normalizeTestingChecklistPacket` + 6 markdown sections), and quality gate checks (completeness + `--artifact full-handoff` mode). Formal qualification: score 1.0, 3/3 URL scenarios. Qualification evidence, approved marker, checksums, and qualification record published. Full Lighthouse Handoff product loop complete. Aggregate: 115 reviewed, 115 pass, 0 needs_edit, 0 fail, 0 critical risk.
 
 ## Next Task
 
-Apply real human reviews to the first enforced Lighthouse pilot outputs. Start with `npm.cmd run quality-review -- list --track website_audit.lighthouse_handoff`, inspect with `show`, record `pass`, `needs-edit`, or `fail`, then use `summary` to decide whether to continue, suspend, narrow, or broaden the pilot. Multi-model track expansion and live qualification depth are follow-on candidates, not automatic scope.
+Do not broaden globally. The full Lighthouse Handoff product loop is now validated — all 4 roles (priority_helper, developer_task_writer, guardrail_writer, testing_checklist_writer) are qualified; 3 are enforced within `website_audit.lighthouse_handoff`. Decide next action after explicit direction. Multi-model track expansion, DealSniper workflow build-out, and live qualification depth are follow-on candidates, not automatic scope.
 
 ## Do Not
 

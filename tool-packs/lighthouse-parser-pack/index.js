@@ -1,5 +1,6 @@
 const {
   classifyAudits,
+  classifyAuditCategory,
   validateAndEnrichPriorityFixes,
   enrichOpportunity
 } = require("./audit-truth");
@@ -213,6 +214,49 @@ const implementations = {
         errors
       };
     }
+  },
+  "lighthouse.extract_category_audits": {
+    validateInput(input) {
+      if (!input || typeof input !== "object" || Array.isArray(input)) {
+        return invalidInput("Extract category audits input must be an object.", "Send audits object and category.");
+      }
+      if (!input.audits || typeof input.audits !== "object" || Array.isArray(input.audits)) {
+        return invalidInput("Extract category audits input requires audits object.", "Include the raw Lighthouse audits object keyed by audit ID.");
+      }
+      if (!input.category || !["accessibility", "seo", "performance"].includes(input.category)) {
+        return invalidInput("Extract category audits input requires valid category.", "Include category: accessibility, seo, or performance.");
+      }
+      return null;
+    },
+    async handle({ input }) {
+      return extractAuditsByCategory(input);
+    }
+  },
+  "lighthouse.assemble_audit_report": {
+    validateInput(input) {
+      if (!input || typeof input !== "object" || Array.isArray(input)) {
+        return invalidInput("Assemble audit report input must be an object.", "Send url, category, extractedAudits, analysis, and recommendations.");
+      }
+      if (typeof input.url !== "string" || !input.url.trim()) {
+        return invalidInput("Assemble audit report input requires url.", "Include the page URL.");
+      }
+      if (!input.category || !["accessibility", "seo", "performance"].includes(input.category)) {
+        return invalidInput("Assemble audit report input requires valid category.", "Include category: accessibility, seo, or performance.");
+      }
+      if (!input.extractedAudits || typeof input.extractedAudits !== "object") {
+        return invalidInput("Assemble audit report input requires extractedAudits.", "Include extracted audit data object.");
+      }
+      if (!input.analysis || typeof input.analysis !== "object") {
+        return invalidInput("Assemble audit report input requires analysis.", "Include analysis object with findings.");
+      }
+      if (!input.recommendations || typeof input.recommendations !== "object") {
+        return invalidInput("Assemble audit report input requires recommendations.", "Include recommendations object.");
+      }
+      return null;
+    },
+    async handle({ input }) {
+      return assembleAuditReport(input);
+    }
   }
 };
 
@@ -245,4 +289,87 @@ function invalidInput(message, nextStep) {
   };
 }
 
+function extractAuditsByCategory({ audits, category, url }) {
+  const extracted = [];
+  let totalScore = 0;
+  let scoreCount = 0;
+  let passCount = 0;
+  let failCount = 0;
+
+  for (const [auditId, audit] of Object.entries(audits)) {
+    const title = audit.title || "";
+    const auditCategory = classifyAuditCategory(auditId, title);
+    if (auditCategory !== category) continue;
+
+    const score = typeof audit.score === "number" ? audit.score : null;
+    extracted.push({
+      id: auditId,
+      title: audit.title || "",
+      description: audit.description || "",
+      score,
+      scoreDisplayMode: audit.scoreDisplayMode || "",
+      numericValue: typeof audit.numericValue === "number" ? audit.numericValue : null,
+      numericUnit: audit.numericUnit || "",
+      displayValue: audit.displayValue || "",
+      metricSavings: audit.metricSavings || {}
+    });
+
+    if (score === 1) passCount++;
+    else if (score !== null && score < 1) failCount++;
+    if (score !== null) { totalScore += score; scoreCount++; }
+  }
+
+  return {
+    url: url || "",
+    category,
+    auditCount: extracted.length,
+    passCount,
+    failCount,
+    score: scoreCount > 0 ? Math.round((totalScore / scoreCount) * 100) / 100 : null,
+    audits: extracted
+  };
+}
+
+function assembleAuditReport({ url, category, extractedAudits, analysis, recommendations }) {
+  const score = (extractedAudits && typeof extractedAudits.score === "number") ? extractedAudits.score : null;
+  const findings = (analysis && Array.isArray(analysis.findings)) ? analysis.findings : [];
+  const recs = (recommendations && Array.isArray(recommendations.recommendations)) ? recommendations.recommendations : [];
+
+  const findingsSection = findings.length > 0
+    ? findings.map((f) => `- **${f.auditId || f.title || "Audit"}** (${f.severity || "unknown"}): ${f.finding || ""}`).join("\n")
+    : "No detailed findings available.";
+
+  const recsSection = recs.length > 0
+    ? recs.map((r, i) => `${i + 1}. ${r.title || r.recommendation || JSON.stringify(r)}`).join("\n")
+    : "No recommendations available.";
+
+  const reportMarkdown = [
+    `# ${category.charAt(0).toUpperCase() + category.slice(1)} Audit Report: ${url}`,
+    "",
+    "## Summary",
+    (analysis && analysis.summary) || "No summary available.",
+    "",
+    "## Score",
+    score !== null ? `${category} score: ${score}` : "Score not available.",
+    "",
+    "## Findings",
+    findingsSection,
+    "",
+    "## Recommendations",
+    recsSection
+  ].join("\n");
+
+  return {
+    url: url || "",
+    category,
+    summary: (analysis && analysis.summary) || "",
+    score,
+    findings,
+    recommendations: recs,
+    reportMarkdown
+  };
+}
+
 module.exports = implementations;
+module.exports.extractAuditsByCategory = extractAuditsByCategory;
+module.exports.assembleAuditReport = assembleAuditReport;

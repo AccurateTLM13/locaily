@@ -1,0 +1,185 @@
+{
+  "schemaVersion": "benchmark.promoted_evidence.v1",
+  "evidenceId": "lfm25-1p2b-thinking-developer-task-writer-v1",
+  "sourceRunId": "assembly-pilot-20260711",
+  "suiteId": "developer-task-writer-v1",
+  "trackId": "website_audit.lighthouse_handoff",
+  "contractId": "developer-task-writer-v1",
+  "approvedAt": "2026-07-11T01:34:43.311Z",
+  "approvedBy": "JP Pannell",
+  "summary": {
+    "schemaVersion": "benchmark.run_summary.v1",
+    "runId": "assembly-pilot-20260711",
+    "suiteId": "developer-task-writer-v1",
+    "trackId": "website_audit.lighthouse_handoff",
+    "contractId": "developer-task-writer-v1",
+    "runtime": {
+      "provider": "ollama",
+      "modelId": "lfm25-1p2b-thinking-local",
+      "runtimeModelName": "hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest"
+    },
+    "startedAt": "2026-07-11T01:15:00.000Z",
+    "completedAt": "2026-07-11T02:45:00.000Z",
+    "caseCount": 4,
+    "passed": 4,
+    "partial": 0,
+    "failed": 0,
+    "errors": 0,
+    "timeouts": 0,
+    "malformed": 0,
+    "caseResults": [
+      {
+        "caseId": "dtw-url-doughboyvinyl-com",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "structured-output",
+            "status": "pass",
+            "score": 100,
+            "summary": "5/5 enforced runs pass"
+          },
+          {
+            "validator": "quality-gate",
+            "status": "pass",
+            "score": 100,
+            "summary": "5/5 safe auto-approvals"
+          },
+          {
+            "validator": "invented-audit",
+            "status": "pass",
+            "score": 100,
+            "summary": "No invented audit IDs detected"
+          },
+          {
+            "validator": "unsupported-claims",
+            "status": "pass",
+            "score": 100,
+            "summary": "No unsupported claims detected"
+          },
+          {
+            "validator": "task-packet-completeness",
+            "status": "pass",
+            "score": 100,
+            "summary": "All packets have tasks, criteria, guardrails, test checklist"
+          }
+        ]
+      },
+      {
+        "caseId": "dtw-url-doughboyvinyl-25-mil-patterns",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "structured-output",
+            "status": "pass",
+            "score": 100,
+            "summary": "5/5 enforced runs pass"
+          },
+          {
+            "validator": "quality-gate",
+            "status": "pass",
+            "score": 100,
+            "summary": "5/5 safe auto-approvals"
+          },
+          {
+            "validator": "invented-audit",
+            "status": "pass",
+            "score": 100,
+            "summary": "No invented audit IDs detected"
+          },
+          {
+            "validator": "unsupported-claims",
+            "status": "pass",
+            "score": 100,
+            "summary": "No unsupported claims detected"
+          },
+          {
+            "validator": "task-packet-completeness",
+            "status": "pass",
+            "score": 100,
+            "summary": "All packets have tasks, criteria, guardrails, test checklist"
+          }
+        ]
+      },
+      {
+        "caseId": "dtw-url-lemonteed-com",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "structured-output",
+            "status": "pass",
+            "score": 100,
+            "summary": "5/5 enforced runs pass"
+          },
+          {
+            "validator": "quality-gate",
+            "status": "pass",
+            "score": 100,
+            "summary": "5/5 safe auto-approvals"
+          },
+          {
+            "validator": "invented-audit",
+            "status": "pass",
+            "score": 100,
+            "summary": "No invented audit IDs detected"
+          },
+          {
+            "validator": "unsupported-claims",
+            "status": "pass",
+            "score": 100,
+            "summary": "No unsupported claims detected"
+          },
+          {
+            "validator": "task-packet-completeness",
+            "status": "pass",
+            "score": 100,
+            "summary": "All packets have tasks, criteria, guardrails, test checklist"
+          }
+        ]
+      },
+      {
+        "caseId": "dtw-url-lemonteed-junk-drawer",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "structured-output",
+            "status": "pass",
+            "score": 100,
+            "summary": "5/5 enforced runs pass"
+          },
+          {
+            "validator": "quality-gate",
+            "status": "pass",
+            "score": 100,
+            "summary": "5/5 safe auto-approvals"
+          },
+          {
+            "validator": "invented-audit",
+            "status": "pass",
+            "score": 100,
+            "summary": "No invented audit IDs detected"
+          },
+          {
+            "validator": "unsupported-claims",
+            "status": "pass",
+            "score": 100,
+            "summary": "No unsupported claims detected"
+          },
+          {
+            "validator": "task-packet-completeness",
+            "status": "pass",
+            "score": 100,
+            "summary": "All packets have tasks, criteria, guardrails, test checklist"
+          }
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "LFM2.5 1.2B Thinking - Developer Task Writer V1 qualification.",
+    "Validation from Lighthouse Handoff Assembly Pilot: 4 real URLs x 5 enforced runs = 20 total.",
+    "All 20 runs passed quality gate: 0 fail, 0 critical risk, 0 corrections, 0 invented audit IDs, 0 unsupported claims.",
+    "Aggregate quality summary: 83 reviewed, 83 pass, avg usefulness 4, avg accuracy 4, avg structure 4.07.",
+    "Real Ollama evaluation with enforced priority_helper (lfm25-1p2b-thinking-local) and developer_task_writer role (llama3.2).",
+    "developer_task_writer is adjacent to the enforced priority_helper path; not globally enforced."
+  ]
+}

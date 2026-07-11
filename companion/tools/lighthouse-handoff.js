@@ -493,6 +493,9 @@ function buildComposedHandoff(input, memoryPreflight = null) {
       modelThinking: input.prioritizedFixes?.thinking
     }),
     priorityFixes: resolvedPriorityFixes,
+    developerTaskPacket: normalizeDeveloperTaskPacket(input.developerTaskPacket),
+    guardrailPacket: normalizeGuardrailPacket(input.guardrailPacket),
+    testingChecklistPacket: normalizeTestingChecklistPacket(input.testingChecklistPacket),
     needsReview: resolvedNeedsReview,
     handoffChecklist: checklist,
     estimatedImpact: estimateImpact(weakest.value)
@@ -519,6 +522,51 @@ function buildComposedHandoff(input, memoryPreflight = null) {
   };
 
   return handoff;
+}
+
+function normalizeGuardrailPacket(packet) {
+  if (!packet || typeof packet !== "object" || Array.isArray(packet)) {
+    return null;
+  }
+  return {
+    implementationGuardrails: Array.isArray(packet.implementationGuardrails) ? packet.implementationGuardrails : [],
+    doNotBreakConstraints: Array.isArray(packet.doNotBreakConstraints) ? packet.doNotBreakConstraints : [],
+    humanReviewTriggers: Array.isArray(packet.humanReviewTriggers) ? packet.humanReviewTriggers : [],
+    riskNotes: Array.isArray(packet.riskNotes) ? packet.riskNotes : [],
+    verificationBoundaries: Array.isArray(packet.verificationBoundaries) ? packet.verificationBoundaries : []
+  };
+}
+
+function normalizeTestingChecklistPacket(packet) {
+  if (!packet || typeof packet !== "object" || Array.isArray(packet)) {
+    return null;
+  }
+  return {
+    pageSpeedRerunSteps: Array.isArray(packet.pageSpeedRerunSteps) ? packet.pageSpeedRerunSteps : [],
+    beforeAfterComparisons: Array.isArray(packet.beforeAfterComparisons) ? packet.beforeAfterComparisons : [],
+    regressionChecks: Array.isArray(packet.regressionChecks) ? packet.regressionChecks : [],
+    manualQaNotes: Array.isArray(packet.manualQaNotes) ? packet.manualQaNotes : [],
+    codingAgentVerification: Array.isArray(packet.codingAgentVerification) ? packet.codingAgentVerification : [],
+    stopAndAskTriggers: Array.isArray(packet.stopAndAskTriggers) ? packet.stopAndAskTriggers : []
+  };
+}
+
+function normalizeDeveloperTaskPacket(packet) {
+  if (!packet || typeof packet !== "object" || Array.isArray(packet)) {
+    return {
+      developerTasks: [],
+      acceptanceCriteria: [],
+      guardrails: [],
+      testingChecklist: []
+    };
+  }
+
+  return {
+    developerTasks: Array.isArray(packet.developerTasks) ? packet.developerTasks : [],
+    acceptanceCriteria: Array.isArray(packet.acceptanceCriteria) ? packet.acceptanceCriteria : [],
+    guardrails: Array.isArray(packet.guardrails) ? packet.guardrails : [],
+    testingChecklist: Array.isArray(packet.testingChecklist) ? packet.testingChecklist : []
+  };
 }
 
 function validateToolInput(input) {
@@ -651,5 +699,6 @@ function throwToolError(code, message, nextStep) {
 }
 
 module.exports = {
-  lighthouseHandoffTool
+  lighthouseHandoffTool,
+  normalizeTestingChecklistPacket
 };

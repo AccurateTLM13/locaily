@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "lfm25-1p2b-thinking-testing-checklist-writer-v1-promoted-evidence",
+  "artifactType": "promoted_evidence",
+  "artifactPath": "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-testing-checklist-writer-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:14c27b4a205fc40eeef058726b7a73ec6902d0edeea833bf45c52fe1054197b3",
+  "generatedAt": "2026-07-11T12:00:00.000Z"
+}

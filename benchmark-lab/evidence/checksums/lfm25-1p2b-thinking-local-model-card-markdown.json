@@ -5,6 +5,6 @@
   "artifactPath": "benchmark-lab/model-cards/published/lfm25-1p2b-thinking-local.md",
   "algorithm": "sha256",
   "checksumMode": "canonical_text_v1",
-  "checksum": "sha256:4d1d36a20697204785ec334b4994d3ffa6ecfbd694dc4ab462f2d0511ba9924e",
-  "generatedAt": "2026-07-06T21:12:03.055Z"
+  "checksum": "sha256:44cecc24750c8d8df83ba4ebf9e57adbe422be348031ad64eaae25cabfbdd8f0",
+  "generatedAt": "2026-07-11T02:17:42.577Z"
 }

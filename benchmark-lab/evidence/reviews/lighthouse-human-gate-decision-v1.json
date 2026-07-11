@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "locaily.lighthouse_human_gate_decision.v1",
+  "recommendedDecision": "continue",
+  "reasons": [
+    "All candidates are proposed safe passes; continue the pilot and collect more quality evidence."
+  ],
+  "generatedAt": "2026-07-11T02:20:40.992Z"
+}

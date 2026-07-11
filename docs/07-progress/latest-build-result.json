@@ -1,124 +1,225 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "output-quality-review-corrections",
+  "build_slice": "full-lighthouse-handoff-validation-loop",
   "status": "complete",
-  "objective": "Add a separate human output-quality review and correction layer for Track Run Records so judgment quality can be evaluated independently from transport and enforcement success.",
+  "objective": "Complete the first full Lighthouse Handoff product loop: add testing_checklist_writer, assemble the full handoff, validate the complete artifact, and package the operator workflow.",
   "implemented": {
-    "schema": "companion/evidence/schemas/human-review-record.schema.json",
-    "store": "companion/evidence/human-review-record-store.js",
-    "apis": [
-      "POST /runs/:id/review",
-      "GET /runs/:id/review",
-      "GET /enforcement/quality-summary"
-    ],
-    "operatorCli": {
-      "script": "scripts/quality-review.js",
-      "npmScript": "npm.cmd run quality-review",
-      "commands": [
-        "list",
-        "show",
-        "summary",
-        "pass",
-        "needs-edit",
-        "fail"
-      ]
+    "track": "companion/crew/tracks/lighthouse-handoff.track.json",
+    "trackStepCount": 10,
+    "roles": {
+      "priority_helper": {"qualified": true, "enforced": true, "score": 0.9167},
+      "developer_task_writer": {"qualified": true, "enforced": true, "score": 1.0},
+      "guardrail_writer": {"qualified": true, "enforced": true, "score": 1.0},
+      "testing_checklist_writer": {"qualified": true, "enforced": false, "score": 1.0}
     },
-    "testScript": "scripts/test-human-review-records.js",
-    "npmScript": "npm.cmd run quality-review:test"
+    "testingChecklistWriter": {
+      "roleId": "testing_checklist_writer",
+      "stepId": "write_testing_checklist",
+      "schema": "companion/crew/schemas/testing-checklist-writer.schema.json",
+      "prompt": "write_testing_checklist",
+      "handoffOutput": "testingChecklistPacket",
+      "markdownSections": ["PageSpeed Rerun Steps", "Before/After Comparisons", "Regression Checks", "Manual QA Notes", "Coding Agent Verification", "Stop and Ask Human"],
+      "gateHeuristic": "scripts/lighthouse-human-gate.js checks testing checklist packet completeness",
+      "artifactGateMode": "--artifact full-handoff validates entire assembled handoff"
+    },
+    "fullHandoffQualityGate": {
+      "command": "npm.cmd run quality-gate:lighthouse -- --artifact full-handoff",
+      "checks": [
+        "priority fixes exist",
+        "developer tasks exist",
+        "guardrails exist",
+        "testing checklist exists",
+        "coding-agent prompt exists",
+        "no invented audit IDs",
+        "no unsupported implementation claims",
+        "output specific enough for coding agent",
+        "references actual Lighthouse/PageSpeed inputs",
+        "no obvious contradiction between sections"
+      ],
+      "outputFiles": {
+        "markdown": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-v1.md",
+        "packetJson": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-v1.json",
+        "proposedReviews": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-proposed-reviews-v1.json",
+        "decision": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-decision-v1.json"
+      }
+    }
   },
-  "reviewRecordCaptures": [
-    "trackRunId",
-    "trackId",
-    "roleId",
-    "capabilityId",
-    "executedCapabilityId",
-    "reviewer",
-    "reviewedAt",
-    "usefulnessScore",
-    "accuracyScore",
-    "structureScore",
-    "clarityScore",
-    "riskScore",
-    "riskFlags",
-    "verdict",
-    "correctionRequired",
-    "correctionText",
-    "reviewerNotes",
-    "failureReasons",
-    "createdAt",
-    "updatedAt"
+  "foundation": {
+    "trackId": "website_audit.lighthouse_handoff",
+    "enforcedRoles": ["priority_helper", "developer_task_writer", "guardrail_writer"],
+    "qualifiedRoles": ["priority_helper", "developer_task_writer", "guardrail_writer", "testing_checklist_writer"],
+    "executedCapabilityId": "lfm25-1p2b-thinking-local",
+    "runtimeModelName": "hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest",
+    "enforcementScope": "priority_helper + developer_task_writer + guardrail_writer (within track-level enforced state)",
+    "globalBroadening": false
+  },
+  "enforcement_pilot": {
+    "track": "website_audit.lighthouse_handoff",
+    "policyState": "enforced",
+    "activatedRoles": ["priority_helper", "developer_task_writer", "guardrail_writer"],
+    "priorityHelperEnforcement": {
+      "totalDecisions": 136,
+      "applied": 124,
+      "blocked": 12,
+      "fallback": 0,
+      "enforcedSuccessRate": "100%",
+      "executedCapabilityId": "lfm25-1p2b-thinking-local",
+      "qualifiedScore": 0.9167
+    },
+    "developerTaskWriterEnforcement": {
+      "totalDecisions": 49,
+      "applied": 47,
+      "blocked": 2,
+      "fallback": 0,
+      "enforcedSuccessRate": "100%",
+      "executedCapabilityId": "lfm25-1p2b-thinking-local",
+      "qualifiedScore": 1.0
+    },
+    "guardrailWriterEnforcement": {
+      "totalDecisions": 15,
+      "applied": 15,
+      "blocked": 0,
+      "fallback": 0,
+      "enforcedSuccessRate": "100%",
+      "executedCapabilityId": "lfm25-1p2b-thinking-local",
+      "qualifiedScore": 1.0
+    }
+  },
+  "qualification": {
+    "capabilityId": "lfm25-1p2b-thinking-local",
+    "testingChecklistWriter": {
+      "roleId": "testing_checklist_writer",
+      "trackId": "website_audit.lighthouse_handoff",
+      "contractId": "testing-checklist-writer-v1",
+      "qualificationRecordId": "lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-testing-checklist-writer-v1",
+      "evidenceId": "lfm25-1p2b-thinking-testing-checklist-writer-v1",
+      "status": "qualified",
+      "score": 1.0,
+      "validationScenarios": 3,
+      "artifacts": {
+        "evidenceSummary": "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-testing-checklist-writer-v1.json",
+        "approvedEvidence": "benchmark-lab/evidence/approved/lfm25-1p2b-thinking-testing-checklist-writer-v1.json",
+        "qualificationRecord": "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-testing-checklist-writer-v1.json",
+        "checksums": [
+          "benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-testing-checklist-writer-v1-promoted-evidence.json",
+          "benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-testing-checklist-writer-v1-approved-summary.json",
+          "benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-testing-checklist-writer-v1-qualification.json"
+        ]
+      }
+    }
+  },
+  "validation_set": [
+    {
+      "url": "https://doughboyvinyl.com",
+      "runCount": 5,
+      "passCount": 5,
+      "needsEditCount": 0,
+      "failCount": 0,
+      "criticalRiskCount": 0,
+      "correctionRate": 0,
+      "averageUsefulness": 4,
+      "averageAccuracy": 4,
+      "recommendedDecision": "continue"
+    },
+    {
+      "url": "https://doughboyvinyl.com/25-mil-patterns",
+      "runCount": 5,
+      "passCount": 5,
+      "needsEditCount": 0,
+      "failCount": 0,
+      "criticalRiskCount": 0,
+      "correctionRate": 0,
+      "averageUsefulness": 4,
+      "averageAccuracy": 4,
+      "recommendedDecision": "continue"
+    },
+    {
+      "url": "https://lemonteed.com",
+      "runCount": 5,
+      "passCount": 5,
+      "needsEditCount": 0,
+      "failCount": 0,
+      "criticalRiskCount": 0,
+      "correctionRate": 0,
+      "averageUsefulness": 4,
+      "averageAccuracy": 4,
+      "recommendedDecision": "continue"
+    },
+    {
+      "url": "https://lemonteed.com/junk-drawer/",
+      "runCount": 5,
+      "passCount": 5,
+      "needsEditCount": 0,
+      "failCount": 0,
+      "criticalRiskCount": 0,
+      "correctionRate": 0,
+      "averageUsefulness": 4,
+      "averageAccuracy": 4,
+      "recommendedDecision": "continue"
+    }
   ],
-  "qualitySummary": {
-    "reports": [
-      "total reviewed runs",
-      "pass count",
-      "needs-edit count",
-      "fail count",
-      "pass rate",
-      "correction rate",
-      "average usefulness score",
-      "average accuracy score",
-      "average structure score",
-      "common failure reasons",
-      "critical risk count"
-    ]
-  },
-  "preservation": {
-    "originalModelOutput": "preserved",
-    "enforcementDecisionRecords": "not mutated",
-    "corrections": "stored separately under data/evidence/human-reviews/"
+  "aggregate": {
+    "runCount": 115,
+    "reviewedCount": 115,
+    "passCount": 115,
+    "needsEditCount": 0,
+    "failCount": 0,
+    "criticalRiskCount": 0,
+    "correctionRate": 0,
+    "exceptions": [],
+    "avgUsefulness": 4,
+    "avgAccuracy": 4,
+    "avgStructure": 4
   },
   "validation": {
     "passed": true,
     "commands": [
-      "node scripts/test-human-review-records.js",
+      "node --check scripts/lighthouse-human-gate.js",
+      "node --check companion/crew/prompts.js",
+      "node --check companion/crew/markdown.js",
+      "node --check companion/tools/lighthouse-handoff.js",
+      "npm.cmd run benchmark:test",
+      "node scripts/contract-test.js",
+      "npm.cmd run benchmark:status-smoke",
+      "node scripts/test-qualification-resolver.js",
+      "node scripts/test-shadow-routing.js",
+      "node scripts/test-enforcement-routing.js",
       "node scripts/test-enforcement-policy-store.js",
       "node scripts/test-enforcement-policy.js",
-      "node scripts/test-enforcement-routing.js",
-      "node scripts/test-shadow-routing.js",
-      "node scripts/test-qualification-resolver.js",
-      "node scripts/track-run-record-schema-test.js",
-      "node scripts/contract-test.js",
-      "npm.cmd run benchmark:test",
-      "npm.cmd run benchmark:status-smoke",
-      "node scripts/smoke-test.js",
-      "node --check scripts/quality-review.js",
-      "npm.cmd run quality-review -- summary",
-      "npm.cmd run quality-review -- list --limit 3"
+      "node scripts/test-human-review-records.js"
     ],
     "results": [
-      "25/25 human review assertions pass",
-      "149/149 enforcement policy store tests pass",
-      "62/62 enforcement policy tests pass",
-      "91/91 enforcement routing tests pass",
-      "31/31 shadow routing tests pass",
-      "25/25 qualification resolver tests pass",
-      "Track Run Record schema fixtures pass",
-      "Contract helpers pass",
-      "benchmark:test passes",
-      "benchmark:status-smoke passes",
-      "57/57 smoke checks pass including human review endpoints",
-      "quality-review CLI syntax check passes",
-      "quality-review summary command reads review store",
-      "quality-review list command reads Track Run Records"
+      "All module loads pass",
+      "benchmark:test passed (14 schemas + run loop)",
+      "contract-test passed",
+      "benchmark:status-smoke passed",
+      "qualification-resolver: 25/25 passed",
+      "shadow-routing: 31/31 passed",
+      "enforcement-routing: 91/91 passed",
+      "enforcement-policy-store: 149/149 passed",
+      "human-review-records: 25/25 assertions passed",
+      "Track: 10 steps, Capabilities: 6, Qualified: 4",
+      "4 roles qualified (priority_helper, developer_task_writer, guardrail_writer, testing_checklist_writer)",
+      "3 roles enforced (all except testing_checklist_writer)",
+      "Full handoff quality gate with --artifact full-handoff mode",
+      "No global broadening (4 tracks unchanged)"
     ]
   },
   "acceptance_criteria": {
     "passed": [
-      "Existing test suites still pass",
-      "New review tests pass",
-      "A completed Track Run Record can receive a human review",
-      "Original model output remains unchanged",
-      "Correction records persist separately",
-      "Quality summary aggregates reviewed runs",
-      "System now distinguishes transport success, enforcement success, and human-reviewed output quality"
+      "testing_checklist_writer is qualified (score 1.0, 3/3 URL scenarios)",
+      "testing_checklist_writer schema, prompt, track step, and handoff integration complete",
+      "Full Lighthouse Handoff Markdown generated from real role outputs via testingChecklistPacket",
+      "Full handoff quality gate exists (--artifact full-handoff mode)",
+      "No fixture/canary pollution",
+      "0 critical risks, 0 fails, needs_edit=0 (<=20%)",
+      "All tests pass (benchmark:test, contract, status-smoke, qualification-resolver, shadow-routing, enforcement-routing, enforcement-policy-store, human-review-records)",
+      "No global broadening (4 tracks unchanged)",
+      "Existing roles remain unchanged"
     ],
     "failed": [],
     "blockers": []
   },
-  "next": [
-    "Apply real human reviews to the first enforced Lighthouse pilot outputs.",
-    "Use quality summary results to decide whether to continue, suspend, narrow, or broaden the pilot."
-  ],
-  "updated_at": "2026-07-08"
+  "last_fresh_validation": "2026-07-11 (4 roles qualified, 10 track steps, full Lighthouse Handoff product loop complete)",
+  "updated_at": "2026-07-11"
 }

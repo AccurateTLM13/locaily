@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "required": ["audits", "category"],
+  "properties": {
+    "audits": {
+      "type": "object",
+      "description": "Raw Lighthouse audits object, keyed by audit ID (e.g., from lighthouseResult.audits)"
+    },
+    "url": { "type": "string" },
+    "category": {
+      "type": "string",
+      "enum": ["accessibility", "seo", "performance"],
+      "description": "Which category of audits to extract"
+    }
+  }
+}

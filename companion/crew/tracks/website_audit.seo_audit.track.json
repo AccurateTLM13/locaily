@@ -1,0 +1,77 @@
+{
+  "track_id": "website_audit.seo_audit",
+  "version": "1.0.0",
+  "name": "SEO Audit",
+  "description": "Structured SEO audit from Lighthouse SEO data — analyzes issues, prioritizes by search impact, recommends fixes.",
+  "steps": [
+    {
+      "id": "extract_seo_audits",
+      "input_map": {
+        "audits": ["$input.audits", {}],
+        "url": "$input.url",
+        "category": "seo"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "lighthouse.extract_category_audits",
+        "task": "run"
+      }
+    },
+    {
+      "id": "analyze_seo_issues",
+      "input_map": {
+        "url": "$input.url",
+        "extractedAudits": ["$artifacts.extract_seo_audits", {}],
+        "failCount": ["$artifacts.extract_seo_audits.failCount", 0],
+        "failures": ["$artifacts.extract_seo_audits.audits", []]
+      },
+      "executor": {
+        "type": "model",
+        "role": "seo_analyzer",
+        "schema": "companion/crew/schemas/seo-analyzer.schema.json",
+        "prompt_template": "analyze_seo"
+      }
+    },
+    {
+      "id": "recommend_seo_fixes",
+      "input_map": {
+        "url": "$input.url",
+        "analysis": ["$artifacts.analyze_seo_issues", {}],
+        "findings": ["$artifacts.analyze_seo_issues.findings", []],
+        "extractedAudits": ["$artifacts.extract_seo_audits", {}]
+      },
+      "executor": {
+        "type": "model",
+        "role": "seo_recommender",
+        "schema": "companion/crew/schemas/seo-recommender.schema.json",
+        "prompt_template": "recommend_seo"
+      }
+    },
+    {
+      "id": "assemble_seo_report",
+      "input_map": {
+        "url": "$input.url",
+        "category": "seo",
+        "extractedAudits": ["$artifacts.extract_seo_audits", {}],
+        "analysis": ["$artifacts.analyze_seo_issues", {}],
+        "recommendations": ["$artifacts.recommend_seo_fixes", {}]
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "lighthouse.assemble_audit_report",
+        "task": "run"
+      }
+    },
+    {
+      "id": "verify_seo_output",
+      "input_map": {
+        "handoff": ["$artifacts.assemble_seo_report", {}]
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "lighthouse.verify_handoff",
+        "task": "run"
+      }
+    }
+  ]
+}

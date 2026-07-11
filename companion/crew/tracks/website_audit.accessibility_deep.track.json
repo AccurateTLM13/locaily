@@ -1,0 +1,78 @@
+{
+  "track_id": "website_audit.accessibility_deep",
+  "version": "1.0.0",
+  "name": "Accessibility Deep Audit",
+  "description": "Deep accessibility audit from Lighthouse a11y data — analyzes failures, maps to WCAG, recommends element-level fixes.",
+  "steps": [
+    {
+      "id": "extract_a11y_audits",
+      "input_map": {
+        "audits": ["$input.audits", {}],
+        "url": "$input.url",
+        "category": "accessibility"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "lighthouse.extract_category_audits",
+        "task": "run"
+      }
+    },
+    {
+      "id": "analyze_a11y_issues",
+      "input_map": {
+        "url": "$input.url",
+        "extractedAudits": ["$artifacts.extract_a11y_audits", {}],
+        "auditCount": ["$artifacts.extract_a11y_audits.auditCount", 0],
+        "failCount": ["$artifacts.extract_a11y_audits.failCount", 0],
+        "failures": ["$artifacts.extract_a11y_audits.audits", []]
+      },
+      "executor": {
+        "type": "model",
+        "role": "a11y_analyzer",
+        "schema": "companion/crew/schemas/a11y-analyzer.schema.json",
+        "prompt_template": "analyze_a11y"
+      }
+    },
+    {
+      "id": "recommend_a11y_fixes",
+      "input_map": {
+        "url": "$input.url",
+        "analysis": ["$artifacts.analyze_a11y_issues", {}],
+        "findings": ["$artifacts.analyze_a11y_issues.findings", []],
+        "extractedAudits": ["$artifacts.extract_a11y_audits", {}]
+      },
+      "executor": {
+        "type": "model",
+        "role": "a11y_recommender",
+        "schema": "companion/crew/schemas/a11y-recommender.schema.json",
+        "prompt_template": "recommend_a11y"
+      }
+    },
+    {
+      "id": "assemble_a11y_report",
+      "input_map": {
+        "url": "$input.url",
+        "category": "accessibility",
+        "extractedAudits": ["$artifacts.extract_a11y_audits", {}],
+        "analysis": ["$artifacts.analyze_a11y_issues", {}],
+        "recommendations": ["$artifacts.recommend_a11y_fixes", {}]
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "lighthouse.assemble_audit_report",
+        "task": "run"
+      }
+    },
+    {
+      "id": "verify_a11y_output",
+      "input_map": {
+        "handoff": ["$artifacts.assemble_a11y_report", {}]
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "lighthouse.verify_handoff",
+        "task": "run"
+      }
+    }
+  ]
+}

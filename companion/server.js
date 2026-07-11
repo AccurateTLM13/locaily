@@ -78,6 +78,15 @@ const DEFAULT_CONFIG = {
       fast_worker: "llama3.2",
       default_worker: "llama3.2",
       reasoning_worker: "llama3.2",
+      developer_task_writer: "llama3.2",
+      guardrail_writer: "llama3.2",
+      testing_checklist_writer: "llama3.2",
+      a11y_analyzer: "llama3.2",
+      a11y_recommender: "llama3.2",
+      seo_analyzer: "llama3.2",
+      seo_recommender: "llama3.2",
+      budget_analyzer: "llama3.2",
+      budget_recommender: "llama3.2",
       voice_worker: null
     },
     providers: {
@@ -85,6 +94,15 @@ const DEFAULT_CONFIG = {
         fast_worker: "mock-local-model",
         default_worker: "mock-local-model",
         reasoning_worker: "mock-local-model",
+        developer_task_writer: "mock-local-model",
+        guardrail_writer: "mock-local-model",
+        testing_checklist_writer: "mock-local-model",
+        a11y_analyzer: "mock-local-model",
+        a11y_recommender: "mock-local-model",
+        seo_analyzer: "mock-local-model",
+        seo_recommender: "mock-local-model",
+        budget_analyzer: "mock-local-model",
+        budget_recommender: "mock-local-model",
         voice_worker: null
       }
     }

@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "required": ["summary", "budgetGaps"],
+  "properties": {
+    "summary": { "type": "string", "description": "Overall performance budget analysis" },
+    "budgetGaps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["auditId", "title", "currentValue", "target", "gapSeverity"],
+        "properties": {
+          "auditId": { "type": "string", "description": "Lighthouse audit ID" },
+          "title": { "type": "string", "description": "Metric title" },
+          "currentValue": { "type": "string", "description": "Current measured value" },
+          "target": { "type": "string", "description": "Budget target value" },
+          "gapSeverity": { "type": "string", "enum": ["critical", "significant", "moderate", "within_budget"] }
+        }
+      }
+    }
+  }
+}

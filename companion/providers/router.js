@@ -197,6 +197,9 @@ function mockValueForSchema(schema, key) {
   }
 
   if (schema.type === "array") {
+    if (schema.minItems > 0) {
+      return [mockValueForSchema(schema.items, `${key}Item`)];
+    }
     return [];
   }
 
@@ -212,8 +215,16 @@ function mockValueForSchema(schema, key) {
     return 0.8;
   }
 
+  if (schema.type === "string") {
+    return `Mock ${key}`;
+  }
+
   if (schema.type === "object") {
-    return {};
+    const result = {};
+    for (const requiredKey of schema.required || []) {
+      result[requiredKey] = mockValueForSchema(schema.properties && schema.properties[requiredKey], requiredKey);
+    }
+    return result;
   }
 
   return mockValueForKey(key);

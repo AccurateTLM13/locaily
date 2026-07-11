@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-developer-task-writer-v1-qualification",
+  "artifactType": "qualification_record",
+  "artifactPath": "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-developer-task-writer-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:d1e798da769e92b59b9239b58ad26ce2b707317122e6eb414ec72ca7492ab440",
+  "generatedAt": "2026-07-11T01:34:43.311Z"
+}

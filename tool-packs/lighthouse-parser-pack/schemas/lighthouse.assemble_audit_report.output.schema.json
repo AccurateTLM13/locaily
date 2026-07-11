@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "required": ["url", "category", "summary", "score", "findings", "recommendations", "reportMarkdown"],
+  "properties": {
+    "url": { "type": "string" },
+    "category": { "type": "string" },
+    "summary": { "type": "string" },
+    "score": { "type": ["number", "null"] },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "auditId": { "type": "string" },
+          "title": { "type": "string" },
+          "severity": { "type": "string" },
+          "finding": { "type": "string" }
+        }
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "reportMarkdown": { "type": "string" }
+  }
+}

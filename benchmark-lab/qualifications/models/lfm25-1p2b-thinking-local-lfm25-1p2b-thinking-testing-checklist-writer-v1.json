@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-testing-checklist-writer-v1",
+  "subject": {
+    "type": "model",
+    "id": "lfm25-1p2b-thinking-local",
+    "provider": "ollama",
+    "runtimeModelName": "hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest",
+    "digest": "unknown"
+  },
+  "status": "qualified",
+  "qualifiedFor": [
+    {
+      "role": "testing_checklist_writer",
+      "trackId": "website_audit.lighthouse_handoff",
+      "contractId": "testing-checklist-writer-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": []
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "lfm25-1p2b-thinking-testing-checklist-writer-v1"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-testing-checklist-writer-v1.json"
+    ]
+  },
+  "modelProfileId": "lfm25-1p2b-thinking-local",
+  "notes": [
+    "Generated from explicitly promoted Benchmark Lab evidence.",
+    "Qualified for website_audit.lighthouse_handoff testing_checklist_writer role. 3/3 URL validation scenarios PASS (100%).",
+    "Real Ollama evaluation 2026-07-11. Adjacent to enforced priority_helper, developer_task_writer, and guardrail_writer."
+  ],
+  "generatedAt": "2026-07-11T12:00:00.000Z"
+}

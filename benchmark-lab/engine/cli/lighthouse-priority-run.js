@@ -7,6 +7,12 @@ const { parseArgs, printHelp, requireArgs } = require("./args");
 const LAB_ROOT = path.resolve(__dirname, "..", "..");
 
 async function main() {
+  if (process.argv.slice(2).some((arg) => arg === "--url" || arg.startsWith("--url="))) {
+    const { main: runLighthouseUrl } = require("../../../scripts/lighthouse-run");
+    await runLighthouseUrl(process.argv.slice(2));
+    return;
+  }
+
   const args = parseArgs(process.argv.slice(2), {
     suite: {},
     manifest: {},

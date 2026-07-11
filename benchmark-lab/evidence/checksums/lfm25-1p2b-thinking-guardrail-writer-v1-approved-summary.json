@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "lfm25-1p2b-thinking-guardrail-writer-v1-approved-summary",
+  "artifactType": "approved_evidence_summary",
+  "artifactPath": "benchmark-lab/evidence/approved/lfm25-1p2b-thinking-guardrail-writer-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:f76d9f45628571db79dc467e3f8852fb77eebeac4e54f6f9ad044e74881cddb2",
+  "generatedAt": "2026-07-11T02:17:42.577Z"
+}

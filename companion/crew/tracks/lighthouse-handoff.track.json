@@ -67,12 +67,69 @@
       }
     },
     {
+      "id": "write_developer_tasks",
+      "input_map": {
+        "url": "$input.url",
+        "scores": ["$input.scores", {}],
+        "priorityFixes": ["$artifacts.validate_priority_fixes.priorityFixes", "$artifacts.prioritize_fixes.priorityFixes", []],
+        "rankedOpportunities": ["$artifacts.classify_issues.rankedOpportunities", []],
+        "classifiedIssues": ["$artifacts.classify_issues.issues", []]
+      },
+      "executor": {
+        "type": "model",
+        "role": "developer_task_writer",
+        "schema": "companion/crew/schemas/developer-task-writer.schema.json",
+        "prompt_template": "write_developer_tasks"
+      }
+    },
+    {
+      "id": "write_guardrails",
+      "input_map": {
+        "url": "$input.url",
+        "scores": ["$input.scores", {}],
+        "priorityFixes": ["$artifacts.validate_priority_fixes.priorityFixes", "$artifacts.prioritize_fixes.priorityFixes", []],
+        "developerTasks": ["$artifacts.write_developer_tasks.developerTasks", []],
+        "acceptanceCriteria": ["$artifacts.write_developer_tasks.acceptanceCriteria", []],
+        "testingChecklist": ["$artifacts.write_developer_tasks.testingChecklist", []],
+        "rankedOpportunities": ["$artifacts.classify_issues.rankedOpportunities", []],
+        "classifiedIssues": ["$artifacts.classify_issues.issues", []]
+      },
+      "executor": {
+        "type": "model",
+        "role": "guardrail_writer",
+        "schema": "companion/crew/schemas/guardrail-writer.schema.json",
+        "prompt_template": "write_guardrails"
+      }
+    },
+    {
+      "id": "write_testing_checklist",
+      "input_map": {
+        "url": "$input.url",
+        "scores": ["$input.scores", {}],
+        "priorityFixes": ["$artifacts.validate_priority_fixes.priorityFixes", "$artifacts.prioritize_fixes.priorityFixes", []],
+        "developerTasks": ["$artifacts.write_developer_tasks.developerTasks", []],
+        "guardrails": ["$artifacts.write_guardrails.implementationGuardrails", []],
+        "testingChecklist": ["$artifacts.write_developer_tasks.testingChecklist", []],
+        "rankedOpportunities": ["$artifacts.classify_issues.rankedOpportunities", []],
+        "classifiedIssues": ["$artifacts.classify_issues.issues", []]
+      },
+      "executor": {
+        "type": "model",
+        "role": "testing_checklist_writer",
+        "schema": "companion/crew/schemas/testing-checklist-writer.schema.json",
+        "prompt_template": "write_testing_checklist"
+      }
+    },
+    {
       "id": "write_handoff",
       "input_map": {
         "url": "$input.url",
         "metrics": ["$artifacts.extract_metrics", {}],
         "classifiedIssues": ["$artifacts.classify_issues", {}],
         "prioritizedFixes": ["$artifacts.validate_priority_fixes", "$artifacts.prioritize_fixes", {}],
+        "developerTaskPacket": ["$artifacts.write_developer_tasks", {}],
+        "guardrailPacket": ["$artifacts.write_guardrails", {}],
+        "testingChecklistPacket": ["$artifacts.write_testing_checklist", {}],
         "matchedFixes": ["$artifacts.match_fixes", {}],
         "opportunities": ["$input.opportunities", []],
         "rankedOpportunities": [

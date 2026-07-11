@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-testing-checklist-writer-v1-qualification",
+  "artifactType": "qualification_record",
+  "artifactPath": "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-testing-checklist-writer-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:1cba974c0e0b71cb030a5b8aedb4ca1e557df3525caad7872dc96e52e4a905ab",
+  "generatedAt": "2026-07-11T12:00:00.000Z"
+}

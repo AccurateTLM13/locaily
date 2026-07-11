@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "required": ["url", "category", "auditCount", "audits"],
+  "properties": {
+    "url": { "type": "string" },
+    "category": { "type": "string" },
+    "auditCount": { "type": "integer" },
+    "passCount": { "type": "integer" },
+    "failCount": { "type": "integer" },
+    "score": { "type": ["number", "null"] },
+    "audits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "score", "scoreDisplayMode"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "score": { "type": ["number", "null"] },
+          "scoreDisplayMode": { "type": "string" },
+          "numericValue": { "type": ["number", "null"] },
+          "numericUnit": { "type": "string" },
+          "displayValue": { "type": "string" },
+          "metricSavings": { "type": "object" }
+        }
+      }
+    }
+  }
+}

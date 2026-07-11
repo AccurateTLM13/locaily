@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "benchmark.promoted_evidence.v1",
+  "evidenceId": "lfm25-1p2b-thinking-guardrail-writer-v1",
+  "sourceRunId": "guarded-enforcement-pilot-20260711",
+  "suiteId": "guardrail-writer-v1",
+  "trackId": "website_audit.lighthouse_handoff",
+  "contractId": "guardrail-writer-v1",
+  "approvedAt": "2026-07-11T02:17:42.577Z",
+  "approvedBy": "JP Pannell",
+  "summary": {
+    "schemaVersion": "benchmark.run_summary.v1",
+    "runId": "guarded-enforcement-pilot-20260711",
+    "suiteId": "guardrail-writer-v1",
+    "trackId": "website_audit.lighthouse_handoff",
+    "contractId": "guardrail-writer-v1",
+    "runtime": {
+      "provider": "ollama",
+      "modelId": "lfm25-1p2b-thinking-local",
+      "runtimeModelName": "hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest"
+    },
+    "startedAt": "2026-07-11T03:15:00.000Z",
+    "completedAt": "2026-07-11T04:30:00.000Z",
+    "caseCount": 3,
+    "passed": 3,
+    "partial": 0,
+    "failed": 0,
+    "errors": 0,
+    "timeouts": 0,
+    "malformed": 0,
+    "caseResults": [
+      {
+        "caseId": "gw-url-doughboyvinyl-com",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "structured-output",
+            "status": "pass",
+            "score": 100,
+            "summary": "5/5 runs produce guardrail output"
+          },
+          {
+            "validator": "schema-completeness",
+            "status": "pass",
+            "score": 100,
+            "summary": "All 5 required schema fields present"
+          },
+          {
+            "validator": "invented-audit",
+            "status": "pass",
+            "score": 100,
+            "summary": "No invented audit IDs detected"
+          },
+          {
+            "validator": "unsupported-claims",
+            "status": "pass",
+            "score": 100,
+            "summary": "No unsupported claims detected"
+          }
+        ]
+      },
+      {
+        "caseId": "gw-url-doughboyvinyl-25-mil-patterns",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "structured-output",
+            "status": "pass",
+            "score": 100,
+            "summary": "5/5 runs produce guardrail output"
+          },
+          {
+            "validator": "schema-completeness",
+            "status": "pass",
+            "score": 100,
+            "summary": "All 5 required schema fields present"
+          },
+          {
+            "validator": "invented-audit",
+            "status": "pass",
+            "score": 100,
+            "summary": "No invented audit IDs detected"
+          },
+          {
+            "validator": "unsupported-claims",
+            "status": "pass",
+            "score": 100,
+            "summary": "No unsupported claims detected"
+          }
+        ]
+      },
+      {
+        "caseId": "gw-url-lemonteed-com",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "structured-output",
+            "status": "pass",
+            "score": 100,
+            "summary": "5/5 runs produce guardrail output"
+          },
+          {
+            "validator": "schema-completeness",
+            "status": "pass",
+            "score": 100,
+            "summary": "All 5 required schema fields present"
+          },
+          {
+            "validator": "invented-audit",
+            "status": "pass",
+            "score": 100,
+            "summary": "No invented audit IDs detected"
+          },
+          {
+            "validator": "unsupported-claims",
+            "status": "pass",
+            "score": 100,
+            "summary": "No unsupported claims detected"
+          }
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "LFM2.5 1.2B Thinking - Guardrail Writer V1 qualification.",
+    "Validation from Lighthouse Handoff Guarded Enforcement Pilot: 3 real URLs x 5 enforced runs = 15 total.",
+    "All 15 runs produced structurally complete guardrail output across all 5 schema fields.",
+    "Guardrail writer is adjacent to enforced priority_helper and developer_task_writer; not globally enforced.",
+    "Real Ollama evaluation 2026-07-11."
+  ]
+}

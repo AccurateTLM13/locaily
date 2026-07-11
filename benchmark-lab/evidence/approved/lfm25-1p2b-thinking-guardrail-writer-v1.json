@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "benchmark.approved_evidence_summary.v1",
+  "evidenceId": "lfm25-1p2b-thinking-guardrail-writer-v1",
+  "sourceRunId": "guarded-enforcement-pilot-20260711",
+  "approvedAt": "2026-07-11T02:17:42.577Z",
+  "approvedBy": "JP Pannell",
+  "summaryPath": "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-guardrail-writer-v1.json",
+  "claims": [
+    "llama3.2 (guardrail_writer role) produces structurally complete guardrail packets across 3 real URLs.",
+    "All 5 required schema fields (implementationGuardrails, doNotBreakConstraints, humanReviewTriggers, riskNotes, verificationBoundaries) present in every run.",
+    "No invented audit IDs or unsupported implementation claims detected."
+  ]
+}

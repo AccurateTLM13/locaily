@@ -44,6 +44,22 @@
       "permissions": [],
       "input_schema": "schemas/lighthouse.verify_handoff.input.schema.json",
       "output_schema": "schemas/lighthouse.verify_handoff.output.schema.json"
+    },
+    {
+      "id": "lighthouse.extract_category_audits",
+      "description": "Extract audits matching a given category from raw Lighthouse audits.",
+      "model_role": null,
+      "permissions": [],
+      "input_schema": "schemas/lighthouse.extract_category_audits.input.schema.json",
+      "output_schema": "schemas/lighthouse.extract_category_audits.output.schema.json"
+    },
+    {
+      "id": "lighthouse.assemble_audit_report",
+      "description": "Assemble a structured audit report from model outputs and extracted audits.",
+      "model_role": null,
+      "permissions": [],
+      "input_schema": "schemas/lighthouse.assemble_audit_report.input.schema.json",
+      "output_schema": "schemas/lighthouse.assemble_audit_report.output.schema.json"
     }
   ]
 }

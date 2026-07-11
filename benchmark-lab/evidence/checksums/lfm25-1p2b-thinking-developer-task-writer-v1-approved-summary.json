@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "lfm25-1p2b-thinking-developer-task-writer-v1-approved-summary",
+  "artifactType": "approved_evidence_summary",
+  "artifactPath": "benchmark-lab/evidence/approved/lfm25-1p2b-thinking-developer-task-writer-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:11b3a3d278e2478528e61af42a332d64926efab18537892bdfd439f85d18d223",
+  "generatedAt": "2026-07-11T01:34:43.311Z"
+}

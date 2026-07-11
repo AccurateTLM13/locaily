@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "required": ["pageSpeedRerunSteps", "beforeAfterComparisons", "regressionChecks", "manualQaNotes", "codingAgentVerification", "stopAndAskTriggers"],
+  "properties": {
+    "pageSpeedRerunSteps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Specific PageSpeed/Lighthouse rerun steps after implementing fixes. Must reference real URLs and tools."
+    },
+    "beforeAfterComparisons": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Before/after comparison checks to validate score improvements. Must reference actual audit IDs."
+    },
+    "regressionChecks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Regression checks to ensure existing behavior is preserved after changes."
+    },
+    "manualQaNotes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Manual QA notes for a human tester to verify the fixes work as expected."
+    },
+    "codingAgentVerification": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Verification instructions a coding agent can follow after implementing fixes, referencing Lighthouse/browser DevTools."
+    },
+    "stopAndAskTriggers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Conditions that should stop the workflow and ask a human for clarification before proceeding."
+    }
+  }
+}

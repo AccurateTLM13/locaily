@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "benchmark.approved_evidence_summary.v1",
+  "evidenceId": "lfm25-1p2b-thinking-testing-checklist-writer-v1",
+  "sourceRunId": "guarded-enforcement-pilot-20260711",
+  "approvedAt": "2026-07-11T12:00:00.000Z",
+  "approvedBy": "JP Pannell",
+  "summaryPath": "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-testing-checklist-writer-v1.json",
+  "claims": [
+    "llama3.2 (testing_checklist_writer role) produces structurally complete testing checklist packets across 3 real URLs.",
+    "All 6 required schema fields (pageSpeedRerunSteps, beforeAfterComparisons, regressionChecks, manualQaNotes, codingAgentVerification, stopAndAskTriggers) present in every run.",
+    "No invented audit IDs or unsupported implementation claims detected."
+  ]
+}

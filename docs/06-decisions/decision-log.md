@@ -1045,6 +1045,61 @@ This is the evidence foundation only. No UI was added.
 
 ---
 
+## 2026-07-08 - Lighthouse Quality Gate Uses Review Packets
+
+### Decision
+
+Use a one-command human gate packet for Lighthouse pilot output-quality review instead of requiring operators to crawl Track Run Record JSON or hand-write review API calls.
+
+### Why
+
+The human reviewer should judge a readable packet with draft verdicts, risk flags, safe passes, and exceptions. Transport success, enforcement success, and quality judgment remain separate, but the operator workflow must be compact enough to repeat.
+
+### Consequences
+
+- `npm.cmd run quality-gate:lighthouse -- --dry-run` generates Markdown and JSON gate artifacts under `benchmark-lab/evidence/reviews/`.
+- Deterministic draft reviews are proposals, not final claims of model quality.
+- `--approve-safe` may write review records only for low-risk proposed passes with no correction required.
+- `needs_edit`, `fail`, critical-risk, and risk-flagged runs remain human-attention items.
+- Track Run Records and model output remain immutable.
+
+### Status
+
+Confirmed.
+
+### Notes
+
+The current packet found 11 enforced Lighthouse pilot candidate runs and recommended `continue`; the human still owns the gate decision.
+
+---
+
+## 2026-07-08 - Lighthouse Assembly Validation Is Adjacent-Role Evidence
+
+### Decision
+
+Add `developer_task_writer` as an adjacent Lighthouse Handoff role that consumes validated `priority_helper` output, but do not treat it as global enforcement or broad model qualification.
+
+### Why
+
+The enforced `priority_helper` path proves routing and priority selection for one qualified capability. Coding-agent-ready assembly is a separate quality layer: tasks, acceptance criteria, guardrails, and testing checklist items must be evaluated against the actual Lighthouse/Priority Helper evidence.
+
+### Consequences
+
+- The Lighthouse track now includes `write_developer_tasks` after priority-fix validation.
+- Human gate packets inspect developer task packet completeness before safe approval.
+- `developer_task_writer` can pass an assembly pilot without being globally enforced.
+- Broader role qualification or model expansion requires a separate explicit decision and evidence set.
+
+### Status
+
+Confirmed.
+
+### Notes
+
+The first assembly pilot passed 20/20 latest real-URL gated runs with 0 fails, 0 critical risks, and 0 corrections.
+
+---
+
 ```md
 ## YYYY-MM-DD — Title
 ### Decision

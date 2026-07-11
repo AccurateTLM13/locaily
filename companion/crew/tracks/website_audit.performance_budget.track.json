@@ -1,0 +1,79 @@
+{
+  "track_id": "website_audit.performance_budget",
+  "version": "1.0.0",
+  "name": "Performance Budget Audit",
+  "description": "Performance budget analysis from Lighthouse data — identifies budget gaps, recommends thresholds, proposes CI/CD enforcement rules.",
+  "steps": [
+    {
+      "id": "extract_perf_audits",
+      "input_map": {
+        "audits": ["$input.audits", {}],
+        "url": "$input.url",
+        "category": "performance"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "lighthouse.extract_category_audits",
+        "task": "run"
+      }
+    },
+    {
+      "id": "analyze_budget_gaps",
+      "input_map": {
+        "url": "$input.url",
+        "extractedAudits": ["$artifacts.extract_perf_audits", {}],
+        "scores": ["$input.scores", {}],
+        "auditCount": ["$artifacts.extract_perf_audits.auditCount", 0],
+        "failures": ["$artifacts.extract_perf_audits.audits", []]
+      },
+      "executor": {
+        "type": "model",
+        "role": "budget_analyzer",
+        "schema": "companion/crew/schemas/budget-analyzer.schema.json",
+        "prompt_template": "analyze_budget"
+      }
+    },
+    {
+      "id": "recommend_budget_rules",
+      "input_map": {
+        "url": "$input.url",
+        "analysis": ["$artifacts.analyze_budget_gaps", {}],
+        "budgetGaps": ["$artifacts.analyze_budget_gaps.budgetGaps", []],
+        "extractedAudits": ["$artifacts.extract_perf_audits", {}],
+        "scores": ["$input.scores", {}]
+      },
+      "executor": {
+        "type": "model",
+        "role": "budget_recommender",
+        "schema": "companion/crew/schemas/budget-recommender.schema.json",
+        "prompt_template": "recommend_budget"
+      }
+    },
+    {
+      "id": "assemble_budget_report",
+      "input_map": {
+        "url": "$input.url",
+        "category": "performance_budget",
+        "extractedAudits": ["$artifacts.extract_perf_audits", {}],
+        "analysis": ["$artifacts.analyze_budget_gaps", {}],
+        "recommendations": ["$artifacts.recommend_budget_rules", {}]
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "lighthouse.assemble_audit_report",
+        "task": "run"
+      }
+    },
+    {
+      "id": "verify_budget_output",
+      "input_map": {
+        "handoff": ["$artifacts.assemble_budget_report", {}]
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "lighthouse.verify_handoff",
+        "task": "run"
+      }
+    }
+  ]
+}

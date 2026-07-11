@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "required": ["implementationGuardrails", "doNotBreakConstraints", "humanReviewTriggers", "riskNotes", "verificationBoundaries"],
+  "properties": {
+    "implementationGuardrails": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Specific guardrails for implementing the Lighthouse fixes. Must reference real Lighthouse audit IDs."
+    },
+    "doNotBreakConstraints": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Constraints that must not be violated during implementation, such as preserving existing behavior, avoiding unrelated changes."
+    },
+    "humanReviewTriggers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Conditions that trigger human review, such as significant layout changes, third-party dependency changes."
+    },
+    "riskNotes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Risk notes tied to specific Lighthouse audit IDs, acknowledging edge cases and uncertainties."
+    },
+    "verificationBoundaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Specific verification steps a developer should perform after implementation, referencing Lighthouse retests and browser checks."
+    }
+  }
+}

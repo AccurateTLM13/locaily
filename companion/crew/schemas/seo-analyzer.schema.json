@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "required": ["summary", "findings"],
+  "properties": {
+    "summary": { "type": "string", "description": "Overall SEO analysis summary" },
+    "findings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["auditId", "title", "severity", "impact", "finding"],
+        "properties": {
+          "auditId": { "type": "string", "description": "Lighthouse audit ID" },
+          "title": { "type": "string", "description": "Audit title" },
+          "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+          "impact": { "type": "string", "description": "Search visibility impact" },
+          "finding": { "type": "string", "description": "Plain-language description of the issue" }
+        }
+      }
+    }
+  }
+}

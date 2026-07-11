@@ -1,0 +1,191 @@
+{
+  "schemaVersion": "locaily.lighthouse_human_gate_packet.v1",
+  "generatedAt": "2026-07-11T02:20:40.987Z",
+  "trackId": "website_audit.lighthouse_handoff",
+  "roleId": "priority_helper",
+  "executedCapabilityId": "lfm25-1p2b-thinking-local",
+  "mode": "approve-safe",
+  "dryRun": false,
+  "filters": {
+    "url": "https://lemonteed.com/",
+    "includeFixtures": false,
+    "latestOnly": false,
+    "latestN": 5
+  },
+  "files": {
+    "markdown": "benchmark-lab/evidence/reviews/lighthouse-human-gate-v1.md",
+    "packetJson": "benchmark-lab/evidence/reviews/lighthouse-human-gate-v1.json",
+    "proposedReviews": "benchmark-lab/evidence/reviews/lighthouse-human-gate-proposed-reviews-v1.json",
+    "decision": "benchmark-lab/evidence/reviews/lighthouse-human-gate-decision-v1.json"
+  },
+  "summary": {
+    "totalCandidateRuns": 5,
+    "proposedPass": 5,
+    "proposedNeedsEdit": 0,
+    "proposedFail": 0,
+    "criticalRiskCount": 0,
+    "correctionRate": 0,
+    "averageUsefulnessScore": 4,
+    "averageAccuracyScore": 4,
+    "averageStructureScore": 4,
+    "commonFailureReasons": [],
+    "safePassCount": 5,
+    "humanAttentionCount": 0,
+    "selection": {
+      "urlFilter": "https://lemonteed.com/",
+      "includeFixtures": false,
+      "latestOnly": false,
+      "latestN": 5,
+      "desiredRuns": 5,
+      "matchingRunsBeforeLimit": 30,
+      "selectedRuns": 5,
+      "excludedFixtures": 11,
+      "shortfallMessage": null
+    }
+  },
+  "decision": {
+    "schemaVersion": "locaily.lighthouse_human_gate_decision.v1",
+    "recommendedDecision": "continue",
+    "reasons": [
+      "All candidates are proposed safe passes; continue the pilot and collect more quality evidence."
+    ],
+    "generatedAt": "2026-07-11T02:20:40.992Z"
+  },
+  "runs": [
+    {
+      "trackRunId": "track-mrfqm3pw-595f57d2",
+      "createdAt": "2026-07-11T02:20:27.093Z",
+      "proposedVerdict": "pass",
+      "scores": {
+        "usefulness": 4,
+        "accuracy": 4,
+        "structure": 4,
+        "clarity": 4,
+        "risk": 1
+      },
+      "riskFlags": [],
+      "failureReasons": [],
+      "humanAction": "quick approve",
+      "safeAutoApprovalEligible": true,
+      "inputSummary": "url:string(21), scores:object(4), opportunities:array(2)",
+      "auditSummary": "url=\"https://lemonteed.com\", performance=35, accessibility=85, bestPractices=82, seo=88 | issues[2], rankedOpportunities[2], source=\"deterministic-audit-mapping\"",
+      "modelOutputSummary": "thinking=\"Considering the constraints, I will select up to three prior\", priorityFixes[1]",
+      "finalOutputSummary": "clientSummary=\"Handoff for https://lemonteed.com: lowest score is performan\", developerSummary=\"For https://lemonteed.com, the weakest Lighthouse category i\", priorityFixes[2], developerTaskPacket{4}, guardrailPacket{5}",
+      "taskWriterOutputSummary": "developerTasks[2], acceptanceCriteria[3], guardrails[3], testingChecklist[3]",
+      "reasoning": [
+        "Developer task packet is structurally complete: tasks=2, acceptanceCriteria=3, guardrails=3, testingChecklist=3.",
+        "Guardrail packet is structurally complete: impl=2, constraints=1, triggers=1, risks=2, verification=2.",
+        "Output summary is present, structured, grounded in the available Lighthouse summaries, and has no heuristic risk flags."
+      ],
+      "suggestedCorrection": ""
+    },
+    {
+      "trackRunId": "track-mrfqm0ma-f5ff018c",
+      "createdAt": "2026-07-11T02:20:23.074Z",
+      "proposedVerdict": "pass",
+      "scores": {
+        "usefulness": 4,
+        "accuracy": 4,
+        "structure": 4,
+        "clarity": 4,
+        "risk": 1
+      },
+      "riskFlags": [],
+      "failureReasons": [],
+      "humanAction": "quick approve",
+      "safeAutoApprovalEligible": true,
+      "inputSummary": "url:string(21), scores:object(4), opportunities:array(2)",
+      "auditSummary": "url=\"https://lemonteed.com\", performance=35, accessibility=85, bestPractices=82, seo=88 | issues[2], rankedOpportunities[2], source=\"deterministic-audit-mapping\"",
+      "modelOutputSummary": "thinking=\"Considered the provided opportunities and ranked actionable \", priorityFixes[2]",
+      "finalOutputSummary": "clientSummary=\"Handoff for https://lemonteed.com: lowest score is performan\", developerSummary=\"For https://lemonteed.com, the weakest Lighthouse category i\", priorityFixes[2], developerTaskPacket{4}, guardrailPacket{5}",
+      "taskWriterOutputSummary": "developerTasks[2], acceptanceCriteria[4], guardrails[4], testingChecklist[4]",
+      "reasoning": [
+        "Developer task packet is structurally complete: tasks=2, acceptanceCriteria=4, guardrails=4, testingChecklist=4.",
+        "Guardrail packet is structurally complete: impl=2, constraints=1, triggers=1, risks=2, verification=2.",
+        "Output summary is present, structured, grounded in the available Lighthouse summaries, and has no heuristic risk flags."
+      ],
+      "suggestedCorrection": ""
+    },
+    {
+      "trackRunId": "track-mrfqlxcq-899c48c8",
+      "createdAt": "2026-07-11T02:20:18.842Z",
+      "proposedVerdict": "pass",
+      "scores": {
+        "usefulness": 4,
+        "accuracy": 4,
+        "structure": 4,
+        "clarity": 4,
+        "risk": 1
+      },
+      "riskFlags": [],
+      "failureReasons": [],
+      "humanAction": "quick approve",
+      "safeAutoApprovalEligible": true,
+      "inputSummary": "url:string(21), scores:object(4), opportunities:array(2)",
+      "auditSummary": "url=\"https://lemonteed.com\", performance=35, accessibility=85, bestPractices=82, seo=88 | issues[2], rankedOpportunities[2], source=\"deterministic-audit-mapping\"",
+      "modelOutputSummary": "thinking=\"Considering the constraints, I will select up to three prior\", priorityFixes[2]",
+      "finalOutputSummary": "clientSummary=\"Handoff for https://lemonteed.com: lowest score is performan\", developerSummary=\"For https://lemonteed.com, the weakest Lighthouse category i\", priorityFixes[2], developerTaskPacket{4}, guardrailPacket{5}",
+      "taskWriterOutputSummary": "developerTasks[2], acceptanceCriteria[3], guardrails[3], testingChecklist[3]",
+      "reasoning": [
+        "Developer task packet is structurally complete: tasks=2, acceptanceCriteria=3, guardrails=3, testingChecklist=3.",
+        "Guardrail packet is structurally complete: impl=3, constraints=3, triggers=3, risks=3, verification=3.",
+        "Output summary is present, structured, grounded in the available Lighthouse summaries, and has no heuristic risk flags."
+      ],
+      "suggestedCorrection": ""
+    },
+    {
+      "trackRunId": "track-mrfqlts0-3763258b",
+      "createdAt": "2026-07-11T02:20:14.208Z",
+      "proposedVerdict": "pass",
+      "scores": {
+        "usefulness": 4,
+        "accuracy": 4,
+        "structure": 4,
+        "clarity": 4,
+        "risk": 1
+      },
+      "riskFlags": [],
+      "failureReasons": [],
+      "humanAction": "quick approve",
+      "safeAutoApprovalEligible": true,
+      "inputSummary": "url:string(21), scores:object(4), opportunities:array(2)",
+      "auditSummary": "url=\"https://lemonteed.com\", performance=35, accessibility=85, bestPractices=82, seo=88 | issues[2], rankedOpportunities[2], source=\"deterministic-audit-mapping\"",
+      "modelOutputSummary": "thinking=\"Considering the constraints, I will select two priority fixe\", priorityFixes[2]",
+      "finalOutputSummary": "clientSummary=\"Handoff for https://lemonteed.com: lowest score is performan\", developerSummary=\"For https://lemonteed.com, the weakest Lighthouse category i\", priorityFixes[2], developerTaskPacket{4}, guardrailPacket{5}",
+      "taskWriterOutputSummary": "developerTasks[2], acceptanceCriteria[3], guardrails[2], testingChecklist[3]",
+      "reasoning": [
+        "Developer task packet is structurally complete: tasks=2, acceptanceCriteria=3, guardrails=2, testingChecklist=3.",
+        "Guardrail packet is structurally complete: impl=2, constraints=2, triggers=2, risks=2, verification=2.",
+        "Output summary is present, structured, grounded in the available Lighthouse summaries, and has no heuristic risk flags."
+      ],
+      "suggestedCorrection": ""
+    },
+    {
+      "trackRunId": "track-mrfqlqm4-27a4f30c",
+      "createdAt": "2026-07-11T02:20:10.110Z",
+      "proposedVerdict": "pass",
+      "scores": {
+        "usefulness": 4,
+        "accuracy": 4,
+        "structure": 4,
+        "clarity": 4,
+        "risk": 1
+      },
+      "riskFlags": [],
+      "failureReasons": [],
+      "humanAction": "quick approve",
+      "safeAutoApprovalEligible": true,
+      "inputSummary": "url:string(21), scores:object(4), opportunities:array(2)",
+      "auditSummary": "url=\"https://lemonteed.com\", performance=35, accessibility=85, bestPractices=82, seo=88 | issues[2], rankedOpportunities[2], source=\"deterministic-audit-mapping\"",
+      "modelOutputSummary": "thinking=\"Considering the provided data and constraints, I aim to iden\", priorityFixes[2]",
+      "finalOutputSummary": "clientSummary=\"Handoff for https://lemonteed.com: lowest score is performan\", developerSummary=\"For https://lemonteed.com, the weakest Lighthouse category i\", priorityFixes[2], developerTaskPacket{4}, guardrailPacket{5}",
+      "taskWriterOutputSummary": "developerTasks[2], acceptanceCriteria[3], guardrails[3], testingChecklist[3]",
+      "reasoning": [
+        "Developer task packet is structurally complete: tasks=2, acceptanceCriteria=3, guardrails=3, testingChecklist=3.",
+        "Guardrail packet is structurally complete: impl=2, constraints=2, triggers=1, risks=2, verification=2.",
+        "Output summary is present, structured, grounded in the available Lighthouse summaries, and has no heuristic risk flags."
+      ],
+      "suggestedCorrection": ""
+    }
+  ]
+}

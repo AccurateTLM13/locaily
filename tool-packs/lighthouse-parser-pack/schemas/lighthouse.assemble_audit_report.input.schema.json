@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["url", "category", "extractedAudits", "analysis", "recommendations"],
+  "properties": {
+    "url": { "type": "string" },
+    "category": { "type": "string" },
+    "extractedAudits": { "type": "object" },
+    "analysis": { "type": "object" },
+    "recommendations": { "type": "object" }
+  }
+}

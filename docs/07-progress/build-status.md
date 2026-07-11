@@ -1,6 +1,6 @@
 # Build Status
 
-**Updated:** 2026-07-08
+**Updated:** 2026-07-11 (Full Lighthouse Handoff product loop complete — 4 roles qualified, 10 track steps, full assembled artifact validated)
 
 ## Current Stage
 
@@ -36,7 +36,7 @@ North Star direction is now documented as a local capability network: route trac
 - `GET /orchestration/tracks`, `GET /orchestration/workflows`, `POST /workflows/plan`, `POST /workflows/run`
 - Workflow orchestration layer (`companion/orchestration/`)
 - Manifest-backed tool registry
-- Lighthouse proof track (7 steps)
+- Lighthouse proof track (10 steps)
 - DealSniper workflow track (3 steps)
 - Experimental Operator Log editorial tracks
 - Declarative step `input_map` on all track steps (`input-map-resolver.js` + `step-input.js`)
@@ -74,9 +74,9 @@ North Star direction is now documented as a local capability network: route trac
 
 ## Current Priority
 
-**Now:** Output Quality Review foundation is complete. Track Run Records can receive separate human review/correction records, and `GET /enforcement/quality-summary` reports reviewed-run quality metrics distinct from transport/enforcement success.
+**Now:** Full Lighthouse Handoff product loop is complete — 4 roles (priority_helper, developer_task_writer, guardrail_writer, testing_checklist_writer) qualified; 3 enforced. Track has 10 steps. Full assembled artifact quality gate with `--artifact full-handoff` mode. No global broadening.
 
-**Next:** Review the actual enforced Lighthouse pilot outputs using the new review API, then decide whether to continue, suspend, narrow, or broaden the pilot. Benchmark Lab live qualification depth, extension bridge, or Memory Bridge private vault validation remain candidates.
+**Next:** Decide next action after explicit direction. Multi-model track expansion, DealSniper workflow build-out, and live qualification depth remain follow-on candidates.
 
 **Benchmark Lab:** Milestone 1 complete and operator-ready. Broader model, track, hardware, and live qualification coverage remain follow-on work — not yet scoped or scheduled.
 

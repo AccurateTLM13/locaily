@@ -1705,7 +1705,7 @@ async function checkWorkflowPlanLighthouse() {
   assertTaskRunSuccess(response.body, "workflow-orchestrator", "lighthouse_handoff");
   assert(response.body.result.plan, "Expected run plan in response.");
   assert(response.body.result.plan.workflow_id === "lighthouse_handoff", "Expected workflow_id on plan.");
-  assert(response.body.result.plan.steps.length === 7, "Expected seven plan steps.");
+  assert(response.body.result.plan.steps.length === 10, "Expected ten plan steps (write_testing_checklist added).");
   assert(response.body.result.plan.steps.every((step) => step.status === "pending"), "Expected pending plan steps.");
 }
 
@@ -1742,7 +1742,7 @@ async function checkWorkflowRunLighthouseMockProvider() {
     assert(typeof response.body.result.markdown === "string", "Expected markdown in workflow run result.");
     assert(response.body.result.plan, "Expected executed run plan in workflow result.");
     assert(response.body.result.plan.status === "completed", "Expected completed run plan.");
-    assert(response.body.result.plan.steps.length === 7, "Expected seven executed plan steps.");
+    assert(response.body.result.plan.steps.length === 10, "Expected ten executed plan steps (write_testing_checklist added).");
     assert(response.body.meta.workflow_id === "lighthouse_handoff", "Expected workflow_id in meta.");
     assert(response.body.meta.plan_id, "Expected plan_id in meta.");
     assert(Array.isArray(response.body.meta.steps), "Expected step status metadata.");

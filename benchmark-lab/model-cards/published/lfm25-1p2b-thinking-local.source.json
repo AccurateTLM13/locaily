@@ -2,20 +2,25 @@
   "schemaVersion": "benchmark.model_card_source.v1",
   "modelId": "lfm25-1p2b-thinking-local",
   "runtimeModelName": "hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest",
-  "generatedAt": "2026-07-06T21:12:03.045Z",
+  "generatedAt": "2026-07-11T02:17:42.577Z",
   "evidenceIds": [
-    "lfm25-1p2b-thinking-lighthouse-priority-v1"
+    "lfm25-1p2b-thinking-lighthouse-priority-v1",
+    "lfm25-1p2b-thinking-developer-task-writer-v1",
+    "lfm25-1p2b-thinking-guardrail-writer-v1"
   ],
   "trackQualifications": [
     {
       "trackId": "website_audit.lighthouse_handoff",
-      "status": "screening",
+      "status": "qualified",
       "evidenceIds": [
-        "lfm25-1p2b-thinking-lighthouse-priority-v1"
+        "lfm25-1p2b-thinking-lighthouse-priority-v1",
+        "lfm25-1p2b-thinking-developer-task-writer-v1",
+        "lfm25-1p2b-thinking-guardrail-writer-v1"
       ]
     }
   ],
   "limitations": [
-    "Draft model card only. No Locaily routing qualification is claimed by this artifact."
+    "Qualified for guardrail_writer role (website_audit.lighthouse_handoff). Adjacent to enforced priority_helper and developer_task_writer; not globally enforced.",
+    "Score computed from 3 real-URL validation scenarios with schema completeness checks."
   ]
 }

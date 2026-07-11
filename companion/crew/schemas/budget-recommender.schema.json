@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "required": ["budgetRules", "enforcementStrategy"],
+  "properties": {
+    "budgetRules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["metric", "budget", "condition"],
+        "properties": {
+          "metric": { "type": "string", "description": "Performance metric name" },
+          "budget": { "type": "string", "description": "Budget threshold value" },
+          "condition": { "type": "string", "enum": ["less_than", "greater_than", "equals"], "description": "Comparison condition" },
+          "sourceAudit": { "type": "string", "description": "Related Lighthouse audit ID" }
+        }
+      }
+    },
+    "enforcementStrategy": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Strategy for enforcing budgets in CI/CD"
+    }
+  }
+}

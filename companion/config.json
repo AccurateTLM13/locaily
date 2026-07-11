@@ -15,6 +15,15 @@
       "priority_helper": "hf.co/LiquidAI/LFM2.5-350M-GGUF",
       "reasoning_worker": "hf.co/LiquidAI/LFM2.5-8B-A1B-GGUF",
       "fallback_worker": "hf.co/LiquidAI/LFM2.5-350M-GGUF",
+      "developer_task_writer": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
+      "guardrail_writer": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
+      "testing_checklist_writer": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
+      "a11y_analyzer": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
+      "a11y_recommender": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
+      "seo_analyzer": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
+      "seo_recommender": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
+      "budget_analyzer": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
+      "budget_recommender": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
       "voice_worker": null
     },
     "providers": {
@@ -22,6 +31,15 @@
         "fast_worker": "mock-local-model",
         "default_worker": "mock-local-model",
         "reasoning_worker": "mock-local-model",
+        "developer_task_writer": "mock-local-model",
+        "guardrail_writer": "mock-local-model",
+        "testing_checklist_writer": "mock-local-model",
+        "a11y_analyzer": "mock-local-model",
+        "a11y_recommender": "mock-local-model",
+        "seo_analyzer": "mock-local-model",
+        "seo_recommender": "mock-local-model",
+        "budget_analyzer": "mock-local-model",
+        "budget_recommender": "mock-local-model",
         "voice_worker": null
       }
     }
@@ -87,7 +105,9 @@
       "editorial.scan_vault",
       "editorial.verify_report",
       "editorial.collect_evidence",
-      "editorial.verify_operator_log"
+      "editorial.verify_operator_log",
+      "lighthouse.extract_category_audits",
+      "lighthouse.assemble_audit_report"
     ]
   },
   "permissions": {

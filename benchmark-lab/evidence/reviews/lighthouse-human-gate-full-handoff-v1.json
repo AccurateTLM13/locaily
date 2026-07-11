@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "locaily.lighthouse_human_gate_packet.v1",
+  "generatedAt": "2026-07-11T04:53:49.503Z",
+  "trackId": "website_audit.lighthouse_handoff",
+  "mode": "packet-only",
+  "artifact": "full-handoff",
+  "dryRun": true,
+  "filters": {
+    "url": "https://example.com/",
+    "includeFixtures": false,
+    "latestOnly": false,
+    "latestN": 1
+  },
+  "files": {
+    "markdown": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-v1.md",
+    "packetJson": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-v1.json",
+    "proposedReviews": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-proposed-reviews-v1.json",
+    "decision": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-decision-v1.json"
+  },
+  "summary": {
+    "totalCandidateRuns": 0,
+    "proposedPass": 0,
+    "proposedNeedsEdit": 0,
+    "proposedFail": 0,
+    "criticalRiskCount": 0,
+    "correctionRate": null,
+    "averageUsefulnessScore": null,
+    "averageAccuracyScore": null,
+    "averageStructureScore": null,
+    "commonFailureReasons": [],
+    "safePassCount": 0,
+    "humanAttentionCount": 0,
+    "selection": {
+      "urlFilter": "https://example.com/",
+      "includeFixtures": false,
+      "latestOnly": false,
+      "latestN": 1,
+      "desiredRuns": 1,
+      "matchingRunsBeforeLimit": 0,
+      "selectedRuns": 0,
+      "excludedFixtures": 11,
+      "shortfallMessage": "Requested 1 matching run(s), but only found 0."
+    }
+  },
+  "decision": {
+    "schemaVersion": "locaily.lighthouse_human_gate_decision.v1",
+    "recommendedDecision": "suspend",
+    "reasons": [
+      "No full-handoff candidate runs were found."
+    ],
+    "generatedAt": "2026-07-11T04:53:49.503Z"
+  },
+  "runs": []
+}

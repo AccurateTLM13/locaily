@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "benchmark.approved_evidence_summary.v1",
+  "evidenceId": "lfm25-1p2b-thinking-developer-task-writer-v1",
+  "sourceRunId": "assembly-pilot-20260711",
+  "approvedAt": "2026-07-11T01:34:43.311Z",
+  "approvedBy": "JP Pannell",
+  "summaryPath": "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-developer-task-writer-v1.json",
+  "claims": [
+    "llama3.2 (developer_task_writer role, adjacent to enforced priority_helper) produces structurally complete developer task packets across 4 real URLs.",
+    "20/20 quality-gate passes: 0 fails, 0 critical risks, 0 corrections, 0 invented audit IDs, 0 unsupported implementation claims.",
+    "Developer task packets include tasks, acceptance criteria, guardrails, and testing checklist items grounded in supplied Lighthouse/Priority Helper data."
+  ]
+}

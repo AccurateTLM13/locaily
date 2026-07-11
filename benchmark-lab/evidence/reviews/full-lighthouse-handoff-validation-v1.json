@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "locaily.lighthouse_full_handoff_validation.v1",
+  "generatedAt": "2026-07-11T12:00:00.000Z",
+  "trackId": "website_audit.lighthouse_handoff",
+  "status": "complete",
+  "rolesValidated": [
+    {"role": "priority_helper", "stepId": "prioritize_fixes", "qualified": true, "score": 0.9167, "enforced": true},
+    {"role": "developer_task_writer", "stepId": "write_developer_tasks", "qualified": true, "score": 1.0, "enforced": true},
+    {"role": "guardrail_writer", "stepId": "write_guardrails", "qualified": true, "score": 1.0, "enforced": true},
+    {"role": "testing_checklist_writer", "stepId": "write_testing_checklist", "qualified": true, "score": 1.0, "enforced": false}
+  ],
+  "trackStepCount": 10,
+  "urlsTested": [
+    "https://doughboyvinyl.com",
+    "https://doughboyvinyl.com/25-mil-patterns",
+    "https://lemonteed.com",
+    "https://lemonteed.com/junk-drawer"
+  ],
+  "runCounts": {
+    "total": 20,
+    "perUrl": 5,
+    "enforcedRoleRuns": {
+      "priority_helper": {"applied": 124, "total": 136},
+      "developer_task_writer": {"applied": 47, "total": 49},
+      "guardrail_writer": {"applied": 15, "total": 15}
+    }
+  },
+  "qualityResults": {
+    "pass": 20,
+    "needsEdit": 0,
+    "fail": 0,
+    "criticalRiskCount": 0,
+    "fallbackCount": 0,
+    "correctionRate": 0,
+    "averageUsefulness": 4,
+    "averageAccuracy": 4,
+    "averageStructure": 4
+  },
+  "fullHandoffChecks": {
+    "priorityFixesExist": true,
+    "developerTasksExist": true,
+    "guardrailsExist": true,
+    "testingChecklistExist": true,
+    "codingAgentPromptExist": true,
+    "noInventedAuditIds": true,
+    "noUnsupportedImplementationClaims": true,
+    "specificForCodingAgent": true,
+    "referencesActualLighthouseInputs": true,
+    "noContradictions": true
+  },
+  "decision": "continue",
+  "decisionReasons": [
+    "Full Lighthouse Handoff product loop is structurally complete and validated.",
+    "All 4 roles pass quality gates with 0 critical risks, 0 fails, 0 corrections.",
+    "Full assembled artifact includes all required sections.",
+    "No global broadening (4 tracks unchanged, only website_audit.lighthouse_handoff enforced)."
+  ],
+  "qualificationArtifacts": {
+    "evidenceSummaries": [
+      "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-lighthouse-priority-v1.json",
+      "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-developer-task-writer-v1.json",
+      "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-guardrail-writer-v1.json",
+      "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-testing-checklist-writer-v1.json"
+    ],
+    "qualificationRecords": [
+      "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-lighthouse-priority-v1.json",
+      "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-developer-task-writer-v1.json",
+      "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-guardrail-writer-v1.json",
+      "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-testing-checklist-writer-v1.json"
+    ]
+  }
+}
