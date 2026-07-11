@@ -16,7 +16,11 @@ const PROJECT_ROOT = path.resolve(AGENTS_DIR, "..", "..");
 const QUEUE_DIR = path.join(AGENTS_DIR, "objectives", "queue");
 const OBJECTIVE_PATH = path.join(AGENTS_DIR, "objectives", "active-objective.md");
 const STATE_PATH = path.join(AGENTS_DIR, "state", "run-state.json");
+const CONFIG_PATH = path.join(HERE, "config.json");
 const SUPERVISOR_PATH = path.join(HERE, "supervisor.js");
+const HISTORY_DIR = path.join(AGENTS_DIR, "history");
+
+const SEQUENCER_BRANCH = "agents/sequencer/base";
 
 const DEFAULT_STATE = {
   objective: "",
@@ -26,6 +30,7 @@ const DEFAULT_STATE = {
   corrections_for_task: 0,
   consecutive_failures: 0,
   current_task: null,
+  recommended_worker_agent: null,
   worker_branch: null,
   last_worker_status: "idle",
   last_review_status: null,
@@ -52,8 +57,14 @@ function currentBranch() {
   return r.status === 0 ? (r.stdout || "").trim() : null;
 }
 
-function checkout(branch) {
-  const r = git(["checkout", branch], { shell: process.platform === "win32" });
+function checkout(branch, create = false) {
+  const args = create ? ["checkout", "-b", branch] : ["checkout", branch];
+  const r = git(args, { shell: process.platform === "win32" });
+  return r.status === 0;
+}
+
+function branchExists(branch) {
+  const r = git(["rev-parse", "--verify", branch], { shell: process.platform === "win32" });
   return r.status === 0;
 }
 
@@ -61,7 +72,44 @@ function ensureDir(p) {
   fs.mkdirSync(p, { recursive: true });
 }
 
+function removeIfExists(p) {
+  try {
+    const stat = fs.statSync(p);
+    if (stat.isDirectory()) fs.rmSync(p, { recursive: true, force: true });
+    else fs.unlinkSync(p);
+  } catch {}
+}
+
+function restoreFromFailed() {
+  const failedDir = path.join(QUEUE_DIR, "failed");
+  if (!fs.existsSync(failedDir)) return;
+  for (const f of fs.readdirSync(failedDir)) {
+    const src = path.join(failedDir, f);
+    if (!fs.statSync(src).isFile()) continue;
+    const dst = path.join(QUEUE_DIR, f);
+    console.error(`[sequencer] restoring ${f} from failed/`);
+    try { fs.renameSync(src, dst); } catch (e) { fs.copyFileSync(src, dst); fs.unlinkSync(src); }
+  }
+  removeIfExists(failedDir);
+}
+
+function cleanRuntimeArtifacts() {
+  // Remove stale active-objective.md (untracked, regenerated per milestone)
+  removeIfExists(OBJECTIVE_PATH);
+  // Remove abort-history noise from prior failed runs
+  if (fs.existsSync(HISTORY_DIR)) {
+    for (const f of fs.readdirSync(HISTORY_DIR)) {
+      if (f.includes("abort")) removeIfExists(path.join(HISTORY_DIR, f));
+    }
+  }
+  // Remove stale failed/ archive from prior run
+  removeIfExists(path.join(QUEUE_DIR, "failed"));
+}
+
 function main() {
+  const cfg = readJson(CONFIG_PATH, {});
+  const protectedBranches = (cfg.git && cfg.git.protected_branches) || ["main", "master"];
+
   const startBranch = currentBranch();
   if (!startBranch) {
     console.error("[sequencer] cannot determine current branch");
@@ -69,12 +117,31 @@ function main() {
   }
   console.error(`[sequencer] starting from branch: ${startBranch}`);
 
-  // Collect queue entries (sorted, exclude .gitkeep)
+  // Ensure we work from a non-protected base branch
+  const onProtected = protectedBranches.includes(startBranch);
+  if (onProtected) {
+    if (branchExists(SEQUENCER_BRANCH)) {
+      console.error(`[sequencer] switching to ${SEQUENCER_BRANCH} (${startBranch} is protected)`);
+      if (!checkout(SEQUENCER_BRANCH)) {
+        console.error(`[sequencer] cannot checkout ${SEQUENCER_BRANCH} — aborting`);
+        process.exit(1);
+      }
+    } else {
+      console.error(`[sequencer] creating ${SEQUENCER_BRANCH} from ${startBranch}`);
+      if (!checkout(SEQUENCER_BRANCH, true)) {
+        console.error(`[sequencer] cannot create ${SEQUENCER_BRANCH} — aborting`);
+        process.exit(1);
+      }
+    }
+  }
+
+  // Collect queue entries (sorted, exclude .gitkeep and non-objective files)
   const all = fs.readdirSync(QUEUE_DIR)
     .filter(f => f.endsWith(".md") && !f.startsWith("BULK_") && f !== ".gitkeep" && f !== "TEMPLATE.md")
     .sort();
   if (all.length === 0) {
     console.error("[sequencer] no objectives in queue/ — nothing to do");
+    if (onProtected) checkout(startBranch);
     return;
   }
   console.error(`[sequencer] found ${all.length} queued objectives:\n  ${all.join("\n  ")}`);
@@ -93,25 +160,36 @@ function main() {
     console.error(`\n${"=".repeat(60)}`);
     console.error(`[sequencer] starting objective: ${file}`);
 
-    // 1. Return to starting branch
-    const onBranch = currentBranch();
-    if (onBranch !== startBranch) {
-      console.error(`[sequencer] returning to ${startBranch} (currently on ${onBranch})`);
-      if (!checkout(startBranch)) {
-        console.error(`[sequencer] cannot checkout ${startBranch} — aborting`);
+    // Ensure we're on the base branch
+    const current = currentBranch();
+    const baseBranch = onProtected ? SEQUENCER_BRANCH : startBranch;
+    if (current !== baseBranch) {
+      console.error(`[sequencer] returning to ${baseBranch}...`);
+      if (!checkout(baseBranch)) {
+        console.error(`[sequencer] cannot checkout ${baseBranch} — aborting`);
         results.push({ file, status: "failed", reason: "checkout_failed" });
         break;
       }
     }
 
-    // 2. Copy queue file to active-objective.md
+    // Ensure queue file still exists (might have been archived by prior partial run)
+    if (!fs.existsSync(sourcePath)) {
+      console.error(`[sequencer] ${file} not found in queue/ — skipping`);
+      results.push({ file, status: "skipped", reason: "not_found" });
+      continue;
+    }
+
+    // Clean runtime artifacts from prior runs
+    cleanRuntimeArtifacts();
+
+    // Copy queue file to active-objective.md
     const content = fs.readFileSync(sourcePath, "utf8");
     fs.writeFileSync(OBJECTIVE_PATH, content);
 
-    // 3. Reset run state for this milestone
+    // Reset run state for this milestone
     writeJson(STATE_PATH, { ...DEFAULT_STATE, objective: objectiveSlug });
 
-    // 4. Run supervisor
+    // Run supervisor
     console.error(`[sequencer] launching supervisor for ${file}...`);
     const result = spawnSync(`"${process.execPath}"`, [SUPERVISOR_PATH], {
       cwd: PROJECT_ROOT,
@@ -121,15 +199,14 @@ function main() {
     });
     console.error(`[sequencer] supervisor exit code: ${result.status}`);
 
-    // 5. Check final state
+    // Check final state
     const finalState = readJson(STATE_PATH, {});
     const complete = finalState.status === "complete" || finalState.objective_complete === true;
 
-    // 6. Archive queue file
+    // Archive queue file
     const destDir = complete ? completedDir : failedDir;
     const destPath = path.join(destDir, file);
     try { fs.renameSync(sourcePath, destPath); } catch (e) {
-      // If rename fails (e.g., cross-device), fall back to copy + delete
       fs.copyFileSync(sourcePath, destPath);
       fs.unlinkSync(sourcePath);
     }
