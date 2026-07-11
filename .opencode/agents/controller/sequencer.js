@@ -195,6 +195,15 @@ function main() {
     // Clean runtime artifacts from prior runs
     cleanRuntimeArtifacts();
 
+    // Remove stale worker branch from prior failed run
+    const cfg2 = readJson(CONFIG_PATH, {});
+    const prefix = (cfg2.git && cfg2.git.worker_branch_prefix) || "agents/worker";
+    const workerBranchName = `${prefix}/${objectiveSlug}`;
+    if (branchExists(workerBranchName)) {
+      console.error(`[sequencer] removing stale worker branch ${workerBranchName}`);
+      git(["branch", "-D", workerBranchName], { shell: process.platform === "win32" });
+    }
+
     // Copy queue file to active-objective.md
     const content = fs.readFileSync(sourcePath, "utf8");
     fs.writeFileSync(OBJECTIVE_PATH, content);
