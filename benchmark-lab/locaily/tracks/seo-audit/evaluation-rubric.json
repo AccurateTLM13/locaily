@@ -1,0 +1,43 @@
+{
+  "rubricId": "seo-audit-v1",
+  "trackId": "website_audit.seo_audit",
+  "role": "seo_analyzer",
+  "description": "Evaluation rubric for SEO Audit seo_analyzer qualification",
+  "dimensions": [
+    {
+      "id": "factual-grounding",
+      "name": "Factual grounding",
+      "weight": 0.30,
+      "description": "Every claim must be traceable to input data. No invented audits or issues."
+    },
+    {
+      "id": "impact-assessment",
+      "name": "Impact assessment accuracy",
+      "weight": 0.25,
+      "description": "Search visibility impact is accurately described for each issue."
+    },
+    {
+      "id": "severity-accuracy",
+      "name": "Severity accuracy",
+      "weight": 0.20,
+      "description": "Issues are correctly classified by severity based on search ranking impact."
+    },
+    {
+      "id": "clarity",
+      "name": "Finding clarity",
+      "weight": 0.15,
+      "description": "Findings are described in plain language suitable for content or marketing teams."
+    },
+    {
+      "id": "schema-compliance",
+      "name": "Output-schema compliance",
+      "weight": 0.10,
+      "description": "Output is valid JSON matching the output schema."
+    }
+  ],
+  "passThreshold": 0.7,
+  "failConditions": [
+    "inventing audit IDs not present in input",
+    "output fails schema validation"
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "benchmark.promoted_evidence.v1",
+  "evidenceId": "llama3.2-a11y-analyzer-v1",
+  "sourceRunId": "run-20260711T134023Z",
+  "suiteId": "accessibility-deep-v1",
+  "trackId": "website_audit.accessibility_deep",
+  "contractId": "a11y-analyzer-v1",
+  "approvedAt": "2026-07-11T13:42:57.172Z",
+  "approvedBy": "locaily-agent",
+  "summary": {
+    "schemaVersion": "benchmark.run_summary.v1",
+    "runId": "run-20260711T134023Z",
+    "suiteId": "accessibility-deep-v1",
+    "trackId": "website_audit.accessibility_deep",
+    "contractId": "a11y-analyzer-v1",
+    "runtime": {
+      "provider": "ollama",
+      "modelId": "llama3.2-local",
+      "runtimeModelName": "llama3.2"
+    },
+    "startedAt": "2026-07-11T13:40:23.433Z",
+    "completedAt": "2026-07-11T13:40:50.412Z",
+    "caseCount": 3,
+    "passed": 3,
+    "failed": 0,
+    "errors": 0,
+    "timeouts": 0,
+    "malformed": 0,
+    "caseResults": [
+      {
+        "caseId": "a11y-001",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "extract",
+            "actual": "extract"
+          }
+        ]
+      },
+      {
+        "caseId": "a11y-002",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "extract",
+            "actual": "extract"
+          }
+        ]
+      },
+      {
+        "caseId": "a11y-003",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "extract",
+            "actual": "extract"
+          }
+        ]
+      }
+    ]
+  },
+  "notes": [
+    "llama3.2 passes 3/3 accessibility deep analysis scenarios"
+  ]
+}

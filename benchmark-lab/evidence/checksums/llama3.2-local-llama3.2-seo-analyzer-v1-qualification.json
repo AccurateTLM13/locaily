@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "llama3.2-local-llama3.2-seo-analyzer-v1-qualification",
+  "artifactType": "qualification_record",
+  "artifactPath": "benchmark-lab/qualifications/models/llama3.2-local-llama3.2-seo-analyzer-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:ab51906f51e26871108592c0cfaf900ca979059a7bee694424fe870fd2ea31bd",
+  "generatedAt": "2026-07-11T13:44:35.757Z"
+}

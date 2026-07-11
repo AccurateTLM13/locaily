@@ -51,8 +51,29 @@ Do not describe Memory Bridge as making models "self-learning."
 - GitHub or cloud sync
 - Obsidian plugin requirement
 - Automatic wiki edits
-- `POST /memory/writeback/apply`
 - Wiring memory into every workflow (one proof workflow comes after v0 smoke tests)
+
+## v1 Scope (Milestone 4)
+
+v0 was compose-handoff + proposal-only writeback. v1 adds two opt-in capabilities required by the Relay Node milestone and general workflow maturity:
+
+**In scope (v1):**
+
+- **Structured search** — `POST /memory/search` runs an allowlisted, case-insensitive ranked search across vault Markdown and returns scored hits with line snippets. No full file dumps; no `raw/` access.
+- **Writeback apply** — `POST /memory/writeback/apply` writes a reviewed proposal to an allowlisted vault path. Gated behind `memoryBridge.allowApply` (or `writebackMode: "apply"`) and the `memory.writeback.apply` permission. Vault-local config cannot enable apply when the companion disallows it.
+- **Relay node memory consent** — relay nodes are execution targets only; they may read/apply the *operator-configured* vault on the node that owns it. No vault state is pushed across the relay protocol.
+
+**Still out of scope for v1:**
+
+- Embeddings / vector search (keyword ranking only)
+- GitHub or cloud sync
+- Automatic edits outside the allowlist / blocked paths
+- Distributed memory consensus across relay nodes
+
+| Operation | v1 behavior |
+|-----------|-------------|
+| Search | Allowlisted `.md` only; returns `{ query, count, hits[] }` with `score` and `matches[].snippet` |
+| Apply | Writes rendered proposal Markdown to `targetPath` (allowlisted, inside vault, `.md`); opt-in only |
 
 ## Vault Layouts
 
@@ -120,6 +141,8 @@ When `memoryBridge.enabled` is `false`, Locaily runs normally; memory endpoints 
 | GET | `/memory/status` | Effective config summary, readability, counts, warnings |
 | POST | `/memory/context-pack` | Build task-specific Context Pack |
 | POST | `/memory/writeback/propose` | Write reviewable proposal to inbox |
+| POST | `/memory/search` | Structured, allowlisted ranked search (v1) |
+| POST | `/memory/writeback/apply` | Apply reviewed proposal to allowlisted path (v1, opt-in) |
 
 Contract detail: [api-contract.md](./api-contract.md), [context-packs.md](./context-packs.md), [memory-writeback.md](./memory-writeback.md).
 

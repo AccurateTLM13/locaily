@@ -1,5 +1,35 @@
 # Decision Log
 
+## 2026-07-11 — M4 Relay Nodes: Ephemeral Execution Targets, Localhost-Only, Opt-In Memory
+
+### Decision
+
+For Milestone 4 (Relay Nodes & Distributed Capability Network):
+
+- Relay nodes are **execution targets only** — they receive individual step work via `POST /relay/step` and return raw results. They cannot alter orchestrator policy, qualifications, or the node registry beyond their own entry.
+- The Local Brain stays **localhost-only by default**; relay cross-device traffic is an opt-in client connection initiated by the orchestrator to a registered `baseUrl`. No public exposure is added.
+- Discovery is **registry-based** (nodes register/heartbeat their `baseUrl` + capabilities). No mDNS/broadcast in M4.
+- Relay nodes are treated as **ephemeral**: a failed/timeout dispatch marks the node unhealthy and falls back to local execution. No state is stored only on a relay node.
+- Memory Bridge v1 `applyWriteback` is **opt-in** (`memoryBridge.allowApply`) and vault-path-gated; vault-local config cannot enable apply when the companion disallows it. Relay nodes only touch their operator-configured local vault.
+- No distributed consensus or Byzantine fault tolerance is claimed; routing is single-node selection with local fallback.
+
+### Why
+
+Keeps the local-first, privacy-preserving posture of Locaily while enabling nearby-device capability routing. Treating relay nodes as ephemeral execution targets bounds the new failure modes introduced by multi-machine coordination (per the M4 risk note) and avoids over-claiming a distributed systems guarantee the project does not provide.
+
+### Consequences
+
+- `companion/relay/*` implements protocol, registry, connector, router.
+- `POST /relay/step` intentionally exposes only step execution, not control operations.
+- Cross-node routing requires no new client contract beyond `options.relay_policy` (already injected by the server).
+- `test:relay:e2e` verifies discovery, routing, and fallback across two Local Brain instances.
+
+### Status
+
+Implemented and verified (2026-07-11).
+
+---
+
 ## 2026-07-05 — Pit Crew → The Crew: Code Path Migration
 
 ### Decision
@@ -1097,6 +1127,79 @@ Confirmed.
 ### Notes
 
 The first assembly pilot passed 20/20 latest real-URL gated runs with 0 fails, 0 critical risks, and 0 corrections.
+
+---
+
+## 2026-07-11 — Milestones 2-4 Roadmap
+
+### Decision
+
+Define three major post-Lighthouse milestones: M2 (Multi-Track Qualification & Enforcement), M3 (Dynamic Track Planning & DAG Execution), and M4 (Relay Nodes & Distributed Capability Network). Documented in `docs/07-progress/roadmap-milestones-2-3-4.md`.
+
+### Why
+
+The Lighthouse Handoff product loop is complete. The infrastructure (track runner, enforcement, qualification engine, Benchmark Lab) supports expansion. The next logical steps are: broaden coverage across more tracks (M2), move from linear to graph execution (M3), and distribute across devices (M4). These map directly to the north star of a local capability network.
+
+### Status
+
+Confirmed — M2 implemented. Awaiting direction on M3 or next work.
+
+### Notes
+
+M2 and M3 are independent and can be worked in either order or parallel. M4 benefits from M3 but does not require it. Each milestone has its own stop conditions, acceptance criteria, and effort estimate in the roadmap doc.
+
+---
+
+## 2026-07-11 — M2: Multi-Track Qualification & Enforcement Complete
+
+### Decision
+
+Completed M2 milestone: qualified llama3.2 for 4 new roles across 4 tracks (a11y_analyzer, budget_analyzer, seo_analyzer, default_worker/dealsniper). Created Benchmark Lab suites for each track. Built qualification dashboard endpoint. Set all 4 new tracks to shadow enforcement.
+
+### Why
+
+Three website audit tracks (accessibility_deep, performance_budget, seo_audit) and DealSniper had structural scaffolding (schemas, prompts, track JSONs, model role mappings) but no qualified model roles. Benchmark Lab suites were needed to evaluate structured output quality. Llama3.2 passed 10/10 scenarios across all 4 suites with score 1.0.
+
+### Consequences
+
+- 2 models now qualified (lfm25-1p2b-thinking-local + llama3.2-local)
+- 6 total qualified capabilities across 5 tracks
+- 4 new tracks in shadow enforcement mode, collecting routing evidence
+- New `GET /qualifications/dashboard` endpoint for consolidated view
+- New `quality-gate:website-audit` script for output validation
+- All existing tests continue to pass
+
+### Status
+
+Confirmed.
+
+### Notes
+
+M2 acceptance criteria met: 3 new website audit tracks qualified (a11y, budget, seo), DealSniper qualified, 2 models qualified (llama3.2 + lfm25-1p2b-thinking), all tests pass. The operator-log-* tracks remain unqualified (they depend on editorial-pack with Memory Bridge vault). The recommender roles (a11y_recommender, budget_recommender, seo_recommender) remain at screening status pending additional Benchmark Lab suites.
+
+---
+
+## 2026-07-11 - M5: Multi-Device Workflow Coordination (Placement + Distributed Execution)
+
+### Decision
+
+Extend M4 Relay Nodes from single-step routing into coordinated multi-device workflow execution: the orchestrator computes a step-to-node placement plan across healthy relay nodes and executes each step on its assigned device, falling back locally when an assigned node fails. Add a placement planner (`companion/relay/placement.js`) and `POST /relay/plan` preview, and route via `executeStepWithAssignedNode`.
+
+### Why
+
+M4 proved a single step can be offloaded to one relay node with local fallback. The north star is a local capability network where work is distributed across devices; coordinating whole workflows (not just one step) across multiple capable devices is the natural next capability and reuses the M4 registry/connector/router.
+
+### Status
+
+Confirmed.
+
+### Notes
+
+- Single orchestrator, ephemeral relay nodes; no distributed consensus or global scheduler.
+- Placement is capability + health + least-loaded; no latency/bandwidth awareness (deferred).
+- Tool steps always execute locally (relay nodes are model-capability targets only).
+- `distribute` policy is the M5 coordination path; M4 policies (`prefer_relay`, `route_if_unavailable`) remain per-step dynamic decisions and are unchanged.
+- Failed node is marked unhealthy for 60s (registry stale window); fallback is per-step local with `RELAY_FALLBACK` audit. No data loss.
 
 ---
 

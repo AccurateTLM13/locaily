@@ -5,6 +5,8 @@ const { executeToolStep } = require("./tool-router");
 const { formatHandoffMarkdown } = require("./markdown");
 const { validateResult } = require("../core/result-validator");
 const { recordDirectTrackRun } = require("./runtime-track-run-recorder");
+const { executeDag, validateDag, createDagContext } = require("../core/dag-executor");
+const { executeStepViaRelayIfNeeded } = require("../relay/router");
 
 function createTrackContext(input) {
   return {
@@ -69,47 +71,150 @@ async function runTrack({
   const stepsRun = [];
   const startTrack = Date.now();
   const outputSchema = loadOutputSchema(track);
+  const useDag = options.useDag === true;
 
-  for (const step of track.steps) {
-    const stepResult = await executeStep({
-      step,
-      context,
-      runtime,
-      options: {
-        ...options,
-        track_id: track.track_id
-      },
-      toolRegistry,
-      meta
-    });
-
-    context.artifacts[step.id] = stepResult.output;
-
-    if (step.id === "write_handoff" && stepResult.output && typeof stepResult.output === "object") {
-      context.artifacts[step.id] = {
-        ...stepResult.output,
-        markdown: formatHandoffMarkdown({
-          ...stepResult.output,
-          url: input.url
-        })
-      };
+  if (useDag) {
+    const dagValidation = validateDag(track);
+    if (!dagValidation.valid) {
+      const error = new Error("DAG validation failed: " + dagValidation.errors.map(e => e.message).join("; "));
+      error.code = "DAG_VALIDATION_FAILED";
+      error.dagErrors = dagValidation.errors;
+      throw error;
     }
 
-    stepsRun.push({
-      name: step.id,
-      executor: step.executor.type,
-      tool: stepResult.meta.tool || null,
-      task: stepResult.meta.task || null,
-      model: stepResult.meta.model || stepResult.meta.tool || "rule_based_checker",
-      role: stepResult.meta.role || step.executor.role || "tool",
-      profile_id: stepResult.meta.profile_id || options.profile_id || null,
-      suitability: stepResult.meta.suitability || null,
-      qualification: stepResult.meta.qualification || null,
-      shadowRouting: stepResult.meta.shadowRouting || null,
-      enforcementDecision: stepResult.meta.enforcementDecision || null,
-      durationMs: stepResult.meta.durationMs,
-      output: stepResult.output
+    const stepExecutor = async (step, dagCtx) => {
+      const mergedCtx = { input: dagCtx.input, artifacts: dagCtx.artifacts };
+      const stepOptions = { ...options, track_id: track.track_id };
+      try {
+        const result = await executeStepViaRelayIfNeeded({
+          step,
+          context: mergedCtx,
+          runtime,
+          options: stepOptions,
+          toolRegistry,
+          meta,
+          stepId: step.id,
+          localExecute: () => executeStep({
+            step,
+            context: mergedCtx,
+            runtime,
+            options: stepOptions,
+            toolRegistry,
+            meta
+          })
+        });
+        dagCtx.artifacts[step.id] = result.output;
+        return { ok: true, output: result.output, meta: result.meta };
+      } catch (err) {
+        return {
+          ok: false,
+          error: { code: err.code || "STEP_FAILED", message: err.message }
+        };
+      }
+    };
+
+    const dagResult = await executeDag({
+      track,
+      context: createDagContext(input),
+      stepExecutor,
+      options: { maxConcurrency: options.maxConcurrency || 4, abortOnError: options.abortOnError !== false }
     });
+
+    if (!dagResult.ok) {
+      const errorEntries = Object.entries(dagResult.errors || {});
+      const detail = errorEntries.map(([id, err]) => `${id}: ${err.code || ""} ${err.message || ""} ${err.originalCode ? "(was:"+err.originalCode+")" : ""}`).join("; ");
+      const error = new Error("DAG execution failed with " + dagResult.failed + " failed steps: " + detail);
+      error.code = "DAG_EXECUTION_FAILED";
+      error.dagErrors = dagResult.errors;
+      throw error;
+    }
+
+    context.artifacts = dagResult.context.artifacts;
+
+    for (const stepId of dagResult.stepOrder) {
+      const step = track.steps.find(s => s.id === stepId);
+      if (!step) continue;
+      const stepResult = dagResult.context.results[stepId];
+      if (!stepResult) continue;
+
+      if (stepId === "write_handoff" && stepResult.output && typeof stepResult.output === "object") {
+        context.artifacts[stepId] = {
+          ...stepResult.output,
+          markdown: formatHandoffMarkdown({
+            ...stepResult.output,
+            url: input.url
+          })
+        };
+      }
+
+      stepsRun.push({
+        name: stepId,
+        executor: step.executor.type,
+        tool: stepResult.meta?.tool || null,
+        task: stepResult.meta?.task || null,
+        model: stepResult.meta?.model || stepResult.meta?.tool || "rule_based_checker",
+        role: stepResult.meta?.role || step.executor.role || "tool",
+        profile_id: stepResult.meta?.profile_id || options.profile_id || null,
+        suitability: stepResult.meta?.suitability || null,
+        qualification: stepResult.meta?.qualification || null,
+        shadowRouting: stepResult.meta?.shadowRouting || null,
+        enforcementDecision: stepResult.meta?.enforcementDecision || null,
+        durationMs: stepResult.meta?.durationMs || 0,
+        output: stepResult.output
+      });
+    }
+  } else {
+    for (const step of track.steps) {
+      const stepOptions = {
+        ...options,
+        track_id: track.track_id
+      };
+      const stepResult = await executeStepViaRelayIfNeeded({
+        step,
+        context,
+        runtime,
+        options: stepOptions,
+        toolRegistry,
+        meta,
+        stepId: step.id,
+        localExecute: () => executeStep({
+          step,
+          context,
+          runtime,
+          options: stepOptions,
+          toolRegistry,
+          meta
+        })
+      });
+
+      context.artifacts[step.id] = stepResult.output;
+
+      if (step.id === "write_handoff" && stepResult.output && typeof stepResult.output === "object") {
+        context.artifacts[step.id] = {
+          ...stepResult.output,
+          markdown: formatHandoffMarkdown({
+            ...stepResult.output,
+            url: input.url
+          })
+        };
+      }
+
+      stepsRun.push({
+        name: step.id,
+        executor: step.executor.type,
+        tool: stepResult.meta.tool || null,
+        task: stepResult.meta.task || null,
+        model: stepResult.meta.model || stepResult.meta.tool || "rule_based_checker",
+        role: stepResult.meta.role || step.executor.role || "tool",
+        profile_id: stepResult.meta.profile_id || options.profile_id || null,
+        suitability: stepResult.meta.suitability || null,
+        qualification: stepResult.meta.qualification || null,
+        shadowRouting: stepResult.meta.shadowRouting || null,
+        enforcementDecision: stepResult.meta.enforcementDecision || null,
+        durationMs: stepResult.meta.durationMs,
+        output: stepResult.output
+      });
+    }
   }
 
   const { result, schemaValid } = assembleTrackResult(track, context, input, outputSchema);

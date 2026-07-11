@@ -38,6 +38,17 @@
     "audit:seo": "node scripts/audit-run.js --track website_audit.seo_audit",
     "audit:budget": "node scripts/audit-run.js --track website_audit.performance_budget",
     "quality-review": "node scripts/quality-review.js",
-    "quality-review:test": "node scripts/test-human-review-records.js"
+    "quality-review:test": "node scripts/test-human-review-records.js",
+    "quality-gate:website-audit": "node scripts/website-audit-gate.js",
+    "audit:dealsniper": "node scripts/audit-run.js --track marketplace.dealsniper",
+    "test:dag": "node scripts/test-dag-graph.cjs && node scripts/test-dag-executor.cjs && node scripts/test-run-plan-dag.cjs",
+  "test:relay": "node scripts/test-relay-unit.cjs",
+  "test:relay:e2e": "node scripts/test-relay-e2e.cjs",
+  "test:relay:placement": "node scripts/test-relay-placement.cjs",
+  "test:multi-device:e2e": "node scripts/test-multi-device-e2e.cjs",
+  "test:memory-v1": "node scripts/test-memory-v1.cjs",
+  "test:m4": "node scripts/test-relay-unit.cjs && node scripts/test-memory-v1.cjs && node scripts/test-relay-e2e.cjs",
+  "test:m5": "node scripts/test-relay-placement.cjs && node scripts/test-multi-device-e2e.cjs",
+    "dag:plan": "curl.exe -s -X POST http://127.0.0.1:31313/tracks/plan -H \"Content-Type: application/json\" -d \"{\\\"request\\\":\\\"$*\\\"}\""
   }
 }

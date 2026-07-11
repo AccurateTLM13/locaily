@@ -1,225 +1,111 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "full-lighthouse-handoff-validation-loop",
+  "build_slice": "M5-multi-device-workflow-coordination",
   "status": "complete",
-  "objective": "Complete the first full Lighthouse Handoff product loop: add testing_checklist_writer, assemble the full handoff, validate the complete artifact, and package the operator workflow.",
+  "objective": "Multi-device workflow coordination built on M4 Relay Nodes — coordinator computes a step-to-node placement plan across healthy relay nodes, executes each workflow step on its assigned device, and falls back locally when an assigned node fails. Includes a placement planner, a placement-preview endpoint, and coordinated multi-device execution with audit trail.",
   "implemented": {
-    "track": "companion/crew/tracks/lighthouse-handoff.track.json",
-    "trackStepCount": 10,
-    "roles": {
-      "priority_helper": {"qualified": true, "enforced": true, "score": 0.9167},
-      "developer_task_writer": {"qualified": true, "enforced": true, "score": 1.0},
-      "guardrail_writer": {"qualified": true, "enforced": true, "score": 1.0},
-      "testing_checklist_writer": {"qualified": true, "enforced": false, "score": 1.0}
-    },
-    "testingChecklistWriter": {
-      "roleId": "testing_checklist_writer",
-      "stepId": "write_testing_checklist",
-      "schema": "companion/crew/schemas/testing-checklist-writer.schema.json",
-      "prompt": "write_testing_checklist",
-      "handoffOutput": "testingChecklistPacket",
-      "markdownSections": ["PageSpeed Rerun Steps", "Before/After Comparisons", "Regression Checks", "Manual QA Notes", "Coding Agent Verification", "Stop and Ask Human"],
-      "gateHeuristic": "scripts/lighthouse-human-gate.js checks testing checklist packet completeness",
-      "artifactGateMode": "--artifact full-handoff validates entire assembled handoff"
-    },
-    "fullHandoffQualityGate": {
-      "command": "npm.cmd run quality-gate:lighthouse -- --artifact full-handoff",
-      "checks": [
-        "priority fixes exist",
-        "developer tasks exist",
-        "guardrails exist",
-        "testing checklist exists",
-        "coding-agent prompt exists",
-        "no invented audit IDs",
-        "no unsupported implementation claims",
-        "output specific enough for coding agent",
-        "references actual Lighthouse/PageSpeed inputs",
-        "no obvious contradiction between sections"
-      ],
-      "outputFiles": {
-        "markdown": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-v1.md",
-        "packetJson": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-v1.json",
-        "proposedReviews": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-proposed-reviews-v1.json",
-        "decision": "benchmark-lab/evidence/reviews/lighthouse-human-gate-full-handoff-decision-v1.json"
-      }
+    "placement_planner": [
+      "companion/relay/placement.js (createPlacementPlanner, buildPlacementFromTrack)"
+    ],
+    "placement_policies": [
+      "distribute (spread model steps across capable healthy nodes, least-loaded)",
+      "local_first (local when locally capable, else route)",
+      "local_only (force all local)",
+      "prefer_relay / route_if_unavailable (M4 per-step dynamic decision, unchanged)"
+    ],
+    "assigned_node_routing": [
+      "companion/relay/router.js executeStepWithAssignedNode (route to specific node, fallback local + RELAY_FALLBACK audit on failure)",
+      "companion/relay/router.js executeStepViaRelayIfNeeded now consults options.relay.assignments[stepId]",
+      "companion/crew/orchestrator.js (DAG + linear) and companion/orchestration/run-plan-executor.js pass stepId"
+    ],
+    "server_wiring": [
+      "POST /relay/plan (placement preview for a track)",
+      "GET /relay/protocol now lists /relay/plan",
+      "applyRelayPlacement() attaches assignments + placementSummary for relay_policy=distribute on /tracks/run and /workflows/run",
+      "responses include relay_placement summary (counts + byNode)"
+    ],
+    "tests": [
+      "scripts/test-relay-placement.cjs (14/14 — added dedupe/load-split coverage)",
+      "scripts/test-multi-device-e2e.cjs (22/22 — three Local Brain instances A orchestrator + B + C relay; distributed run, then kill C -> local fallback)"
+    ],
+    "package_scripts": [
+      "test:relay:placement",
+      "test:multi-device:e2e",
+      "test:m5"
+    ],
+    "all_test_results": {
+      "benchmark:test": "PASS",
+      "contract-test": "PASS",
+      "benchmark:status-smoke": "PASS",
+      "test:dag": "14/14 + 9/9 + workflow PASS",
+      "orchestration-unit-test": "PASS",
+      "smoke-test": "57/57 PASS",
+      "test:relay (unit)": "17/17 PASS (harness fixed: async checks now actually run)",
+      "test:memory-v1": "6/6 PASS",
+      "test:relay:e2e": "11/11 PASS",
+      "test:relay:placement": "14/14 PASS",
+      "test:multi-device:e2e": "22/22 PASS"
     }
-  },
-  "foundation": {
-    "trackId": "website_audit.lighthouse_handoff",
-    "enforcedRoles": ["priority_helper", "developer_task_writer", "guardrail_writer"],
-    "qualifiedRoles": ["priority_helper", "developer_task_writer", "guardrail_writer", "testing_checklist_writer"],
-    "executedCapabilityId": "lfm25-1p2b-thinking-local",
-    "runtimeModelName": "hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest",
-    "enforcementScope": "priority_helper + developer_task_writer + guardrail_writer (within track-level enforced state)",
-    "globalBroadening": false
-  },
-  "enforcement_pilot": {
-    "track": "website_audit.lighthouse_handoff",
-    "policyState": "enforced",
-    "activatedRoles": ["priority_helper", "developer_task_writer", "guardrail_writer"],
-    "priorityHelperEnforcement": {
-      "totalDecisions": 136,
-      "applied": 124,
-      "blocked": 12,
-      "fallback": 0,
-      "enforcedSuccessRate": "100%",
-      "executedCapabilityId": "lfm25-1p2b-thinking-local",
-      "qualifiedScore": 0.9167
-    },
-    "developerTaskWriterEnforcement": {
-      "totalDecisions": 49,
-      "applied": 47,
-      "blocked": 2,
-      "fallback": 0,
-      "enforcedSuccessRate": "100%",
-      "executedCapabilityId": "lfm25-1p2b-thinking-local",
-      "qualifiedScore": 1.0
-    },
-    "guardrailWriterEnforcement": {
-      "totalDecisions": 15,
-      "applied": 15,
-      "blocked": 0,
-      "fallback": 0,
-      "enforcedSuccessRate": "100%",
-      "executedCapabilityId": "lfm25-1p2b-thinking-local",
-      "qualifiedScore": 1.0
-    }
-  },
-  "qualification": {
-    "capabilityId": "lfm25-1p2b-thinking-local",
-    "testingChecklistWriter": {
-      "roleId": "testing_checklist_writer",
-      "trackId": "website_audit.lighthouse_handoff",
-      "contractId": "testing-checklist-writer-v1",
-      "qualificationRecordId": "lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-testing-checklist-writer-v1",
-      "evidenceId": "lfm25-1p2b-thinking-testing-checklist-writer-v1",
-      "status": "qualified",
-      "score": 1.0,
-      "validationScenarios": 3,
-      "artifacts": {
-        "evidenceSummary": "benchmark-lab/evidence/summaries/lfm25-1p2b-thinking-testing-checklist-writer-v1.json",
-        "approvedEvidence": "benchmark-lab/evidence/approved/lfm25-1p2b-thinking-testing-checklist-writer-v1.json",
-        "qualificationRecord": "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-testing-checklist-writer-v1.json",
-        "checksums": [
-          "benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-testing-checklist-writer-v1-promoted-evidence.json",
-          "benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-testing-checklist-writer-v1-approved-summary.json",
-          "benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-local-lfm25-1p2b-thinking-testing-checklist-writer-v1-qualification.json"
-        ]
-      }
-    }
-  },
-  "validation_set": [
-    {
-      "url": "https://doughboyvinyl.com",
-      "runCount": 5,
-      "passCount": 5,
-      "needsEditCount": 0,
-      "failCount": 0,
-      "criticalRiskCount": 0,
-      "correctionRate": 0,
-      "averageUsefulness": 4,
-      "averageAccuracy": 4,
-      "recommendedDecision": "continue"
-    },
-    {
-      "url": "https://doughboyvinyl.com/25-mil-patterns",
-      "runCount": 5,
-      "passCount": 5,
-      "needsEditCount": 0,
-      "failCount": 0,
-      "criticalRiskCount": 0,
-      "correctionRate": 0,
-      "averageUsefulness": 4,
-      "averageAccuracy": 4,
-      "recommendedDecision": "continue"
-    },
-    {
-      "url": "https://lemonteed.com",
-      "runCount": 5,
-      "passCount": 5,
-      "needsEditCount": 0,
-      "failCount": 0,
-      "criticalRiskCount": 0,
-      "correctionRate": 0,
-      "averageUsefulness": 4,
-      "averageAccuracy": 4,
-      "recommendedDecision": "continue"
-    },
-    {
-      "url": "https://lemonteed.com/junk-drawer/",
-      "runCount": 5,
-      "passCount": 5,
-      "needsEditCount": 0,
-      "failCount": 0,
-      "criticalRiskCount": 0,
-      "correctionRate": 0,
-      "averageUsefulness": 4,
-      "averageAccuracy": 4,
-      "recommendedDecision": "continue"
-    }
-  ],
-  "aggregate": {
-    "runCount": 115,
-    "reviewedCount": 115,
-    "passCount": 115,
-    "needsEditCount": 0,
-    "failCount": 0,
-    "criticalRiskCount": 0,
-    "correctionRate": 0,
-    "exceptions": [],
-    "avgUsefulness": 4,
-    "avgAccuracy": 4,
-    "avgStructure": 4
   },
   "validation": {
     "passed": true,
-    "commands": [
-      "node --check scripts/lighthouse-human-gate.js",
-      "node --check companion/crew/prompts.js",
-      "node --check companion/crew/markdown.js",
-      "node --check companion/tools/lighthouse-handoff.js",
-      "npm.cmd run benchmark:test",
-      "node scripts/contract-test.js",
-      "npm.cmd run benchmark:status-smoke",
-      "node scripts/test-qualification-resolver.js",
-      "node scripts/test-shadow-routing.js",
-      "node scripts/test-enforcement-routing.js",
-      "node scripts/test-enforcement-policy-store.js",
-      "node scripts/test-enforcement-policy.js",
-      "node scripts/test-human-review-records.js"
-    ],
     "results": [
-      "All module loads pass",
-      "benchmark:test passed (14 schemas + run loop)",
-      "contract-test passed",
-      "benchmark:status-smoke passed",
-      "qualification-resolver: 25/25 passed",
-      "shadow-routing: 31/31 passed",
-      "enforcement-routing: 91/91 passed",
-      "enforcement-policy-store: 149/149 passed",
-      "human-review-records: 25/25 assertions passed",
-      "Track: 10 steps, Capabilities: 6, Qualified: 4",
-      "4 roles qualified (priority_helper, developer_task_writer, guardrail_writer, testing_checklist_writer)",
-      "3 roles enforced (all except testing_checklist_writer)",
-      "Full handoff quality gate with --artifact full-handoff mode",
-      "No global broadening (4 tracks unchanged)"
+      "Placement planner distributes model steps across two relay nodes (B gets priority_helper, C gets developer/guardrail/testing writers) and keeps tool steps local",
+      "Multi-device e2e: Lighthouse Handoff runs on A with model steps executed on B and C; relay_placement summary reports 4 relayed / 6 local across both devices",
+      "Failure + local fallback: killing node C reroutes its steps locally and records RELAY_FALLBACK audit events; workflow still completes",
+      "Existing M4 relay e2e still passes (single-step prefer_relay unaffected)",
+      "All existing tests pass (backward compatible)"
     ]
   },
   "acceptance_criteria": {
     "passed": [
-      "testing_checklist_writer is qualified (score 1.0, 3/3 URL scenarios)",
-      "testing_checklist_writer schema, prompt, track step, and handoff integration complete",
-      "Full Lighthouse Handoff Markdown generated from real role outputs via testingChecklistPacket",
-      "Full handoff quality gate exists (--artifact full-handoff mode)",
-      "No fixture/canary pollution",
-      "0 critical risks, 0 fails, needs_edit=0 (<=20%)",
-      "All tests pass (benchmark:test, contract, status-smoke, qualification-resolver, shadow-routing, enforcement-routing, enforcement-policy-store, human-review-records)",
-      "No global broadening (4 tracks unchanged)",
-      "Existing roles remain unchanged"
+      "Coordinator computes a placement plan across 2+ relay nodes for a workflow",
+      "Each step executes on its assigned device; tool steps stay local",
+      "Node failure mid-workflow falls back to local execution with audit trail",
+      "Placement preview endpoint reports assignments + summary",
+      "All existing tests still pass (backward compatible)",
+      "End-to-end: Lighthouse Handoff distributed across 3 devices, then degraded to 2 with fallback"
     ],
     "failed": [],
     "blockers": []
   },
-  "last_fresh_validation": "2026-07-11 (4 roles qualified, 10 track steps, full Lighthouse Handoff product loop complete)",
-  "updated_at": "2026-07-11"
+  "scope_notes": [
+    "Single orchestrator, ephemeral relay nodes — no distributed consensus or global scheduler",
+    "Placement is capability + health + least-loaded; no latency/bandwidth awareness",
+    "Tool steps are always local by design (relay nodes are model-capability targets)",
+    "Local fallback is per-step; a failed node is marked unhealthy for 60s (registry stale window)"
+  ],
+  "stop_conditions_honored": [
+    "Local Brain localhost-only by default (no public exposure)",
+    "Relay nodes are execution targets only (no control-plane ops)",
+    "No automatic model swapping / Model Garage",
+    "No distributed consensus / Byzantine fault tolerance claimed",
+    "Failures degrade gracefully to local execution (no data loss)"
+  ],
+  "last_fresh_validation": "2026-07-11 (M5 complete + review fixes — multi-device workflow coordination)",
+  "next_milestones": "Follow-on candidates: broader model/track qualification coverage, live Ollama qualification runs, Model Garage evaluation harness (Phase 2)",
+  "updated_at": "2026-07-11",
+  "review_2026-07-11": {
+    "scope": "Post-completion review of M4 + M5 for bugs, mistakes, and unfinished items",
+    "issues_found": [
+      "registry.selectForRole sorted descending (picked most-loaded node) — wrong least-loaded behavior",
+      "placement byRole double-counted a node advertising both `role` and `role:role`",
+      "no direct unit test for executeStepWithAssignedNode (M5 assigned-node routing)",
+      "relay-node-protocol.md documented M4 only, missing M5 placement/distribute/POST /relay/plan",
+      "HIDDEN: test-relay-unit.cjs async checks were fire-and-forget before process.exit — never executed (false confidence); exposed a wrong audit-field assertion (r.code vs r.error_code)"
+    ],
+    "fixes_applied": [
+      "companion/relay/registry.js: selectForRole now sorts ascending (a.dispatchCount - b.dispatchCount)",
+      "companion/relay/placement.js: byRole dedupes nodes per role",
+      "scripts/test-relay-unit.cjs: harness now awaits async checks; added 3 executeStepWithAssignedNode tests; corrected audit assertion to r.error_code",
+      "scripts/test-relay-placement.cjs: added dedupe/least-loaded load-split test",
+      "docs/05-integrations/relay-node-protocol.md: added M5 placement section (distribute policy, POST /relay/plan, relay_placement, assignments)"
+    ],
+    "verification": {
+      "test:relay (unit)": "17/17 PASS",
+      "test:relay:placement": "14/14 PASS",
+      "test:multi-device:e2e": "22/22 PASS"
+    },
+    "outcome": "All M4/M5 review issues resolved; no blockers remaining for M5 acceptance."
+  }
 }

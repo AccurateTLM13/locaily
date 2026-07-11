@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "llama3.2-local-llama3.2-dealsniper-v1",
+  "subject": {
+    "type": "model",
+    "id": "llama3.2-local",
+    "provider": "ollama",
+    "runtimeModelName": "llama3.2",
+    "digest": "unknown"
+  },
+  "status": "qualified",
+  "qualifiedFor": [
+    {
+      "role": "default_worker",
+      "trackId": "marketplace.dealsniper",
+      "contractId": "deal-sniper-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": []
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "llama3.2-dealsniper-v1"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/evidence/summaries/llama3.2-dealsniper-v1.json"
+    ]
+  },
+  "modelProfileId": "llama3.2-local",
+  "notes": [
+    "Generated from explicitly promoted Benchmark Lab evidence.",
+    "llama3.2 qualifies for default_worker role on DealSniper: 3/3 structured output scenarios pass"
+  ],
+  "generatedAt": "2026-07-11T13:43:40.166Z"
+}

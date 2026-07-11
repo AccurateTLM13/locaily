@@ -1,0 +1,38 @@
+[
+  {
+    "caseId": "ds-001",
+    "trackId": "marketplace.dealsniper",
+    "difficulty": "easy",
+    "responseMode": "json",
+    "input": {
+      "text": "You are a marketplace deal analyst. Analyze the listing below and determine if it's a good deal.\nConsider: market price, item condition, seller reputation, shipping costs, and demand.\nBe specific. Do not give vague advice.\nReturn JSON only matching the schema.\n\nTitle: Vintage Canon AE-1 Film Camera with 50mm Lens - Excellent Condition\nPrice: $175\nDescription: Fully functional Canon AE-1 with 50mm f/1.8 lens. No scratches on lens. Light seals replaced 2024. Includes original strap and case.\nLocation: Austin, TX\nSeller info: 5-star seller, 250+ reviews, 98% positive\nSource: eBay\n\nOutput must include: \"label\": \"extract\""
+    },
+    "expected": {
+      "label": "extract"
+    }
+  },
+  {
+    "caseId": "ds-002",
+    "trackId": "marketplace.dealsniper",
+    "difficulty": "easy",
+    "responseMode": "json",
+    "input": {
+      "text": "You are a marketplace deal analyst. Analyze the listing below and determine if it's a good deal.\nConsider: market price, item condition, seller reputation, shipping costs, and demand.\nBe specific. Do not give vague advice.\nReturn JSON only matching the schema.\n\nTitle: iPhone 14 Pro Max 256GB - Space Black\nPrice: $1,099\nDescription: Used for 6 months. Minor scratch on screen. No original box. Battery health 87%.\nLocation: Ship nationwide\nSeller info: New seller, 3 reviews, 67% positive\nSource: Facebook Marketplace\n\nOutput must include: \"label\": \"extract\""
+    },
+    "expected": {
+      "label": "extract"
+    }
+  },
+  {
+    "caseId": "ds-003",
+    "trackId": "marketplace.dealsniper",
+    "difficulty": "medium",
+    "responseMode": "json",
+    "input": {
+      "text": "You are a marketplace deal analyst. Analyze the listing below and determine if it's a good deal.\nConsider: market price, item condition, seller reputation, shipping costs, and demand.\nBe specific. Do not give vague advice.\nReturn JSON only matching the schema.\n\nTitle: Mid-Century Modern Dining Table - Solid Walnut - 6ft\nPrice: $400\nDescription: Beautiful solid walnut dining table. Some water marks on top but can be refinished. Needs pickup.\nLocation: Portland, OR (local pickup only)\nSeller info: 4.8-star seller, 120 reviews, no negative feedback in 6 months\nSource: Craigslist\n\nOutput must include: \"label\": \"extract\""
+    },
+    "expected": {
+      "label": "extract"
+    }
+  }
+]

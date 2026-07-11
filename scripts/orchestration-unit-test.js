@@ -57,7 +57,7 @@ function checkRunPlanBuilder() {
   assert.equal(plan.track_id, "website_audit.lighthouse_handoff");
   assert.equal(plan.task_id, "task_test");
   assert.equal(plan.status, "pending");
-  assert.equal(plan.steps.length, 7, "Expected seven lighthouse plan steps.");
+  assert.equal(plan.steps.length, 10, "Expected ten lighthouse plan steps.");
 
   for (const step of plan.steps) {
     assert.equal(step.track_id, plan.track_id);

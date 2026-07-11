@@ -8,6 +8,7 @@ const DEFAULT_MEMORY_BRIDGE_CONFIG = {
   readPolicy: "allowlist",
   writebackMode: "proposal_only",
   rawAccess: false,
+  allowApply: false,
   allowedPaths: ["index.md", "log.md", "SCHEMA.md", "projects/", "topics/"],
   blockedPaths: ["raw/", "private/", "personal/", ".git/", ".memory-bridge/writeback-inbox/"]
 };
@@ -270,6 +271,163 @@ function createVaultAdapter(options = {}) {
         proposalPath: normalizeRelativePath(relative(this.getVaultRoot(), absolutePath)),
         proposalId: safeName.replace(/\.md$/i, "")
       };
+    },
+
+    getAllowApply() {
+      return Boolean(effectiveConfig.allowApply) || effectiveConfig.writebackMode === "apply";
+    },
+
+    search(query, { limit = 10, paths } = {}) {
+      const status = this.getStatus();
+
+      if (!status.enabled || !status.readable) {
+        return {
+          ok: false,
+          error: {
+            code: "MEMORY_NOT_READABLE",
+            message: "Memory vault is not enabled or not readable."
+          }
+        };
+      }
+
+      if (!query || typeof query !== "string" || !query.trim()) {
+        return {
+          ok: false,
+          error: {
+            code: "MISSING_QUERY",
+            message: "A non-empty search query is required."
+          }
+        };
+      }
+
+      const lowerQuery = query.toLowerCase();
+      const terms = lowerQuery.split(/\s+/).filter(Boolean);
+      const candidates = Array.isArray(paths) && paths.length > 0
+        ? paths.map((p) => normalizeRelativePath(p)).filter((p) => this.isPathAllowed(p))
+        : this.listMarkdownFiles();
+
+      const hits = [];
+
+      for (const relPath of candidates) {
+        const readResult = this.readMarkdownFile(relPath);
+
+        if (!readResult.ok) {
+          continue;
+        }
+
+        const lines = readResult.content.split("\n");
+        const matchedLines = [];
+        let score = 0;
+
+        lines.forEach((line, index) => {
+          const lowerLine = line.toLowerCase();
+          const matched = terms.filter((term) => lowerLine.includes(term));
+
+          if (matched.length > 0) {
+            score += matched.length;
+            matchedLines.push({ line: index + 1, snippet: line.trim().slice(0, 200) });
+          }
+        });
+
+        if (score > 0) {
+          hits.push({
+            path: relPath,
+            score,
+            matches: matchedLines.slice(0, 5)
+          });
+        }
+      }
+
+      hits.sort((a, b) => b.score - a.score);
+
+      return {
+        ok: true,
+        result: {
+          query,
+          count: hits.length,
+          hits: hits.slice(0, limit)
+        }
+      };
+    },
+
+    applyWriteback({ targetPath, content }) {
+      const status = this.getStatus();
+
+      if (!status.enabled) {
+        return {
+          ok: false,
+          error: {
+            code: "MEMORY_DISABLED",
+            message: "Memory bridge is not enabled."
+          }
+        };
+      }
+
+      if (!this.getAllowApply()) {
+        return {
+          ok: false,
+          error: {
+            code: "WRITEBACK_APPLY_DISABLED",
+            message: "Writeback apply is disabled. Enable memoryBridge.allowApply (or set writebackMode to 'apply')."
+          }
+        };
+      }
+
+      if (!targetPath || typeof targetPath !== "string" || !targetPath.trim()) {
+        return {
+          ok: false,
+          error: {
+            code: "MISSING_TARGET_PATH",
+            message: "targetPath is required for writeback apply."
+          }
+        };
+      }
+
+      const normalized = normalizeRelativePath(targetPath);
+
+      if (!normalized || !normalized.endsWith(".md")) {
+        return {
+          ok: false,
+          error: {
+            code: "INVALID_TARGET_PATH",
+            message: "targetPath must be a relative .md path inside the vault."
+          }
+        };
+      }
+
+      if (!this.isPathAllowed(normalized)) {
+        return {
+          ok: false,
+          error: {
+            code: "PATH_NOT_ALLOWED",
+            message: `targetPath is not allowlisted or is blocked: ${normalized}`
+          }
+        };
+      }
+
+      const vaultRoot = this.getVaultRoot();
+      const absolutePath = join(vaultRoot, ...normalized.split("/"));
+
+      if (!isInsideVault(vaultRoot, absolutePath)) {
+        return {
+          ok: false,
+          error: {
+            code: "PATH_TRAVERSAL",
+            message: "targetPath escapes the configured vault root."
+          }
+        };
+      }
+
+      mkdirSync(join(absolutePath, ".."), { recursive: true });
+      writeFileSync(absolutePath, content, "utf8");
+
+      return {
+        ok: true,
+        result: {
+          writtenPath: normalized,
+          appliedAt: new Date().toISOString()
+        }
+      };
     }
   };
 }
@@ -284,6 +442,7 @@ function normalizeMemoryBridgeConfig(config) {
     readPolicy: config.readPolicy || DEFAULT_MEMORY_BRIDGE_CONFIG.readPolicy,
     writebackMode: config.writebackMode || DEFAULT_MEMORY_BRIDGE_CONFIG.writebackMode,
     rawAccess: Boolean(config.rawAccess),
+    allowApply: Boolean(config.allowApply),
     allowedPaths: normalizePathList(config.allowedPaths, DEFAULT_MEMORY_BRIDGE_CONFIG.allowedPaths),
     blockedPaths: normalizePathList(config.blockedPaths, DEFAULT_MEMORY_BRIDGE_CONFIG.blockedPaths)
   };
@@ -304,23 +463,28 @@ function loadEffectiveConfig(baseConfig) {
 
   try {
     const vaultOverrides = JSON.parse(readFileSync(vaultConfigPath, "utf8"));
-    const merged = {
-      ...baseConfig,
-      ...vaultOverrides,
-      allowedPaths: vaultOverrides.allowedPaths
-        ? normalizePathList(vaultOverrides.allowedPaths, baseConfig.allowedPaths)
-        : baseConfig.allowedPaths,
-      blockedPaths: vaultOverrides.blockedPaths
-        ? normalizePathList(vaultOverrides.blockedPaths, baseConfig.blockedPaths)
-        : baseConfig.blockedPaths
-    };
+  const merged = {
+    ...baseConfig,
+    ...vaultOverrides,
+    allowedPaths: vaultOverrides.allowedPaths
+      ? normalizePathList(vaultOverrides.allowedPaths, baseConfig.allowedPaths)
+      : baseConfig.allowedPaths,
+    blockedPaths: vaultOverrides.blockedPaths
+      ? normalizePathList(vaultOverrides.blockedPaths, baseConfig.blockedPaths)
+      : baseConfig.blockedPaths
+  };
 
-    // Vault-local config cannot enable raw access when companion disallows it.
-    if (!baseConfig.rawAccess) {
-      merged.rawAccess = false;
-    }
+  // Vault-local config cannot enable raw access when companion disallows it.
+  if (!baseConfig.rawAccess) {
+    merged.rawAccess = false;
+  }
 
-    return merged;
+  // Vault-local config cannot enable writeback apply when companion disallows it.
+  if (!baseConfig.allowApply) {
+    merged.allowApply = false;
+  }
+
+  return merged;
   } catch (_error) {
     return baseConfig;
   }

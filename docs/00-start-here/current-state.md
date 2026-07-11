@@ -2,7 +2,7 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-07-11 (Testing Checklist Writer qualification — 4 roles qualified, 10 track steps, full Lighthouse Handoff product loop complete)
+**Updated:** 2026-07-11 (M5 complete + post-completion review: 4 issues found and fixed — registry least-loaded sort, placement dedupe, missing assigned-node unit tests, protocol doc M5; test harness bug fixed so async checks actually run)
 
 ## What Works
 
@@ -13,11 +13,15 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Lighthouse Handoff track** - `website_audit.lighthouse_handoff` in `companion/crew/tracks/`
 - **DealSniper workflow track** - `marketplace.dealsniper` in `companion/crew/tracks/`
 - **Declarative step `input_map`** - tool and model steps via `companion/crew/step-input.js`
-- **Workflow orchestration** - `POST /workflows/plan`, `POST /workflows/run`, `GET /orchestration/*` (`companion/orchestration/`)
+- **Workflow orchestration** - `POST /workflows/plan`, `POST /workflows/run`, `GET /orchestration/*` (`companion/orchestration/`). Run-plan execution now uses the DAG engine (`run-plan-executor.js`) — steps execute in dependency levels with per-level parallelism; sequential when `options.useDag === false`.
+- **Track planner (`/tracks/plan`)** - model-backed free-form → plan decomposition, now qualification-gated (no blind LLM calls). `reasoning_worker` is qualified for `llama3.2-local` (Benchmark Lab suite `track-planning`, mock runtime, 4/4 pass).
 - **Model roles** - role slots in track steps and routing options
 - **Provider routing** - Ollama + mock via `companion/providers/router.js`
 - **Audit / scoreboard hooks** - `GET /audit`, `GET /scoreboard`, per-run recording
 - **Memory Bridge v0** - `/memory/status`, `/memory/context-pack`, `/memory/writeback/propose` (disabled by default)
+- **Relay Node protocol (M4)** - `companion/relay/*`: registry, connector, router. Endpoints `GET /relay/protocol`, `GET /relay/nodes`, `POST /relay/register`, `POST /relay/heartbeat`, `POST /relay/unregister`, `POST /relay/step`. Cross-node routing wired into track + workflow step execution with local fallback + `RELAY_FALLBACK` audit. `GET /health` reports relay node counts.
+- **Memory Bridge v1 (M4)** - adds `POST /memory/search` (allowlisted ranked search) and `POST /memory/writeback/apply` (opt-in, vault-path-gated, `memory.writeback.apply` permission).
+- **Multi-Device Workflow Coordination (M5)** - `companion/relay/placement.js` placement planner distributes model steps across healthy relay nodes (capability + health + least-loaded; `distribute` policy). `POST /relay/plan` previews placement. `executeStepWithAssignedNode` routes each step to its assigned node and falls back locally (with `RELAY_FALLBACK` audit) on node failure. Wired into `/tracks/run` and `/workflows/run` for `relay_policy=distribute`; responses include `relay_placement` summary. Tests: `test-relay-placement.cjs` (14/14), `test-multi-device-e2e.cjs` (22/22), `test-relay` unit (17/17 after harness fix).
 - **Operator Log editorial tracks** - experimental discovery and human-selected draft proposal paths
 - **Benchmark Lab Milestone 1** - complete and operator-ready. Implements: engine and CLI (run, review, compare, promote, matrix, probe, diagnose, report, model-card, qualification, checksum-verify); 14 schemas with validation; mock + Ollama + ToolEvalRuntime adapters; execution-router with native/policy-routed/runtime-constrained modes; evidence promotion and checksum verification (canonical_text_v1/byte_exact); qualification-record generation; model capability probing; read-only runtime status at `GET /benchmark/status`; Local Brain consuming compact qualification data without importing Benchmark Lab engine internals
 - **Tool Eval Bench compatibility slice** - `benchmark-lab/locaily/tracks/basic-tool-use/`, ported 8 Tool Eval Bench scenarios, `ToolEvalRuntime` adapter (Ollama `/api/chat` tool-calling), multi-turn runner, PARTIAL verdict support, and evidence/report pipeline
@@ -37,25 +41,30 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Lighthouse run + Human Gate packet** - `npm.cmd run lighthouse:run -- --url https://your-site.com` creates a Lighthouse Track Run Record from a simple URL command using a synthetic Lighthouse payload unless scores/findings are supplied. `npm.cmd run quality-gate:lighthouse -- --dry-run` finds enforced `website_audit.lighthouse_handoff` / `priority_helper` pilot records for `lfm25-1p2b-thinking-local`, generates deterministic draft reviews, and writes review packet artifacts under `benchmark-lab/evidence/reviews/`. `--approve-safe` writes review records only for low-risk proposed passes.
 - **Lighthouse Handoff Assembly Pilot** - The Lighthouse track now includes an adjacent model step, `developer_task_writer`, after validated priority fixes. It consumes priority helper output and emits coding-agent-ready developer tasks, acceptance criteria, guardrails, and testing checklist items. Four real URLs were validated with five fresh enforced runs each; URL-scoped gates approved 20/20 safe passes with 0 fails, 0 critical risks, and 0 corrections. This validates assembly quality separately from the enforced `priority_helper` routing path.
 - **Smoke and contract tests** - `scripts/smoke-test.js`, `scripts/contract-test.js` (current verification suite passes; see latest progress log or CI evidence for counts)
+- **Multi-track qualification** - 4 new Benchmark Lab suites for accessibility_deep, performance_budget, seo_audit, and dealsniper
+- **llama3.2 qualified for 4 roles** - a11y_analyzer (score 1.0), budget_analyzer (score 1.0), seo_analyzer (score 1.0), default_worker/dealsniper (score 1.0)
+- **Two qualified models** - lfm25-1p2b-thinking-local (Lighthouse) + llama3.2-local (website audits + dealsniper)
+- **6 total qualified capabilities** across 5 tracks
+- **Qualification dashboard** - `GET /qualifications/dashboard` with per-model, per-track, per-role breakdown
+- **All 4 new tracks in shadow enforcement** - collecting routing evidence for future enforcement
 
 ## What Is Partial
 
-- **Track runner** - linear pipeline only; four workflow tracks in catalog
+- **Track runner** - linear pipeline (default) with optional DAG mode (useDag: true); eight tracks in catalog (4 active, 4 in shadow)
+- **DAG executor** - `companion/core/dag-executor.js` + `companion/core/dag-graph.js` — topological sort, cycle detection, parallel step execution, fan-in/fan-out support
+- **Track planner** - `companion/tools/track-planner.js` — model-backed tool for free-form request to structured plan decomposition; `POST /tracks/plan` endpoint
+- **DAG validation** - dependency inference from `$artifacts.*` references in `input_map`, cycle detection, missing step detection, level grouping for parallelism
 - **Model qualification coverage** - Qualification consumption engine and capability registry built; broader model, track, hardware, deeper live qualification evidence, and prompt/regression coverage remain incremental
 - **Model scorecards / skill sheets** - six-state qualification consumption engine + capability registry are the runtime surface
 - **Runtime Track Run Record emission** - The Crew orchestrator and workflow plan executor emit canonical Track Run Records for all supported runtime flows (direct track, workflow, Lighthouse Handoff, DealSniper). Records are persisted to `data/evidence/track-run-records/`. Responses from `/tracks/run` and `/worksflows/run` include evidence references. Failed executions also produce records. Qualification Evidence Linker connects records to qualification data.
-- **Memory Bridge** - v0 endpoints + optional Lighthouse `compose-handoff` preflight; no apply/search/embeddings
+- **Memory Bridge** - v0 endpoints + v1 search/apply (apply opt-in); no embeddings yet
 - **Console validation** - local validation UI exists; not a finished product surface
 - **Fallback ladder** - partial (`retry_same_model_once`); no full escalation handler
 - **Step input mapping** - declarative `input_map` on all track steps; legacy step-id fallbacks removed from `step-input.js`
 
 ## What Is Not Built Yet
 
-- **Track planner** - no automatic decomposition from free-form requests
-- **DAG execution** - steps run in file order only
-- **Relay Node protocol** - conceptual docs only
-- **Automatic track classification** - no classifier selects workflow + track
-- **Worker registry** - models routed by role, not a full worker catalog
+- **Automatic track classification** - no classifier selects workflow + track *(M3 follow-on)*
 - **Automatic model swapping / Model Garage auto-switching** - proposed only
 - **Extension to Local Brain HTTP bridge** - spec exists; not implemented end-to-end
 
@@ -118,10 +127,9 @@ The North Star is now documented as a local capability network: decompose work i
 
 | Layer | Focus |
 |---|---|
-| **Now** | All 4 Lighthouse roles (priority_helper, developer_task_writer, guardrail_writer, testing_checklist_writer) qualified; 3 enforced within `website_audit.lighthouse_handoff` through `lfm25-1p2b-thinking-local`. Full Lighthouse Handoff product loop complete. Track: 10 steps. Capabilities: 6, Qualified: 4. No global broadening. |
-| **Next** | Do not add a new adjacent role or broaden globally. Decide next action after explicit direction. |
-| **Later** | Simple dependency graphs; Relay Node protocol implementation; broader model qualification coverage |
-| **Research** | DAG planner generated by Local Brain |
+| **Now** | M5 complete + reviewed: Multi-Device Workflow Coordination — placement planner, `POST /relay/plan`, distributed step execution across relay nodes with local fallback on node failure. Review fixed 4 issues (registry least-loaded sort, placement dedupe, assigned-node unit tests, protocol doc M5); test harness bug fixed. Test counts: unit 17/17, placement 14/14, multi-device e2e 22/22. |
+| **Next** | Broader model qualification coverage; live Ollama qualification runs; operator-log tracks qualification; Global scheduler / latency-aware placement (current placement is capability + health + least-loaded) |
+| **Later** | Model Garage evaluation harness; automatic track classification; multi-device workflow coordination with retry/rebalance beyond per-step local fallback |
 | **Archive** | Old companion-only architecture, pre-track planning docs |
 
 LFM2.5-1.2B-Thinking is now the first enforced qualified model capability for a companion server runtime track (`website_audit.lighthouse_handoff`, role `priority_helper`). Runtime execution uses `runtimeModelName` from the qualification record; policy and evidence keep the stable capability id `lfm25-1p2b-thinking-local`. Enforcement is still per-track only; no global enforcement is enabled.

@@ -107,7 +107,8 @@
       "editorial.collect_evidence",
       "editorial.verify_operator_log",
       "lighthouse.extract_category_audits",
-      "lighthouse.assemble_audit_report"
+      "lighthouse.assemble_audit_report",
+      "track-planner"
     ]
   },
   "permissions": {

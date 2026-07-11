@@ -18,6 +18,8 @@ North Star direction is now documented as a local capability network: route trac
 | **3 - Model-step input mapping** | Complete |
 | **4 - Track-based orchestration** | Complete |
 | **5 - Benchmark Lab** | Complete — Milestone 1 operator-ready |
+| **6 - Relay Nodes (M4)** | Complete |
+| **7 - Multi-Device Workflow Coordination (M5)** | Complete |
 
 ## Current Proof
 
@@ -48,6 +50,9 @@ North Star direction is now documented as a local capability network: route trac
 - Qualification records schema-validated at `companion/core/model-qualification-loader.js`
 - Input gate, permissions, audit, result validation
 - Memory Bridge v0 endpoints (disabled by default)
+- Relay Node protocol, node registry, cross-node routing with local fallback (`companion/relay/*`, `/relay/*` endpoints)
+- Multi-device workflow placement planner (`companion/relay/placement.js`) + `POST /relay/plan` preview; distributed step execution with local fallback on node failure
+- Memory Bridge v1: structured search (`/memory/search`) + writeback-apply (`/memory/writeback/apply`, opt-in)
 - Current verification suite passes; see the latest progress log or CI evidence for counts
 - Windows launch helpers
 
@@ -57,20 +62,25 @@ North Star direction is now documented as a local capability network: route trac
 - Model qualification coverage (Milestone 1 engine and operator workflow complete; broader model, track, and hardware qualification remains incremental)
 - Model scorecards / skill sheets (direction; qualification records are the current evidence-backed runtime surface)
 - Scoreboard (records runs; no full rubric harness)
-- Memory Bridge (v0; compose preflight only on Lighthouse)
-- Fallback ladder (retry only)
+- Memory Bridge (v1 apply is opt-in; no embeddings/vector search yet)
+- Fallback ladder (retry only; relay fallback added for cross-node routing)
 - Validation console (early UI)
 
 ## Not Built
 
 - Automatic model swapping / Model Garage auto-switching
-- DAG runner / graph planner
-- Relay Node protocol and connectors
-- Automatic track classifier
-- Worker registry beyond role slots
-- Unified capability registry
-- Extension to Local Brain HTTP bridge (end-to-end)
+- Automatic track classifier (optional M3 area — planner covers manual decomposition)
+- Distributed consensus / Byzantine fault tolerance across relay nodes (relay nodes are ephemeral execution targets; local fallback always available)
+- Global scheduler / latency-aware placement (placement is capability + health + least-loaded only)
 - `GET /jobs/{id}/status` persistence API
+
+## Recently Completed
+
+- **DAG execution engine** (`companion/core/dag-graph.js`, `companion/core/dag-executor.js`): dependency graph from `depends_on` / `$artifacts.*` input-map references, topological sort, cycle + missing-step detection, level-grouped parallel execution.
+- **Track-run DAG mode**: `POST /tracks/run` with `{"options":{"useDag":true}}` runs steps in dependency order.
+- **Workflow DAG integration**: `companion/orchestration/run-plan-executor.js` executes run-plan steps in dependency levels with per-level parallelism (`options.useDag`, default true).
+- **Track planner**: `POST /tracks/plan` decomposes a free-form request into a structured plan; gated by model qualification (no blind LLM calls).
+- See [Track DAG Execution](../02-track-system/dag-execution.md).
 
 ## Current Priority
 
@@ -87,5 +97,6 @@ North Star direction is now documented as a local capability network: route trac
 - Benchmark Lab Validation Checklist: [../../benchmark-lab/VALIDATION_CHECKLIST.md](../../benchmark-lab/VALIDATION_CHECKLIST.md)
 - North Star: [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md)
 - M4 completion: [milestone-4-completion.md](./milestone-4-completion.md)
+- M5 completion: [milestone-5-multi-device-workflow-coordination.md](./milestone-5-multi-device-workflow-coordination.md)
 - Track system: [../02-track-system/README.md](../02-track-system/README.md)
 - Input mapping: [../02-track-system/step-input-mapping.md](../02-track-system/step-input-mapping.md)

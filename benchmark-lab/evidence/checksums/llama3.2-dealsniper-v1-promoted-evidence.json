@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "llama3.2-dealsniper-v1-promoted-evidence",
+  "artifactType": "promoted_evidence",
+  "artifactPath": "benchmark-lab/evidence/summaries/llama3.2-dealsniper-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:fcdf48fdd3ec389d04eb40817dd021490a58bc4daddff57b99bd6deb2a1f3862",
+  "generatedAt": "2026-07-11T13:43:31.693Z"
+}

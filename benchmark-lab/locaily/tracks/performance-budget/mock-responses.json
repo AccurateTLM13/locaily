@@ -1,0 +1,32 @@
+{
+  "budget-001": {
+    "summary": "Performance score of 35 indicates significant budget violations. LCP at 8.2s far exceeds the 2.5s target. Render-blocking resources add 1.8s of delay. Unused JavaScript contributes to main-thread congestion.",
+    "budgetGaps": [
+      { "auditId": "largest-contentful-paint-element", "title": "Largest Contentful Paint element", "currentValue": "8.2s", "target": "2.5s", "gapSeverity": "critical" },
+      { "auditId": "render-blocking-resources", "title": "Eliminate render-blocking resources", "currentValue": "1800ms", "target": "< 500ms", "gapSeverity": "significant" },
+      { "auditId": "unused-javascript", "title": "Reduce unused JavaScript", "currentValue": "420KB", "target": "< 300KB", "gapSeverity": "significant" }
+    ]
+  },
+  "budget-002": {
+    "summary": "Performance score of 22 is critically low. LCP is impacted by a large hero image and render-blocking CSS/JS. JavaScript bundle is 580KB with 68% unused code, causing excessive main-thread work and slow bootup.",
+    "budgetGaps": [
+      { "auditId": "unused-javascript", "title": "Reduce unused JavaScript", "currentValue": "580KB loaded / 394KB unused", "target": "< 300KB total", "gapSeverity": "critical" },
+      { "auditId": "mainthread-work-breakdown", "title": "Minimize main-thread work", "currentValue": "6.2s", "target": "< 2.0s", "gapSeverity": "critical" },
+      { "auditId": "largest-contentful-paint-element", "title": "Largest Contentful Paint element", "currentValue": "9.4s", "target": "2.5s", "gapSeverity": "critical" },
+      { "auditId": "render-blocking-resources", "title": "Eliminate render-blocking resources", "currentValue": "2.4s", "target": "< 0.5s", "gapSeverity": "critical" }
+    ]
+  },
+  "budget-rec-001": {
+    "budgetRules": [
+      { "metric": "LCP", "budget": "2.5s", "condition": "less_than", "sourceAudit": "largest-contentful-paint-element" },
+      { "metric": "render-blocking time", "budget": "500ms", "condition": "less_than", "sourceAudit": "render-blocking-resources" },
+      { "metric": "total JavaScript", "budget": "300KB", "condition": "less_than" }
+    ],
+    "enforcementStrategy": [
+      "Run Lighthouse CI on every PR",
+      "Fail CI when any budget rule is violated",
+      "Alert team when LCP exceeds 3.0s in production monitoring",
+      "Set up WebPageTest daily check for LCP and TBT"
+    ]
+  }
+}

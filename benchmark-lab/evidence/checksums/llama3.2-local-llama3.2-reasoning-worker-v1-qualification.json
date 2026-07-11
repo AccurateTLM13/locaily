@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "llama3.2-local-llama3.2-reasoning-worker-v1-qualification",
+  "artifactType": "qualification_record",
+  "artifactPath": "benchmark-lab/qualifications/models/llama3.2-local-llama3.2-reasoning-worker-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:7d4c36c730a469c9f9fe383d03fc95c58f9cc0873858bcf3e4868fcc70aa71df",
+  "generatedAt": "2026-07-11T16:29:34.403Z"
+}

@@ -8,8 +8,29 @@
   "status": "available",
   "capabilities": [
     "structured-output",
-    "intent-classification"
+    "intent-classification",
+    "a11y-analysis",
+    "budget-analysis",
+    "seo-analysis",
+    "deal-analysis"
   ],
+  "qualifications": {
+    "website_audit.accessibility_deep": {
+      "a11y_analyzer": "qualified",
+      "a11y_recommender": "screening"
+    },
+    "website_audit.performance_budget": {
+      "budget_analyzer": "qualified",
+      "budget_recommender": "screening"
+    },
+    "website_audit.seo_audit": {
+      "seo_analyzer": "qualified",
+      "seo_recommender": "screening"
+    },
+    "marketplace.dealsniper": {
+      "default_worker": "qualified"
+    }
+  },
   "notes": [
     "Local Ollama manifest for Benchmark Lab runs against the installed llama3.2 model.",
     "Availability means the manifest targets a real local runtime; qualification still requires approved evidence."

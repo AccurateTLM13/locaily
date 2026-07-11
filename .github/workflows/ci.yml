@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Locaily ships zero runtime dependencies (companion + benchmark-lab use
+      # only Node built-ins). npm install is intentionally skipped to keep CI
+      # fast and dependency-free. If dependencies are added later, add an
+      # `npm ci` step here.
+
+      - name: Offline test suites (no server required)
+        run: |
+          node scripts/contract-test.js
+          npm run test:dag
+          npm run benchmark:test
+          npm run benchmark:status-smoke
+          npm run test:relay
+          npm run test:memory-v1
+          npm run test:relay:placement
+          npm run test:multi-device:e2e
+
+      - name: Start Local Brain companion server
+        run: |
+          node companion/server.js > companion-server.log 2>&1 &
+          echo $! > companion-server.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:31313/health >/dev/null 2>&1; then
+              echo "Companion server is up."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Companion server failed to start."
+          cat companion-server.log
+          exit 1
+
+      - name: Server smoke test (mock provider, no Ollama required)
+        run: node scripts/smoke-test.js
+
+      - name: M4 relay end-to-end (two servers, discovery + routing + fallback)
+        run: npm run test:relay:e2e
+
+      - name: Stop companion server
+        if: always()
+        run: |
+          if [ -f companion-server.pid ]; then
+            kill "$(cat companion-server.pid)" 2>/dev/null || true
+            rm -f companion-server.pid
+          fi
+          rm -f companion-server.log

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Budget Analyzer Output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "budgetGaps"],
+  "properties": {
+    "summary": { "type": "string", "minLength": 1 },
+    "budgetGaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["auditId", "title", "currentValue", "target", "gapSeverity"],
+        "properties": {
+          "auditId": { "type": "string", "minLength": 1 },
+          "title": { "type": "string" },
+          "currentValue": { "type": "string" },
+          "target": { "type": "string" },
+          "gapSeverity": { "enum": ["critical", "significant", "moderate", "within_budget"] }
+        }
+      }
+    }
+  }
+}

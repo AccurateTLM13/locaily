@@ -1,0 +1,22 @@
+{
+  "plan-001": {
+    "type": "success",
+    "durationMs": 18,
+    "output": { "track": "classification", "label": "classify", "confidence": "high" }
+  },
+  "plan-002": {
+    "type": "success",
+    "durationMs": 21,
+    "output": { "track": "classification", "label": "route", "confidence": "high" }
+  },
+  "plan-003": {
+    "type": "success",
+    "durationMs": 19,
+    "output": { "track": "classification", "label": "summarize", "confidence": "high" }
+  },
+  "plan-004": {
+    "type": "success",
+    "durationMs": 15,
+    "output": { "track": "classification", "label": "unknown", "confidence": "medium" }
+  }
+}

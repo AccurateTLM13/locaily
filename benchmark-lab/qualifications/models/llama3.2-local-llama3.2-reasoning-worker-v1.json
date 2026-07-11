@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "llama3.2-local-llama3.2-reasoning-worker-v1",
+  "subject": {
+    "type": "model",
+    "id": "llama3.2-local",
+    "provider": "ollama",
+    "runtimeModelName": "llama3.2",
+    "digest": "unknown"
+  },
+  "status": "qualified",
+  "qualifiedFor": [
+    {
+      "role": "reasoning_worker",
+      "trackId": "core.track_planning",
+      "contractId": "track-planner-worker-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": []
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "llama3.2-reasoning-worker-v1"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/evidence/summaries/llama3.2-reasoning-worker-v1.json"
+    ]
+  },
+  "modelProfileId": "llama3.2-local",
+  "notes": [
+    "Generated from explicitly promoted Benchmark Lab evidence."
+  ],
+  "generatedAt": "2026-07-11T16:29:34.397Z"
+}

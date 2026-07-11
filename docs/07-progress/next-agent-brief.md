@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-11 (Testing Checklist Writer qualification — 4 roles qualified, 10 track steps, full Lighthouse Handoff product loop complete)
+**Updated:** 2026-07-11 (M5 complete + post-completion review: 4 issues found and fixed, test harness bug fixed)
 
 ## Read First
 
@@ -45,6 +45,12 @@ The canonical Track Run Record schema, builder, and two Benchmark Lab runner int
 ### The Crew Runtime Track Run Record Emission
 
 The companion track runner (`companion/crew/orchestrator.js`), workflow plan executor (`companion/orchestration/run-plan-executor.js`), and both endpoint handlers (`/tracks/run`, `/workflows/run`) emit canonical Track Run Records after every execution. Records are persisted to the append-only store at `data/evidence/track-run-records/`, include per-step child records, reference audit records via correlation ID, and are returned as additive evidence fields in endpoint responses. Failed executions also produce records.
+
+### Multi-Device Workflow Coordination (M5)
+
+Built on M4 Relay Nodes. A placement planner (`companion/relay/placement.js`) computes a step-to-node assignment across healthy relay nodes for a track, distributing model steps across capable nodes least-loaded (`distribute` policy), while tool steps stay local. `POST /relay/plan` previews the assignment. `executeStepWithAssignedNode` in `companion/relay/router.js` routes each step to its assigned node and falls back to local execution (with a `RELAY_FALLBACK` audit event) when that node fails or is unhealthy. The assignment is consulted by `executeStepViaRelayIfNeeded` via `options.relay.assignments[stepId]`. Wired into `/tracks/run` and `/workflows/run` when `relay_policy=distribute`; responses include a `relay_placement` summary. Tests: `scripts/test-relay-placement.cjs` (13/13) and `scripts/test-multi-device-e2e.cjs` (22/22, three Local Brain instances, node-failure fallback). M4 policies (`prefer_relay`, `route_if_unavailable`) remain per-step dynamic decisions and unchanged. Tests: `scripts/test-relay-placement.cjs` (14/14), `scripts/test-multi-device-e2e.cjs` (22/22), `scripts/test-relay-unit.cjs` (17/17).
+
+**Post-completion review (2026-07-11) fixed:** (1) `registry.selectForRole` sorted descending → now least-loaded ascending; (2) placement `byRole` double-counted nodes advertising both `role` and `role:role` → deduped; (3) added direct unit tests for `executeStepWithAssignedNode` (routes to assigned node, falls back when unhealthy, falls back + `RELAY_FALLBACK` audit on relay failure); (4) `docs/05-integrations/relay-node-protocol.md` now documents M5 (placement, `distribute`, `POST /relay/plan`, `relay_placement`); plus a hidden bug where `test-relay-unit.cjs` fire-and-forget async checks never ran (masked a wrong `r.code` vs `r.error_code` audit assertion) — harness now awaits async checks. All relay/M5 tests green: unit 17/17, placement 14/14, multi-device e2e 22/22.
 
 ### Pit Crew → The Crew Code Path Migration
 
@@ -119,14 +125,54 @@ Lighthouse Handoff Assembly Pilot is complete. The system can now distinguish tr
 
 ## Completed Since Last Update
 
-- **Formal qualification for `developer_task_writer`**: Qualification record generated with status `qualified`, score 1.0. Evidence summary, approved marker, checksums, and model card all published. Local Brain now loads and surfaces developer_task_writer as qualified — `/health` reports `qualified: 3` total, `website_audit.lighthouse_handoff` track now has 2 qualified capabilities (priority_helper + developer_task_writer).
-- **Guarded Enforcement Pilot for developer_task_writer**: developer_task_writer activated through existing enforcement policy without modification — the track was already `enforced` and developer_task_writer was eligible (qualified score 1.0, all gates passed). Validated on 3 real URLs x 5 fresh enforced runs = 15 runs. All runs: enforcementDecision.applied=true, executedCapabilityId=lfm25-1p2b-thinking-local, fallbackTriggered=false. Quality gate: 15/15 safe approvals, 0 exceptions. Aggregate: 99 reviewed, 99 pass, 0 needs_edit, 0 fail, 0 critical risk. DTW enforcement: 16 applied/17 total.
-- **Guardrail writer qualification and guarded enforcement**: Added `guardrail_writer` as the next adjacent Lighthouse Handoff role. Created schema, prompt, track step (9 steps total), handoff integration, and quality gate checks. Formal qualification: score 1.0, 3/3 URL scenarios. Guarded enforcement validation: 3 URLs x 5 runs = 15 enforced runs, 15/15 applied, 0 blocked, 0 fallback. All 3 roles (PH, DT, GW) now enforced within `website_audit.lighthouse_handoff`. Capabilities: 6, Qualified: 4.
-- **Testing checklist writer qualification**: Added `testing_checklist_writer` as the fourth Lighthouse Handoff role. Created schema (6 required fields), prompt, track step (10 steps total), handoff integration (`normalizeTestingChecklistPacket` + 6 markdown sections), and quality gate checks (completeness + `--artifact full-handoff` mode). Formal qualification: score 1.0, 3/3 URL scenarios. Qualification evidence, approved marker, checksums, and qualification record published. Full Lighthouse Handoff product loop complete. Aggregate: 115 reviewed, 115 pass, 0 needs_edit, 0 fail, 0 critical risk.
+- **M2: Multi-Track Qualification & Enforcement** — completed 2026-07-11
+  - Created 4 Benchmark Lab suites (accessibility-deep, performance-budget, seo-audit, dealsniper) with case files, output schemas, and validators
+  - Qualified llama3.2 for 4 roles: a11y_analyzer (score 1.0), budget_analyzer (score 1.0), seo_analyzer (score 1.0), default_worker/dealsniper (score 1.0)
+  - All 10/10 scenarios pass across all suites
+  - Built `GET /qualifications/dashboard` endpoint showing per-model, per-track, per-role status with enforcement state
+  - Created `scripts/website-audit-gate.js` quality gate for output validation
+  - Set all 4 new tracks to shadow enforcement mode, collecting routing evidence
+  - Updated model manifest for llama3.2-local with qualification data
+  - 2 models now qualified across 5 tracks: lfm25-1p2b-thinking-local (4 roles) + llama3.2-local (4 roles)
+  - 6 total qualified capabilities: priority_helper, developer_task_writer, guardrail_writer, testing_checklist_writer, a11y_analyzer, budget_analyzer, seo_analyzer, default_worker
 
 ## Next Task
 
-Do not broaden globally. The full Lighthouse Handoff product loop is now validated — all 4 roles (priority_helper, developer_task_writer, guardrail_writer, testing_checklist_writer) are qualified; 3 are enforced within `website_audit.lighthouse_handoff`. Decide next action after explicit direction. Multi-model track expansion, DealSniper workflow build-out, and live qualification depth are follow-on candidates, not automatic scope.
+M2 and M3 are both complete (reviewed and reconciled 2026-07-11 — see `docs/07-progress/m2-m3-review-issues.md`).
+
+**M3 is complete:**
+- Model-backed track planner (`/tracks/plan`, `companion/tools/track-planner.js`) decomposes free-form requests into run plans; qualification-gated (no blind LLM calls) — `reasoning_worker` is qualified for `llama3.2-local`.
+- DAG runner (`companion/core/dag-graph.js`, `dag-executor.js`) executes steps in dependency order with parallel independent steps; used by both `/tracks/run` (`useDag`) and workflow orchestration (`run-plan-executor.js`).
+- Graph validation (cycle detection, missing-step detection) in `dag-graph.js`.
+- Plan → Run bridge into `POST /workflows/plan` and `POST /workflows/run`.
+- Backward compatible — linear runner stays as fallback (`useDag: false`).
+
+**M5 is complete (built on M4):**
+- Placement planner (`companion/relay/placement.js`): `createPlacementPlanner` + `buildPlacementFromTrack`; policies `distribute`, `local_first`, `local_only` (M4 policies unchanged).
+- `POST /relay/plan` previews assignments + summary for a track.
+- `executeStepWithAssignedNode` routes each step to its assigned node; falls back locally with `RELAY_FALLBACK` audit on failure.
+- Wired into `/tracks/run` and `/workflows/run` for `relay_policy=distribute`; responses include `relay_placement`.
+- Acceptance verified by `scripts/test-multi-device-e2e.cjs` (22/22): three servers (orchestrator + 2 relay nodes), distributed run, node-kill fallback.
+
+**M4 is complete:**
+- Relay Node protocol (`companion/relay/*`): `protocol.js`, `registry.js`, `connector.js`, `router.js`.
+- Endpoints: `GET /relay/protocol`, `GET /relay/nodes`, `POST /relay/register`, `POST /relay/heartbeat`, `POST /relay/unregister`, `POST /relay/step`.
+- Node registry tracks capabilities + health; discovery is registry-based (no mDNS yet).
+- Cross-node routing wired into `companion/crew/orchestrator.js` and `companion/orchestration/run-plan-executor.js`; policy via `options.relay_policy` (`route_if_unavailable` default, `prefer_relay`, `local_only`).
+- Local fallback on relay failure with `RELAY_FALLBACK` audit event; relay nodes marked unhealthy.
+- Memory Bridge v1: `POST /memory/search` (allowlisted ranked search) and `POST /memory/writeback/apply` (opt-in, vault-path-gated, `memory.writeback.apply` permission).
+- Acceptance verified by `scripts/test-relay-e2e.cjs` (11/11): two servers, discovery, routing to node B, local fallback after B killed, fallback audit event.
+- CI workflow added at `.github/workflows/ci.yml` (offline suites + server smoke + relay e2e).
+
+**Do not:**
+- Remove linear track runner
+- Replace existing `/tracks/run` contract
+- Call planner model without qualified capability evidence
+- Expose the Local Brain to the public network (keep localhost-only default)
+- Treat relay nodes as control planes (they are execution targets only)
+- Claim distributed consensus or Byzantine fault tolerance
+
+M2 follow-on candidates remain: qualify recommender roles (a11y_recommender, budget_recommender, seo_recommender), qualify operator-log tracks, enforce the 4 shadow tracks.
 
 ## Do Not
 
@@ -134,10 +180,9 @@ Do not broaden globally. The full Lighthouse Handoff product loop is now validat
 - Broaden claims from narrow benchmark evidence
 - Implement a follow-on milestone or qualification-coverage expansion without an explicitly supplied objective
 - Implement automatic model swapping / Model Garage auto-switching
-- Claim DAG support, Relay Node routing, or automatic track classification exists
+- Claim DAG support or automatic track classification exists (both are implemented; do not overclaim distributed consensus)
 - Remove legacy `step-input.js` fallbacks until Lighthouse parity work resumes — **done 2026-06-30**
 - Break existing Local Brain endpoints or response envelopes
-- Implement RelayNode routing, hardware recommendations, or remote execution dispatch in this slice
 - Import `benchmark-lab/engine/` modules from the Local Brain companion or any code under `companion/`
 - Enable enforcement for any Track without explicit evidence review
 - Enable global enforcement — per-track states only
@@ -158,8 +203,8 @@ Benchmark Lab produces evidence and qualification records.
 Canonical track-run records are the first evidence loop artifact.
 Local Brain consumes compact qualification records, not raw benchmark runs.
 Local Brain must not import benchmark-lab/engine/ modules.
-Relay Nodes may provide track capabilities in the future.
-RelayNodes are future approved remote execution targets, not control planes.
+Relay Nodes provide track capabilities across nearby devices; cross-node routing with local fallback is implemented in `companion/relay/`.
+RelayNodes are execution targets only, not control planes.
 Workflows compose tracks.
 Validation scores tracks.
 Local Brain dispatches tracks - not raw model names.
@@ -189,6 +234,8 @@ Target routing principle: smallest qualified capability.
 | Audit Event Schema | `companion/schemas/internal/enforcement-policy-audit-event.schema.json` (10 event types with before/after and revision) |
 | Shadow Evidence Review | `companion/evidence/shadow-evidence-review.js` (aggregates shadow comparison statistics) |
 | Proof workflows | `lighthouse-handoff.track.json`, `dealsniper.track.json` |
+| Relay Nodes | `companion/relay/` (protocol, registry, connector, router) |
+| Memory Bridge | `companion/memory/vault-adapter.js`, `companion/memory/writeback-proposal.js` |
 
 ## Before Reporting Success
 
@@ -201,6 +248,9 @@ node scripts/contract-test.js
 node scripts/test-enforcement-policy-store.js
 node scripts/test-enforcement-policy.js
 node scripts/test-enforcement-routing.js
+npm.cmd run test:relay
+npm.cmd run test:memory-v1
+npm.cmd run test:relay:e2e
 ```
 
 Do not require a live Ollama runtime unless your changes specifically affect Ollama interaction. If the companion server is running, also run:

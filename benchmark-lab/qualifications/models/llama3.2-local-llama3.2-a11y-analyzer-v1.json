@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "llama3.2-local-llama3.2-a11y-analyzer-v1",
+  "subject": {
+    "type": "model",
+    "id": "llama3.2-local",
+    "provider": "ollama",
+    "runtimeModelName": "llama3.2",
+    "digest": "unknown"
+  },
+  "status": "qualified",
+  "qualifiedFor": [
+    {
+      "role": "a11y_analyzer",
+      "trackId": "website_audit.accessibility_deep",
+      "contractId": "a11y-analyzer-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": []
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "llama3.2-a11y-analyzer-v1"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/evidence/summaries/llama3.2-a11y-analyzer-v1.json"
+    ]
+  },
+  "modelProfileId": "llama3.2-local",
+  "notes": [
+    "Generated from explicitly promoted Benchmark Lab evidence.",
+    "llama3.2 qualifies for a11y_analyzer role: 3/3 structured output scenarios pass"
+  ],
+  "generatedAt": "2026-07-11T13:43:38.028Z"
+}

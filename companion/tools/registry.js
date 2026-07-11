@@ -13,10 +13,13 @@ const toolPackManifestSchema = {
 };
 const internalToolRegistryEntrySchema = require("../schemas/internal/internal-tool-registry-entry.schema.json");
 
+const trackPlannerTool = require("./track-planner");
+
 // Built-in compatibility tools
 const BUILT_IN_TOOLS = [
   dealSniperTool,
-  lighthouseHandoffTool
+  lighthouseHandoffTool,
+  trackPlannerTool
 ];
 
 function createToolRegistry(options = {}) {

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "seo-audit-v1",
+  "name": "SEO Audit V1",
+  "mode": "qualification",
+  "trackId": "website_audit.seo_audit",
+  "contractId": "seo-analyzer-v1",
+  "runtime": {
+    "provider": "ollama",
+    "modelManifest": "llama3.2-local",
+    "baseUrl": "http://127.0.0.1:11434",
+    "timeoutMs": 120000,
+    "temperature": 0,
+    "numPredict": 4096
+  },
+  "caseFiles": ["cases.json"],
+  "outputSchema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "SEO Analyzer Output",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["summary", "findings", "label"],
+    "properties": {
+      "label": { "enum": ["extract"] },
+      "summary": { "type": "string", "minLength": 1 },
+      "findings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["auditId", "title", "severity", "finding"],
+          "properties": {
+            "auditId": { "type": "string", "minLength": 1 },
+            "title": { "type": "string" },
+            "severity": { "enum": ["critical", "high", "medium", "low"] },
+            "finding": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  },
+  "validators": ["json-parse", "json-schema"]
+}
