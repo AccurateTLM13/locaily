@@ -113,9 +113,8 @@ function main() {
 
     // 4. Run supervisor
     console.error(`[sequencer] launching supervisor for ${file}...`);
-    const result = spawnSync(process.execPath, [SUPERVISOR_PATH], {
-      cwd: PROJECT_ROOT, encoding: "utf8",
-      maxBuffer: 1024 * 1024 * 64,
+    const result = spawnSync(`"${process.execPath}"`, [SUPERVISOR_PATH], {
+      cwd: PROJECT_ROOT,
       timeout: 0,
       shell: process.platform === "win32",
       stdio: ["inherit", "inherit", "inherit"]
