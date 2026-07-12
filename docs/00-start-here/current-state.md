@@ -2,7 +2,7 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-07-12 (M6 scope: durable job store wired into Local Brain; `/jobs` API endpoints added: `POST /jobs`, `GET /jobs`, `GET /jobs/:id`; `jobTotals` in `/health` response)
+**Updated:** 2026-07-12 (M6 scope: durable job store wired into Local Brain; `/jobs` API endpoints added: `POST /jobs`, `GET /jobs`, `GET /jobs/:id`; `jobTotals` in `/health` response; background worker polling loop automatically claims and executes queued jobs)
 
 ## What Works
 
@@ -41,6 +41,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Lighthouse run + Human Gate packet** - `npm.cmd run lighthouse:run -- --url https://your-site.com` creates a Lighthouse Track Run Record from a simple URL command using a synthetic Lighthouse payload unless scores/findings are supplied. `npm.cmd run quality-gate:lighthouse -- --dry-run` finds enforced `website_audit.lighthouse_handoff` / `priority_helper` pilot records for `lfm25-1p2b-thinking-local`, generates deterministic draft reviews, and writes review packet artifacts under `benchmark-lab/evidence/reviews/`. `--approve-safe` writes review records only for low-risk proposed passes.
 - **Lighthouse Handoff Assembly Pilot** - The Lighthouse track now includes an adjacent model step, `developer_task_writer`, after validated priority fixes. It consumes priority helper output and emits coding-agent-ready developer tasks, acceptance criteria, guardrails, and testing checklist items. Four real URLs were validated with five fresh enforced runs each; URL-scoped gates approved 20/20 safe passes with 0 fails, 0 critical risks, and 0 corrections. This validates assembly quality separately from the enforced `priority_helper` routing path.
 - **Durable Job Store API** — `POST /jobs` creates persistent background jobs (track or workflow), `GET /jobs` lists jobs with optional status filter, `GET /jobs/:id` returns full job record. `GET /health` now includes `jobTotals` with counts by status (queued, claimed, running, completed, failed, cancelled, paused_review). Jobs persist to `data/jobs/*.json` and survive server restart. 64 tests in `scripts/test-jobs-api.js` covering all endpoints, filtering, health integration, and persistence.
+- **Background Worker Polling Loop** — `companion/jobs/worker.js` implements a polling worker that automatically claims and executes queued jobs from the durable job store. The worker starts when the server starts, polls every 5 seconds, processes one job at a time (single concurrency), and handles retry logic (retryable errors with remaining attempts are re-queued; non-retryable errors or exhausted attempts leave the job in `failed` status). Track-type jobs execute via `runTrack`; workflow-type jobs execute via `buildRunPlan`+`executeRunPlan`. Exports `start()`, `stop()`, and `getStatus()`. 44 tests in `scripts/test-jobs-worker.js` covering success paths, failure/retry, single concurrency, polling, and start/stop lifecycle.
 - **Smoke and contract tests** - `scripts/smoke-test.js`, `scripts/contract-test.js` (current verification suite passes; see latest progress log or CI evidence for counts)
 - **Multi-track qualification** - 4 new Benchmark Lab suites for accessibility_deep, performance_budget, seo_audit, and dealsniper
 - **llama3.2 qualified for 4 roles** - a11y_analyzer (score 1.0), budget_analyzer (score 1.0), seo_analyzer (score 1.0), default_worker/dealsniper (score 1.0)
@@ -131,7 +132,7 @@ The North Star is now documented as a local capability network: decompose work i
 
 | Layer | Focus |
 |---|---|
-| **Now** | M6: Trusted Relay Execution and Actual-Placement Evidence — node pairing/authentication, capability verification, allowed-network restrictions, minimal-context envelopes, planned-vs-actual placement records, remote output schema validation, explicit relay fallback reasons, one real two-device pilot |
+| **Now** | M6: Operator Control Plane — durable job store API, background worker polling loop (claims + executes queued jobs), human-gate endpoints (POST /jobs/:id/review, paused_review transitions) |
 | **Next** | Broader model qualification coverage; live Ollama qualification runs; operator-log tracks qualification; Model Garage evaluation harness (Phase 2 — spec only until evidence) |
 | **Later** | Lighthouse canonical-path documentation; workflow audit summary hardening; Desktop Companion UI (deferred); automatic track classification |
 | **Archive** | Old companion-only architecture, pre-track planning docs |

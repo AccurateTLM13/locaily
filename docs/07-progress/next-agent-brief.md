@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-12 (M6: durable job store wired into Local Brain; `/jobs` API endpoints implemented)
+**Updated:** 2026-07-12 (M6: durable job store wired into Local Brain; `/jobs` API endpoints implemented; background worker polling loop claims and executes queued jobs)
 
 ## Read First
 
@@ -121,18 +121,24 @@ Real URL validation set:
 
 ## Current Task
 
-The durable job store is now wired into the Local Brain server. The `/jobs` API endpoints (`POST /jobs`, `GET /jobs`, `GET /jobs/:id`) are implemented and tested. The next task is the background worker polling loop that claims and executes jobs from the store.
+The background worker polling loop is now implemented. The worker (`companion/jobs/worker.js`) automatically claims and executes queued jobs from the durable job store, with retry handling for failures.
 
-### Immediate Next: Background Worker (polling loop)
-- Create a background polling worker in `companion/jobs/worker.js` that periodically checks for claimable jobs
-- Claim queued jobs, execute them (calling existing track/workflow execution paths), and record results
-- Handle lease expiration and retry logic
-
-### Follow-on: Human-gate endpoints
+### Immediate Next: Human-gate endpoints
 - `POST /jobs/:id/review` for `paused_review` status transitions
 - Cancel, retry, and other mutation endpoints
 
 ## Completed Since Last Update
+
+- **Background Worker Polling Loop (M6 operator-control-plane)** — completed 2026-07-12
+  - `companion/jobs/worker.js` implements a polling worker with `start()`, `stop()`, and `getStatus()`
+  - Polls every 5 seconds (configurable) calling `durableJobStore.listClaimableJobs()`
+  - Claims queued jobs, transitions to `running`, executes via execution callbacks, completes/fails/retries
+  - Track-type jobs execute via `runTrack`; workflow-type jobs execute via `buildRunPlan`+`executeRunPlan`
+  - Retry logic: retryable errors with remaining attempts re-queue via `retryJob`; non-retryable or exhausted attempts leave in `failed`
+  - Single concurrency (`isProcessing` flag) — skips poll cycle if still processing
+  - Lifecycle events logged to console (claimed, started, completed, failed, retried)
+  - Wired into `companion/server.js` — worker starts automatically after server listens
+  - 44 integration tests in `scripts/test-jobs-worker.js` covering success paths, failure/retry, concurrency, polling, and lifecycle
 
 - **Durable Job Store API (M6 operator-control-plane)** — completed 2026-07-12
   - `createDurableJobStore` imported and initialized in server.js
