@@ -432,7 +432,11 @@ function startGitBoundary(cfg) {
   const branch = currentBranch();
   const dirty = isDirtyPattern();
   if (dirty && cfg.git.stop_on_dirty_startup) {
-    throw new Error(`git_boundary: working tree dirty at startup; refusing to run. branch=${branch}`);
+    if (process.env.SEQUENCER_MODE) {
+      console.error(`[controller] sequencer mode: skipping dirty tree check on ${branch}`);
+    } else {
+      throw new Error(`git_boundary: working tree dirty at startup; refusing to run. branch=${branch}`);
+    }
   }
   if (cfg.git.protected_branches.includes(branch)) {
     throw new Error(`git_boundary: current branch '${branch}' is protected. Check out a non-protected branch before running the controller.`);

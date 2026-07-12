@@ -1,0 +1,24 @@
+{
+  "run_id": "b3b6b5d9ee14",
+  "iteration": 0,
+  "phase": "final",
+  "state": {
+    "objective": "06-trusted-relay-execution",
+    "status": "running",
+    "phase": "plan",
+    "iteration": 0,
+    "corrections_for_task": 0,
+    "consecutive_failures": 1,
+    "max_iterations": 10,
+    "max_corrections_per_task": 3,
+    "max_consecutive_failures": 3,
+    "current_task": null,
+    "recommended_worker_agent": null,
+    "worker_branch": "agents/worker/06-trusted-relay-execution",
+    "last_worker_status": "idle",
+    "last_review_status": null,
+    "objective_complete": false,
+    "blocker": "plan_artifact_unchanged",
+    "run_id": "b3b6b5d9ee14"
+  }
+}

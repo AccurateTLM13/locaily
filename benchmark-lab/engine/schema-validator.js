@@ -86,6 +86,20 @@ function validateObject(value, schema, path, errors) {
 }
 
 function validateType(value, type, path, errors) {
+  if (Array.isArray(type)) {
+    const matched = type.some((t) => {
+      if (t === "null") return value === null;
+      if (t === "array") return Array.isArray(value);
+      if (t === "integer") return Number.isInteger(value);
+      if (t === "object") return isPlainObject(value);
+      return typeof value === t;
+    });
+    if (!matched) {
+      errors.push(`${path} must be one of types: ${type.join(", ")}.`);
+    }
+    return;
+  }
+
   if (type === "array") {
     if (!Array.isArray(value)) {
       errors.push(`${path} must be an array.`);

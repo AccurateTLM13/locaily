@@ -57,8 +57,9 @@ function currentBranch() {
   return r.status === 0 ? (r.stdout || "").trim() : null;
 }
 
-function checkout(branch, create = false) {
+function checkout(branch, create = false, force = false) {
   const args = create ? ["checkout", "-b", branch] : ["checkout", branch];
+  if (force) args.push("--force");
   const r = git(args, { shell: process.platform === "win32" });
   return r.status === 0;
 }
@@ -94,8 +95,10 @@ function restoreFromFailed() {
 }
 
 function cleanRuntimeArtifacts() {
-  // Remove stale active-objective.md (untracked, regenerated per milestone)
+  const agentsDir = AGENTS_DIR;
+  // Remove stale objective and task files (regenerated per milestone)
   removeIfExists(OBJECTIVE_PATH);
+  removeIfExists(path.join(agentsDir, "tasks", "active-task.md"));
   // Remove abort-history noise from prior failed runs
   if (fs.existsSync(HISTORY_DIR)) {
     for (const f of fs.readdirSync(HISTORY_DIR)) {
@@ -106,34 +109,44 @@ function cleanRuntimeArtifacts() {
   removeIfExists(path.join(QUEUE_DIR, "failed"));
 }
 
+function ensureBaseBranch(protectedBranches, startBranch) {
+  const isTransient = startBranch.startsWith("agents/worker/") || startBranch.startsWith("agents/sequencer/");
+  const needsBase = protectedBranches.includes(startBranch) || isTransient;
+
+  if (!needsBase) return startBranch; // user feature branch, use as-is
+
+  if (branchExists(SEQUENCER_BRANCH)) {
+    console.error(`[sequencer] switching to ${SEQUENCER_BRANCH} (was on ${startBranch})`);
+    if (!checkout(SEQUENCER_BRANCH)) return null;
+    return SEQUENCER_BRANCH;
+  }
+
+  // Create SEQUENCER_BRANCH — first get to a clean non-transient commit
+  const source = protectedBranches.includes(startBranch) ? startBranch : "main";
+  console.error(`[sequencer] creating ${SEQUENCER_BRANCH} from ${source}`);
+  if (currentBranch() !== source && !checkout(source)) return null;
+  if (!checkout(SEQUENCER_BRANCH, true)) return null;
+  return SEQUENCER_BRANCH;
+}
+
 function main() {
   const cfg = readJson(CONFIG_PATH, {});
   const protectedBranches = (cfg.git && cfg.git.protected_branches) || ["main", "master"];
 
-  const startBranch = currentBranch();
-  if (!startBranch) {
+  const trueStartBranch = currentBranch();
+  if (!trueStartBranch) {
     console.error("[sequencer] cannot determine current branch");
     process.exit(1);
   }
-  console.error(`[sequencer] starting from branch: ${startBranch}`);
+  console.error(`[sequencer] starting from branch: ${trueStartBranch}`);
 
-  // Ensure we work from a non-protected base branch
-  const onProtected = protectedBranches.includes(startBranch);
-  if (onProtected) {
-    if (branchExists(SEQUENCER_BRANCH)) {
-      console.error(`[sequencer] switching to ${SEQUENCER_BRANCH} (${startBranch} is protected)`);
-      if (!checkout(SEQUENCER_BRANCH)) {
-        console.error(`[sequencer] cannot checkout ${SEQUENCER_BRANCH} — aborting`);
-        process.exit(1);
-      }
-    } else {
-      console.error(`[sequencer] creating ${SEQUENCER_BRANCH} from ${startBranch}`);
-      if (!checkout(SEQUENCER_BRANCH, true)) {
-        console.error(`[sequencer] cannot create ${SEQUENCER_BRANCH} — aborting`);
-        process.exit(1);
-      }
-    }
+  // Determine and switch to the working base branch
+  const baseBranch = ensureBaseBranch(protectedBranches, trueStartBranch);
+  if (!baseBranch) {
+    console.error("[sequencer] cannot establish a working base branch — aborting");
+    process.exit(1);
   }
+  console.error(`[sequencer] working from branch: ${baseBranch}`);
 
   // Collect queue entries (sorted, exclude .gitkeep and non-objective files)
   const all = fs.readdirSync(QUEUE_DIR)
@@ -141,7 +154,7 @@ function main() {
     .sort();
   if (all.length === 0) {
     console.error("[sequencer] no objectives in queue/ — nothing to do");
-    if (onProtected) checkout(startBranch);
+    if (currentBranch() !== trueStartBranch) checkout(trueStartBranch);
     return;
   }
   console.error(`[sequencer] found ${all.length} queued objectives:\n  ${all.join("\n  ")}`);
@@ -160,27 +173,45 @@ function main() {
     console.error(`\n${"=".repeat(60)}`);
     console.error(`[sequencer] starting objective: ${file}`);
 
-    // Ensure we're on the base branch
-    const current = currentBranch();
-    const baseBranch = onProtected ? SEQUENCER_BRANCH : startBranch;
-    if (current !== baseBranch) {
-      console.error(`[sequencer] returning to ${baseBranch}...`);
-      if (!checkout(baseBranch)) {
+    // Force back to base branch — supervisor may have left us on a worker branch
+    const onBranch = currentBranch();
+    if (onBranch !== baseBranch) {
+      console.error(`[sequencer] resetting to ${baseBranch} (currently on ${onBranch})`);
+      if (!checkout(baseBranch, false, true)) {
         console.error(`[sequencer] cannot checkout ${baseBranch} — aborting`);
         results.push({ file, status: "failed", reason: "checkout_failed" });
         break;
       }
     }
 
-    // Ensure queue file still exists (might have been archived by prior partial run)
+    // Restore queue files from a prior failed run
+    restoreFromFailed();
+
+    // Ensure queue file still exists
     if (!fs.existsSync(sourcePath)) {
       console.error(`[sequencer] ${file} not found in queue/ — skipping`);
       results.push({ file, status: "skipped", reason: "not_found" });
       continue;
     }
 
+    // Reset tracked files, discard worker's uncommitted changes
+    git(["checkout", "--", "."], { shell: process.platform === "win32" });
+
     // Clean runtime artifacts from prior runs
     cleanRuntimeArtifacts();
+
+    // Recreate archive dirs (cleanRuntimeArtifacts removes queue/failed/)
+    ensureDir(completedDir);
+    ensureDir(failedDir);
+
+    // Remove stale worker branch from prior failed run
+    const cfg2 = readJson(CONFIG_PATH, {});
+    const prefix = (cfg2.git && cfg2.git.worker_branch_prefix) || "agents/worker";
+    const workerBranchName = `${prefix}/${objectiveSlug}`;
+    if (branchExists(workerBranchName)) {
+      console.error(`[sequencer] removing stale worker branch ${workerBranchName}`);
+      git(["branch", "-D", workerBranchName], { shell: process.platform === "win32" });
+    }
 
     // Copy queue file to active-objective.md
     const content = fs.readFileSync(sourcePath, "utf8");
@@ -189,13 +220,15 @@ function main() {
     // Reset run state for this milestone
     writeJson(STATE_PATH, { ...DEFAULT_STATE, objective: objectiveSlug });
 
-    // Run supervisor
+    // Run supervisor (SEQUENCER_MODE env tells supervisor to skip dirty-tree check)
     console.error(`[sequencer] launching supervisor for ${file}...`);
+    const childEnv = { ...process.env, SEQUENCER_MODE: "1" };
     const result = spawnSync(`"${process.execPath}"`, [SUPERVISOR_PATH], {
       cwd: PROJECT_ROOT,
       timeout: 0,
       shell: process.platform === "win32",
-      stdio: ["inherit", "inherit", "inherit"]
+      stdio: ["inherit", "inherit", "inherit"],
+      env: childEnv
     });
     console.error(`[sequencer] supervisor exit code: ${result.status}`);
 
@@ -203,14 +236,18 @@ function main() {
     const finalState = readJson(STATE_PATH, {});
     const complete = finalState.status === "complete" || finalState.objective_complete === true;
 
-    // Archive queue file
+    // Archive queue file (handle case where supervisor switch branches left it missing)
     const destDir = complete ? completedDir : failedDir;
     const destPath = path.join(destDir, file);
-    try { fs.renameSync(sourcePath, destPath); } catch (e) {
-      fs.copyFileSync(sourcePath, destPath);
-      fs.unlinkSync(sourcePath);
+    if (fs.existsSync(sourcePath)) {
+      try { fs.renameSync(sourcePath, destPath); } catch (e) {
+        fs.copyFileSync(sourcePath, destPath);
+        fs.unlinkSync(sourcePath);
+      }
+      console.error(`[sequencer] archived ${file} → ${complete ? "completed" : "failed"}/`);
+    } else {
+      console.error(`[sequencer] ${file} disappeared from queue/ (supervisor changed branches) — marking ${complete ? "complete" : "failed"} without archiving`);
     }
-    console.error(`[sequencer] archived ${file} → ${complete ? "completed" : "failed"}/`);
 
     results.push({
       file,
@@ -228,13 +265,13 @@ function main() {
     console.error(`  ${icon}  ${r.file} — ${r.status}${r.blocker ? ` (blocker: ${r.blocker})` : ""} (${r.iteration} iterations)`);
   }
 
-  // Return to starting branch
+  // Return to original starting branch
   const finalBranch = currentBranch();
-  if (finalBranch !== startBranch) {
-    console.error(`[sequencer] returning to ${startBranch}...`);
-    checkout(startBranch);
+  if (finalBranch !== trueStartBranch) {
+    console.error(`[sequencer] returning to ${trueStartBranch}...`);
+    checkout(trueStartBranch);
   }
-  console.error(`\n[sequencer] done — returned to branch: ${startBranch}`);
+  console.error(`\n[sequencer] done — returned to branch: ${trueStartBranch}`);
 }
 
 main();

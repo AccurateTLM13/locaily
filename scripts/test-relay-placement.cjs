@@ -1,6 +1,7 @@
 const assert = require("node:assert");
 const { createPlacementPlanner, PLACEMENT_POLICIES } = require("../companion/relay/placement");
 const { createRelayRegistry } = require("../companion/relay/registry");
+const { createRelayRouter, ROUTING_POLICY } = require("../companion/relay/router");
 
 let passed = 0;
 let failed = 0;
@@ -14,6 +15,24 @@ function check(name, cond, detail) {
     console.error(`FAIL: ${name}`);
     if (detail) console.error(`  ${detail}`);
   }
+}
+
+const asyncChecks = [];
+
+function checkAsync(name, fn) {
+  const promise = (async () => {
+    try {
+      await fn();
+      passed += 1;
+      console.log(`PASS: ${name}`);
+    } catch (error) {
+      failed += 1;
+      console.error(`FAIL: ${name}`);
+      console.error(`  ${error.message}`);
+    }
+  })();
+  asyncChecks.push(promise);
+  return promise;
 }
 
 function makeRegistry(nodes) {
@@ -95,8 +114,75 @@ function main() {
   const balancedPlan = plannerB.plan({ steps: balancedSteps, policy: "distribute", localCapableRoles: null });
   check("distribute splits load across two distinct nodes", balancedPlan.summary.byNode["relay-x"] === 2 && balancedPlan.summary.byNode["relay-y"] === 1, JSON.stringify(balancedPlan.summary.byNode));
 
-  console.log(`\n${passed}/${passed + failed} relay placement tests passed`);
-  process.exit(failed === 0 ? 0 : 1);
+  checkAsync("placement router returns plannedTarget and plannedNodeId in meta on relay success", async () => {
+    const reg = createRelayRegistry();
+    reg.register({ nodeId: "relay-p1", baseUrl: "http://127.0.0.1:31320", capabilities: ["role:priority_helper"] });
+    reg.heartbeat("relay-p1");
+    const connector = {
+      async executeRemoteStep({ node }) {
+        return { ok: true, output: { routed: true }, meta: { role: "priority_helper", model: "mock" } };
+      }
+    };
+    const router = createRelayRouter({ registry: reg, connector });
+    const result = await router.executeStepWithAssignedNode({
+      step: { id: "s1", executor: { type: "model", role: "priority_helper" } },
+      context: {},
+      options: { relay: { enabled: true } },
+      assignedNodeId: "relay-p1",
+      assignmentTarget: "relay",
+      localExecute: async () => ({ output: { local: true }, meta: {} })
+    });
+    assert.strictEqual(result.meta.plannedTarget, "relay");
+    assert.strictEqual(result.meta.plannedNodeId, "relay-p1");
+    assert.strictEqual(result.meta.relay, true);
+  });
+
+  checkAsync("placement router returns planned info in fallback meta", async () => {
+    const reg = createRelayRegistry();
+    reg.register({ nodeId: "relay-p2", baseUrl: "http://127.0.0.1:31321", capabilities: ["role:priority_helper"] });
+    reg.heartbeat("relay-p2");
+    reg.markUnhealthy("relay-p2");
+    const connector = {
+      async executeRemoteStep() { return { ok: true, output: {}, meta: {} }; }
+    };
+    const router = createRelayRouter({ registry: reg, connector });
+    const result = await router.executeStepWithAssignedNode({
+      step: { id: "s1", executor: { type: "model", role: "priority_helper" } },
+      context: {},
+      options: { relay: { enabled: true } },
+      assignedNodeId: "relay-p2",
+      assignmentTarget: "relay",
+      localExecute: async () => ({ output: { local: true }, meta: { role: "priority_helper" } })
+    });
+    assert.strictEqual(result.meta.plannedTarget, "relay");
+    assert.strictEqual(result.meta.plannedNodeId, "relay-p2");
+    assert.strictEqual(result.meta.fallback, true);
+  });
+
+  checkAsync("placement router returns plannedTarget: local when no relay assigned", async () => {
+    const reg = createRelayRegistry();
+    reg.register({ nodeId: "relay-p3", baseUrl: "http://127.0.0.1:31322", capabilities: ["role:seo_writer"] });
+    reg.heartbeat("relay-p3");
+    const connector = {
+      async executeRemoteStep() { return { ok: true, output: {}, meta: {} }; }
+    };
+    const router = createRelayRouter({ registry: reg, connector });
+    const result = await router.executeStepWithFallback({
+      step: { id: "s1", executor: { type: "model", role: "nonexistent_role" } },
+      context: {},
+      options: { relay: { enabled: true, policy: ROUTING_POLICY.PREFER_RELAY } },
+      localExecute: async () => ({ output: { local: true }, meta: { role: "nonexistent_role" } })
+    });
+    assert.strictEqual(result.meta.plannedTarget, "local");
+    assert.strictEqual(result.meta.plannedNodeId, null);
+  });
 }
 
 main();
+
+Promise.all(asyncChecks).then(() => {
+  console.log(`\n${passed}/${passed + failed} relay placement tests passed`);
+  process.exit(failed === 0 ? 0 : 1);
+}).catch(() => {
+  process.exit(1);
+});

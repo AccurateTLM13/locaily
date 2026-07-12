@@ -70,7 +70,18 @@ function buildStepChildRecord({ step, trackId, correlationId, parentRunId, optio
     qualificationRecordId: step.qualification?.recordId || null,
     shadowRecommendation: step.shadowRouting || undefined,
     enforcementDecision: step.enforcementDecision || undefined,
-    routingReason: step.role ? `role:${step.role}` : null
+    routingReason: step.role ? `role:${step.role}` : null,
+    relayNodeId: step.relay === true ? (step.relayNodeId || null) : null,
+    plannedPlacement: (step.plannedTarget || step.plannedNodeId) ? {
+      target: step.plannedTarget || null,
+      nodeId: step.plannedNodeId || null
+    } : null,
+    actualPlacement: (step.actualTarget || step.actualNodeId) ? {
+      target: step.actualTarget || null,
+      nodeId: step.actualNodeId || null
+    } : null,
+    fallbackUsed: step.fallback === true,
+    fallbackReason: step.fallbackReason || undefined
   };
 
   if (isModelExecutor) {
@@ -148,6 +159,11 @@ async function recordDirectTrackRun({
     const hasToolStep = steps.some((s) => s.executor === "tool");
     const executorType = hasModelStep && hasToolStep ? "hybrid" : hasModelStep ? "model" : "tool";
 
+    const anyFallback = steps.some((s) => s.fallback === true);
+    const parentFallbackReason = anyFallback
+      ? (steps.find((s) => s.fallback === true && s.fallbackReason) || {}).fallbackReason || null
+      : null;
+
     const execStatus = error
       ? (schemaValid === false ? "partial" : "failure")
       : executionStatusFromSchemaValid(schemaValid);
@@ -163,7 +179,8 @@ async function recordDirectTrackRun({
       durationMs,
       startedAt: startedAt.toISOString(),
       completedAt: now.toISOString(),
-      fallbackUsed: Array.isArray(fallbacksUsed) ? fallbacksUsed.length > 0 : false,
+      fallbackUsed: anyFallback || (Array.isArray(fallbacksUsed) ? fallbacksUsed.length > 0 : false),
+      fallbackReason: parentFallbackReason || undefined,
       retryCount: 0,
       output: result
         ? {

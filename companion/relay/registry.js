@@ -1,4 +1,4 @@
-const { NODE_STATUS, capabilityKey } = require("./protocol");
+const { NODE_STATUS, capabilityKey, PROTOCOL_VERSION, RELAY_VALIDATION_CODES } = require("./protocol");
 
 const HEALTH_STALE_MS = 60 * 1000;
 
@@ -19,9 +19,61 @@ function createNodeRecord({ nodeId, baseUrl, label, capabilities, hardware }) {
   };
 }
 
+function normalizeCapability(cap) {
+  const str = String(cap);
+  return str.startsWith("role:") ? str.slice(5) : str;
+}
+
 function createRelayRegistry(options = {}) {
   const nodes = new Map();
   const staleMs = options.staleMs || HEALTH_STALE_MS;
+  const allowedCapabilities = options.allowedCapabilities || null;
+  const allowedHosts = options.allowedHosts || null;
+
+  function validateHost(baseUrl) {
+    if (!allowedHosts) {
+      return;
+    }
+
+    let hostname;
+    try {
+      hostname = new URL(baseUrl).hostname;
+    } catch (_) {
+      const error = new Error(`Invalid baseUrl "${baseUrl}".`);
+      error.code = "RELAY_BASE_URL_INVALID";
+      throw error;
+    }
+
+    if (!allowedHosts.has(hostname)) {
+      const error = new Error(
+        `Host "${hostname}" is not in the relay allowlist. Allowed: ${[...allowedHosts].join(", ")}.`
+      );
+      error.code = RELAY_VALIDATION_CODES.RELAY_HOST_NOT_ALLOWED;
+      throw error;
+    }
+  }
+
+  function validateCapabilities(capabilities) {
+    if (!allowedCapabilities || !Array.isArray(capabilities)) {
+      return;
+    }
+
+    const denied = [];
+    for (const cap of capabilities) {
+      const normalized = normalizeCapability(cap);
+      if (!allowedCapabilities.has(normalized)) {
+        denied.push(normalized);
+      }
+    }
+
+    if (denied.length > 0) {
+      const error = new Error(
+        `Unauthorized capability(ies): ${denied.join(", ")}. Allowed: ${[...allowedCapabilities].join(", ")}.`
+      );
+      error.code = RELAY_VALIDATION_CODES.RELAY_CAPABILITY_UNAUTHORIZED;
+      throw error;
+    }
+  }
 
   function isHealthy(node) {
     if (node.status === NODE_STATUS.UNHEALTHY) {
@@ -47,7 +99,7 @@ function createRelayRegistry(options = {}) {
   }
 
   return {
-    register({ nodeId, baseUrl, label, capabilities, hardware }) {
+    register({ nodeId, baseUrl, label, capabilities, hardware, protocolVersion, overwrite }) {
       if (!nodeId || typeof nodeId !== "string" || !nodeId.trim()) {
         const error = new Error("nodeId is required for relay registration.");
         error.code = "RELAY_NODE_ID_REQUIRED";
@@ -60,7 +112,30 @@ function createRelayRegistry(options = {}) {
         throw error;
       }
 
+      validateHost(baseUrl);
+
+      if (protocolVersion !== undefined && protocolVersion !== null && String(protocolVersion) !== PROTOCOL_VERSION) {
+        const error = new Error(
+          `Unsupported protocol version "${protocolVersion}". Supported version: "${PROTOCOL_VERSION}".`
+        );
+        error.code = RELAY_VALIDATION_CODES.RELAY_PROTOCOL_VERSION_UNSUPPORTED;
+        throw error;
+      }
+
+      if (Array.isArray(capabilities)) {
+        validateCapabilities(capabilities);
+      }
+
       const existing = nodes.get(nodeId);
+
+      if (existing && !overwrite) {
+        const error = new Error(
+          `A relay node with id "${nodeId}" is already registered. Pass overwrite: true to replace it.`
+        );
+        error.code = RELAY_VALIDATION_CODES.RELAY_NODE_DUPLICATE;
+        throw error;
+      }
+
       const record = existing
         ? { ...existing, baseUrl, label: label || existing.label, capabilities: Array.isArray(capabilities) ? capabilities.map(String) : existing.capabilities, hardware: hardware && typeof hardware === "object" ? hardware : existing.hardware, lastSeen: Date.now(), status: NODE_STATUS.HEALTHY }
         : createNodeRecord({ nodeId, baseUrl, label, capabilities, hardware });

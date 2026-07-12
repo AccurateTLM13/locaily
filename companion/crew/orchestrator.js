@@ -160,6 +160,16 @@ async function runTrack({
         shadowRouting: stepResult.meta?.shadowRouting || null,
         enforcementDecision: stepResult.meta?.enforcementDecision || null,
         durationMs: stepResult.meta?.durationMs || 0,
+        relayNodeId: stepResult.meta?.nodeId || null,
+        relay: stepResult.meta?.relay || false,
+        fallback: stepResult.meta?.fallback || false,
+        fallbackReason: stepResult.meta?.fallbackReason || null,
+        outputValid: stepResult.meta?.outputValid ?? null,
+        outputValidationErrors: stepResult.meta?.outputValidationErrors ?? null,
+        plannedTarget: stepResult.meta?.plannedTarget ?? null,
+        plannedNodeId: stepResult.meta?.plannedNodeId ?? null,
+        actualTarget: (stepResult.meta?.relay === true) ? "relay" : "local",
+        actualNodeId: stepResult.meta?.nodeId ?? null,
         output: stepResult.output
       });
     }
@@ -212,6 +222,16 @@ async function runTrack({
         shadowRouting: stepResult.meta.shadowRouting || null,
         enforcementDecision: stepResult.meta.enforcementDecision || null,
         durationMs: stepResult.meta.durationMs,
+        relayNodeId: stepResult.meta.nodeId || null,
+        relay: stepResult.meta.relay || false,
+        fallback: stepResult.meta.fallback || false,
+        fallbackReason: stepResult.meta.fallbackReason || null,
+        outputValid: stepResult.meta?.outputValid ?? null,
+        outputValidationErrors: stepResult.meta?.outputValidationErrors ?? null,
+        plannedTarget: stepResult.meta?.plannedTarget ?? null,
+        plannedNodeId: stepResult.meta?.plannedNodeId ?? null,
+        actualTarget: (stepResult.meta?.relay === true) ? "relay" : "local",
+        actualNodeId: stepResult.meta?.nodeId ?? null,
         output: stepResult.output
       });
     }

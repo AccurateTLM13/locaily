@@ -1,5 +1,7 @@
-const { ROUTING_POLICY, NODE_STATUS } = require("./protocol");
+const path = require("node:path");
+const { ROUTING_POLICY, NODE_STATUS, RELAY_FALLBACK_REASON } = require("./protocol");
 const { buildAuditEvent } = require("../core/audit-log");
+const { validateResult } = require("../core/result-validator");
 
 function resolveStepRole(step) {
   if (!step || !step.executor) {
@@ -36,10 +38,81 @@ function decideTarget({ step, localCapable, policy, registry }) {
   return { target: "local", node: null };
 }
 
+function minimizeContext(step, context) {
+  if (context == null) {
+    return { input: {}, artifacts: {} };
+  }
+
+  const inputMap = step && step.input_map;
+
+  if (!inputMap || typeof inputMap !== "object" || typeof inputMap === "string") {
+    return context;
+  }
+
+  const referencedStepIds = new Set();
+
+  function walkValue(value) {
+    if (typeof value === "string") {
+      const match = value.match(/^\$artifacts\.([^.]+)/);
+      if (match) {
+        referencedStepIds.add(match[1]);
+      }
+    } else if (Array.isArray(value)) {
+      for (const item of value) {
+        walkValue(item);
+      }
+    }
+  }
+
+  for (const key of Object.keys(inputMap)) {
+    walkValue(inputMap[key]);
+  }
+
+  const filteredArtifacts = {};
+  const sourceArtifacts = context.artifacts || {};
+
+  for (const stepId of referencedStepIds) {
+    if (stepId in sourceArtifacts) {
+      filteredArtifacts[stepId] = sourceArtifacts[stepId];
+    }
+  }
+
+  return {
+    input: context.input || {},
+    artifacts: filteredArtifacts
+  };
+}
+
+function mapConnectorErrorToFallbackReason(error) {
+  if (!error || !error.code) {
+    return RELAY_FALLBACK_REASON.RELAY_STEP_FAILED;
+  }
+  if (error.code === "RELAY_NODE_TIMEOUT") {
+    return RELAY_FALLBACK_REASON.RELAY_TIMEOUT;
+  }
+  if (error.code === "RELAY_NODE_UNREACHABLE") {
+    return RELAY_FALLBACK_REASON.CONNECTOR_UNAVAILABLE;
+  }
+  return RELAY_FALLBACK_REASON.RELAY_STEP_FAILED;
+}
+
+function wrapLocalFallback(localResult, fallbackReason, extraMeta) {
+  return {
+    ...localResult,
+    meta: {
+      ...(localResult.meta || {}),
+      relay: false,
+      fallback: true,
+      fallbackReason,
+      ...(extraMeta || {})
+    }
+  };
+}
+
 function createRelayRouter({ registry, connector, auditLog, options = {} }) {
   const defaultPolicy = options.policy || ROUTING_POLICY.ROUTE_IF_UNAVAILABLE;
 
-  async function recordFallbackAudit({ step, node, error, identity, runId }) {
+  async function recordFallbackAudit({ step, node, error, identity, runId, fallbackReason }) {
     if (!auditLog || typeof auditLog.record !== "function") {
       return;
     }
@@ -52,13 +125,14 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
           tool: "relay-router",
           ok: false,
           code: "RELAY_FALLBACK",
-          message: `Relay node '${node.nodeId}' failed for step '${step && step.id}'. Falling back to local execution.`,
+          message: `Relay node '${node ? node.nodeId : "unknown"}' failed for step '${step && step.id}'. Falling back to local execution.`,
           details: {
-            nodeId: node.nodeId,
-            nodeBaseUrl: node.baseUrl,
+            nodeId: node ? node.nodeId : null,
+            nodeBaseUrl: node ? node.baseUrl : null,
             stepId: step && step.id,
             errorCode: error.code || "RELAY_ERROR",
             errorMessage: error.message,
+            fallbackReason: fallbackReason || null,
             runId: runId || null,
             warning: "Relay nodes are ephemeral; local fallback used. No state was lost."
           }
@@ -83,23 +157,42 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
     const enabled = options.relay?.enabled !== false;
 
     if (!enabled || !connector) {
-      return localExecute();
+      const localResult = await localExecute();
+      return {
+        ...localResult,
+        meta: {
+          ...(localResult.meta || {}),
+          plannedTarget: "local",
+          plannedNodeId: null
+        }
+      };
     }
 
     const localCapable = options.relay?.localCapable !== false;
     const decision = decideTarget({ step, localCapable, policy, registry });
+    const plannedTarget = decision.target;
+    const plannedNodeId = decision.node ? decision.node.nodeId : null;
 
     if (decision.target !== "relay" || !decision.node) {
-      return localExecute();
+      const localResult = await localExecute();
+      return {
+        ...localResult,
+        meta: {
+          ...(localResult.meta || {}),
+          plannedTarget: "local",
+          plannedNodeId: null
+        }
+      };
     }
 
     const node = decision.node;
 
     try {
+      const minimized = minimizeContext(step, context);
       const remote = await connector.executeRemoteStep({
         node,
         step,
-        context,
+        context: minimized,
         options,
         meta
       });
@@ -107,6 +200,7 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
       if (!remote.ok) {
         const failure = new Error(remote.meta?.error?.message || "Relay node returned ok:false for step.");
         failure.code = remote.meta?.error?.code || "RELAY_STEP_FAILED";
+        failure.fallbackReason = RELAY_FALLBACK_REASON.RELAY_STEP_FAILED;
 
         registry.recordDispatch(node.nodeId, false);
         registry.markUnhealthy(node.nodeId);
@@ -116,13 +210,47 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
           node,
           error: failure,
           identity: meta,
-          runId: (meta && meta.run_id) || null
+          runId: (meta && meta.run_id) || null,
+          fallbackReason: RELAY_FALLBACK_REASON.RELAY_STEP_FAILED
         });
 
-        return localExecute();
+        const localResult = await localExecute();
+        return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.RELAY_STEP_FAILED, {
+          plannedTarget,
+          plannedNodeId
+        });
       }
 
       registry.recordDispatch(node.nodeId, true);
+
+      if (step.executor && step.executor.schema) {
+        const schemaPath = path.resolve(__dirname, "..", "..", step.executor.schema);
+        const schema = require(schemaPath);
+        const validation = validateResult(remote.output, schema);
+        if (!validation.ok) {
+          const err = new Error("Remote output failed schema validation.");
+          err.code = "RELAY_INVALID_OUTPUT";
+          err.fallbackReason = RELAY_FALLBACK_REASON.INVALID_OUTPUT;
+          err.validationErrors = validation.errors;
+
+          await recordFallbackAudit({
+            step,
+            node,
+            error: err,
+            identity: meta,
+            runId: (meta && meta.run_id) || null,
+            fallbackReason: RELAY_FALLBACK_REASON.INVALID_OUTPUT
+          });
+
+          const localResult = await localExecute();
+          return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.INVALID_OUTPUT, {
+            plannedTarget,
+            plannedNodeId,
+            outputValid: false,
+            outputValidationErrors: validation.errors
+          });
+        }
+      }
 
       return {
         output: remote.output,
@@ -130,10 +258,18 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
           ...(remote.meta || {}),
           nodeId: node.nodeId,
           relay: true,
-          fallback: false
+          fallback: false,
+          fallbackReason: null,
+          outputValid: true,
+          outputValidationErrors: [],
+          plannedTarget,
+          plannedNodeId
         }
       };
     } catch (error) {
+      const fallbackReason = mapConnectorErrorToFallbackReason(error);
+      error.fallbackReason = fallbackReason;
+
       registry.recordDispatch(node.nodeId, false);
       registry.markUnhealthy(node.nodeId);
 
@@ -142,10 +278,15 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
         node,
         error,
         identity: meta,
-        runId: (meta && meta.run_id) || null
+        runId: (meta && meta.run_id) || null,
+        fallbackReason
       });
 
-      return localExecute();
+      const localResult = await localExecute();
+      return wrapLocalFallback(localResult, fallbackReason, {
+        plannedTarget,
+        plannedNodeId
+      });
     }
   }
 
@@ -157,25 +298,55 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
     toolRegistry,
     meta = {},
     assignedNodeId,
+    assignmentTarget = "relay",
     localExecute
   }) {
     const enabled = options.relay?.enabled !== false;
+    const plannedTarget = assignedNodeId ? assignmentTarget : "local";
+    const plannedNodeId = assignedNodeId || null;
 
     if (!enabled || !connector || !assignedNodeId || step.executor.type !== "model") {
-      return localExecute();
+      const localResult = await localExecute();
+      return {
+        ...localResult,
+        meta: {
+          ...(localResult.meta || {}),
+          plannedTarget: "local",
+          plannedNodeId: null
+        }
+      };
     }
 
     const node = registry.get(assignedNodeId);
 
     if (!node || !node.healthy || node.status === NODE_STATUS.UNHEALTHY) {
-      return localExecute();
+      const fallbackReason = !node ? RELAY_FALLBACK_REASON.NODE_MISSING : RELAY_FALLBACK_REASON.NODE_UNHEALTHY;
+      const error = new Error(!node ? `Relay node '${assignedNodeId}' not found.` : `Relay node '${assignedNodeId}' is unhealthy.`);
+      error.code = !node ? "RELAY_NODE_MISSING" : "RELAY_NODE_UNHEALTHY";
+      error.fallbackReason = fallbackReason;
+
+      await recordFallbackAudit({
+        step,
+        node: node || { nodeId: assignedNodeId, baseUrl: null },
+        error,
+        identity: meta,
+        runId: (meta && meta.run_id) || null,
+        fallbackReason
+      });
+
+      const localResult = await localExecute();
+      return wrapLocalFallback(localResult, fallbackReason, {
+        plannedTarget,
+        plannedNodeId
+      });
     }
 
     try {
+      const minimized = minimizeContext(step, context);
       const remote = await connector.executeRemoteStep({
         node,
         step,
-        context,
+        context: minimized,
         options,
         meta
       });
@@ -183,6 +354,7 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
       if (!remote.ok) {
         const failure = new Error(remote.meta?.error?.message || "Relay node returned ok:false for step.");
         failure.code = remote.meta?.error?.code || "RELAY_STEP_FAILED";
+        failure.fallbackReason = RELAY_FALLBACK_REASON.RELAY_STEP_FAILED;
 
         registry.recordDispatch(node.nodeId, false);
         registry.markUnhealthy(node.nodeId);
@@ -192,13 +364,47 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
           node,
           error: failure,
           identity: meta,
-          runId: (meta && meta.run_id) || null
+          runId: (meta && meta.run_id) || null,
+          fallbackReason: RELAY_FALLBACK_REASON.RELAY_STEP_FAILED
         });
 
-        return localExecute();
+        const localResult = await localExecute();
+        return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.RELAY_STEP_FAILED, {
+          plannedTarget,
+          plannedNodeId
+        });
       }
 
       registry.recordDispatch(node.nodeId, true);
+
+      if (step.executor && step.executor.schema) {
+        const schemaPath = path.resolve(__dirname, "..", "..", step.executor.schema);
+        const schema = require(schemaPath);
+        const validation = validateResult(remote.output, schema);
+        if (!validation.ok) {
+          const err = new Error("Remote output failed schema validation.");
+          err.code = "RELAY_INVALID_OUTPUT";
+          err.fallbackReason = RELAY_FALLBACK_REASON.INVALID_OUTPUT;
+          err.validationErrors = validation.errors;
+
+          await recordFallbackAudit({
+            step,
+            node,
+            error: err,
+            identity: meta,
+            runId: (meta && meta.run_id) || null,
+            fallbackReason: RELAY_FALLBACK_REASON.INVALID_OUTPUT
+          });
+
+          const localResult = await localExecute();
+          return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.INVALID_OUTPUT, {
+            plannedTarget,
+            plannedNodeId,
+            outputValid: false,
+            outputValidationErrors: validation.errors
+          });
+        }
+      }
 
       return {
         output: remote.output,
@@ -206,10 +412,18 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
           ...(remote.meta || {}),
           nodeId: node.nodeId,
           relay: true,
-          fallback: false
+          fallback: false,
+          fallbackReason: null,
+          outputValid: true,
+          outputValidationErrors: [],
+          plannedTarget,
+          plannedNodeId
         }
       };
     } catch (error) {
+      const fallbackReason = mapConnectorErrorToFallbackReason(error);
+      error.fallbackReason = fallbackReason;
+
       registry.recordDispatch(node.nodeId, false);
       registry.markUnhealthy(node.nodeId);
 
@@ -218,10 +432,15 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
         node,
         error,
         identity: meta,
-        runId: (meta && meta.run_id) || null
+        runId: (meta && meta.run_id) || null,
+        fallbackReason
       });
 
-      return localExecute();
+      const localResult = await localExecute();
+      return wrapLocalFallback(localResult, fallbackReason, {
+        plannedTarget,
+        plannedNodeId
+      });
     }
   }
 
@@ -258,6 +477,7 @@ function executeStepViaRelayIfNeeded({
         toolRegistry,
         meta,
         assignedNodeId: assignment.nodeId,
+        assignmentTarget: assignment.target || "relay",
         localExecute
       });
     }
@@ -281,6 +501,8 @@ module.exports = {
   decideTarget,
   resolveStepRole,
   executeStepViaRelayIfNeeded,
+  minimizeContext,
   ROUTING_POLICY,
-  NODE_STATUS
+  NODE_STATUS,
+  RELAY_FALLBACK_REASON
 };
