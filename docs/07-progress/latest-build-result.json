@@ -1,145 +1,77 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "M5-multi-device-workflow-coordination",
+  "build_slice": "08-operator-control-plane",
   "status": "complete",
-  "objective": "Multi-device workflow coordination built on M4 Relay Nodes — coordinator computes a step-to-node placement plan across healthy relay nodes, executes each workflow step on its assigned device, and falls back locally when an assigned node fails. Includes a placement planner, a placement-preview endpoint, and coordinated multi-device execution with audit trail.",
+  "objective": "Wire the durable job store into the Local Brain server, creating POST /jobs, GET /jobs, and GET /jobs/:id API endpoints so the operator console can observe and manage background work.",
   "implemented": {
-    "placement_planner": [
-      "companion/relay/placement.js (createPlacementPlanner, buildPlacementFromTrack)"
+    "durable_job_store_wiring": [
+      "companion/server.js: import createDurableJobStore, initialize shared instance with data/jobs/ directory"
     ],
-    "placement_policies": [
-      "distribute (spread model steps across capable healthy nodes, least-loaded)",
-      "local_first (local when locally capable, else route)",
-      "local_only (force all local)",
-      "prefer_relay / route_if_unavailable (M4 per-step dynamic decision, unchanged)"
+    "job_api_endpoints": [
+      "POST /jobs — accepts { type, trackId/workflowId, input, options }, validates, persists, returns 201 with job record or 400 on validation failure",
+      "GET /jobs — lists all jobs with optional status and limit query filters; returns summary array (jobId, type, trackId/workflowId, status, createdAt, attempts, lease)",
+      "GET /jobs/:id — returns full job record including metadata, lease, evidenceRefs, result/error, and timestamps; 404 for unknown IDs"
     ],
-    "assigned_node_routing": [
-      "companion/relay/router.js executeStepWithAssignedNode (route to specific node, fallback local + RELAY_FALLBACK audit on failure)",
-      "companion/relay/router.js executeStepViaRelayIfNeeded now consults options.relay.assignments[stepId]",
-      "companion/crew/orchestrator.js (DAG + linear) and companion/orchestration/run-plan-executor.js pass stepId"
-    ],
-    "server_wiring": [
-      "POST /relay/plan (placement preview for a track)",
-      "GET /relay/protocol now lists /relay/plan",
-      "applyRelayPlacement() attaches assignments + placementSummary for relay_policy=distribute on /tracks/run and /workflows/run",
-      "responses include relay_placement summary (counts + byNode)"
+    "health_integration": [
+      "GET /health includes jobTotals with counts by all seven statuses (queued, claimed, running, completed, failed, cancelled, paused_review)"
     ],
     "tests": [
-      "scripts/test-relay-placement.cjs (14/14 — added dedupe/load-split coverage)",
-      "scripts/test-multi-device-e2e.cjs (22/22 — three Local Brain instances A orchestrator + B + C relay; distributed run, then kill C -> local fallback)"
-    ],
-    "package_scripts": [
-      "test:relay:placement",
-      "test:multi-device:e2e",
-      "test:m5"
+      "scripts/test-jobs-api.js (64/64 — covers create track job, create workflow job, invalid type, missing trackId/workflowId, empty list, list with jobs, status filtering, get by ID, get not found, health jobTotals, persistence across restart)"
     ],
     "all_test_results": {
-      "benchmark:test": "PASS",
-      "contract-test": "PASS",
-      "benchmark:status-smoke": "PASS",
-      "test:dag": "14/14 + 9/9 + workflow PASS",
-      "orchestration-unit-test": "PASS",
-      "smoke-test": "57/57 PASS",
-      "test:relay (unit)": "17/17 PASS (harness fixed: async checks now actually run)",
-      "test:memory-v1": "6/6 PASS",
-      "test:relay:e2e": "11/11 PASS",
-      "test:relay:placement": "14/14 PASS",
-      "test:multi-device:e2e": "22/22 PASS"
+      "test-durable-job-store": "117/117 PASS",
+      "test-jobs-api": "64/64 PASS",
+      "contract-test": "PASS"
     }
   },
   "validation": {
     "passed": true,
     "results": [
-      "Placement planner distributes model steps across two relay nodes (B gets priority_helper, C gets developer/guardrail/testing writers) and keeps tool steps local",
-      "Multi-device e2e: Lighthouse Handoff runs on A with model steps executed on B and C; relay_placement summary reports 4 relayed / 6 local across both devices",
-      "Failure + local fallback: killing node C reroutes its steps locally and records RELAY_FALLBACK audit events; workflow still completes",
-      "Existing M4 relay e2e still passes (single-step prefer_relay unaffected)",
-      "All existing tests pass (backward compatible)"
+      "POST /jobs with type track creates and persists a job, returns 201 with full job record",
+      "POST /jobs with type workflow creates and persists a job, returns 201 with full job record",
+      "POST /jobs with invalid input returns 400 with error envelope",
+      "GET /jobs returns all jobs (empty array when none exist)",
+      "GET /jobs?status=queued returns only queued jobs",
+      "GET /jobs?status=running returns only running jobs",
+      "GET /jobs/:id returns full job for valid ID, 404 for invalid",
+      "GET /health includes jobTotals with correct counts by status",
+      "Server restart reloads jobs from data/jobs/*.json — GET /jobs returns previously created jobs",
+      "No changes to existing endpoint response envelopes"
     ]
   },
   "acceptance_criteria": {
     "passed": [
-      "Coordinator computes a placement plan across 2+ relay nodes for a workflow",
-      "Each step executes on its assigned device; tool steps stay local",
-      "Node failure mid-workflow falls back to local execution with audit trail",
-      "Placement preview endpoint reports assignments + summary",
-      "All existing tests still pass (backward compatible)",
-      "End-to-end: Lighthouse Handoff distributed across 3 devices, then degraded to 2 with fallback"
+      "POST /jobs with type track creates and persists a job, returns 201 with the full job record",
+      "POST /jobs with type workflow creates and persists a job, returns 201 with the full job record",
+      "POST /jobs with invalid input returns 400 with an error envelope",
+      "GET /jobs returns all jobs (empty array when none exist)",
+      "GET /jobs?status=queued returns only queued jobs",
+      "GET /jobs?status=running returns only running jobs",
+      "GET /jobs/:id returns the full job for a valid id, 404 for invalid",
+      "GET /health includes jobTotals with correct counts by status",
+      "Server restart reloads jobs from data/jobs/*.json — GET /jobs returns previously created jobs",
+      "node scripts/test-jobs-api.js passes all test cases",
+      "Existing tests still pass: node scripts/contract-test.js, node scripts/test-durable-job-store.js",
+      "No changes to existing response envelope shapes"
     ],
     "failed": [],
     "blockers": []
   },
   "scope_notes": [
-    "Single orchestrator, ephemeral relay nodes — no distributed consensus or global scheduler",
-    "Placement is capability + health + least-loaded; no latency/bandwidth awareness",
-    "Tool steps are always local by design (relay nodes are model-capability targets)",
-    "Local fallback is per-step; a failed node is marked unhealthy for 60s (registry stale window)"
+    "Background worker polling loop is the next task — not yet implemented",
+    "Human-gate endpoints (POST /jobs/:id/review, paused_review transitions) are a later task",
+    "Cancel, retry, or any mutation endpoints other than create are later tasks",
+    "Operator console UI (HTML/CSS/JS dashboard) not included",
+    "CLI commands not included",
+    "companion/core/durable-job-store.js and its schema not modified — store is complete as-is"
   ],
   "stop_conditions_honored": [
-    "Local Brain localhost-only by default (no public exposure)",
-    "Relay nodes are execution targets only (no control-plane ops)",
-    "No automatic model swapping / Model Garage",
-    "No distributed consensus / Byzantine fault tolerance claimed",
-    "Failures degrade gracefully to local execution (no data loss)"
+    "No modifications to existing /tracks/run, /workflows/run, /tasks/run, or /analyze endpoints or their response envelopes",
+    "No import of benchmark-lab/engine/ modules",
+    "Server remains localhost-only",
+    "No modification to companion/core/durable-job-store.js or its schema"
   ],
-  "last_fresh_validation": "2026-07-11 (M5 complete + review fixes — multi-device workflow coordination)",
-  "next_milestones": "M6: Trusted Relay Execution and Actual-Placement Evidence — node pairing/authentication, capability verification, allowed-network restrictions, minimal-context envelopes, planned-vs-actual placement records, remote output schema validation, explicit relay fallback reasons, one real two-device pilot, performance comparison, human-readable operator view",
-  "updated_at": "2026-07-11",
-  "architectural_review_2026-07-11": {
-    "scope": "M5 architectural review for safety, evidence integrity, and deployment readiness",
-    "findings": [
-      {
-        "severity": "high",
-        "title": "Relay communication has no visible trust boundary",
-        "description": "No authentication token, signature, node certificate, request nonce, or pairing credential. Registration and heartbeat calls are unauthenticated. A rogue or accidentally registered LAN node could receive workflow context, user-derived content, and return manipulated results.",
-        "current_state": "Trusted-development-network only",
-        "fix": "M6 objective #1: Node pairing and authentication"
-      },
-      {
-        "severity": "medium",
-        "title": "Planned relay placement can silently become local execution",
-        "description": "When an assigned node is missing or unhealthy, executeStepWithAssignedNode() falls back to local execution without recording a fallback audit. Run reports placement plan assigning step to relay node, but actual execution occurred locally with no recorded reason.",
-        "consequence": "Planned and executed topology can diverge silently, weakening the evidence system",
-        "fix": "M6 objective #5: Planned-versus-actual placement records"
-      },
-      {
-        "severity": "medium",
-        "title": "local_first defaults to effectively local-only",
-        "description": "Every role is treated as locally capable when localCapableRoles is omitted. local_first immediately assigns locally when the role is considered locally capable.",
-        "consequence": "Without explicit local-capability data, relay nodes are never used for model steps",
-        "fix": "Document that local_first requires explicit localCapableRoles for correct behavior"
-      },
-      {
-        "severity": "medium",
-        "title": "Approved evidence was written with an agent as approver",
-        "description": "Several new evidence records use approvedBy: locaily-agent. Blurs distinction between generated, promoted, machine-reviewed, human-reviewed, and approved for qualification.",
-        "fix": "Use promotionActor instead of approvedBy; reserve approvedBy for actual human approval"
-      }
-    ],
-    "recommendation": "M6: Trusted Relay Execution and Actual-Placement Evidence — harden one real two-device path, prove the evidence is truthful, and measure whether distribution creates value",
-    "assessment": "Today's work passes as a major milestone. The structure is disciplined, modular, test-oriented, and aligned with the Locaily thesis. The system did not take the lazy route of bolting HTTP calls onto the workflow runner; it created actual placement, registry, protocol, routing, evidence, and fallback concepts. The next danger is scope excitement."
-  },
-  "review_2026-07-11": {
-    "scope": "Post-completion review of M4 + M5 for bugs, mistakes, and unfinished items",
-    "issues_found": [
-      "registry.selectForRole sorted descending (picked most-loaded node) — wrong least-loaded behavior",
-      "placement byRole double-counted a node advertising both `role` and `role:role`",
-      "no direct unit test for executeStepWithAssignedNode (M5 assigned-node routing)",
-      "relay-node-protocol.md documented M4 only, missing M5 placement/distribute/POST /relay/plan",
-      "HIDDEN: test-relay-unit.cjs async checks were fire-and-forget before process.exit — never executed (false confidence); exposed a wrong audit-field assertion (r.code vs r.error_code)"
-    ],
-    "fixes_applied": [
-      "companion/relay/registry.js: selectForRole now sorts ascending (a.dispatchCount - b.dispatchCount)",
-      "companion/relay/placement.js: byRole dedupes nodes per role",
-      "scripts/test-relay-unit.cjs: harness now awaits async checks; added 3 executeStepWithAssignedNode tests; corrected audit assertion to r.error_code",
-      "scripts/test-relay-placement.cjs: added dedupe/least-loaded load-split test",
-      "docs/05-integrations/relay-node-protocol.md: added M5 placement section (distribute policy, POST /relay/plan, relay_placement, assignments)"
-    ],
-    "verification": {
-      "test:relay (unit)": "17/17 PASS",
-      "test:relay:placement": "14/14 PASS",
-      "test:multi-device:e2e": "22/22 PASS"
-    },
-    "outcome": "All M4/M5 review issues resolved; no blockers remaining for M5 acceptance."
-  }
+  "last_fresh_validation": "2026-07-12 (jobs API endpoints implemented and tested)",
+  "next_milestones": "Background worker (polling loop that claims and executes jobs) — queue item 07-durable-background-execution",
+  "updated_at": "2026-07-12"
 }

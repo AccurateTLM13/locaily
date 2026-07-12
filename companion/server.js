@@ -53,6 +53,7 @@ const { createQualificationResolver } = require("./core/qualification-resolver")
 const { createCapabilityRegistry } = require("./core/capability-registry");
 const { createRelayRegistry } = require("./relay/registry");
 const { createRelayConnector } = require("./relay/connector");
+const { createDurableJobStore } = require("./core/durable-job-store");
 const { createRelayAuth } = require("./relay/auth");
 const { createRelayRouter, executeStepViaRelayIfNeeded, ROUTING_POLICY } = require("./relay/router");
 const { buildPlacementFromTrack } = require("./relay/placement");
@@ -276,6 +277,10 @@ const consoleController = createConsoleController({
   getStatusSnapshot: buildConsoleStatusResponse,
   localSetupStore,
   onSetupSaved: refreshVaultAdapterForConsoleSetup
+});
+
+const durableJobStore = createDurableJobStore({
+  dataDir: join(__dirname, "..", "data")
 });
 
 const server = http.createServer(async (request, response) => {
@@ -1503,6 +1508,124 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, applyResult.ok ? 200 : 400, responseBody);
     }
 
+    if (request.method === "POST" && url.pathname === "/jobs") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with type, input, and trackId or workflowId."
+        });
+      }
+
+      const { type, trackId, workflowId, input, context, options, maxAttempts, correlationId } = bodyResult.body || {};
+
+      if (!type || (type !== "track" && type !== "workflow")) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "INVALID_TYPE",
+          message: "type must be 'track' or 'workflow'.",
+          nextStep: "Set type to 'track' or 'workflow'."
+        });
+      }
+
+      if (type === "track" && !trackId) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "MISSING_TRACK_ID",
+          message: "trackId is required when type is 'track'.",
+          nextStep: "Provide a trackId in the request body."
+        });
+      }
+
+      if (type === "workflow" && !workflowId) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "MISSING_WORKFLOW_ID",
+          message: "workflowId is required when type is 'workflow'.",
+          nextStep: "Provide a workflowId in the request body."
+        });
+      }
+
+      const createResult = durableJobStore.createJob({
+        executionType: type,
+        trackId: type === "track" ? trackId : null,
+        workflowId: type === "workflow" ? workflowId : null,
+        input: input || {},
+        context: context || {},
+        options: options || {},
+        maxAttempts: typeof maxAttempts === "number" ? maxAttempts : 3,
+        correlationId: correlationId || null
+      });
+
+      if (!createResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: createResult.code,
+          message: createResult.message,
+          nextStep: "Check the job parameters and try again."
+        });
+      }
+
+      return sendJson(response, 201, {
+        ok: true,
+        job: createResult.job
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/jobs") {
+      const statusFilter = url.searchParams.get("status") || null;
+      const limitParam = url.searchParams.get("limit");
+      const limit = limitParam ? parseInt(limitParam, 10) : null;
+
+      let jobs = durableJobStore.listJobs(statusFilter ? { status: statusFilter } : {});
+
+      if (limit && Number.isFinite(limit) && limit > 0) {
+        jobs = jobs.slice(0, limit);
+      }
+
+      const summary = jobs.map((job) => ({
+        jobId: job.jobId,
+        type: job.executionType,
+        trackId: job.trackId,
+        workflowId: job.workflowId,
+        status: job.status,
+        createdAt: job.timestamps.createdAt,
+        attempts: job.attempt,
+        lease: job.lease ? {
+          holder: job.lease.holder,
+          expiresAt: job.lease.expiresAt
+        } : null
+      }));
+
+      return sendJson(response, 200, {
+        ok: true,
+        jobs: summary
+      });
+    }
+
+    const jobGetMatch = url.pathname.match(/^\/jobs\/([^/]+)$/);
+    if (jobGetMatch && request.method === "GET") {
+      const jobId = decodeURIComponent(jobGetMatch[1]);
+      const job = durableJobStore.getJob(jobId);
+
+      if (!job) {
+        return sendJson(response, 404, {
+          ok: false,
+          code: "JOB_NOT_FOUND",
+          message: `Job '${jobId}' was not found.`,
+          nextStep: "Use GET /jobs to list all jobs."
+        });
+      }
+
+      return sendJson(response, 200, {
+        ok: true,
+        job
+      });
+    }
+
     if (request.method === "POST" && url.pathname === "/analyze") {
       const bodyResult = await readJsonBody(request);
 
@@ -1540,7 +1663,7 @@ const server = http.createServer(async (request, response) => {
       ok: false,
       code: "NOT_FOUND",
       message: `No route matched ${request.method} ${url.pathname}.`,
-      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, or legacy POST /analyze."
+      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, POST /jobs, GET /jobs, GET /jobs/:id, or legacy POST /analyze."
     });
   } catch (error) {
     console.error("Unexpected server error.");
@@ -1675,6 +1798,12 @@ async function buildHealthResponse() {
   const enforcementStore = enforcementPolicy.getStore ? enforcementPolicy.getStore() : null;
   const enforcementHealth = enforcementStore ? enforcementStore.getStoreHealth() : { healthy: false, initialized: false };
 
+  const allJobs = durableJobStore.listJobs();
+  const jobTotals = {};
+  for (const status of durableJobStore.STATUSES) {
+    jobTotals[status] = allJobs.filter((j) => j.status === status).length;
+  }
+
   const health = {
     ok: true,
     engine: "local-ai-engine-core",
@@ -1721,7 +1850,8 @@ async function buildHealthResponse() {
       safeFallback: enforcementHealth.safeFallback,
       enforcementLocked: enforcementHealth.enforcementLocked,
       policyEndpoint: "/enforcement/policy"
-    }
+    },
+    jobTotals
   };
 
   if (runtimeState.warning) {
@@ -1745,6 +1875,7 @@ async function printStartupStatus() {
   console.log("Canonical API: POST /tasks/run");
   console.log("Track API: POST /tracks/run");
   console.log("Workflow API: POST /workflows/plan, POST /workflows/run");
+  console.log("Jobs API: POST /jobs, GET /jobs, GET /jobs/:id");
   console.log("Compatibility API: POST /analyze");
   console.log(`Active provider: ${activeProvider}`);
 
