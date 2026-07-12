@@ -164,6 +164,8 @@ async function runTrack({
         relay: stepResult.meta?.relay || false,
         fallback: stepResult.meta?.fallback || false,
         fallbackReason: stepResult.meta?.fallbackReason || null,
+        outputValid: stepResult.meta?.outputValid ?? null,
+        outputValidationErrors: stepResult.meta?.outputValidationErrors ?? null,
         output: stepResult.output
       });
     }
@@ -220,6 +222,8 @@ async function runTrack({
         relay: stepResult.meta.relay || false,
         fallback: stepResult.meta.fallback || false,
         fallbackReason: stepResult.meta.fallbackReason || null,
+        outputValid: stepResult.meta?.outputValid ?? null,
+        outputValidationErrors: stepResult.meta?.outputValidationErrors ?? null,
         output: stepResult.output
       });
     }

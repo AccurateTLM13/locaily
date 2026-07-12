@@ -695,6 +695,93 @@ checkAsync("router executeStepWithAssignedNode unhealthy preserves localExecute 
   assert.strictEqual(result.meta.fallbackReason, "node_unhealthy");
 });
 
+checkAsync("router executeStepWithFallback rejects invalid remote output and falls back", async () => {
+  const reg = createRelayRegistry();
+  reg.register({ nodeId: "b", baseUrl: "http://b:1", capabilities: ["default_worker"] });
+  const connector = {
+    async executeRemoteStep() {
+      return { ok: true, output: { wrong: true }, meta: {} };
+    }
+  };
+  const audit = { records: [], async record(e) { this.records.push(e); } };
+  const router = createRelayRouter({ registry: reg, connector, auditLog: audit });
+
+  const result = await router.executeStepWithFallback({
+    step: {
+      id: "s1",
+      executor: {
+        type: "model",
+        role: "default_worker",
+        schema: "scripts/test-fixtures/step-output.schema.json"
+      }
+    },
+    context: {},
+    options: { relay: { enabled: true, policy: ROUTING_POLICY.PREFER_RELAY } },
+    localExecute: async () => ({ output: { summary: "local fallback" }, meta: { role: "default_worker" } })
+  });
+
+  assert.strictEqual(result.meta.relay, false);
+  assert.strictEqual(result.meta.fallback, true);
+  assert.strictEqual(result.meta.fallbackReason, "invalid_output");
+  assert.strictEqual(result.meta.outputValid, false);
+  assert.ok(Array.isArray(result.meta.outputValidationErrors));
+  assert.ok(result.meta.outputValidationErrors.length > 0);
+  assert.strictEqual(result.output.summary, "local fallback");
+  assert.ok(audit.records.some((r) => r.error_code === "RELAY_FALLBACK"));
+});
+
+checkAsync("router executeStepWithFallback accepts valid remote output", async () => {
+  const reg = createRelayRegistry();
+  reg.register({ nodeId: "b", baseUrl: "http://b:1", capabilities: ["default_worker"] });
+  const connector = {
+    async executeRemoteStep() {
+      return { ok: true, output: { summary: "all good" }, meta: {} };
+    }
+  };
+  const audit = { records: [], async record(e) { this.records.push(e); } };
+  const router = createRelayRouter({ registry: reg, connector, auditLog: audit });
+
+  const result = await router.executeStepWithFallback({
+    step: {
+      id: "s1",
+      executor: {
+        type: "model",
+        role: "default_worker",
+        schema: "scripts/test-fixtures/step-output.schema.json"
+      }
+    },
+    context: {},
+    options: { relay: { enabled: true, policy: ROUTING_POLICY.PREFER_RELAY } },
+    localExecute: async () => ({ output: { summary: "local fallback" }, meta: {} })
+  });
+
+  assert.strictEqual(result.meta.relay, true);
+  assert.strictEqual(result.meta.fallback, false);
+  assert.strictEqual(result.meta.outputValid, true);
+  assert.ok(!audit.records.some((r) => r.error_code === "RELAY_FALLBACK"));
+});
+
+checkAsync("router executeStepWithFallback no schema passes through unchanged", async () => {
+  const reg = createRelayRegistry();
+  reg.register({ nodeId: "b", baseUrl: "http://b:1", capabilities: ["default_worker"] });
+  const connector = {
+    async executeRemoteStep() {
+      return { ok: true, output: { anything: true }, meta: {} };
+    }
+  };
+  const router = createRelayRouter({ registry: reg, connector });
+
+  const result = await router.executeStepWithFallback({
+    step: { id: "s1", executor: { type: "model", role: "default_worker" } },
+    context: {},
+    options: { relay: { enabled: true, policy: ROUTING_POLICY.PREFER_RELAY } },
+    localExecute: async () => ({ output: { local: true }, meta: {} })
+  });
+
+  assert.strictEqual(result.meta.relay, true);
+  assert.strictEqual(result.meta.outputValid, true);
+});
+
 Promise.all(asyncChecks).then(() => {
   console.log(`\n${passed}/${passed + failed} relay unit tests passed`);
   process.exit(failed === 0 ? 0 : 1);

@@ -1,5 +1,7 @@
+const path = require("node:path");
 const { ROUTING_POLICY, NODE_STATUS, RELAY_FALLBACK_REASON } = require("./protocol");
 const { buildAuditEvent } = require("../core/audit-log");
+const { validateResult } = require("../core/result-validator");
 
 function resolveStepRole(step) {
   if (!step || !step.executor) {
@@ -94,14 +96,15 @@ function mapConnectorErrorToFallbackReason(error) {
   return RELAY_FALLBACK_REASON.RELAY_STEP_FAILED;
 }
 
-function wrapLocalFallback(localResult, fallbackReason) {
+function wrapLocalFallback(localResult, fallbackReason, extraMeta) {
   return {
     ...localResult,
     meta: {
       ...(localResult.meta || {}),
       relay: false,
       fallback: true,
-      fallbackReason
+      fallbackReason,
+      ...(extraMeta || {})
     }
   };
 }
@@ -199,6 +202,33 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
 
       registry.recordDispatch(node.nodeId, true);
 
+      if (step.executor && step.executor.schema) {
+        const schemaPath = path.resolve(__dirname, "..", "..", step.executor.schema);
+        const schema = require(schemaPath);
+        const validation = validateResult(remote.output, schema);
+        if (!validation.ok) {
+          const err = new Error("Remote output failed schema validation.");
+          err.code = "RELAY_INVALID_OUTPUT";
+          err.fallbackReason = RELAY_FALLBACK_REASON.INVALID_OUTPUT;
+          err.validationErrors = validation.errors;
+
+          await recordFallbackAudit({
+            step,
+            node,
+            error: err,
+            identity: meta,
+            runId: (meta && meta.run_id) || null,
+            fallbackReason: RELAY_FALLBACK_REASON.INVALID_OUTPUT
+          });
+
+          const localResult = await localExecute();
+          return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.INVALID_OUTPUT, {
+            outputValid: false,
+            outputValidationErrors: validation.errors
+          });
+        }
+      }
+
       return {
         output: remote.output,
         meta: {
@@ -206,7 +236,9 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
           nodeId: node.nodeId,
           relay: true,
           fallback: false,
-          fallbackReason: null
+          fallbackReason: null,
+          outputValid: true,
+          outputValidationErrors: []
         }
       };
     } catch (error) {
@@ -300,6 +332,33 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
 
       registry.recordDispatch(node.nodeId, true);
 
+      if (step.executor && step.executor.schema) {
+        const schemaPath = path.resolve(__dirname, "..", "..", step.executor.schema);
+        const schema = require(schemaPath);
+        const validation = validateResult(remote.output, schema);
+        if (!validation.ok) {
+          const err = new Error("Remote output failed schema validation.");
+          err.code = "RELAY_INVALID_OUTPUT";
+          err.fallbackReason = RELAY_FALLBACK_REASON.INVALID_OUTPUT;
+          err.validationErrors = validation.errors;
+
+          await recordFallbackAudit({
+            step,
+            node,
+            error: err,
+            identity: meta,
+            runId: (meta && meta.run_id) || null,
+            fallbackReason: RELAY_FALLBACK_REASON.INVALID_OUTPUT
+          });
+
+          const localResult = await localExecute();
+          return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.INVALID_OUTPUT, {
+            outputValid: false,
+            outputValidationErrors: validation.errors
+          });
+        }
+      }
+
       return {
         output: remote.output,
         meta: {
@@ -307,7 +366,9 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
           nodeId: node.nodeId,
           relay: true,
           fallback: false,
-          fallbackReason: null
+          fallbackReason: null,
+          outputValid: true,
+          outputValidationErrors: []
         }
       };
     } catch (error) {
