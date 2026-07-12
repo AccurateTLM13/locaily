@@ -220,13 +220,15 @@ function main() {
     // Reset run state for this milestone
     writeJson(STATE_PATH, { ...DEFAULT_STATE, objective: objectiveSlug });
 
-    // Run supervisor
+    // Run supervisor (SEQUENCER_MODE env tells supervisor to skip dirty-tree check)
     console.error(`[sequencer] launching supervisor for ${file}...`);
+    const childEnv = { ...process.env, SEQUENCER_MODE: "1" };
     const result = spawnSync(`"${process.execPath}"`, [SUPERVISOR_PATH], {
       cwd: PROJECT_ROOT,
       timeout: 0,
       shell: process.platform === "win32",
-      stdio: ["inherit", "inherit", "inherit"]
+      stdio: ["inherit", "inherit", "inherit"],
+      env: childEnv
     });
     console.error(`[sequencer] supervisor exit code: ${result.status}`);
 
