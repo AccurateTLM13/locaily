@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-11 (M5 complete + post-completion review: 4 implementation issues fixed + architectural review identifying M6 scope)
+**Updated:** 2026-07-12 (M6: durable job store wired into Local Brain; `/jobs` API endpoints implemented)
 
 ## Read First
 
@@ -121,30 +121,28 @@ Real URL validation set:
 
 ## Current Task
 
-M5 is complete and reviewed. The system can now distribute workflow steps across multiple relay nodes with local fallback. The architectural review identified four issues that need attention before the relay system can be used outside trusted development networks:
+The durable job store is now wired into the Local Brain server. The `/jobs` API endpoints (`POST /jobs`, `GET /jobs`, `GET /jobs/:id`) are implemented and tested. The next task is the background worker polling loop that claims and executes jobs from the store.
 
-### High: Relay communication has no visible trust boundary
-- No authentication token, signature, node certificate, request nonce, or pairing credential
-- Registration and heartbeat calls are unauthenticated
-- A rogue or accidentally registered LAN node could receive workflow context, user-derived content, and return manipulated results
-- **Current state:** Trusted-development-network only
+### Immediate Next: Background Worker (polling loop)
+- Create a background polling worker in `companion/jobs/worker.js` that periodically checks for claimable jobs
+- Claim queued jobs, execute them (calling existing track/workflow execution paths), and record results
+- Handle lease expiration and retry logic
 
-### Medium: Planned relay placement can silently become local execution
-- When an assigned node is missing or unhealthy, `executeStepWithAssignedNode()` falls back to local execution without recording a fallback audit
-- Run reports placement plan assigning step to relay node, but actual execution occurred locally with no recorded reason
-- **Consequence:** Planned and executed topology can diverge silently, weakening the evidence system
-
-### Medium: `local_first` defaults to effectively local-only
-- Every role is treated as locally capable when `localCapableRoles` is omitted
-- `local_first` immediately assigns locally when the role is considered locally capable
-- **Consequence:** Without explicit local-capability data, relay nodes are never used for model steps
-
-### Medium: "Approved evidence" was written with an agent as approver
-- Several new evidence records use `"approvedBy": "locaily-agent"`
-- Blurs distinction between generated, promoted, machine-reviewed, human-reviewed, and approved for qualification
-- **Fix:** Use `promotionActor` instead of `approvedBy`; reserve `approvedBy` for actual human approval
+### Follow-on: Human-gate endpoints
+- `POST /jobs/:id/review` for `paused_review` status transitions
+- Cancel, retry, and other mutation endpoints
 
 ## Completed Since Last Update
+
+- **Durable Job Store API (M6 operator-control-plane)** — completed 2026-07-12
+  - `createDurableJobStore` imported and initialized in server.js
+  - `POST /jobs` creates persistent background jobs for track and workflow types with schema validation
+  - `GET /jobs` lists all jobs with optional `?status=` and `?limit=` query filters
+  - `GET /jobs/:id` returns the full job record (or 404 for unknown jobs)
+  - `GET /health` includes `jobTotals` with counts by all seven job statuses
+  - Jobs persist to `data/jobs/*.json` and survive server restart
+  - 64 integration tests in `scripts/test-jobs-api.js` covering create, list, filter, get, health, and persistence
+  - Changes are additive — no existing endpoint shapes modified
 
 - **M2: Multi-Track Qualification & Enforcement** — completed 2026-07-11
   - Created 4 Benchmark Lab suites (accessibility-deep, performance-budget, seo-audit, dealsniper) with case files, output schemas, and validators
