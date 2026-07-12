@@ -444,6 +444,35 @@ check("registry accepts any capability when no allowlist is configured (backward
   assert.strictEqual(node.nodeId, "a5");
 });
 
+check("registry accepts allowed host when allowlist is configured", () => {
+  const reg = createRelayRegistry({ allowedHosts: new Set(["127.0.0.1", "localhost"]) });
+  const node = reg.register({ nodeId: "h1", baseUrl: "http://127.0.0.1:31314", capabilities: ["default_worker"] });
+  assert.strictEqual(node.nodeId, "h1");
+});
+
+check("registry rejects denied host with RELAY_HOST_NOT_ALLOWED", () => {
+  const reg = createRelayRegistry({ allowedHosts: new Set(["127.0.0.1"]) });
+  let caught;
+  try { reg.register({ nodeId: "h2", baseUrl: "http://192.168.1.100:31314", capabilities: ["default_worker"] }); } catch (e) { caught = e; }
+  assert.ok(caught, "expected throw for denied host");
+  assert.strictEqual(caught.code, "RELAY_HOST_NOT_ALLOWED");
+  assert.ok(caught.message.includes("192.168.1.100"), "error message should name the denied hostname");
+});
+
+check("registry accepts localhost variants when both are in allowlist", () => {
+  const reg = createRelayRegistry({ allowedHosts: new Set(["127.0.0.1", "localhost"]) });
+  const nodeA = reg.register({ nodeId: "h3a", baseUrl: "http://127.0.0.1:31314", capabilities: ["default_worker"] });
+  assert.strictEqual(nodeA.nodeId, "h3a");
+  const nodeB = reg.register({ nodeId: "h3b", baseUrl: "http://localhost:31314", capabilities: ["default_worker"] });
+  assert.strictEqual(nodeB.nodeId, "h3b");
+});
+
+check("registry accepts any host when no allowlist is configured (backward compat)", () => {
+  const reg = createRelayRegistry();
+  const node = reg.register({ nodeId: "h4", baseUrl: "http://10.0.0.5:31314", capabilities: ["default_worker"] });
+  assert.strictEqual(node.nodeId, "h4");
+});
+
 Promise.all(asyncChecks).then(() => {
   console.log(`\n${passed}/${passed + failed} relay unit tests passed`);
   process.exit(failed === 0 ? 0 : 1);

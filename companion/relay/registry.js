@@ -28,6 +28,30 @@ function createRelayRegistry(options = {}) {
   const nodes = new Map();
   const staleMs = options.staleMs || HEALTH_STALE_MS;
   const allowedCapabilities = options.allowedCapabilities || null;
+  const allowedHosts = options.allowedHosts || null;
+
+  function validateHost(baseUrl) {
+    if (!allowedHosts) {
+      return;
+    }
+
+    let hostname;
+    try {
+      hostname = new URL(baseUrl).hostname;
+    } catch (_) {
+      const error = new Error(`Invalid baseUrl "${baseUrl}".`);
+      error.code = "RELAY_BASE_URL_INVALID";
+      throw error;
+    }
+
+    if (!allowedHosts.has(hostname)) {
+      const error = new Error(
+        `Host "${hostname}" is not in the relay allowlist. Allowed: ${[...allowedHosts].join(", ")}.`
+      );
+      error.code = RELAY_VALIDATION_CODES.RELAY_HOST_NOT_ALLOWED;
+      throw error;
+    }
+  }
 
   function validateCapabilities(capabilities) {
     if (!allowedCapabilities || !Array.isArray(capabilities)) {
@@ -87,6 +111,8 @@ function createRelayRegistry(options = {}) {
         error.code = "RELAY_BASE_URL_REQUIRED";
         throw error;
       }
+
+      validateHost(baseUrl);
 
       if (protocolVersion !== undefined && protocolVersion !== null && String(protocolVersion) !== PROTOCOL_VERSION) {
         const error = new Error(

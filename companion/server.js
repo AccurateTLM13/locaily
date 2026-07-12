@@ -214,7 +214,12 @@ const relayAllowedCapabilities =
   relayCapabilityAllowlistEnv && relayCapabilityAllowlistEnv !== "*"
     ? new Set(relayCapabilityAllowlistEnv.split(",").map((s) => s.trim()).filter(Boolean))
     : null;
-const relayRegistry = createRelayRegistry({ staleMs: 60 * 1000, allowedCapabilities: relayAllowedCapabilities });
+const relayHostAllowlistEnv = process.env.RELAY_ALLOWLIST;
+const relayAllowedHosts =
+  relayHostAllowlistEnv && relayHostAllowlistEnv !== "*"
+    ? new Set(relayHostAllowlistEnv.split(",").map((s) => s.trim()).filter(Boolean))
+    : null;
+const relayRegistry = createRelayRegistry({ staleMs: 60 * 1000, allowedCapabilities: relayAllowedCapabilities, allowedHosts: relayAllowedHosts });
 const relayToken = process.env.RELAY_TOKEN || null;
 const relayConnector = createRelayConnector({ timeoutMs: 15000, token: relayToken });
 const relayAuth = relayToken ? createRelayAuth({ token: relayToken }) : null;
