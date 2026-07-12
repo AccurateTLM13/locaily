@@ -1058,10 +1058,10 @@ const server = http.createServer(async (request, response) => {
         }
       }
 
-      const { nodeId, baseUrl, label, capabilities, hardware } = bodyResult.body || {};
+      const { nodeId, baseUrl, label, capabilities, hardware, protocolVersion, overwrite } = bodyResult.body || {};
 
       try {
-        const node = relayRegistry.register({ nodeId, baseUrl, label, capabilities, hardware });
+        const node = relayRegistry.register({ nodeId, baseUrl, label, capabilities, hardware, protocolVersion, overwrite });
         return sendJson(response, 200, { ok: true, node });
       } catch (error) {
         return sendJson(response, 400, {

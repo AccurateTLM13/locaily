@@ -60,6 +60,44 @@ check("registry rejects registration without nodeId/baseUrl", () => {
   assert.throws(() => reg.register({ nodeId: "b" }), { code: "RELAY_BASE_URL_REQUIRED" });
 });
 
+check("registry rejects duplicate nodeId without overwrite", () => {
+  const reg = createRelayRegistry();
+  reg.register({ nodeId: "dup", baseUrl: "http://dup:1" });
+  let caught;
+  try { reg.register({ nodeId: "dup", baseUrl: "http://dup:2" }); } catch (e) { caught = e; }
+  assert.ok(caught, "expected throw for duplicate nodeId");
+  assert.strictEqual(caught.code, "RELAY_NODE_DUPLICATE");
+});
+
+check("registry allows duplicate nodeId with overwrite: true", () => {
+  const reg = createRelayRegistry();
+  reg.register({ nodeId: "dup", baseUrl: "http://dup:1", label: "first" });
+  const updated = reg.register({ nodeId: "dup", baseUrl: "http://dup:2", label: "second", overwrite: true });
+  assert.strictEqual(updated.baseUrl, "http://dup:2");
+  assert.strictEqual(updated.label, "second");
+  assert.strictEqual(reg.list().length, 1);
+});
+
+check("registry rejects unsupported protocolVersion", () => {
+  const reg = createRelayRegistry();
+  let caught;
+  try { reg.register({ nodeId: "pv", baseUrl: "http://pv:1", protocolVersion: "0.9" }); } catch (e) { caught = e; }
+  assert.ok(caught, "expected throw for unsupported protocolVersion");
+  assert.strictEqual(caught.code, "RELAY_PROTOCOL_VERSION_UNSUPPORTED");
+});
+
+check("registry accepts protocolVersion 1.0", () => {
+  const reg = createRelayRegistry();
+  const node = reg.register({ nodeId: "pv1", baseUrl: "http://pv1:1", protocolVersion: "1.0" });
+  assert.strictEqual(node.nodeId, "pv1");
+});
+
+check("registry accepts missing protocolVersion (backward compat)", () => {
+  const reg = createRelayRegistry();
+  const node = reg.register({ nodeId: "pvm", baseUrl: "http://pvm:1" });
+  assert.strictEqual(node.nodeId, "pvm");
+});
+
 check("registry selectForRole picks capable healthy node", () => {
   const reg = createRelayRegistry();
   reg.register({ nodeId: "b", baseUrl: "http://b:1", capabilities: ["developer_task_writer"] });

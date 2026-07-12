@@ -25,6 +25,11 @@ const RELAY_AUTH_CODES = {
   RELAY_AUTH_REQUIRED: "RELAY_AUTH_REQUIRED"
 };
 
+const RELAY_VALIDATION_CODES = {
+  RELAY_NODE_DUPLICATE: "RELAY_NODE_DUPLICATE",
+  RELAY_PROTOCOL_VERSION_UNSUPPORTED: "RELAY_PROTOCOL_VERSION_UNSUPPORTED"
+};
+
 function isSupportedProtocolVersion(version) {
   if (!version) {
     return true;
@@ -80,6 +85,7 @@ module.exports = {
   NODE_STATUS,
   ROUTING_POLICY,
   RELAY_AUTH_CODES,
+  RELAY_VALIDATION_CODES,
   isSupportedProtocolVersion,
   capabilityKey,
   describeProtocol
