@@ -32,6 +32,16 @@ const RELAY_VALIDATION_CODES = {
   RELAY_HOST_NOT_ALLOWED: "RELAY_HOST_NOT_ALLOWED"
 };
 
+const RELAY_FALLBACK_REASON = {
+  NODE_MISSING: "node_missing",
+  NODE_UNHEALTHY: "node_unhealthy",
+  RELAY_DISABLED: "relay_disabled",
+  CONNECTOR_UNAVAILABLE: "connector_unavailable",
+  RELAY_STEP_FAILED: "relay_step_failed",
+  RELAY_TIMEOUT: "relay_timeout",
+  INVALID_OUTPUT: "invalid_output"
+};
+
 function isSupportedProtocolVersion(version) {
   if (!version) {
     return true;
@@ -88,6 +98,7 @@ module.exports = {
   ROUTING_POLICY,
   RELAY_AUTH_CODES,
   RELAY_VALIDATION_CODES,
+  RELAY_FALLBACK_REASON,
   isSupportedProtocolVersion,
   capabilityKey,
   describeProtocol

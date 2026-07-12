@@ -160,6 +160,10 @@ async function runTrack({
         shadowRouting: stepResult.meta?.shadowRouting || null,
         enforcementDecision: stepResult.meta?.enforcementDecision || null,
         durationMs: stepResult.meta?.durationMs || 0,
+        relayNodeId: stepResult.meta?.nodeId || null,
+        relay: stepResult.meta?.relay || false,
+        fallback: stepResult.meta?.fallback || false,
+        fallbackReason: stepResult.meta?.fallbackReason || null,
         output: stepResult.output
       });
     }
@@ -212,6 +216,10 @@ async function runTrack({
         shadowRouting: stepResult.meta.shadowRouting || null,
         enforcementDecision: stepResult.meta.enforcementDecision || null,
         durationMs: stepResult.meta.durationMs,
+        relayNodeId: stepResult.meta.nodeId || null,
+        relay: stepResult.meta.relay || false,
+        fallback: stepResult.meta.fallback || false,
+        fallbackReason: stepResult.meta.fallbackReason || null,
         output: stepResult.output
       });
     }

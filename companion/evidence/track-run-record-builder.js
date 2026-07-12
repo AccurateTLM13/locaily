@@ -57,6 +57,10 @@ function buildTrackRunRecord(options = {}) {
     fallbackUsed: options.fallbackUsed || false
   };
 
+  if (options.fallbackReason) {
+    execution.fallbackReason = options.fallbackReason;
+  }
+
   if (executorType === "model" && options.modelInfo) {
     execution.modelInfo = { ...options.modelInfo };
   }
