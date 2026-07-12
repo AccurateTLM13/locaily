@@ -2,7 +2,7 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-07-12 (M6 scope: durable job store wired into Local Brain; `/jobs` API endpoints added: `POST /jobs`, `GET /jobs`, `GET /jobs/:id`, `POST /jobs/:id/cancel`, `POST /jobs/:id/retry`, `POST /jobs/:id/review`; `jobTotals` in `/health` response; background worker polling loop automatically claims and executes queued jobs; cancel/retry/review mutation endpoints for operator control)
+**Updated:** 2026-07-12 (M6 scope: durable job store wired into Local Brain; `/jobs` API endpoints added: `POST /jobs`, `GET /jobs`, `GET /jobs/:id`, `POST /jobs/:id/cancel`, `POST /jobs/:id/retry`, `POST /jobs/:id/review`; `jobTotals` in `/health` response; background worker polling loop automatically claims and executes queued jobs; cancel/retry/review mutation endpoints for operator control; operator console UI at `/operator`)
 
 ## What Works
 
@@ -50,6 +50,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **6 total qualified capabilities** across 5 tracks
 - **Qualification dashboard** - `GET /qualifications/dashboard` with per-model, per-track, per-role breakdown
 - **All 4 new tracks in shadow enforcement** - collecting routing evidence for future enforcement
+- **Operator Console UI** - `companion/operator/index.html` served at `GET /operator`; single-page dashboard with four panels (Dashboard, Jobs, Relay Nodes, Enqueue). Uses dark theme CSS custom properties, keyboard shortcuts (1-4/R/Esc), auto-refresh, job detail overlay with action buttons (Cancel/Retry/Request Review/Approve/Reject/Request Correction/Stop), confirmation dialogs with optional reason input, outcome layer badges (transport/execution/enforcement/human), relay node status with health indicators, enqueue form, and full ARIA accessibility. Static files served from `companion/operator/`. 34 integration tests in `scripts/test-operator-console.js`.
 
 ## What Is Partial
 
@@ -133,7 +134,7 @@ The North Star is now documented as a local capability network: decompose work i
 
 | Layer | Focus |
 |---|---|
-| **Now** | M6: Operator Control Plane — durable job store API, background worker polling loop (claims + executes queued jobs), cancel/retry/review mutation endpoints (POST /jobs/:id/cancel, /retry, /review with paused_review transitions) |
+| **Now** | M6: Operator Control Plane — durable job store API, background worker polling loop (claims + executes queued jobs), cancel/retry/review mutation endpoints (POST /jobs/:id/cancel, /retry, /review with paused_review transitions), operator console UI at /operator |
 | **Next** | Broader model qualification coverage; live Ollama qualification runs; operator-log tracks qualification; Model Garage evaluation harness (Phase 2 — spec only until evidence) |
 | **Later** | Lighthouse canonical-path documentation; workflow audit summary hardening; Desktop Companion UI (deferred); automatic track classification |
 | **Archive** | Old companion-only architecture, pre-track planning docs |

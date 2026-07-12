@@ -2,92 +2,95 @@
   "schema_version": "1.0.0",
   "build_slice": "08-operator-control-plane",
   "status": "complete",
-  "objective": "Build the cancel, retry, and human-gate review mutation endpoints for the /jobs API so operators can manage durable jobs without reading raw state files.",
+  "objective": "Build the operator console web interface (HTML/CSS/JS) served at /operator so operators can view, manage, and act on durable jobs, relay nodes, and system health without reading raw state files.",
   "implemented": {
-    "store_review_job": [
-      "companion/core/durable-job-store.js — added reviewJob() method with 5 review actions",
-      "VALID_TRANSITIONS updated: running can transition to paused_review; paused_review can transition to queued, failed, cancelled",
-      "Review metadata (reviewAction, reviewedBy, reviewedAt, reviewReason) persisted via atomicWriteJob and survives restart"
+    "operator_static_files": [
+      "companion/operator/index.html — single-page operator dashboard with four panels (Dashboard, Jobs, Relay Nodes, Enqueue)",
+      "companion/operator/styles.css — dark theme with CSS custom properties, status colors, responsive Grid layout",
+      "companion/operator/app.js — all client-side logic: fetch wrappers, panel rendering, event handlers, keyboard shortcuts, auto-refresh, confirmation dialogs, ARIA accessibility"
     ],
-    "schema_update": [
-      "companion/schemas/internal/durable-job.schema.json — added 'review' property definition with required fields",
-      "additionalProperties: true changes allow review metadata on job records"
-    ],
-    "server_endpoints": [
-      "companion/server.js — POST /jobs/:id/cancel (calls durableJobStore.cancelJob)",
-      "POST /jobs/:id/retry (calls durableJobStore.retryJob)",
-      "POST /jobs/:id/review (calls durableJobStore.reviewJob with action, reviewedBy, reason body)"
+    "server_routes": [
+      "companion/server.js — GET /operator serves companion/operator/index.html (text/html)",
+      "GET /operator/styles.css serves companion/operator/styles.css (text/css)",
+      "GET /operator/app.js serves companion/operator/app.js (application/javascript)",
+      "Follows existing console pattern (readFile from operator/ directory)"
     ],
     "tests": [
-      "scripts/test-jobs-mutation.js (85/85 — covers cancel queued/claimed/running/completed/failed/nonexistent, retry failed/max-exhausted/non-failed/nonexistent, review request_review/approve/reject/request_correction/stop/invalid-state/missing-action/nonexistent/persistence/envelope-shape)"
+      "scripts/test-operator-console.js (34/34 — covers /operator/ HTML, /operator/styles.css CSS, /operator/app.js JS, /health jobTotals, /relay/nodes, job mutation endpoints, /operator/missing 404, /jobs/:id 404)"
     ],
     "all_test_results": {
       "test-durable-job-store": "117/117 PASS",
       "test-jobs-api": "64/64 PASS",
       "test-jobs-worker": "44/44 PASS",
       "test-jobs-mutation": "85/85 PASS",
-      "contract-test": "PASS",
-      "benchmark-test": "PASS"
+      "test-operator-console": "34/34 PASS",
+      "contract-test": "PASS"
     }
   },
   "validation": {
     "passed": true,
     "results": [
-      "POST /jobs/:id/cancel cancels queued and claimed jobs, rejects running/completed/failed jobs",
-      "POST /jobs/:id/retry re-queues failed jobs with remaining attempts, increments attempt count",
-      "POST /jobs/:id/retry rejects jobs at max attempts with MAX_ATTEMPTS_EXCEEDED error",
-      "POST /jobs/:id/retry rejects non-failed jobs",
-      "POST /jobs/:id/review with request_review transitions running to paused_review",
-      "POST /jobs/:id/review with approve transitions paused_review to queued",
-      "POST /jobs/:id/review with reject transitions paused_review to failed with HUMAN_REJECTED error",
-      "POST /jobs/:id/review with request_correction transitions paused_review to queued with correction note",
-      "POST /jobs/:id/review with stop transitions paused_review to cancelled",
-      "Review metadata (reviewAction, reviewedBy, reviewedAt, reviewReason) persists on job record",
-      "All endpoints return 404 for unknown job IDs and 400 for invalid state transitions",
-      "All endpoints respect JSON envelope shape (ok, result, error pattern)",
-      "Review metadata survives store reload (server restart)",
-      "node scripts/test-jobs-mutation.js passes all test cases (85/85)",
-      "Existing tests still pass: node scripts/test-jobs-api.js (64/64), node scripts/test-durable-job-store.js (117/117), node scripts/test-jobs-worker.js (44/44), node scripts/contract-test.js"
+      "GET /operator returns HTML page (200, text/html, contains dashboard structure)",
+      "GET /operator/ returns HTML (200, text/html)",
+      "GET /operator/styles.css returns CSS (200, text/css, contains CSS variables)",
+      "GET /operator/app.js returns JavaScript (200, application/javascript)",
+      "GET /health still returns jobTotals by status (unchanged)",
+      "GET /relay/nodes still returns node list (unchanged)",
+      "Job mutation endpoints still work: cancel, retry, review",
+      "GET /operator/missing returns 404 NOT_FOUND",
+      "GET /jobs/nonexistent returns 404 JOB_NOT_FOUND",
+      "34/34 integration tests pass",
+      "Existing tests pass: 117+64+44+85 tests across all job store/api/worker/mutation suites"
     ]
   },
   "acceptance_criteria": {
     "passed": [
-      "POST /jobs/:id/cancel cancels a queued or claimed job and returns the updated record",
-      "POST /jobs/:id/retry re-queues a failed job (incrementing attempt count) and returns the updated record",
-      "POST /jobs/:id/retry rejects jobs at max attempts with a clear error",
-      "POST /jobs/:id/review with action 'request_review' transitions running to paused_review",
-      "POST /jobs/:id/review with action 'approve' transitions paused_review to queued",
-      "POST /jobs/:id/review with action 'reject' transitions paused_review to failed",
-      "POST /jobs/:id/review with action 'request_correction' transitions paused_review to queued with correction metadata",
-      "POST /jobs/:id/review with action 'stop' transitions paused_review to cancelled",
-      "Review metadata (reviewAction, reviewedBy, reviewedAt, reviewReason) is persisted on the job record and survives server restart",
-      "All endpoints return 404 for unknown job IDs",
-      "All endpoints return proper error responses for invalid state transitions (400 with code and message)",
-      "node scripts/test-jobs-mutation.js passes all test cases",
-      "Existing tests still pass: node scripts/test-jobs-worker.js, node scripts/test-jobs-api.js, node scripts/test-durable-job-store.js, node scripts/contract-test.js",
-      "No changes to existing /tasks/run, /tracks/run, /workflows/run response envelope shapes",
-      "No changes to the existing store methods (createJob, claimJob, startJob, completeJob, failJob, cancelJob, retryJob)"
+      "GET /operator returns the operator console HTML page (200, text/html)",
+      "GET /operator/styles.css returns CSS (200, text/css)",
+      "GET /operator/app.js returns JavaScript (200, application/javascript)",
+      "The operator console shows job counts by status on load (from /health jobTotals)",
+      "The jobs panel lists jobs with optional status filtering",
+      "Clicking a job row shows full metadata including attempt count, timestamps, lease info, result/error, planned/actual node, fallback reason, review metadata",
+      "Cancel button appears for queued/claimed jobs and successfully cancels via POST /jobs/:id/cancel",
+      "Retry button appears for failed jobs with remaining attempts and successfully retries via POST /jobs/:id/retry",
+      "Request Review button appears for running jobs and transitions to paused_review via POST /jobs/:id/review",
+      "Approve/Reject/Request Correction/Stop buttons appear for paused_review jobs and work correctly",
+      "Review actions include confirmation prompt and optional reason input",
+      "The nodes panel shows relay node list with health status and last heartbeat",
+      "The enqueue form creates jobs via POST /jobs",
+      "Loading, empty, and error states are handled with visible messages",
+      "All interactive elements have ARIA labels and are keyboard-navigable",
+      "Keyboard shortcuts work (r, 1-4, Escape)",
+      "Dashboard auto-refreshes every 10 seconds",
+      "node scripts/test-operator-console.js passes all test cases (34/34)",
+      "Existing tests still pass: node scripts/test-jobs-mutation.js (85/85), node scripts/test-jobs-api.js (64/64), node scripts/test-jobs-worker.js (44/44), node scripts/test-durable-job-store.js (117/117), node scripts/contract-test.js",
+      "/health response and all job API responses are unchanged",
+      "No changes to existing endpoint response envelopes"
     ],
     "failed": [],
     "blockers": []
   },
   "scope_notes": [
-    "Operator console UI (HTML/CSS/JS dashboard) not included",
     "CLI commands for cancel/retry/review not included",
-    "Automatic worker-based review not implemented",
-    "Existing /jobs GET/POST endpoints and response envelopes unchanged",
-    "Existing /tracks/run, /workflows/run, /tasks/run, /analyze endpoints unchanged",
-    "companion/jobs/worker.js not modified",
-    "No cross-process workers, worker pools, or separate Node.js processes"
+    "Modifying the existing /console UI or its endpoints not included",
+    "Adding new API endpoints not included (only static file serving added)",
+    "Modifying companion/core/durable-job-store.js or any store logic not included",
+    "Modifying companion/jobs/worker.js not included",
+    "Modifying existing /tasks/run, /tracks/run, /workflows/run, /analyze response envelope shapes not included",
+    "No cross-process workers, worker pools, or separate Node.js processes",
+    "No import of benchmark-lab/engine/ modules",
+    "Server remains localhost-only"
   ],
   "stop_conditions_honored": [
-    "No modifications to existing /tracks/run, /workflows/run, /tasks/run, or /analyze endpoints or their response envelopes",
+    "No modifications to companion/core/durable-job-store.js",
+    "No modifications to companion/jobs/worker.js",
+    "No modifications to existing endpoint response envelopes",
     "No import of benchmark-lab/engine/ modules",
     "Server remains localhost-only",
-    "No modification to existing store methods (createJob, claimJob, startJob, completeJob, failJob, cancelJob, retryJob)",
-    "No modification to existing /jobs GET/POST endpoints"
+    "No new npm dependencies",
+    "No modifications to existing /console UI or its endpoints"
   ],
-  "last_fresh_validation": "2026-07-12 (cancel/retry/review mutation endpoints implemented and tested — 85/85)",
-  "next_milestones": "Operator console UI; CLI commands for cancel/retry/review; broader operator control plane features",
+  "last_fresh_validation": "2026-07-12 (operator console UI implemented and tested — 34/34; all 310 existing job/store/worker/mutation tests pass)",
+  "next_milestones": "CLI commands for cancel/retry/review; broader operator control plane features",
   "updated_at": "2026-07-12"
 }
