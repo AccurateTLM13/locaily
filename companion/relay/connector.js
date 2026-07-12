@@ -13,6 +13,17 @@ function defaultFetch() {
 function createRelayConnector(options = {}) {
   const fetchImpl = options.fetch || defaultFetch();
   const timeoutMs = options.timeoutMs || 15000;
+  const token = options.token || null;
+
+  function buildHeaders() {
+    const headers = { "Content-Type": "application/json" };
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    return headers;
+  }
 
   async function postJson(url, body) {
     const controller = new AbortController();
@@ -21,7 +32,7 @@ function createRelayConnector(options = {}) {
     try {
       const response = await fetchImpl(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: buildHeaders(),
         body: JSON.stringify(body),
         signal: controller.signal
       });

@@ -19,6 +19,29 @@ const ROUTING_POLICY = {
   LOCAL_ONLY: "local_only"
 };
 
+const RELAY_AUTH_CODES = {
+  RELAY_AUTH_MISSING: "RELAY_AUTH_MISSING",
+  RELAY_AUTH_INVALID: "RELAY_AUTH_INVALID",
+  RELAY_AUTH_REQUIRED: "RELAY_AUTH_REQUIRED"
+};
+
+const RELAY_VALIDATION_CODES = {
+  RELAY_NODE_DUPLICATE: "RELAY_NODE_DUPLICATE",
+  RELAY_PROTOCOL_VERSION_UNSUPPORTED: "RELAY_PROTOCOL_VERSION_UNSUPPORTED",
+  RELAY_CAPABILITY_UNAUTHORIZED: "RELAY_CAPABILITY_UNAUTHORIZED",
+  RELAY_HOST_NOT_ALLOWED: "RELAY_HOST_NOT_ALLOWED"
+};
+
+const RELAY_FALLBACK_REASON = {
+  NODE_MISSING: "node_missing",
+  NODE_UNHEALTHY: "node_unhealthy",
+  RELAY_DISABLED: "relay_disabled",
+  CONNECTOR_UNAVAILABLE: "connector_unavailable",
+  RELAY_STEP_FAILED: "relay_step_failed",
+  RELAY_TIMEOUT: "relay_timeout",
+  INVALID_OUTPUT: "invalid_output"
+};
+
 function isSupportedProtocolVersion(version) {
   if (!version) {
     return true;
@@ -73,6 +96,9 @@ module.exports = {
   STEP_ROLE,
   NODE_STATUS,
   ROUTING_POLICY,
+  RELAY_AUTH_CODES,
+  RELAY_VALIDATION_CODES,
+  RELAY_FALLBACK_REASON,
   isSupportedProtocolVersion,
   capabilityKey,
   describeProtocol

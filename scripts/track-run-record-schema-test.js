@@ -1,6 +1,7 @@
 const path = require("node:path");
 const { readJson } = require("../benchmark-lab/engine/fs-utils");
 const { validateSchema } = require("../benchmark-lab/engine/schema-validator");
+const { buildTrackRunRecord } = require("../companion/evidence/track-run-record-builder");
 
 const ROOT = path.resolve(__dirname, "..");
 
@@ -49,6 +50,43 @@ async function main() {
       console.log(`ok ${fixture.label} (invalid fails as expected)`);
     }
   }
+
+  const schema = await readJson(path.join(ROOT, "companion/evidence/schemas/track-run-record.schema.json"));
+
+  function stripNulls(obj) {
+    if (Array.isArray(obj)) return obj.map(stripNulls);
+    if (obj && typeof obj === "object") {
+      const result = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (v === null || v === undefined) continue;
+        result[k] = stripNulls(v);
+      }
+      return result;
+    }
+    return obj;
+  }
+
+  const withPlacement = stripNulls(buildTrackRunRecord({
+    trackId: "placement-test",
+    executorType: "model",
+    status: "success",
+    durationMs: 100,
+    plannedPlacement: { target: "relay", nodeId: "node-a" },
+    actualPlacement: { target: "relay", nodeId: "node-a" }
+  }));
+  const withPlacementResult = validateSchema(withPlacement, schema, "built-record-with-placement");
+  assert(withPlacementResult.ok, `built record with placement should pass. Errors: ${withPlacementResult.errors.join(" ")}`);
+  console.log("ok built record with plannedPlacement and actualPlacement (valid)");
+
+  const withoutPlacement = stripNulls(buildTrackRunRecord({
+    trackId: "no-placement-test",
+    executorType: "tool",
+    status: "success",
+    durationMs: 50
+  }));
+  const withoutPlacementResult = validateSchema(withoutPlacement, schema, "built-record-without-placement");
+  assert(withoutPlacementResult.ok, `built record without placement should pass. Errors: ${withoutPlacementResult.errors.join(" ")}`);
+  console.log("ok built record without plannedPlacement/actualPlacement (valid, backward compatible)");
 }
 
 function assert(condition, message) {

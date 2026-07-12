@@ -53,6 +53,7 @@ const { createQualificationResolver } = require("./core/qualification-resolver")
 const { createCapabilityRegistry } = require("./core/capability-registry");
 const { createRelayRegistry } = require("./relay/registry");
 const { createRelayConnector } = require("./relay/connector");
+const { createRelayAuth } = require("./relay/auth");
 const { createRelayRouter, executeStepViaRelayIfNeeded, ROUTING_POLICY } = require("./relay/router");
 const { buildPlacementFromTrack } = require("./relay/placement");
 const { describeProtocol } = require("./relay/protocol");
@@ -208,8 +209,20 @@ const localSetupStore = createLocalSetupStore({
   dataDir: join(__dirname, "..", "data")
 });
 
-const relayRegistry = createRelayRegistry({ staleMs: 60 * 1000 });
-const relayConnector = createRelayConnector({ timeoutMs: 15000 });
+const relayCapabilityAllowlistEnv = process.env.RELAY_CAPABILITY_ALLOWLIST;
+const relayAllowedCapabilities =
+  relayCapabilityAllowlistEnv && relayCapabilityAllowlistEnv !== "*"
+    ? new Set(relayCapabilityAllowlistEnv.split(",").map((s) => s.trim()).filter(Boolean))
+    : null;
+const relayHostAllowlistEnv = process.env.RELAY_ALLOWLIST;
+const relayAllowedHosts =
+  relayHostAllowlistEnv && relayHostAllowlistEnv !== "*"
+    ? new Set(relayHostAllowlistEnv.split(",").map((s) => s.trim()).filter(Boolean))
+    : null;
+const relayRegistry = createRelayRegistry({ staleMs: 60 * 1000, allowedCapabilities: relayAllowedCapabilities, allowedHosts: relayAllowedHosts });
+const relayToken = process.env.RELAY_TOKEN || null;
+const relayConnector = createRelayConnector({ timeoutMs: 15000, token: relayToken });
+const relayAuth = relayToken ? createRelayAuth({ token: relayToken }) : null;
 const relayRouter = createRelayRouter({ registry: relayRegistry, connector: relayConnector, auditLog });
 
 configurePageSpeed({
@@ -1044,10 +1057,21 @@ const server = http.createServer(async (request, response) => {
         });
       }
 
-      const { nodeId, baseUrl, label, capabilities, hardware } = bodyResult.body || {};
+      if (relayAuth) {
+        const authErr = relayAuth.verifyRequest(request);
+
+        if (authErr) {
+          return sendJson(response, 401, {
+            ok: false,
+            error: authErr
+          });
+        }
+      }
+
+      const { nodeId, baseUrl, label, capabilities, hardware, protocolVersion, overwrite } = bodyResult.body || {};
 
       try {
-        const node = relayRegistry.register({ nodeId, baseUrl, label, capabilities, hardware });
+        const node = relayRegistry.register({ nodeId, baseUrl, label, capabilities, hardware, protocolVersion, overwrite });
         return sendJson(response, 200, { ok: true, node });
       } catch (error) {
         return sendJson(response, 400, {
@@ -1067,6 +1091,17 @@ const server = http.createServer(async (request, response) => {
           code: "BAD_JSON",
           message: "Request body could not be parsed as JSON."
         });
+      }
+
+      if (relayAuth) {
+        const authErr = relayAuth.verifyRequest(request);
+
+        if (authErr) {
+          return sendJson(response, 401, {
+            ok: false,
+            error: authErr
+          });
+        }
       }
 
       const { nodeId, capabilities, hardware } = bodyResult.body || {};
@@ -1092,6 +1127,17 @@ const server = http.createServer(async (request, response) => {
           code: "BAD_JSON",
           message: "Request body could not be parsed as JSON."
         });
+      }
+
+      if (relayAuth) {
+        const authErr = relayAuth.verifyRequest(request);
+
+        if (authErr) {
+          return sendJson(response, 401, {
+            ok: false,
+            error: authErr
+          });
+        }
       }
 
       const { nodeId } = bodyResult.body || {};
@@ -1164,6 +1210,17 @@ const server = http.createServer(async (request, response) => {
           message: "Request body could not be parsed as JSON.",
           nextStep: "Send a relay step dispatch object."
         });
+      }
+
+      if (relayAuth) {
+        const authErr = relayAuth.verifyRequest(request);
+
+        if (authErr) {
+          return sendJson(response, 401, {
+            ok: false,
+            error: authErr
+          });
+        }
       }
 
       const { step, context, options, meta } = bodyResult.body || {};
@@ -2802,8 +2859,15 @@ async function executeTrackRunRequest(body, context) {
       trackSuccessBody.evidence = evidenceRef;
     }
 
-    if (trackOptions.relay && trackOptions.relay.placementSummary) {
-      trackSuccessBody.relay_placement = trackOptions.relay.placementSummary;
+    {
+      const planned = (trackOptions.relay && trackOptions.relay.placementSummary) || null;
+      const actual = (trackResult.steps || []).map((step) => ({
+        stepId: step.name,
+        target: step.actualTarget || "local",
+        nodeId: step.actualNodeId || null,
+        matched: (step.actualNodeId || null) === (step.plannedNodeId || null)
+      }));
+      trackSuccessBody.relay_placement = { planned, actual };
     }
 
     return {
@@ -3251,8 +3315,22 @@ async function executeWorkflowRunRequest(body, context) {
       workflowSuccessBody.evidence = evidenceRef;
     }
 
-    if (runPlanOptions.relay && runPlanOptions.relay.placementSummary) {
-      workflowSuccessBody.relay_placement = runPlanOptions.relay.placementSummary;
+    {
+      const planned = (runPlanOptions.relay && runPlanOptions.relay.placementSummary) || null;
+      const assignments = (runPlanOptions.relay && runPlanOptions.relay.assignments) || {};
+      const actual = (execution.plan.steps || []).map((step) => {
+        const wu = step.worker_used || {};
+        const plannedAssignment = assignments[step.step_id] || {};
+        const actualNodeId = wu.node_id || null;
+        const plannedNodeId = plannedAssignment.nodeId || null;
+        return {
+          stepId: step.step_id,
+          target: wu.routed_via === "relay" ? "relay" : "local",
+          nodeId: actualNodeId,
+          matched: actualNodeId === plannedNodeId
+        };
+      });
+      workflowSuccessBody.relay_placement = { planned, actual };
     }
 
     return {
