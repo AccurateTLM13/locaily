@@ -57,8 +57,9 @@ function currentBranch() {
   return r.status === 0 ? (r.stdout || "").trim() : null;
 }
 
-function checkout(branch, create = false) {
+function checkout(branch, create = false, force = false) {
   const args = create ? ["checkout", "-b", branch] : ["checkout", branch];
+  if (force) args.push("--force");
   const r = git(args, { shell: process.platform === "win32" });
   return r.status === 0;
 }
@@ -176,8 +177,7 @@ function main() {
     const onBranch = currentBranch();
     if (onBranch !== baseBranch) {
       console.error(`[sequencer] resetting to ${baseBranch} (currently on ${onBranch})`);
-      // Force checkout, discarding local worker-branch changes
-      if (!checkout(baseBranch)) {
+      if (!checkout(baseBranch, false, true)) {
         console.error(`[sequencer] cannot checkout ${baseBranch} — aborting`);
         results.push({ file, status: "failed", reason: "checkout_failed" });
         break;
