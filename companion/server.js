@@ -1,5 +1,6 @@
 const http = require("node:http");
 const { readFileSync } = require("node:fs");
+const { readFile } = require("node:fs/promises");
 const { join } = require("node:path");
 const { createRunIdentity } = require("./core/ids");
 const {
@@ -333,6 +334,22 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && consoleAsset) {
       return sendContent(response, consoleAsset.statusCode, consoleAsset.contentType, consoleAsset.body);
+    }
+
+    // Operator console static files
+    if (request.method === "GET" && (url.pathname === "/operator" || url.pathname === "/operator/")) {
+      const body = await readFile(join(__dirname, "operator", "index.html"));
+      return sendContent(response, 200, "text/html; charset=utf-8", body);
+    }
+
+    if (request.method === "GET" && url.pathname === "/operator/styles.css") {
+      const body = await readFile(join(__dirname, "operator", "styles.css"));
+      return sendContent(response, 200, "text/css; charset=utf-8", body);
+    }
+
+    if (request.method === "GET" && url.pathname === "/operator/app.js") {
+      const body = await readFile(join(__dirname, "operator", "app.js"));
+      return sendContent(response, 200, "text/javascript; charset=utf-8", body);
     }
 
     if (request.method === "GET" && url.pathname === "/console/status") {
@@ -1555,93 +1572,52 @@ const server = http.createServer(async (request, response) => {
           ok: false,
           code: "BAD_JSON",
           message: "Request body could not be parsed as JSON.",
-          nextStep: "Send a valid JSON object with type, input, and trackId or workflowId."
+          nextStep: "Send a valid JSON object with executionType, input, and trackId or workflowId."
         });
       }
 
-      const { type, trackId, workflowId, input, context, options, maxAttempts, correlationId } = bodyResult.body || {};
-
-      if (!type || (type !== "track" && type !== "workflow")) {
-        return sendJson(response, 400, {
-          ok: false,
-          code: "INVALID_TYPE",
-          message: "type must be 'track' or 'workflow'.",
-          nextStep: "Set type to 'track' or 'workflow'."
-        });
-      }
-
-      if (type === "track" && !trackId) {
-        return sendJson(response, 400, {
-          ok: false,
-          code: "MISSING_TRACK_ID",
-          message: "trackId is required when type is 'track'.",
-          nextStep: "Provide a trackId in the request body."
-        });
-      }
-
-      if (type === "workflow" && !workflowId) {
-        return sendJson(response, 400, {
-          ok: false,
-          code: "MISSING_WORKFLOW_ID",
-          message: "workflowId is required when type is 'workflow'.",
-          nextStep: "Provide a workflowId in the request body."
-        });
-      }
+      const { executionType, trackId, workflowId, input, context, options, maxAttempts, correlationId } = bodyResult.body || {};
 
       const createResult = durableJobStore.createJob({
-        executionType: type,
-        trackId: type === "track" ? trackId : null,
-        workflowId: type === "workflow" ? workflowId : null,
-        input: input || {},
-        context: context || {},
-        options: options || {},
-        maxAttempts: typeof maxAttempts === "number" ? maxAttempts : 3,
-        correlationId: correlationId || null
+        executionType,
+        trackId,
+        workflowId,
+        input,
+        context,
+        options,
+        maxAttempts,
+        correlationId
       });
 
       if (!createResult.ok) {
-        return sendJson(response, 400, {
+        const statusCode = createResult.code === "INVALID_EXECUTION_TYPE" || createResult.code === "MISSING_TRACK_ID" || createResult.code === "MISSING_WORKFLOW_ID" ? 400 : 500;
+        return sendJson(response, statusCode, {
           ok: false,
           code: createResult.code,
-          message: createResult.message,
-          nextStep: "Check the job parameters and try again."
+          message: createResult.message
         });
       }
 
-      return sendJson(response, 201, {
+      return sendJson(response, 200, {
         ok: true,
         job: createResult.job
       });
     }
 
     if (request.method === "GET" && url.pathname === "/jobs") {
-      const statusFilter = url.searchParams.get("status") || null;
-      const limitParam = url.searchParams.get("limit");
-      const limit = limitParam ? parseInt(limitParam, 10) : null;
+      const filter = {};
+      const status = url.searchParams.get("status");
+      if (status) filter.status = status;
+      const executionTypeParam = url.searchParams.get("executionType");
+      if (executionTypeParam) filter.executionType = executionTypeParam;
+      const trackIdParam = url.searchParams.get("trackId");
+      if (trackIdParam) filter.trackId = trackIdParam;
 
-      let jobs = durableJobStore.listJobs(statusFilter ? { status: statusFilter } : {});
-
-      if (limit && Number.isFinite(limit) && limit > 0) {
-        jobs = jobs.slice(0, limit);
-      }
-
-      const summary = jobs.map((job) => ({
-        jobId: job.jobId,
-        type: job.executionType,
-        trackId: job.trackId,
-        workflowId: job.workflowId,
-        status: job.status,
-        createdAt: job.timestamps.createdAt,
-        attempts: job.attempt,
-        lease: job.lease ? {
-          holder: job.lease.holder,
-          expiresAt: job.lease.expiresAt
-        } : null
-      }));
+      const jobs = durableJobStore.listJobs(Object.keys(filter).length > 0 ? filter : {});
 
       return sendJson(response, 200, {
         ok: true,
-        jobs: summary
+        jobs
       });
     }
 
@@ -1918,10 +1894,14 @@ async function buildHealthResponse() {
   const enforcementHealth = enforcementStore ? enforcementStore.getStoreHealth() : { healthy: false, initialized: false };
 
   const allJobs = durableJobStore.listJobs();
-  const jobTotals = {};
-  for (const status of durableJobStore.STATUSES) {
-    jobTotals[status] = allJobs.filter((j) => j.status === status).length;
-  }
+  const total = allJobs.length;
+  const queued = allJobs.filter((j) => j.status === "queued").length;
+  const claimed = allJobs.filter((j) => j.status === "claimed").length;
+  const running = allJobs.filter((j) => j.status === "running").length;
+  const completed = allJobs.filter((j) => j.status === "completed").length;
+  const failed = allJobs.filter((j) => j.status === "failed").length;
+  const cancelled = allJobs.filter((j) => j.status === "cancelled").length;
+  const jobTotals = { total, queued, claimed, running, completed, failed, cancelled };
 
   const health = {
     ok: true,

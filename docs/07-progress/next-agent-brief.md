@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-12 (M6: durable job store wired into Local Brain; `/jobs` API endpoints implemented; background worker polling loop claims and executes queued jobs; cancel/retry/review mutation endpoints added)
+**Updated:** 2026-07-12 (M6: durable job store wired into Local Brain; `/jobs` API endpoints implemented; background worker polling loop claims and executes queued jobs; cancel/retry/review mutation endpoints added; operator console UI at /operator)
 
 ## Read First
 
@@ -128,10 +128,17 @@ The cancel, retry, and human-gate review mutation endpoints are now implemented.
 - Review metadata (action, reviewer, timestamp, reason) persists on the job record and survives server restart
 
 ### Immediate Next
-- Operator console UI (HTML/CSS/JS dashboard) — API layer is complete; dashboard can now call cancel/retry/review endpoints
 - CLI commands for cancel/retry/review
 
 ## Completed Since Last Update
+
+- **Operator Console UI (M6 operator-control-plane)** — completed 2026-07-12
+  - `companion/operator/index.html` — single-page operator dashboard with four panels (Dashboard, Jobs, Relay Nodes, Enqueue)
+  - `companion/operator/styles.css` — dark theme with CSS custom properties, status colors, responsive grid layout
+  - `companion/operator/app.js` — all client-side logic: fetch wrappers, panel rendering, event handlers, keyboard shortcuts (1-4/R/Esc), auto-refresh, confirmation dialogs, ARIA accessibility, outcome layer badges
+  - `companion/server.js` — added `GET /operator`, `/operator/styles.css`, `/operator/app.js` static file routes
+  - `scripts/test-operator-console.js` — 34 integration tests covering static file serving, health integration, job mutation endpoints, 404 handling
+  - All interactive elements have ARIA labels and are keyboard-navigable
 
 - **Job Cancel/Retry/Review Mutation Endpoints (M6 operator-control-plane)** — completed 2026-07-12
   - `companion/core/durable-job-store.js`: added `reviewJob()` method supporting 5 review actions (`request_review`, `approve`, `reject`, `request_correction`, `stop`) with full state validation, review metadata persistence, and updated `VALID_TRANSITIONS` for `paused_review` and `running`
