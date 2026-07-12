@@ -1,0 +1,24 @@
+{
+  "run_id": "291358d237ed",
+  "iteration": 0,
+  "phase": "plan",
+  "state": {
+    "objective": "06-trusted-relay-execution",
+    "status": "running",
+    "phase": "worker",
+    "iteration": 0,
+    "corrections_for_task": 0,
+    "consecutive_failures": 0,
+    "max_iterations": 10,
+    "max_corrections_per_task": 3,
+    "max_consecutive_failures": 3,
+    "current_task": "verify-the-m6-trusted-relay-implementation-auth-allowlisting",
+    "recommended_worker_agent": "worker",
+    "worker_branch": "agents/worker/06-trusted-relay-execution",
+    "last_worker_status": "pending",
+    "last_review_status": null,
+    "objective_complete": false,
+    "blocker": null,
+    "run_id": "291358d237ed"
+  }
+}
