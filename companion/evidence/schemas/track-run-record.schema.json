@@ -119,7 +119,25 @@
         },
         "relayNodeId": {
           "type": "string",
-          "description": "Relay Node identifier when routing to a remote capability."
+          "description": "Relay Node identifier when routing to a remote capability. Superseded by actualPlacement.nodeId; retained for backward compatibility."
+        },
+        "plannedPlacement": {
+          "type": "object",
+          "description": "Where this step was planned to execute. null when no placement plan was computed.",
+          "properties": {
+            "target": { "type": "string", "enum": ["relay", "local", "auto"] },
+            "nodeId": { "type": ["string", "null"] }
+          },
+          "additionalProperties": false
+        },
+        "actualPlacement": {
+          "type": "object",
+          "description": "Where this step actually executed.",
+          "properties": {
+            "target": { "type": "string", "enum": ["relay", "local"] },
+            "nodeId": { "type": ["string", "null"] }
+          },
+          "additionalProperties": false
         },
         "qualificationRecordId": {
           "type": "string",
@@ -573,6 +591,24 @@
               "capabilityId": { "type": "string" },
               "provider": { "type": "string" },
               "relayNodeId": { "type": "string" },
+              "plannedPlacement": {
+                "type": "object",
+                "description": "Where this step was planned to execute. null when no placement plan was computed.",
+                "properties": {
+                  "target": { "type": "string", "enum": ["relay", "local", "auto"] },
+                  "nodeId": { "type": ["string", "null"] }
+                },
+                "additionalProperties": false
+              },
+              "actualPlacement": {
+                "type": "object",
+                "description": "Where this step actually executed.",
+                "properties": {
+                  "target": { "type": "string", "enum": ["relay", "local"] },
+                  "nodeId": { "type": ["string", "null"] }
+                },
+                "additionalProperties": false
+              },
               "qualificationRecordId": { "type": "string" },
               "routingReason": { "type": "string" },
               "fallbackCandidates": { "type": "array", "items": { "type": "string" } },

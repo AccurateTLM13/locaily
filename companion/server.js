@@ -2859,8 +2859,15 @@ async function executeTrackRunRequest(body, context) {
       trackSuccessBody.evidence = evidenceRef;
     }
 
-    if (trackOptions.relay && trackOptions.relay.placementSummary) {
-      trackSuccessBody.relay_placement = trackOptions.relay.placementSummary;
+    {
+      const planned = (trackOptions.relay && trackOptions.relay.placementSummary) || null;
+      const actual = (trackResult.steps || []).map((step) => ({
+        stepId: step.name,
+        target: step.actualTarget || "local",
+        nodeId: step.actualNodeId || null,
+        matched: (step.actualNodeId || null) === (step.plannedNodeId || null)
+      }));
+      trackSuccessBody.relay_placement = { planned, actual };
     }
 
     return {
@@ -3308,8 +3315,22 @@ async function executeWorkflowRunRequest(body, context) {
       workflowSuccessBody.evidence = evidenceRef;
     }
 
-    if (runPlanOptions.relay && runPlanOptions.relay.placementSummary) {
-      workflowSuccessBody.relay_placement = runPlanOptions.relay.placementSummary;
+    {
+      const planned = (runPlanOptions.relay && runPlanOptions.relay.placementSummary) || null;
+      const assignments = (runPlanOptions.relay && runPlanOptions.relay.assignments) || {};
+      const actual = (execution.plan.steps || []).map((step) => {
+        const wu = step.worker_used || {};
+        const plannedAssignment = assignments[step.step_id] || {};
+        const actualNodeId = wu.node_id || null;
+        const plannedNodeId = plannedAssignment.nodeId || null;
+        return {
+          stepId: step.step_id,
+          target: wu.routed_via === "relay" ? "relay" : "local",
+          nodeId: actualNodeId,
+          matched: actualNodeId === plannedNodeId
+        };
+      });
+      workflowSuccessBody.relay_placement = { planned, actual };
     }
 
     return {

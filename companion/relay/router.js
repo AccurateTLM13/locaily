@@ -157,14 +157,32 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
     const enabled = options.relay?.enabled !== false;
 
     if (!enabled || !connector) {
-      return localExecute();
+      const localResult = await localExecute();
+      return {
+        ...localResult,
+        meta: {
+          ...(localResult.meta || {}),
+          plannedTarget: "local",
+          plannedNodeId: null
+        }
+      };
     }
 
     const localCapable = options.relay?.localCapable !== false;
     const decision = decideTarget({ step, localCapable, policy, registry });
+    const plannedTarget = decision.target;
+    const plannedNodeId = decision.node ? decision.node.nodeId : null;
 
     if (decision.target !== "relay" || !decision.node) {
-      return localExecute();
+      const localResult = await localExecute();
+      return {
+        ...localResult,
+        meta: {
+          ...(localResult.meta || {}),
+          plannedTarget: "local",
+          plannedNodeId: null
+        }
+      };
     }
 
     const node = decision.node;
@@ -197,7 +215,10 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
         });
 
         const localResult = await localExecute();
-        return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.RELAY_STEP_FAILED);
+        return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.RELAY_STEP_FAILED, {
+          plannedTarget,
+          plannedNodeId
+        });
       }
 
       registry.recordDispatch(node.nodeId, true);
@@ -223,6 +244,8 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
 
           const localResult = await localExecute();
           return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.INVALID_OUTPUT, {
+            plannedTarget,
+            plannedNodeId,
             outputValid: false,
             outputValidationErrors: validation.errors
           });
@@ -238,7 +261,9 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
           fallback: false,
           fallbackReason: null,
           outputValid: true,
-          outputValidationErrors: []
+          outputValidationErrors: [],
+          plannedTarget,
+          plannedNodeId
         }
       };
     } catch (error) {
@@ -258,7 +283,10 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
       });
 
       const localResult = await localExecute();
-      return wrapLocalFallback(localResult, fallbackReason);
+      return wrapLocalFallback(localResult, fallbackReason, {
+        plannedTarget,
+        plannedNodeId
+      });
     }
   }
 
@@ -270,12 +298,23 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
     toolRegistry,
     meta = {},
     assignedNodeId,
+    assignmentTarget = "relay",
     localExecute
   }) {
     const enabled = options.relay?.enabled !== false;
+    const plannedTarget = assignedNodeId ? assignmentTarget : "local";
+    const plannedNodeId = assignedNodeId || null;
 
     if (!enabled || !connector || !assignedNodeId || step.executor.type !== "model") {
-      return localExecute();
+      const localResult = await localExecute();
+      return {
+        ...localResult,
+        meta: {
+          ...(localResult.meta || {}),
+          plannedTarget: "local",
+          plannedNodeId: null
+        }
+      };
     }
 
     const node = registry.get(assignedNodeId);
@@ -296,7 +335,10 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
       });
 
       const localResult = await localExecute();
-      return wrapLocalFallback(localResult, fallbackReason);
+      return wrapLocalFallback(localResult, fallbackReason, {
+        plannedTarget,
+        plannedNodeId
+      });
     }
 
     try {
@@ -327,7 +369,10 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
         });
 
         const localResult = await localExecute();
-        return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.RELAY_STEP_FAILED);
+        return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.RELAY_STEP_FAILED, {
+          plannedTarget,
+          plannedNodeId
+        });
       }
 
       registry.recordDispatch(node.nodeId, true);
@@ -353,6 +398,8 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
 
           const localResult = await localExecute();
           return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.INVALID_OUTPUT, {
+            plannedTarget,
+            plannedNodeId,
             outputValid: false,
             outputValidationErrors: validation.errors
           });
@@ -368,7 +415,9 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
           fallback: false,
           fallbackReason: null,
           outputValid: true,
-          outputValidationErrors: []
+          outputValidationErrors: [],
+          plannedTarget,
+          plannedNodeId
         }
       };
     } catch (error) {
@@ -388,7 +437,10 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
       });
 
       const localResult = await localExecute();
-      return wrapLocalFallback(localResult, fallbackReason);
+      return wrapLocalFallback(localResult, fallbackReason, {
+        plannedTarget,
+        plannedNodeId
+      });
     }
   }
 
@@ -425,6 +477,7 @@ function executeStepViaRelayIfNeeded({
         toolRegistry,
         meta,
         assignedNodeId: assignment.nodeId,
+        assignmentTarget: assignment.target || "relay",
         localExecute
       });
     }

@@ -72,6 +72,14 @@ function buildStepChildRecord({ step, trackId, correlationId, parentRunId, optio
     enforcementDecision: step.enforcementDecision || undefined,
     routingReason: step.role ? `role:${step.role}` : null,
     relayNodeId: step.relay === true ? (step.relayNodeId || null) : null,
+    plannedPlacement: (step.plannedTarget || step.plannedNodeId) ? {
+      target: step.plannedTarget || null,
+      nodeId: step.plannedNodeId || null
+    } : null,
+    actualPlacement: (step.actualTarget || step.actualNodeId) ? {
+      target: step.actualTarget || null,
+      nodeId: step.actualNodeId || null
+    } : null,
     fallbackUsed: step.fallback === true,
     fallbackReason: step.fallbackReason || undefined
   };

@@ -166,6 +166,10 @@ async function runTrack({
         fallbackReason: stepResult.meta?.fallbackReason || null,
         outputValid: stepResult.meta?.outputValid ?? null,
         outputValidationErrors: stepResult.meta?.outputValidationErrors ?? null,
+        plannedTarget: stepResult.meta?.plannedTarget ?? null,
+        plannedNodeId: stepResult.meta?.plannedNodeId ?? null,
+        actualTarget: (stepResult.meta?.relay === true) ? "relay" : "local",
+        actualNodeId: stepResult.meta?.nodeId ?? null,
         output: stepResult.output
       });
     }
@@ -224,6 +228,10 @@ async function runTrack({
         fallbackReason: stepResult.meta.fallbackReason || null,
         outputValid: stepResult.meta?.outputValid ?? null,
         outputValidationErrors: stepResult.meta?.outputValidationErrors ?? null,
+        plannedTarget: stepResult.meta?.plannedTarget ?? null,
+        plannedNodeId: stepResult.meta?.plannedNodeId ?? null,
+        actualTarget: (stepResult.meta?.relay === true) ? "relay" : "local",
+        actualNodeId: stepResult.meta?.nodeId ?? null,
         output: stepResult.output
       });
     }

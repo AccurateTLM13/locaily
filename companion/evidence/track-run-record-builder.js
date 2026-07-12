@@ -31,11 +31,16 @@ function buildTrackRunRecord(options = {}) {
   }
 
   const executorType = options.executorType || "model";
+  const plannedPlacement = options.plannedPlacement || null;
+  const actualPlacement = options.actualPlacement || null;
+  const relayNodeId = (actualPlacement && actualPlacement.nodeId) || options.relayNodeId || null;
   record.routing = {
     executorType,
     capabilityId: options.capabilityId || null,
     provider: options.provider || null,
-    relayNodeId: options.relayNodeId || null,
+    relayNodeId,
+    plannedPlacement,
+    actualPlacement,
     qualificationRecordId: options.qualificationRecordId || null,
     routingReason: options.routingReason || null,
     fallbackCandidates: options.fallbackCandidates || [],
@@ -48,6 +53,12 @@ function buildTrackRunRecord(options = {}) {
   }
   if (!record.routing.enforcementDecision) {
     delete record.routing.enforcementDecision;
+  }
+  if (!record.routing.plannedPlacement) {
+    delete record.routing.plannedPlacement;
+  }
+  if (!record.routing.actualPlacement) {
+    delete record.routing.actualPlacement;
   }
 
   const execution = {
