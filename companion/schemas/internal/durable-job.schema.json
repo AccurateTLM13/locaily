@@ -155,6 +155,32 @@
         "type": "string"
       },
       "default": []
+    },
+    "review": {
+      "type": ["object", "null"],
+      "description": "Human review metadata when the job enters or exits paused_review.",
+      "default": null,
+      "additionalProperties": false,
+      "properties": {
+        "reviewAction": {
+          "type": "string",
+          "description": "The review action taken (request_review, approve, reject, request_correction, stop)."
+        },
+        "reviewedBy": {
+          "type": "string",
+          "description": "Identifier of the human or system that performed the review."
+        },
+        "reviewedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO-8601 timestamp when the review was performed."
+        },
+        "reviewReason": {
+          "type": ["string", "null"],
+          "description": "Optional reason or note accompanying the review action."
+        }
+      },
+      "required": ["reviewAction", "reviewedBy", "reviewedAt"]
     }
   }
 }

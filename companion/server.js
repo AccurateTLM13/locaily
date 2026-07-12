@@ -1665,6 +1665,85 @@ const server = http.createServer(async (request, response) => {
       });
     }
 
+    const jobCancelMatch = url.pathname.match(/^\/jobs\/([^/]+)\/cancel$/);
+    if (jobCancelMatch && request.method === "POST") {
+      const jobId = decodeURIComponent(jobCancelMatch[1]);
+      const result = durableJobStore.cancelJob(jobId);
+      if (!result.ok) {
+        const statusCode = result.code === "JOB_NOT_FOUND" ? 404 : 400;
+        return sendJson(response, statusCode, {
+          ok: false,
+          code: result.code,
+          message: result.message,
+          nextStep: result.code === "JOB_NOT_FOUND" ? "Use GET /jobs to list all jobs." : "Only queued or claimed jobs can be cancelled."
+        });
+      }
+      return sendJson(response, 200, {
+        ok: true,
+        job: result.job
+      });
+    }
+
+    const jobRetryMatch = url.pathname.match(/^\/jobs\/([^/]+)\/retry$/);
+    if (jobRetryMatch && request.method === "POST") {
+      const jobId = decodeURIComponent(jobRetryMatch[1]);
+      const result = durableJobStore.retryJob(jobId);
+      if (!result.ok) {
+        const statusCode = result.code === "JOB_NOT_FOUND" ? 404 : 400;
+        return sendJson(response, statusCode, {
+          ok: false,
+          code: result.code,
+          message: result.message,
+          nextStep: result.code === "JOB_NOT_FOUND" ? "Use GET /jobs to list all jobs." : "Only failed jobs with remaining attempts can be retried."
+        });
+      }
+      return sendJson(response, 200, {
+        ok: true,
+        job: result.job
+      });
+    }
+
+    const jobReviewMatch = url.pathname.match(/^\/jobs\/([^/]+)\/review$/);
+    if (jobReviewMatch && request.method === "POST") {
+      const jobId = decodeURIComponent(jobReviewMatch[1]);
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with action, reviewedBy, and reason."
+        });
+      }
+
+      const { action, reviewedBy, reason } = bodyResult.body || {};
+
+      if (!action || typeof action !== "string") {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "MISSING_ACTION",
+          message: "Review action is required.",
+          nextStep: "Send action as one of: request_review, approve, reject, request_correction, stop."
+        });
+      }
+
+      const result = durableJobStore.reviewJob(jobId, action, { reviewedBy, reason });
+      if (!result.ok) {
+        const statusCode = result.code === "JOB_NOT_FOUND" ? 404 : 400;
+        return sendJson(response, statusCode, {
+          ok: false,
+          code: result.code,
+          message: result.message,
+          nextStep: "Check the job status and review action and try again."
+        });
+      }
+      return sendJson(response, 200, {
+        ok: true,
+        job: result.job
+      });
+    }
+
     if (request.method === "POST" && url.pathname === "/analyze") {
       const bodyResult = await readJsonBody(request);
 
@@ -1702,7 +1781,7 @@ const server = http.createServer(async (request, response) => {
       ok: false,
       code: "NOT_FOUND",
       message: `No route matched ${request.method} ${url.pathname}.`,
-      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, POST /jobs, GET /jobs, GET /jobs/:id, or legacy POST /analyze."
+      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, POST /jobs, GET /jobs, GET /jobs/:id, POST /jobs/:id/cancel, POST /jobs/:id/retry, POST /jobs/:id/review, or legacy POST /analyze."
     });
   } catch (error) {
     console.error("Unexpected server error.");
@@ -1915,7 +1994,7 @@ async function printStartupStatus() {
   console.log("Canonical API: POST /tasks/run");
   console.log("Track API: POST /tracks/run");
   console.log("Workflow API: POST /workflows/plan, POST /workflows/run");
-  console.log("Jobs API: POST /jobs, GET /jobs, GET /jobs/:id");
+  console.log("Jobs API: POST /jobs, GET /jobs, GET /jobs/:id, POST /jobs/:id/cancel, POST /jobs/:id/retry, POST /jobs/:id/review");
   console.log("Compatibility API: POST /analyze");
   console.log(`Active provider: ${activeProvider}`);
 

@@ -10,11 +10,11 @@ const TERMINAL_STATUSES = ["completed", "failed", "cancelled"];
 const VALID_TRANSITIONS = {
   queued: ["claimed", "cancelled"],
   claimed: ["running", "cancelled", "queued"],
-  running: ["completed", "failed"],
+  running: ["completed", "failed", "paused_review"],
   failed: ["queued"],
   completed: [],
   cancelled: [],
-  paused_review: []
+  paused_review: ["queued", "failed", "cancelled"]
 };
 
 const DEFAULT_LEASE_DURATION_MS = 60_000;
@@ -446,6 +446,97 @@ function createDurableJobStore(options = {}) {
     return { ok: true, job: deepClone(job) };
   }
 
+  function reviewJob(jobId, action, reviewPayload = {}) {
+    const job = jobs.get(jobId);
+    if (!job) {
+      return {
+        ok: false,
+        code: "JOB_NOT_FOUND",
+        message: `Job '${jobId}' not found.`
+      };
+    }
+
+    const REVIEW_ACTIONS = {
+      request_review: { from: "running", to: "paused_review" },
+      approve: { from: "paused_review", to: "queued" },
+      reject: { from: "paused_review", to: "failed" },
+      request_correction: { from: "paused_review", to: "queued" },
+      stop: { from: "paused_review", to: "cancelled" }
+    };
+
+    const actionDef = REVIEW_ACTIONS[action];
+    if (!actionDef) {
+      return {
+        ok: false,
+        code: "INVALID_REVIEW_ACTION",
+        message: `Unsupported review action '${action}'. Supported: ${Object.keys(REVIEW_ACTIONS).join(", ")}.`
+      };
+    }
+
+    if (job.status !== actionDef.from) {
+      return {
+        ok: false,
+        code: "INVALID_STATE_TRANSITION",
+        message: `Cannot '${action}' job in status '${job.status}'. Job must be '${actionDef.from}'.`
+      };
+    }
+
+    const allowedTransitions = VALID_TRANSITIONS[actionDef.from] || [];
+    if (!allowedTransitions.includes(actionDef.to)) {
+      return {
+        ok: false,
+        code: "INVALID_STATE_TRANSITION",
+        message: `Transition '${actionDef.from}' → '${actionDef.to}' is not allowed.`
+      };
+    }
+
+    const timestamp = now();
+    const reviewedBy = reviewPayload.reviewedBy || "operator";
+    const reviewReason = reviewPayload.reason || null;
+
+    job.status = actionDef.to;
+    job.timestamps.updatedAt = timestamp;
+
+    if (actionDef.to === "failed" || actionDef.to === "cancelled") {
+      job.timestamps.completedAt = timestamp;
+    } else if (actionDef.to === "queued") {
+      job.timestamps.completedAt = null;
+    }
+
+    if (actionDef.to === "queued" || actionDef.to === "paused_review") {
+      job.lease = null;
+    }
+
+    if (actionDef.to === "failed") {
+      job.error = {
+        code: "HUMAN_REJECTED",
+        message: reviewReason || "Job was rejected by operator review.",
+        retryable: false,
+        details: { reviewAction: action, reviewedBy, reviewedAt: timestamp }
+      };
+    }
+
+    job.review = {
+      reviewAction: action,
+      reviewedBy,
+      reviewedAt: timestamp,
+      reviewReason
+    };
+
+    try {
+      validateJob(job);
+    } catch (err) {
+      return {
+        ok: false,
+        code: "JOB_VALIDATION_FAILED",
+        message: err.message
+      };
+    }
+
+    atomicWriteJob(job);
+    return { ok: true, job: deepClone(job) };
+  }
+
   function getJob(jobId) {
     const job = jobs.get(jobId);
     return job ? deepClone(job) : null;
@@ -499,6 +590,7 @@ function createDurableJobStore(options = {}) {
     failJob,
     cancelJob,
     retryJob,
+    reviewJob,
     getJob,
     listJobs,
     listClaimableJobs,
