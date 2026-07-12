@@ -19,9 +19,37 @@ function createNodeRecord({ nodeId, baseUrl, label, capabilities, hardware }) {
   };
 }
 
+function normalizeCapability(cap) {
+  const str = String(cap);
+  return str.startsWith("role:") ? str.slice(5) : str;
+}
+
 function createRelayRegistry(options = {}) {
   const nodes = new Map();
   const staleMs = options.staleMs || HEALTH_STALE_MS;
+  const allowedCapabilities = options.allowedCapabilities || null;
+
+  function validateCapabilities(capabilities) {
+    if (!allowedCapabilities || !Array.isArray(capabilities)) {
+      return;
+    }
+
+    const denied = [];
+    for (const cap of capabilities) {
+      const normalized = normalizeCapability(cap);
+      if (!allowedCapabilities.has(normalized)) {
+        denied.push(normalized);
+      }
+    }
+
+    if (denied.length > 0) {
+      const error = new Error(
+        `Unauthorized capability(ies): ${denied.join(", ")}. Allowed: ${[...allowedCapabilities].join(", ")}.`
+      );
+      error.code = RELAY_VALIDATION_CODES.RELAY_CAPABILITY_UNAUTHORIZED;
+      throw error;
+    }
+  }
 
   function isHealthy(node) {
     if (node.status === NODE_STATUS.UNHEALTHY) {
@@ -66,6 +94,10 @@ function createRelayRegistry(options = {}) {
         );
         error.code = RELAY_VALIDATION_CODES.RELAY_PROTOCOL_VERSION_UNSUPPORTED;
         throw error;
+      }
+
+      if (Array.isArray(capabilities)) {
+        validateCapabilities(capabilities);
       }
 
       const existing = nodes.get(nodeId);

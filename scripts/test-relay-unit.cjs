@@ -405,6 +405,45 @@ check("auth authError returns structured error for each code", () => {
   assert.ok(required.nextStep);
 });
 
+check("registry accepts allowed capability when allowlist is configured", () => {
+  const reg = createRelayRegistry({ allowedCapabilities: new Set(["developer_task_writer", "default_worker"]) });
+  const node = reg.register({ nodeId: "a1", baseUrl: "http://a1:1", capabilities: ["developer_task_writer"] });
+  assert.strictEqual(node.nodeId, "a1");
+});
+
+check("registry rejects unauthorized capability with RELAY_CAPABILITY_UNAUTHORIZED", () => {
+  const reg = createRelayRegistry({ allowedCapabilities: new Set(["developer_task_writer", "default_worker"]) });
+  let caught;
+  try { reg.register({ nodeId: "a2", baseUrl: "http://a2:1", capabilities: ["unknown_tool"] }); } catch (e) { caught = e; }
+  assert.ok(caught, "expected throw for unauthorized capability");
+  assert.strictEqual(caught.code, "RELAY_CAPABILITY_UNAUTHORIZED");
+  assert.ok(caught.message.includes("unknown_tool"), "error message should name the denied capability");
+});
+
+check("registry rejects mixed capabilities naming the denied ones", () => {
+  const reg = createRelayRegistry({ allowedCapabilities: new Set(["developer_task_writer"]) });
+  let caught;
+  try {
+    reg.register({ nodeId: "a3", baseUrl: "http://a3:1", capabilities: ["developer_task_writer", "evil_cap", "another_bad"] });
+  } catch (e) { caught = e; }
+  assert.ok(caught, "expected throw for mixed capabilities");
+  assert.strictEqual(caught.code, "RELAY_CAPABILITY_UNAUTHORIZED");
+  assert.ok(caught.message.includes("evil_cap"), "error message should name evil_cap");
+  assert.ok(caught.message.includes("another_bad"), "error message should name another_bad");
+});
+
+check("registry normalizes role: prefix before allowlist check", () => {
+  const reg = createRelayRegistry({ allowedCapabilities: new Set(["developer_task_writer"]) });
+  const node = reg.register({ nodeId: "a4", baseUrl: "http://a4:1", capabilities: ["role:developer_task_writer"] });
+  assert.strictEqual(node.nodeId, "a4");
+});
+
+check("registry accepts any capability when no allowlist is configured (backward compat)", () => {
+  const reg = createRelayRegistry();
+  const node = reg.register({ nodeId: "a5", baseUrl: "http://a5:1", capabilities: ["anything_goes", "whatever"] });
+  assert.strictEqual(node.nodeId, "a5");
+});
+
 Promise.all(asyncChecks).then(() => {
   console.log(`\n${passed}/${passed + failed} relay unit tests passed`);
   process.exit(failed === 0 ? 0 : 1);

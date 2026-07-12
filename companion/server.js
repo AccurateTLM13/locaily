@@ -209,7 +209,12 @@ const localSetupStore = createLocalSetupStore({
   dataDir: join(__dirname, "..", "data")
 });
 
-const relayRegistry = createRelayRegistry({ staleMs: 60 * 1000 });
+const relayCapabilityAllowlistEnv = process.env.RELAY_CAPABILITY_ALLOWLIST;
+const relayAllowedCapabilities =
+  relayCapabilityAllowlistEnv && relayCapabilityAllowlistEnv !== "*"
+    ? new Set(relayCapabilityAllowlistEnv.split(",").map((s) => s.trim()).filter(Boolean))
+    : null;
+const relayRegistry = createRelayRegistry({ staleMs: 60 * 1000, allowedCapabilities: relayAllowedCapabilities });
 const relayToken = process.env.RELAY_TOKEN || null;
 const relayConnector = createRelayConnector({ timeoutMs: 15000, token: relayToken });
 const relayAuth = relayToken ? createRelayAuth({ token: relayToken }) : null;
