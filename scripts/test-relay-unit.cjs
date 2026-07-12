@@ -1,6 +1,6 @@
 const assert = require("node:assert");
 const { createRelayRegistry } = require("../companion/relay/registry");
-const { createRelayRouter, ROUTING_POLICY } = require("../companion/relay/router");
+const { createRelayRouter, ROUTING_POLICY, minimizeContext } = require("../companion/relay/router");
 const { describeProtocol } = require("../companion/relay/protocol");
 const { createRelayAuth } = require("../companion/relay/auth");
 
@@ -471,6 +471,78 @@ check("registry accepts any host when no allowlist is configured (backward compa
   const reg = createRelayRegistry();
   const node = reg.register({ nodeId: "h4", baseUrl: "http://10.0.0.5:31314", capabilities: ["default_worker"] });
   assert.strictEqual(node.nodeId, "h4");
+});
+
+check("router minimizeContext: returns full context unchanged when step has no input_map", () => {
+  const step = { id: "s1", executor: { type: "model" } };
+  const context = { input: { url: "http://example.com" }, artifacts: { step_a: { data: 1 }, step_b: { data: 2 } } };
+  const result = minimizeContext(step, context);
+  assert.strictEqual(result, context);
+});
+
+check("router minimizeContext: returns { input, artifacts: {} } when input_map references only $input", () => {
+  const step = { id: "s1", executor: { type: "model" }, input_map: { url: "$input.url" } };
+  const context = { input: { url: "http://example.com" }, artifacts: { step_a: { data: 1 } } };
+  const result = minimizeContext(step, context);
+  assert.deepStrictEqual(result.input, { url: "http://example.com" });
+  assert.deepStrictEqual(result.artifacts, {});
+});
+
+check("router minimizeContext: filters artifacts to only referenced step_ids", () => {
+  const step = {
+    id: "s1",
+    executor: { type: "model" },
+    input_map: {
+      field_a: "$artifacts.step_a.field",
+      field_b: "$artifacts.step_b"
+    }
+  };
+  const context = {
+    input: { url: "http://example.com" },
+    artifacts: {
+      step_a: { field: "value_a" },
+      step_b: { data: "value_b" },
+      step_c: { data: "value_c" }
+    }
+  };
+  const result = minimizeContext(step, context);
+  assert.deepStrictEqual(result.input, { url: "http://example.com" });
+  assert.deepStrictEqual(result.artifacts, {
+    step_a: { field: "value_a" },
+    step_b: { data: "value_b" }
+  });
+  assert.strictEqual("step_c" in result.artifacts, false);
+});
+
+check("router minimizeContext: does not mutate the original context object", () => {
+  const step = {
+    id: "s1",
+    executor: { type: "model" },
+    input_map: { url: "$input.url", scores: "$artifacts.parse_lighthouse.scores" }
+  };
+  const context = {
+    input: { url: "http://example.com" },
+    artifacts: {
+      parse_lighthouse: { scores: { perf: 90 } },
+      check_page: { status: 200 },
+      write_handoff: { notes: "done" }
+    }
+  };
+  const originalArtifactsKeys = Object.keys(context.artifacts).sort();
+  const result = minimizeContext(step, context);
+  const afterArtifactsKeys = Object.keys(context.artifacts).sort();
+  assert.deepStrictEqual(afterArtifactsKeys, originalArtifactsKeys);
+  assert.strictEqual(context.artifacts.parse_lighthouse.scores.perf, 90);
+  assert.strictEqual(context.artifacts.check_page.status, 200);
+  assert.strictEqual(context.artifacts.write_handoff.notes, "done");
+});
+
+check("router minimizeContext: returns empty { input: {}, artifacts: {} } when context is null/undefined", () => {
+  const step = { id: "s1", executor: { type: "model" }, input_map: { url: "$input.url" } };
+  const resultNull = minimizeContext(step, null);
+  assert.deepStrictEqual(resultNull, { input: {}, artifacts: {} });
+  const resultUndefined = minimizeContext(step, undefined);
+  assert.deepStrictEqual(resultUndefined, { input: {}, artifacts: {} });
 });
 
 Promise.all(asyncChecks).then(() => {

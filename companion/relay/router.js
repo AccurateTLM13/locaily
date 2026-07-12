@@ -36,6 +36,51 @@ function decideTarget({ step, localCapable, policy, registry }) {
   return { target: "local", node: null };
 }
 
+function minimizeContext(step, context) {
+  if (context == null) {
+    return { input: {}, artifacts: {} };
+  }
+
+  const inputMap = step && step.input_map;
+
+  if (!inputMap || typeof inputMap !== "object" || typeof inputMap === "string") {
+    return context;
+  }
+
+  const referencedStepIds = new Set();
+
+  function walkValue(value) {
+    if (typeof value === "string") {
+      const match = value.match(/^\$artifacts\.([^.]+)/);
+      if (match) {
+        referencedStepIds.add(match[1]);
+      }
+    } else if (Array.isArray(value)) {
+      for (const item of value) {
+        walkValue(item);
+      }
+    }
+  }
+
+  for (const key of Object.keys(inputMap)) {
+    walkValue(inputMap[key]);
+  }
+
+  const filteredArtifacts = {};
+  const sourceArtifacts = context.artifacts || {};
+
+  for (const stepId of referencedStepIds) {
+    if (stepId in sourceArtifacts) {
+      filteredArtifacts[stepId] = sourceArtifacts[stepId];
+    }
+  }
+
+  return {
+    input: context.input || {},
+    artifacts: filteredArtifacts
+  };
+}
+
 function createRelayRouter({ registry, connector, auditLog, options = {} }) {
   const defaultPolicy = options.policy || ROUTING_POLICY.ROUTE_IF_UNAVAILABLE;
 
@@ -96,10 +141,11 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
     const node = decision.node;
 
     try {
+      const minimized = minimizeContext(step, context);
       const remote = await connector.executeRemoteStep({
         node,
         step,
-        context,
+        context: minimized,
         options,
         meta
       });
@@ -172,10 +218,11 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
     }
 
     try {
+      const minimized = minimizeContext(step, context);
       const remote = await connector.executeRemoteStep({
         node,
         step,
-        context,
+        context: minimized,
         options,
         meta
       });
@@ -281,6 +328,7 @@ module.exports = {
   decideTarget,
   resolveStepRole,
   executeStepViaRelayIfNeeded,
+  minimizeContext,
   ROUTING_POLICY,
   NODE_STATUS
 };
