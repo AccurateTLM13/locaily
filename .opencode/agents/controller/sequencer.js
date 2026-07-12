@@ -94,8 +94,10 @@ function restoreFromFailed() {
 }
 
 function cleanRuntimeArtifacts() {
-  // Remove stale active-objective.md (untracked, regenerated per milestone)
+  const agentsDir = AGENTS_DIR;
+  // Remove stale objective and task files (regenerated per milestone)
   removeIfExists(OBJECTIVE_PATH);
+  removeIfExists(path.join(agentsDir, "tasks", "active-task.md"));
   // Remove abort-history noise from prior failed runs
   if (fs.existsSync(HISTORY_DIR)) {
     for (const f of fs.readdirSync(HISTORY_DIR)) {
@@ -194,6 +196,10 @@ function main() {
 
     // Clean runtime artifacts from prior runs
     cleanRuntimeArtifacts();
+
+    // Recreate archive dirs (cleanRuntimeArtifacts removes queue/failed/)
+    ensureDir(completedDir);
+    ensureDir(failedDir);
 
     // Remove stale worker branch from prior failed run
     const cfg2 = readJson(CONFIG_PATH, {});
