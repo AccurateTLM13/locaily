@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-12 (M6: durable job store wired into Local Brain; `/jobs` API endpoints implemented; background worker polling loop claims and executes queued jobs)
+**Updated:** 2026-07-12 (M6: durable job store wired into Local Brain; `/jobs` API endpoints implemented; background worker polling loop claims and executes queued jobs; cancel/retry/review mutation endpoints added)
 
 ## Read First
 
@@ -121,13 +121,23 @@ Real URL validation set:
 
 ## Current Task
 
-The background worker polling loop is now implemented. The worker (`companion/jobs/worker.js`) automatically claims and executes queued jobs from the durable job store, with retry handling for failures.
+The cancel, retry, and human-gate review mutation endpoints are now implemented. Operators can manage durable jobs via:
+- `POST /jobs/:id/cancel` — cancels queued or claimed jobs
+- `POST /jobs/:id/retry` — re-queues failed jobs with remaining attempts
+- `POST /jobs/:id/review` — supports `request_review` (running→paused_review), `approve` (paused_review→queued), `reject` (paused_review→failed), `request_correction` (paused_review→queued with note), `stop` (paused_review→cancelled)
+- Review metadata (action, reviewer, timestamp, reason) persists on the job record and survives server restart
 
-### Immediate Next: Human-gate endpoints
-- `POST /jobs/:id/review` for `paused_review` status transitions
-- Cancel, retry, and other mutation endpoints
+### Immediate Next
+- Operator console UI (HTML/CSS/JS dashboard) — API layer is complete; dashboard can now call cancel/retry/review endpoints
+- CLI commands for cancel/retry/review
 
 ## Completed Since Last Update
+
+- **Job Cancel/Retry/Review Mutation Endpoints (M6 operator-control-plane)** — completed 2026-07-12
+  - `companion/core/durable-job-store.js`: added `reviewJob()` method supporting 5 review actions (`request_review`, `approve`, `reject`, `request_correction`, `stop`) with full state validation, review metadata persistence, and updated `VALID_TRANSITIONS` for `paused_review` and `running`
+  - `companion/schemas/internal/durable-job.schema.json`: added `review` property definition
+  - `companion/server.js`: added `POST /jobs/:id/cancel`, `POST /jobs/:id/retry`, `POST /jobs/:id/review` endpoints with proper 404/400 error handling and JSON envelope responses
+  - `scripts/test-jobs-mutation.js`: 85 integration tests covering all cancel, retry, and review scenarios including edge cases, error states, persistence, and envelope shape
 
 - **Background Worker Polling Loop (M6 operator-control-plane)** — completed 2026-07-12
   - `companion/jobs/worker.js` implements a polling worker with `start()`, `stop()`, and `getStatus()`
