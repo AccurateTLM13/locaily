@@ -54,6 +54,7 @@ const { createCapabilityRegistry } = require("./core/capability-registry");
 const { createRelayRegistry } = require("./relay/registry");
 const { createRelayConnector } = require("./relay/connector");
 const { createDurableJobStore } = require("./core/durable-job-store");
+const { createBackgroundWorker } = require("./jobs/worker");
 const { createRelayAuth } = require("./relay/auth");
 const { createRelayRouter, executeStepViaRelayIfNeeded, ROUTING_POLICY } = require("./relay/router");
 const { buildPlacementFromTrack } = require("./relay/placement");
@@ -281,6 +282,44 @@ const consoleController = createConsoleController({
 
 const durableJobStore = createDurableJobStore({
   dataDir: join(__dirname, "..", "data")
+});
+
+const backgroundWorker = createBackgroundWorker({
+  durableJobStore,
+  executionCallbacks: {
+    runTrack: async (trackId, input, context, options) => {
+      const runtime = getActiveRuntime();
+      const result = await runTrack({
+        trackId,
+        input,
+        runtime,
+        toolRegistry,
+        options: buildModelRoutingOptions(options || {}),
+        meta: { source: "background-worker", trackId }
+      });
+      return result;
+    },
+    runWorkflow: async (workflowId, input, context, options) => {
+      const runtime = getActiveRuntime();
+      const plan = buildRunPlan({
+        workflowId,
+        input,
+        options: options || {}
+      });
+      const execution = await executeRunPlan({
+        plan,
+        runtime,
+        toolRegistry,
+        options: buildModelRoutingOptions(options || {}),
+        meta: { source: "background-worker", workflowId }
+      });
+      return execution;
+    }
+  },
+  config: {
+    pollIntervalMs: 5000,
+    workerName: "background-worker"
+  }
 });
 
 const server = http.createServer(async (request, response) => {
@@ -1701,6 +1740,7 @@ server.listen(config.server.port, config.server.host, async () => {
     console.warn("[Enforcement Policy] Initialization warning:", initError.message);
   }
   await printStartupStatus();
+  backgroundWorker.start();
 });
 
 function loadConfig() {

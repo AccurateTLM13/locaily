@@ -2,76 +2,80 @@
   "schema_version": "1.0.0",
   "build_slice": "08-operator-control-plane",
   "status": "complete",
-  "objective": "Wire the durable job store into the Local Brain server, creating POST /jobs, GET /jobs, and GET /jobs/:id API endpoints so the operator console can observe and manage background work.",
+  "objective": "Build the background worker polling loop that claims queued jobs from the durable job store and executes them through existing track or workflow execution paths.",
   "implemented": {
-    "durable_job_store_wiring": [
-      "companion/server.js: import createDurableJobStore, initialize shared instance with data/jobs/ directory"
+    "background_worker_module": [
+      "companion/jobs/worker.js — polling worker with start(), stop(), getStatus()",
+      "setInterval polling every 5 seconds (configurable), single concurrency (isProcessing flag)",
+      "Claims, starts, executes, and completes/fails/retries jobs through the durable job store",
+      "Retry logic: retryable errors with remaining attempts re-queue the job; non-retryable or exhausted attempts leave the job in failed",
+      "console.log lifecycle events (claimed, started, completed, failed, retried)"
     ],
-    "job_api_endpoints": [
-      "POST /jobs — accepts { type, trackId/workflowId, input, options }, validates, persists, returns 201 with job record or 400 on validation failure",
-      "GET /jobs — lists all jobs with optional status and limit query filters; returns summary array (jobId, type, trackId/workflowId, status, createdAt, attempts, lease)",
-      "GET /jobs/:id — returns full job record including metadata, lease, evidenceRefs, result/error, and timestamps; 404 for unknown IDs"
-    ],
-    "health_integration": [
-      "GET /health includes jobTotals with counts by all seven statuses (queued, claimed, running, completed, failed, cancelled, paused_review)"
+    "server_integration": [
+      "companion/server.js — import createBackgroundWorker, initialize with durableJobStore and execution callbacks",
+      "Execution callbacks wrap runTrack (track jobs) and buildRunPlan+executeRunPlan (workflow jobs)",
+      "Worker starts automatically inside server.listen() callback after printStartupStatus()"
     ],
     "tests": [
-      "scripts/test-jobs-api.js (64/64 — covers create track job, create workflow job, invalid type, missing trackId/workflowId, empty list, list with jobs, status filtering, get by ID, get not found, health jobTotals, persistence across restart)"
+      "scripts/test-jobs-worker.js (44/44 — covers track completion, workflow completion, failure+retry, maxAttempts exhaustion, non-retryable error, single concurrency, skip-poll-while-processing, multi-job polling, getStatus, start/stop lifecycle)"
     ],
     "all_test_results": {
       "test-durable-job-store": "117/117 PASS",
       "test-jobs-api": "64/64 PASS",
+      "test-jobs-worker": "44/44 PASS",
       "contract-test": "PASS"
     }
   },
   "validation": {
     "passed": true,
     "results": [
-      "POST /jobs with type track creates and persists a job, returns 201 with full job record",
-      "POST /jobs with type workflow creates and persists a job, returns 201 with full job record",
-      "POST /jobs with invalid input returns 400 with error envelope",
-      "GET /jobs returns all jobs (empty array when none exist)",
-      "GET /jobs?status=queued returns only queued jobs",
-      "GET /jobs?status=running returns only running jobs",
-      "GET /jobs/:id returns full job for valid ID, 404 for invalid",
-      "GET /health includes jobTotals with correct counts by status",
-      "Server restart reloads jobs from data/jobs/*.json — GET /jobs returns previously created jobs",
-      "No changes to existing endpoint response envelopes"
+      "Worker starts when the server starts, stops when stop() is called, reports status via getStatus()",
+      "Queued track-type job is claimed, executed via runTrack callback, marked completed with result",
+      "Queued workflow-type job is claimed, executed via runWorkflow callback, marked completed with result",
+      "Retryable failure with remaining attempts re-queues the job (failed → queued via retryJob)",
+      "Max attempts exhausted leaves job in failed status",
+      "Error with retryable: false leaves job in failed status",
+      "Worker processes only one job at a time; polling skips while processing",
+      "Wired into server.js — worker starts after server listens",
+      "node scripts/test-jobs-worker.js passes all test cases (44/44)",
+      "Existing tests still pass: node scripts/test-jobs-api.js (64/64), node scripts/test-durable-job-store.js (117/117)"
     ]
   },
   "acceptance_criteria": {
     "passed": [
-      "POST /jobs with type track creates and persists a job, returns 201 with the full job record",
-      "POST /jobs with type workflow creates and persists a job, returns 201 with the full job record",
-      "POST /jobs with invalid input returns 400 with an error envelope",
-      "GET /jobs returns all jobs (empty array when none exist)",
-      "GET /jobs?status=queued returns only queued jobs",
-      "GET /jobs?status=running returns only running jobs",
-      "GET /jobs/:id returns the full job for a valid id, 404 for invalid",
-      "GET /health includes jobTotals with correct counts by status",
-      "Server restart reloads jobs from data/jobs/*.json — GET /jobs returns previously created jobs",
-      "node scripts/test-jobs-api.js passes all test cases",
-      "Existing tests still pass: node scripts/contract-test.js, node scripts/test-durable-job-store.js",
-      "No changes to existing response envelope shapes"
+      "Worker starts when the server starts, stops when stop() is called, and reports status via getStatus()",
+      "A queued track-type job is claimed, executed via the track callback, and marked completed with the result",
+      "A queued workflow-type job is claimed, executed via the workflow callback, and marked completed with the result",
+      "When execution fails with a retryable error and attempts remain, the job is re-queued (failed → queued via retryJob)",
+      "When execution fails and max attempts are exhausted, the job stays in failed status",
+      "When execution fails with retryable: false, the job stays in failed status",
+      "Worker processes only one job at a time; polling skips while a job is being processed",
+      "Wired into server.js — the worker starts automatically after the server listens",
+      "node scripts/test-jobs-worker.js passes all test cases (44/44)",
+      "Existing tests still pass: node scripts/test-jobs-api.js (64/64), node scripts/test-durable-job-store.js (117/117), node scripts/contract-test.js",
+      "No changes to existing response envelope shapes or store methods"
     ],
     "failed": [],
     "blockers": []
   },
   "scope_notes": [
-    "Background worker polling loop is the next task — not yet implemented",
-    "Human-gate endpoints (POST /jobs/:id/review, paused_review transitions) are a later task",
-    "Cancel, retry, or any mutation endpoints other than create are later tasks",
+    "Human-gate endpoints (POST /jobs/:id/review, paused_review) are later",
+    "Cancel, retry, or mutation endpoints from the worker side not implemented",
     "Operator console UI (HTML/CSS/JS dashboard) not included",
     "CLI commands not included",
-    "companion/core/durable-job-store.js and its schema not modified — store is complete as-is"
+    "companion/core/durable-job-store.js and its schema not modified",
+    "Existing /jobs API endpoints not modified",
+    "Existing /tracks/run, /workflows/run, /tasks/run, /analyze endpoints not modified",
+    "No cross-process workers, worker pools, or separate Node.js processes"
   ],
   "stop_conditions_honored": [
     "No modifications to existing /tracks/run, /workflows/run, /tasks/run, or /analyze endpoints or their response envelopes",
     "No import of benchmark-lab/engine/ modules",
     "Server remains localhost-only",
-    "No modification to companion/core/durable-job-store.js or its schema"
+    "No modification to companion/core/durable-job-store.js or its schema",
+    "No modification to existing /jobs API endpoints"
   ],
-  "last_fresh_validation": "2026-07-12 (jobs API endpoints implemented and tested)",
-  "next_milestones": "Background worker (polling loop that claims and executes jobs) — queue item 07-durable-background-execution",
+  "last_fresh_validation": "2026-07-12 (background worker polling loop implemented and tested — 44/44)",
+  "next_milestones": "Human-gate endpoints (POST /jobs/:id/review, paused_review transitions); cancel/retry/mutation API endpoints",
   "updated_at": "2026-07-12"
 }
