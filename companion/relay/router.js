@@ -163,7 +163,9 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
         meta: {
           ...(localResult.meta || {}),
           plannedTarget: "local",
-          plannedNodeId: null
+          plannedNodeId: null,
+          actualTarget: "local",
+          actualNodeId: null
         }
       };
     }
@@ -180,7 +182,9 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
         meta: {
           ...(localResult.meta || {}),
           plannedTarget: "local",
-          plannedNodeId: null
+          plannedNodeId: null,
+          actualTarget: "local",
+          actualNodeId: null
         }
       };
     }
@@ -312,7 +316,9 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
         meta: {
           ...(localResult.meta || {}),
           plannedTarget: "local",
-          plannedNodeId: null
+          plannedNodeId: null,
+          actualTarget: "local",
+          actualNodeId: null
         }
       };
     }
@@ -337,7 +343,9 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
       const localResult = await localExecute();
       return wrapLocalFallback(localResult, fallbackReason, {
         plannedTarget,
-        plannedNodeId
+        plannedNodeId,
+        actualTarget: "local",
+        actualNodeId: null
       });
     }
 
@@ -371,7 +379,9 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
         const localResult = await localExecute();
         return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.RELAY_STEP_FAILED, {
           plannedTarget,
-          plannedNodeId
+          plannedNodeId,
+          actualTarget: "local",
+          actualNodeId: null
         });
       }
 
@@ -400,6 +410,8 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
           return wrapLocalFallback(localResult, RELAY_FALLBACK_REASON.INVALID_OUTPUT, {
             plannedTarget,
             plannedNodeId,
+            actualTarget: "local",
+            actualNodeId: null,
             outputValid: false,
             outputValidationErrors: validation.errors
           });
@@ -417,7 +429,9 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
           outputValid: true,
           outputValidationErrors: [],
           plannedTarget,
-          plannedNodeId
+          plannedNodeId,
+          actualTarget: "relay",
+          actualNodeId: node.nodeId
         }
       };
     } catch (error) {
@@ -439,7 +453,9 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
       const localResult = await localExecute();
       return wrapLocalFallback(localResult, fallbackReason, {
         plannedTarget,
-        plannedNodeId
+        plannedNodeId,
+        actualTarget: "local",
+        actualNodeId: null
       });
     }
   }

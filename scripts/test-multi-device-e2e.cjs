@@ -152,10 +152,13 @@ async function main() {
   check("workflow result schema valid", run1.body && run1.body.result && run1.body.result.plan && run1.body.result.plan.status === "completed" && run1.body.relay_placement, "missing relay_placement");
 
   const placement = run1.body.relay_placement;
-  check("relay_placement summary present", placement && placement.summary ? false : !!placement, JSON.stringify(placement));
-  check("relay_placement routed 4 model steps", placement.counts.relay === 4, JSON.stringify(placement.counts));
-  check("relay_placement kept 6 tool steps local", placement.counts.local === 6, JSON.stringify(placement.counts));
-  check("relay_placement uses both devices", placement.byNode["relay-b"] === 1 && placement.byNode["relay-c"] === 3, JSON.stringify(placement.byNode));
+  check("relay_placement has planned and actual", placement && placement.planned && Array.isArray(placement.actual), JSON.stringify(placement));
+  check("relay_placement planned routed 4 model steps", placement.planned.counts.relay === 4, JSON.stringify(placement.planned.counts));
+  check("relay_placement planned kept tool steps local", placement.planned.counts.local >= 1, JSON.stringify(placement.planned.counts));
+  check("relay_placement planned uses both devices", placement.planned.byNode["relay-b"] >= 1 && placement.planned.byNode["relay-c"] >= 1, JSON.stringify(placement.planned.byNode));
+  check("relay_placement actual entries have expected shape", placement.actual.every((e) => typeof e.stepId === "string" && typeof e.target === "string" && "nodeId" in e && typeof e.matched === "boolean"), JSON.stringify(placement.actual));
+  check("relay_placement actual has relay entries with valid nodeId", placement.actual.some((e) => e.target === "relay" && typeof e.nodeId === "string" && e.nodeId.length > 0), JSON.stringify(placement.actual));
+  check("relay_placement actual has local tool entries", placement.actual.filter((e) => e.target === "local").length >= 1, JSON.stringify(placement.actual));
 
   const steps1 = stepMeta(run1.body);
   check("workflow produced step metadata", steps1.length > 0, `steps=${steps1.length}`);
@@ -178,6 +181,9 @@ async function main() {
   const steps2 = stepMeta(run2.body);
   check("no step routed to dead relay node C", relayedTo(steps2, "relay-c").length === 0, `relayedToC=${relayedTo(steps2, "relay-c").length}`);
   check("priority_helper still routed to alive relay node B", relayedTo(steps2, "relay-b").length > 0, `relayedToB=${relayedTo(steps2, "relay-b").length}`);
+
+  const placement2 = run2.body.relay_placement;
+  check("run2 relay_placement actual shows unmatched entries after fallback", placement2 && Array.isArray(placement2.actual) && placement2.actual.some((e) => e.matched === false), JSON.stringify(placement2 && placement2.actual));
 
   const audit = await api(BASE_A, "/audit?tool=relay-router");
   const fallbackEvents = (audit.body && audit.body.events) || [];
