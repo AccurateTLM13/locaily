@@ -773,14 +773,21 @@ let renderTimer = null;
 let pollTimer = null;
 
 function draw() {
-  process.stdout.write(`${ESC}2J${ESC}H`);
-  process.stdout.write(render());
-  process.stdout.write("\n");
+  // In-place redraw: home the cursor and overwrite each line, clearing any
+  // trailing characters (ESC[K) and any leftover lines below (ESC[J).
+  // This updates the same screen instead of repainting a fresh one, so the
+  // cockpit reads as one live console rather than a flickering reload.
+  const lines = render().split("\n");
+  let buf = `${ESC}H`;
+  for (const line of lines) buf += line + `${ESC}K\n`;
+  buf += `${ESC}J`;
+  process.stdout.write(buf);
 }
 
 function start() {
+  process.stdout.write(`${ESC}?1049h`); // enter alternate screen buffer
   process.stdout.write(`${ESC}?25l`); // hide cursor
-  process.stdout.write(C.bg);
+  process.stdout.write(`${ESC}2J${ESC}H`); // clear once on entry
 
   readline.emitKeypressEvents(process.stdin);
   if (process.stdin.isTTY) process.stdin.setRawMode(true);
@@ -818,6 +825,11 @@ function start() {
     }
   });
 
+  process.stdout.on("resize", () => {
+    process.stdout.write(`${ESC}2J${ESC}H`); // full clear so a smaller frame leaves no ghosts
+    draw();
+  });
+
   poll().then(() => {
     draw();
     pollTimer = setInterval(() => { poll().then(draw); }, POLL_MS);
@@ -831,7 +843,8 @@ function quit() {
   if (process.stdin.isTTY) process.stdin.setRawMode(false);
   process.stdout.write(RESET);
   process.stdout.write(`${ESC}?25h`); // show cursor
-  process.stdout.write("\n" + paint(C.lemon, "CITRUS PIT") + paint(C.dim, " — pit closed. Run `npm run citrus-pit` to reopen.\n"));
+  process.stdout.write(`${ESC}?1049l`); // leave alternate screen buffer
+  process.stdout.write(paint(C.lemon, "CITRUS PIT") + paint(C.dim, " — pit closed. Run `npm run citrus-pit` to reopen.\n"));
   process.exit(0);
 }
 
