@@ -53,6 +53,7 @@ const { createQualificationResolver } = require("./core/qualification-resolver")
 const { createCapabilityRegistry } = require("./core/capability-registry");
 const { createRelayRegistry } = require("./relay/registry");
 const { createRelayConnector } = require("./relay/connector");
+const { createRelayAuth } = require("./relay/auth");
 const { createRelayRouter, executeStepViaRelayIfNeeded, ROUTING_POLICY } = require("./relay/router");
 const { buildPlacementFromTrack } = require("./relay/placement");
 const { describeProtocol } = require("./relay/protocol");
@@ -209,7 +210,9 @@ const localSetupStore = createLocalSetupStore({
 });
 
 const relayRegistry = createRelayRegistry({ staleMs: 60 * 1000 });
-const relayConnector = createRelayConnector({ timeoutMs: 15000 });
+const relayToken = process.env.RELAY_TOKEN || null;
+const relayConnector = createRelayConnector({ timeoutMs: 15000, token: relayToken });
+const relayAuth = relayToken ? createRelayAuth({ token: relayToken }) : null;
 const relayRouter = createRelayRouter({ registry: relayRegistry, connector: relayConnector, auditLog });
 
 configurePageSpeed({
@@ -1044,6 +1047,17 @@ const server = http.createServer(async (request, response) => {
         });
       }
 
+      if (relayAuth) {
+        const authErr = relayAuth.verifyRequest(request);
+
+        if (authErr) {
+          return sendJson(response, 401, {
+            ok: false,
+            error: authErr
+          });
+        }
+      }
+
       const { nodeId, baseUrl, label, capabilities, hardware } = bodyResult.body || {};
 
       try {
@@ -1069,6 +1083,17 @@ const server = http.createServer(async (request, response) => {
         });
       }
 
+      if (relayAuth) {
+        const authErr = relayAuth.verifyRequest(request);
+
+        if (authErr) {
+          return sendJson(response, 401, {
+            ok: false,
+            error: authErr
+          });
+        }
+      }
+
       const { nodeId, capabilities, hardware } = bodyResult.body || {};
       const node = relayRegistry.heartbeat(nodeId, { capabilities, hardware });
 
@@ -1092,6 +1117,17 @@ const server = http.createServer(async (request, response) => {
           code: "BAD_JSON",
           message: "Request body could not be parsed as JSON."
         });
+      }
+
+      if (relayAuth) {
+        const authErr = relayAuth.verifyRequest(request);
+
+        if (authErr) {
+          return sendJson(response, 401, {
+            ok: false,
+            error: authErr
+          });
+        }
       }
 
       const { nodeId } = bodyResult.body || {};
@@ -1164,6 +1200,17 @@ const server = http.createServer(async (request, response) => {
           message: "Request body could not be parsed as JSON.",
           nextStep: "Send a relay step dispatch object."
         });
+      }
+
+      if (relayAuth) {
+        const authErr = relayAuth.verifyRequest(request);
+
+        if (authErr) {
+          return sendJson(response, 401, {
+            ok: false,
+            error: authErr
+          });
+        }
       }
 
       const { step, context, options, meta } = bodyResult.body || {};

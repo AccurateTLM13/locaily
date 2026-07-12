@@ -2,6 +2,7 @@ const assert = require("node:assert");
 const { createRelayRegistry } = require("../companion/relay/registry");
 const { createRelayRouter, ROUTING_POLICY } = require("../companion/relay/router");
 const { describeProtocol } = require("../companion/relay/protocol");
+const { createRelayAuth } = require("../companion/relay/auth");
 
 let passed = 0;
 let failed = 0;
@@ -301,6 +302,69 @@ checkAsync("router executeStepWithAssignedNode falls back locally and audits on 
   assert.strictEqual(result.meta.relay, undefined);
   assert.ok(audit.records.some((r) => r.error_code === "RELAY_FALLBACK"));
   assert.strictEqual(reg.get("b").healthy, false);
+});
+
+check("auth getToken returns configured token", () => {
+  const auth = createRelayAuth({ token: "secret-123" });
+  assert.strictEqual(auth.getToken(), "secret-123");
+});
+
+check("auth verifyRequest returns null when token matches", () => {
+  const auth = createRelayAuth({ token: "secret-123" });
+  const req = { headers: { authorization: "Bearer secret-123" } };
+  assert.strictEqual(auth.verifyRequest(req), null);
+});
+
+check("auth verifyRequest returns error when header is missing", () => {
+  const auth = createRelayAuth({ token: "secret-123" });
+  const req = { headers: {} };
+  const err = auth.verifyRequest(req);
+  assert.ok(err);
+  assert.strictEqual(err.code, "RELAY_AUTH_MISSING");
+  assert.ok(err.message);
+  assert.ok(err.nextStep);
+});
+
+check("auth verifyRequest returns error when token is wrong", () => {
+  const auth = createRelayAuth({ token: "secret-123" });
+  const req = { headers: { authorization: "Bearer wrong-token" } };
+  const err = auth.verifyRequest(req);
+  assert.ok(err);
+  assert.strictEqual(err.code, "RELAY_AUTH_INVALID");
+  assert.ok(err.message);
+  assert.ok(err.nextStep);
+});
+
+check("auth verifyRequest returns error when header format is invalid", () => {
+  const auth = createRelayAuth({ token: "secret-123" });
+  const req = { headers: { authorization: "Basic abc123" } };
+  const err = auth.verifyRequest(req);
+  assert.ok(err);
+  assert.strictEqual(err.code, "RELAY_AUTH_INVALID");
+});
+
+check("auth verifyRequest returns null when no token is configured", () => {
+  const auth = createRelayAuth({ token: null });
+  const req = { headers: {} };
+  assert.strictEqual(auth.verifyRequest(req), null);
+});
+
+check("auth authError returns structured error for each code", () => {
+  const auth = createRelayAuth({ token: "secret-123" });
+  const missing = auth.authError("RELAY_AUTH_MISSING");
+  assert.strictEqual(missing.code, "RELAY_AUTH_MISSING");
+  assert.ok(missing.message);
+  assert.ok(missing.nextStep);
+
+  const invalid = auth.authError("RELAY_AUTH_INVALID");
+  assert.strictEqual(invalid.code, "RELAY_AUTH_INVALID");
+  assert.ok(invalid.message);
+  assert.ok(invalid.nextStep);
+
+  const required = auth.authError("RELAY_AUTH_REQUIRED");
+  assert.strictEqual(required.code, "RELAY_AUTH_REQUIRED");
+  assert.ok(required.message);
+  assert.ok(required.nextStep);
 });
 
 Promise.all(asyncChecks).then(() => {

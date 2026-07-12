@@ -19,6 +19,12 @@ const ROUTING_POLICY = {
   LOCAL_ONLY: "local_only"
 };
 
+const RELAY_AUTH_CODES = {
+  RELAY_AUTH_MISSING: "RELAY_AUTH_MISSING",
+  RELAY_AUTH_INVALID: "RELAY_AUTH_INVALID",
+  RELAY_AUTH_REQUIRED: "RELAY_AUTH_REQUIRED"
+};
+
 function isSupportedProtocolVersion(version) {
   if (!version) {
     return true;
@@ -73,6 +79,7 @@ module.exports = {
   STEP_ROLE,
   NODE_STATUS,
   ROUTING_POLICY,
+  RELAY_AUTH_CODES,
   isSupportedProtocolVersion,
   capabilityKey,
   describeProtocol
