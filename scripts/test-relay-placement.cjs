@@ -176,6 +176,45 @@ function main() {
     assert.strictEqual(result.meta.plannedTarget, "local");
     assert.strictEqual(result.meta.plannedNodeId, null);
   });
+
+  checkAsync("placement router returns actualTarget and actualNodeId in meta on relay success", async () => {
+    const reg = createRelayRegistry();
+    reg.register({ nodeId: "relay-a1", baseUrl: "http://127.0.0.1:31323", capabilities: ["role:priority_helper"] });
+    reg.heartbeat("relay-a1");
+    const connector = {
+      async executeRemoteStep({ node }) {
+        return { ok: true, output: { routed: true }, meta: { role: "priority_helper", model: "mock" } };
+      }
+    };
+    const router = createRelayRouter({ registry: reg, connector });
+    const result = await router.executeStepWithAssignedNode({
+      step: { id: "s1", executor: { type: "model", role: "priority_helper" } },
+      context: {},
+      options: { relay: { enabled: true } },
+      assignedNodeId: "relay-a1",
+      assignmentTarget: "relay",
+      localExecute: async () => ({ output: { local: true }, meta: {} })
+    });
+    assert.strictEqual(result.meta.actualTarget, "relay");
+    assert.strictEqual(typeof result.meta.actualNodeId, "string");
+    assert.strictEqual(result.meta.actualNodeId, "relay-a1");
+  });
+
+  checkAsync("placement router returns actualTarget: local with actualNodeId: null on local-only execution", async () => {
+    const reg = createRelayRegistry();
+    const connector = {
+      async executeRemoteStep() { return { ok: true, output: {}, meta: {} }; }
+    };
+    const router = createRelayRouter({ registry: reg, connector });
+    const result = await router.executeStepWithFallback({
+      step: { id: "s1", executor: { type: "model", role: "any_role" } },
+      context: {},
+      options: { relay: { enabled: false } },
+      localExecute: async () => ({ output: { local: true }, meta: { role: "any_role" } })
+    });
+    assert.strictEqual(result.meta.actualTarget, "local");
+    assert.strictEqual(result.meta.actualNodeId, null);
+  });
 }
 
 main();
