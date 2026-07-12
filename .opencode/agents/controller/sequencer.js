@@ -194,6 +194,10 @@ function main() {
       continue;
     }
 
+    // Reset working tree: discard uncommitted changes from prior failed runs
+    git(["checkout", "--", "."], { shell: process.platform === "win32" });
+    git(["clean", "-fd"], { shell: process.platform === "win32" });
+
     // Clean runtime artifacts from prior runs
     cleanRuntimeArtifacts();
 
