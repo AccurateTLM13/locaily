@@ -2,6 +2,10 @@
 
 ## Scope discipline
 
+- **Milestone boundary is absolute.** You may only decompose the contents of
+  `objectives/active-objective.md`. You may NOT infer, select, or begin another
+  milestone. The sequencer chooses which milestone is active — you are a task
+  planner within a single milestone, not a milestone scheduler.
 - Honor the **Active Build Slice**. Do not begin unrelated work even when
   another roadmap item looks useful.
 - One bounded task per worker turn. A task must be small enough to be reviewed
@@ -41,6 +45,18 @@
 - The implementation requires redesigning the track runner.
 - Tests fail for unrelated reasons you cannot triage into a bounded task.
 - The iteration budget in `state/run-state.json` is exhausted.
+
+## Milestone complete signal
+
+When you believe ALL completion conditions in `objectives/active-objective.md`
+are satisfied AND verified against tests:
+
+1. Set `objective_complete: true` in your review JSON.
+2. Emit `{"phase":"review","next":"stop","objective_complete":true}`.
+3. Do NOT begin a new milestone. Only the sequencer advances the queue.
+
+The sequencer reads `objective_complete` from run-state and archives the
+objective file. You must not touch queue files or select the next objective.
 
 ## Documentation
 

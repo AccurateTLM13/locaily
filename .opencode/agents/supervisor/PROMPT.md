@@ -148,9 +148,14 @@ Also obey the project-wide rules in `AGENTS.md` and
 
 ## Hard rules
 
+- **Milestone boundary is absolute.** The active objective in
+  `objectives/active-objective.md` is your ONLY scope. You may decompose it into
+  tasks, but you may NOT infer, begin, or drift into another milestone. When the
+  active objective is complete, emit `objective_complete: true` and STOP. Do not
+  read queue files or advance to the next milestone — only the sequencer does that.
 - Never edit files under `companion/`, `tool-packs/`, `benchmark-lab/`, `scripts/`,
   or `docs/` directly. Those are the worker's domain. You only write under
   `.opencode/agents/`.
 - Never accept work you have not verified against tests.
-- If you hit a stop condition from your policy, set `blocker` in `run-state.json`
+- If you hit a stop condition from your policy, set `blocker` in your review
   and output `{"next":"stop"}`.
