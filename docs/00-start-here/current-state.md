@@ -2,7 +2,7 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-07-11 (M5 complete + post-completion review: 4 implementation issues found and fixed + architectural review identifying M6 scope: trust boundary, placement evidence, `local_first` capability source, evidence approval semantics)
+**Updated:** 2026-07-12 (M6 scope: durable job store wired into Local Brain; `/jobs` API endpoints added: `POST /jobs`, `GET /jobs`, `GET /jobs/:id`, `POST /jobs/:id/cancel`, `POST /jobs/:id/retry`, `POST /jobs/:id/review`; `jobTotals` in `/health` response; background worker polling loop automatically claims and executes queued jobs; cancel/retry/review mutation endpoints for operator control; operator console UI at `/operator`)
 
 ## What Works
 
@@ -40,6 +40,9 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Human output-quality reviews** - Track Run Records can receive separate human review/correction records through `POST /runs/:id/review` and `GET /runs/:id/review`. Reviews are stored separately under `data/evidence/human-reviews/`; original model output and enforcement decisions are not overwritten. `GET /enforcement/quality-summary` aggregates reviewed runs by verdict, score averages, correction rate, failure reasons, and critical risk count. Operator shortcut: `npm.cmd run quality-review -- list|show|pass|needs-edit|fail|summary`.
 - **Lighthouse run + Human Gate packet** - `npm.cmd run lighthouse:run -- --url https://your-site.com` creates a Lighthouse Track Run Record from a simple URL command using a synthetic Lighthouse payload unless scores/findings are supplied. `npm.cmd run quality-gate:lighthouse -- --dry-run` finds enforced `website_audit.lighthouse_handoff` / `priority_helper` pilot records for `lfm25-1p2b-thinking-local`, generates deterministic draft reviews, and writes review packet artifacts under `benchmark-lab/evidence/reviews/`. `--approve-safe` writes review records only for low-risk proposed passes.
 - **Lighthouse Handoff Assembly Pilot** - The Lighthouse track now includes an adjacent model step, `developer_task_writer`, after validated priority fixes. It consumes priority helper output and emits coding-agent-ready developer tasks, acceptance criteria, guardrails, and testing checklist items. Four real URLs were validated with five fresh enforced runs each; URL-scoped gates approved 20/20 safe passes with 0 fails, 0 critical risks, and 0 corrections. This validates assembly quality separately from the enforced `priority_helper` routing path.
+- **Durable Job Store API** — `POST /jobs` creates persistent background jobs (track or workflow), `GET /jobs` lists jobs with optional status filter, `GET /jobs/:id` returns full job record. `GET /health` now includes `jobTotals` with counts by status (queued, claimed, running, completed, failed, cancelled, paused_review). Jobs persist to `data/jobs/*.json` and survive server restart. 64 tests in `scripts/test-jobs-api.js` covering all endpoints, filtering, health integration, and persistence.
+- **Background Worker Polling Loop** — `companion/jobs/worker.js` implements a polling worker that automatically claims and executes queued jobs from the durable job store. The worker starts when the server starts, polls every 5 seconds, processes one job at a time (single concurrency), and handles retry logic (retryable errors with remaining attempts are re-queued; non-retryable errors or exhausted attempts leave the job in `failed` status). Track-type jobs execute via `runTrack`; workflow-type jobs execute via `buildRunPlan`+`executeRunPlan`. Exports `start()`, `stop()`, and `getStatus()`. 44 tests in `scripts/test-jobs-worker.js` covering success paths, failure/retry, single concurrency, polling, and start/stop lifecycle.
+- **Job Mutation Endpoints** — `POST /jobs/:id/cancel` cancels queued or claimed jobs, `POST /jobs/:id/retry` re-queues failed jobs with remaining attempts, `POST /jobs/:id/review` supports human-gate review transitions: `request_review` (running→paused_review), `approve` (paused_review→queued), `reject` (paused_review→failed), `request_correction` (paused_review→queued with note), `stop` (paused_review→cancelled). All endpoints return proper 404/400 for missing/invalid jobs and state transitions. Review metadata (action, reviewer, timestamp, reason) persists on the job record. 85 tests in `scripts/test-jobs-mutation.js`.
 - **Smoke and contract tests** - `scripts/smoke-test.js`, `scripts/contract-test.js` (current verification suite passes; see latest progress log or CI evidence for counts)
 - **Multi-track qualification** - 4 new Benchmark Lab suites for accessibility_deep, performance_budget, seo_audit, and dealsniper
 - **llama3.2 qualified for 4 roles** - a11y_analyzer (score 1.0), budget_analyzer (score 1.0), seo_analyzer (score 1.0), default_worker/dealsniper (score 1.0)
@@ -47,6 +50,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **6 total qualified capabilities** across 5 tracks
 - **Qualification dashboard** - `GET /qualifications/dashboard` with per-model, per-track, per-role breakdown
 - **All 4 new tracks in shadow enforcement** - collecting routing evidence for future enforcement
+- **Operator Console UI** - `companion/operator/index.html` served at `GET /operator`; single-page dashboard with four panels (Dashboard, Jobs, Relay Nodes, Enqueue). Uses dark theme CSS custom properties, keyboard shortcuts (1-4/R/Esc), auto-refresh, job detail overlay with action buttons (Cancel/Retry/Request Review/Approve/Reject/Request Correction/Stop), confirmation dialogs with optional reason input, outcome layer badges (transport/execution/enforcement/human), relay node status with health indicators, enqueue form, and full ARIA accessibility. Static files served from `companion/operator/`. 34 integration tests in `scripts/test-operator-console.js`.
 
 ## What Is Partial
 
@@ -130,7 +134,7 @@ The North Star is now documented as a local capability network: decompose work i
 
 | Layer | Focus |
 |---|---|
-| **Now** | M6: Trusted Relay Execution and Actual-Placement Evidence — node pairing/authentication, capability verification, allowed-network restrictions, minimal-context envelopes, planned-vs-actual placement records, remote output schema validation, explicit relay fallback reasons, one real two-device pilot |
+| **Now** | M6: Operator Control Plane — durable job store API, background worker polling loop (claims + executes queued jobs), cancel/retry/review mutation endpoints (POST /jobs/:id/cancel, /retry, /review with paused_review transitions), operator console UI at /operator |
 | **Next** | Broader model qualification coverage; live Ollama qualification runs; operator-log tracks qualification; Model Garage evaluation harness (Phase 2 — spec only until evidence) |
 | **Later** | Lighthouse canonical-path documentation; workflow audit summary hardening; Desktop Companion UI (deferred); automatic track classification |
 | **Archive** | Old companion-only architecture, pre-track planning docs |

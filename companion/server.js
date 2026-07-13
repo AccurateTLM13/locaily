@@ -1,5 +1,6 @@
 const http = require("node:http");
 const { readFileSync } = require("node:fs");
+const { readFile } = require("node:fs/promises");
 const { join } = require("node:path");
 const { createRunIdentity } = require("./core/ids");
 const {
@@ -53,6 +54,8 @@ const { createQualificationResolver } = require("./core/qualification-resolver")
 const { createCapabilityRegistry } = require("./core/capability-registry");
 const { createRelayRegistry } = require("./relay/registry");
 const { createRelayConnector } = require("./relay/connector");
+const { createDurableJobStore } = require("./core/durable-job-store");
+const { createBackgroundWorker } = require("./jobs/worker");
 const { createRelayAuth } = require("./relay/auth");
 const { createRelayRouter, executeStepViaRelayIfNeeded, ROUTING_POLICY } = require("./relay/router");
 const { buildPlacementFromTrack } = require("./relay/placement");
@@ -278,6 +281,48 @@ const consoleController = createConsoleController({
   onSetupSaved: refreshVaultAdapterForConsoleSetup
 });
 
+const durableJobStore = createDurableJobStore({
+  dataDir: join(__dirname, "..", "data")
+});
+
+const backgroundWorker = createBackgroundWorker({
+  durableJobStore,
+  executionCallbacks: {
+    runTrack: async (trackId, input, context, options) => {
+      const runtime = getActiveRuntime();
+      const result = await runTrack({
+        trackId,
+        input,
+        runtime,
+        toolRegistry,
+        options: buildModelRoutingOptions(options || {}),
+        meta: { source: "background-worker", trackId }
+      });
+      return result;
+    },
+    runWorkflow: async (workflowId, input, context, options) => {
+      const runtime = getActiveRuntime();
+      const plan = buildRunPlan({
+        workflowId,
+        input,
+        options: options || {}
+      });
+      const execution = await executeRunPlan({
+        plan,
+        runtime,
+        toolRegistry,
+        options: buildModelRoutingOptions(options || {}),
+        meta: { source: "background-worker", workflowId }
+      });
+      return execution;
+    }
+  },
+  config: {
+    pollIntervalMs: 5000,
+    workerName: "background-worker"
+  }
+});
+
 const server = http.createServer(async (request, response) => {
   const startedAt = Date.now();
   const identity = createRunIdentity();
@@ -289,6 +334,22 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && consoleAsset) {
       return sendContent(response, consoleAsset.statusCode, consoleAsset.contentType, consoleAsset.body);
+    }
+
+    // Operator console static files
+    if (request.method === "GET" && (url.pathname === "/operator" || url.pathname === "/operator/")) {
+      const body = await readFile(join(__dirname, "operator", "index.html"));
+      return sendContent(response, 200, "text/html; charset=utf-8", body);
+    }
+
+    if (request.method === "GET" && url.pathname === "/operator/styles.css") {
+      const body = await readFile(join(__dirname, "operator", "styles.css"));
+      return sendContent(response, 200, "text/css; charset=utf-8", body);
+    }
+
+    if (request.method === "GET" && url.pathname === "/operator/app.js") {
+      const body = await readFile(join(__dirname, "operator", "app.js"));
+      return sendContent(response, 200, "text/javascript; charset=utf-8", body);
     }
 
     if (request.method === "GET" && url.pathname === "/console/status") {
@@ -1503,6 +1564,162 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, applyResult.ok ? 200 : 400, responseBody);
     }
 
+    if (request.method === "POST" && url.pathname === "/jobs") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with executionType, input, and trackId or workflowId."
+        });
+      }
+
+      const { executionType, trackId, workflowId, input, context, options, maxAttempts, correlationId } = bodyResult.body || {};
+
+      const createResult = durableJobStore.createJob({
+        executionType,
+        trackId,
+        workflowId,
+        input,
+        context,
+        options,
+        maxAttempts,
+        correlationId
+      });
+
+      if (!createResult.ok) {
+        const statusCode = createResult.code === "INVALID_EXECUTION_TYPE" || createResult.code === "MISSING_TRACK_ID" || createResult.code === "MISSING_WORKFLOW_ID" ? 400 : 500;
+        return sendJson(response, statusCode, {
+          ok: false,
+          code: createResult.code,
+          message: createResult.message
+        });
+      }
+
+      return sendJson(response, 200, {
+        ok: true,
+        job: createResult.job
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/jobs") {
+      const filter = {};
+      const status = url.searchParams.get("status");
+      if (status) filter.status = status;
+      const executionTypeParam = url.searchParams.get("executionType");
+      if (executionTypeParam) filter.executionType = executionTypeParam;
+      const trackIdParam = url.searchParams.get("trackId");
+      if (trackIdParam) filter.trackId = trackIdParam;
+
+      const jobs = durableJobStore.listJobs(Object.keys(filter).length > 0 ? filter : {});
+
+      return sendJson(response, 200, {
+        ok: true,
+        jobs
+      });
+    }
+
+    const jobGetMatch = url.pathname.match(/^\/jobs\/([^/]+)$/);
+    if (jobGetMatch && request.method === "GET") {
+      const jobId = decodeURIComponent(jobGetMatch[1]);
+      const job = durableJobStore.getJob(jobId);
+
+      if (!job) {
+        return sendJson(response, 404, {
+          ok: false,
+          code: "JOB_NOT_FOUND",
+          message: `Job '${jobId}' was not found.`,
+          nextStep: "Use GET /jobs to list all jobs."
+        });
+      }
+
+      return sendJson(response, 200, {
+        ok: true,
+        job
+      });
+    }
+
+    const jobCancelMatch = url.pathname.match(/^\/jobs\/([^/]+)\/cancel$/);
+    if (jobCancelMatch && request.method === "POST") {
+      const jobId = decodeURIComponent(jobCancelMatch[1]);
+      const result = durableJobStore.cancelJob(jobId);
+      if (!result.ok) {
+        const statusCode = result.code === "JOB_NOT_FOUND" ? 404 : 400;
+        return sendJson(response, statusCode, {
+          ok: false,
+          code: result.code,
+          message: result.message,
+          nextStep: result.code === "JOB_NOT_FOUND" ? "Use GET /jobs to list all jobs." : "Only queued or claimed jobs can be cancelled."
+        });
+      }
+      return sendJson(response, 200, {
+        ok: true,
+        job: result.job
+      });
+    }
+
+    const jobRetryMatch = url.pathname.match(/^\/jobs\/([^/]+)\/retry$/);
+    if (jobRetryMatch && request.method === "POST") {
+      const jobId = decodeURIComponent(jobRetryMatch[1]);
+      const result = durableJobStore.retryJob(jobId);
+      if (!result.ok) {
+        const statusCode = result.code === "JOB_NOT_FOUND" ? 404 : 400;
+        return sendJson(response, statusCode, {
+          ok: false,
+          code: result.code,
+          message: result.message,
+          nextStep: result.code === "JOB_NOT_FOUND" ? "Use GET /jobs to list all jobs." : "Only failed jobs with remaining attempts can be retried."
+        });
+      }
+      return sendJson(response, 200, {
+        ok: true,
+        job: result.job
+      });
+    }
+
+    const jobReviewMatch = url.pathname.match(/^\/jobs\/([^/]+)\/review$/);
+    if (jobReviewMatch && request.method === "POST") {
+      const jobId = decodeURIComponent(jobReviewMatch[1]);
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with action, reviewedBy, and reason."
+        });
+      }
+
+      const { action, reviewedBy, reason } = bodyResult.body || {};
+
+      if (!action || typeof action !== "string") {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "MISSING_ACTION",
+          message: "Review action is required.",
+          nextStep: "Send action as one of: request_review, approve, reject, request_correction, stop."
+        });
+      }
+
+      const result = durableJobStore.reviewJob(jobId, action, { reviewedBy, reason });
+      if (!result.ok) {
+        const statusCode = result.code === "JOB_NOT_FOUND" ? 404 : 400;
+        return sendJson(response, statusCode, {
+          ok: false,
+          code: result.code,
+          message: result.message,
+          nextStep: "Check the job status and review action and try again."
+        });
+      }
+      return sendJson(response, 200, {
+        ok: true,
+        job: result.job
+      });
+    }
+
     if (request.method === "POST" && url.pathname === "/analyze") {
       const bodyResult = await readJsonBody(request);
 
@@ -1540,7 +1757,7 @@ const server = http.createServer(async (request, response) => {
       ok: false,
       code: "NOT_FOUND",
       message: `No route matched ${request.method} ${url.pathname}.`,
-      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, or legacy POST /analyze."
+      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, POST /jobs, GET /jobs, GET /jobs/:id, POST /jobs/:id/cancel, POST /jobs/:id/retry, POST /jobs/:id/review, or legacy POST /analyze."
     });
   } catch (error) {
     console.error("Unexpected server error.");
@@ -1578,6 +1795,7 @@ server.listen(config.server.port, config.server.host, async () => {
     console.warn("[Enforcement Policy] Initialization warning:", initError.message);
   }
   await printStartupStatus();
+  backgroundWorker.start();
 });
 
 function loadConfig() {
@@ -1675,6 +1893,16 @@ async function buildHealthResponse() {
   const enforcementStore = enforcementPolicy.getStore ? enforcementPolicy.getStore() : null;
   const enforcementHealth = enforcementStore ? enforcementStore.getStoreHealth() : { healthy: false, initialized: false };
 
+  const allJobs = durableJobStore.listJobs();
+  const total = allJobs.length;
+  const queued = allJobs.filter((j) => j.status === "queued").length;
+  const claimed = allJobs.filter((j) => j.status === "claimed").length;
+  const running = allJobs.filter((j) => j.status === "running").length;
+  const completed = allJobs.filter((j) => j.status === "completed").length;
+  const failed = allJobs.filter((j) => j.status === "failed").length;
+  const cancelled = allJobs.filter((j) => j.status === "cancelled").length;
+  const jobTotals = { total, queued, claimed, running, completed, failed, cancelled };
+
   const health = {
     ok: true,
     engine: "local-ai-engine-core",
@@ -1721,7 +1949,8 @@ async function buildHealthResponse() {
       safeFallback: enforcementHealth.safeFallback,
       enforcementLocked: enforcementHealth.enforcementLocked,
       policyEndpoint: "/enforcement/policy"
-    }
+    },
+    jobTotals
   };
 
   if (runtimeState.warning) {
@@ -1745,6 +1974,7 @@ async function printStartupStatus() {
   console.log("Canonical API: POST /tasks/run");
   console.log("Track API: POST /tracks/run");
   console.log("Workflow API: POST /workflows/plan, POST /workflows/run");
+  console.log("Jobs API: POST /jobs, GET /jobs, GET /jobs/:id, POST /jobs/:id/cancel, POST /jobs/:id/retry, POST /jobs/:id/review");
   console.log("Compatibility API: POST /analyze");
   console.log(`Active provider: ${activeProvider}`);
 

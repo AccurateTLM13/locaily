@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Locaily Operator Console</title>
+  <link rel="stylesheet" href="/operator/styles.css">
+</head>
+<body>
+  <div class="app-shell" role="application" aria-label="Locaily Operator Console">
+
+    <!-- Top Bar -->
+    <header class="top-bar" role="banner">
+      <div class="top-bar__brand">
+        <span>Locaily Operator</span>
+        <span class="top-bar__subtitle" id="server-info">Connecting...</span>
+      </div>
+      <div class="top-bar__actions">
+        <span class="top-bar__shortcut-hint" aria-label="Keyboard shortcuts">1-4 Panels &middot; R Refresh &middot; Esc Close</span>
+        <button class="btn btn--ghost btn--sm" id="refresh-btn" aria-label="Refresh current panel" title="Refresh current panel (R)">Refresh</button>
+      </div>
+    </header>
+
+    <!-- Panel Tabs -->
+    <nav class="panel-tabs" role="tablist" aria-label="Dashboard panels">
+      <button class="panel-tab panel-tab--active" role="tab" aria-selected="true" aria-controls="panel-dashboard" id="tab-dashboard" data-panel="dashboard">Dashboard</button>
+      <button class="panel-tab" role="tab" aria-selected="false" aria-controls="panel-jobs" id="tab-jobs" data-panel="jobs">Jobs</button>
+      <button class="panel-tab" role="tab" aria-selected="false" aria-controls="panel-nodes" id="tab-nodes" data-panel="nodes">Relay Nodes</button>
+      <button class="panel-tab" role="tab" aria-selected="false" aria-controls="panel-enqueue" id="tab-enqueue" data-panel="enqueue">Enqueue Job</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" role="main">
+
+      <!-- ===== Dashboard Panel ===== -->
+      <section class="panel panel--active" id="panel-dashboard" role="tabpanel" aria-label="Dashboard">
+        <div class="panel-header">
+          <h1 class="panel-title">Dashboard</h1>
+          <div class="panel-actions">
+            <span class="top-bar__shortcut-hint" id="auto-refresh-indicator" aria-live="polite">Auto-refresh: 10s</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Job Totals by Status</h2>
+          <div id="job-stats" aria-live="polite">
+            <div class="loading">Loading job stats</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Relay Nodes</h2>
+          <div id="node-summary" aria-live="polite">
+            <div class="loading">Loading node summary</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Outcome Layers</h2>
+          <p class="detail-field__value" style="font-size: var(--text-sm); color: var(--muted);">
+            Job outcome visibility distinguishes four layers:
+          </p>
+          <div class="outcome-layers">
+            <span class="outcome-layer outcome-layer--transport">Transport</span>
+            <span class="outcome-layer outcome-layer--execution">Execution</span>
+            <span class="outcome-layer outcome-layer--enforcement">Enforcement</span>
+            <span class="outcome-layer outcome-layer--human">Human-Reviewed</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Jobs Panel ===== -->
+      <section class="panel" id="panel-jobs" role="tabpanel" aria-label="Jobs">
+        <div class="panel-header">
+          <h1 class="panel-title">Jobs</h1>
+          <div class="panel-actions">
+            <div class="filter-bar">
+              <label for="status-filter" class="sr-only">Filter by status</label>
+              <select id="status-filter" aria-label="Filter jobs by status">
+                <option value="">All Statuses</option>
+                <option value="queued">Queued</option>
+                <option value="claimed">Claimed</option>
+                <option value="running">Running</option>
+                <option value="completed">Completed</option>
+                <option value="failed">Failed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="paused_review">Paused Review</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table role="table" aria-label="Jobs list">
+              <thead>
+                <tr>
+                  <th>Job ID</th>
+                  <th>Type</th>
+                  <th>Track / Workflow</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th>Attempts</th>
+                  <th>Lease</th>
+                </tr>
+              </thead>
+              <tbody id="jobs-list">
+                <tr><td colspan="7"><div class="loading">Loading jobs</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Nodes Panel ===== -->
+      <section class="panel" id="panel-nodes" role="tabpanel" aria-label="Relay Nodes">
+        <div class="panel-header">
+          <h1 class="panel-title">Relay Nodes</h1>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Registered Nodes</h2>
+          <div id="nodes-list" aria-live="polite">
+            <div class="loading">Loading nodes</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Enqueue Panel ===== -->
+      <section class="panel" id="panel-enqueue" role="tabpanel" aria-label="Enqueue Job">
+        <div class="panel-header">
+          <h1 class="panel-title">Enqueue Job</h1>
+        </div>
+
+        <div class="card">
+          <form class="enqueue-form" id="enqueue-form" aria-label="Create a new job">
+            <div class="form-row">
+              <label for="job-type">Type</label>
+              <select id="job-type" required aria-required="true">
+                <option value="">Select type...</option>
+                <option value="track">Track</option>
+                <option value="workflow">Workflow</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="job-id-input">Track / Workflow ID</label>
+              <input type="text" id="job-id-input" placeholder="e.g. website_audit.lighthouse_handoff" required aria-required="true">
+            </div>
+            <div class="form-row">
+              <label for="job-input">Input JSON <span style="color: var(--muted-soft); font-weight: 400;">(optional)</span></label>
+              <textarea id="job-input" placeholder='{&#10;  "url": "https://example.com"&#10;}'></textarea>
+            </div>
+            <div class="form-row">
+              <button type="submit" class="btn btn--primary" id="enqueue-submit">Create Job</button>
+            </div>
+            <div id="enqueue-result" aria-live="polite"></div>
+          </form>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Job Detail Overlay -->
+    <div class="detail-overlay" id="job-detail-overlay" role="dialog" aria-modal="true" aria-label="Job detail" hidden>
+      <div class="detail-panel">
+        <div class="detail-panel__header">
+          <h2 class="detail-panel__title" id="detail-title">Job Detail</h2>
+          <button class="detail-panel__close" id="detail-close" aria-label="Close detail panel (Escape)">Close</button>
+        </div>
+        <div id="detail-body"></div>
+      </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div class="confirm-dialog" id="confirm-dialog" role="alertdialog" aria-modal="true" aria-label="Confirmation" hidden>
+      <div class="confirm-dialog__box">
+        <h3 class="confirm-dialog__title" id="confirm-title">Confirm Action</h3>
+        <p class="confirm-dialog__message" id="confirm-message"></p>
+        <textarea class="confirm-dialog__reason" id="confirm-reason" placeholder="Optional reason..." aria-label="Reason for action"></textarea>
+        <div class="confirm-dialog__actions">
+          <button class="btn btn--secondary" id="confirm-cancel">Cancel</button>
+          <button class="btn btn--primary" id="confirm-ok">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status announcer for screen readers -->
+    <div class="sr-only" id="status-announcer" aria-live="assertive" aria-atomic="true"></div>
+  </div>
+
+  <script src="/operator/app.js"></script>
+</body>
+</html>

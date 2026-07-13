@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-11 (M5 complete + post-completion review: 4 implementation issues fixed + architectural review identifying M6 scope)
+**Updated:** 2026-07-12 (M6: durable job store wired into Local Brain; `/jobs` API endpoints implemented; background worker polling loop claims and executes queued jobs; cancel/retry/review mutation endpoints added; operator console UI at /operator)
 
 ## Read First
 
@@ -121,30 +121,51 @@ Real URL validation set:
 
 ## Current Task
 
-M5 is complete and reviewed. The system can now distribute workflow steps across multiple relay nodes with local fallback. The architectural review identified four issues that need attention before the relay system can be used outside trusted development networks:
+The cancel, retry, and human-gate review mutation endpoints are now implemented. Operators can manage durable jobs via:
+- `POST /jobs/:id/cancel` — cancels queued or claimed jobs
+- `POST /jobs/:id/retry` — re-queues failed jobs with remaining attempts
+- `POST /jobs/:id/review` — supports `request_review` (running→paused_review), `approve` (paused_review→queued), `reject` (paused_review→failed), `request_correction` (paused_review→queued with note), `stop` (paused_review→cancelled)
+- Review metadata (action, reviewer, timestamp, reason) persists on the job record and survives server restart
 
-### High: Relay communication has no visible trust boundary
-- No authentication token, signature, node certificate, request nonce, or pairing credential
-- Registration and heartbeat calls are unauthenticated
-- A rogue or accidentally registered LAN node could receive workflow context, user-derived content, and return manipulated results
-- **Current state:** Trusted-development-network only
-
-### Medium: Planned relay placement can silently become local execution
-- When an assigned node is missing or unhealthy, `executeStepWithAssignedNode()` falls back to local execution without recording a fallback audit
-- Run reports placement plan assigning step to relay node, but actual execution occurred locally with no recorded reason
-- **Consequence:** Planned and executed topology can diverge silently, weakening the evidence system
-
-### Medium: `local_first` defaults to effectively local-only
-- Every role is treated as locally capable when `localCapableRoles` is omitted
-- `local_first` immediately assigns locally when the role is considered locally capable
-- **Consequence:** Without explicit local-capability data, relay nodes are never used for model steps
-
-### Medium: "Approved evidence" was written with an agent as approver
-- Several new evidence records use `"approvedBy": "locaily-agent"`
-- Blurs distinction between generated, promoted, machine-reviewed, human-reviewed, and approved for qualification
-- **Fix:** Use `promotionActor` instead of `approvedBy`; reserve `approvedBy` for actual human approval
+### Immediate Next
+- CLI commands for cancel/retry/review
 
 ## Completed Since Last Update
+
+- **Operator Console UI (M6 operator-control-plane)** — completed 2026-07-12
+  - `companion/operator/index.html` — single-page operator dashboard with four panels (Dashboard, Jobs, Relay Nodes, Enqueue)
+  - `companion/operator/styles.css` — dark theme with CSS custom properties, status colors, responsive grid layout
+  - `companion/operator/app.js` — all client-side logic: fetch wrappers, panel rendering, event handlers, keyboard shortcuts (1-4/R/Esc), auto-refresh, confirmation dialogs, ARIA accessibility, outcome layer badges
+  - `companion/server.js` — added `GET /operator`, `/operator/styles.css`, `/operator/app.js` static file routes
+  - `scripts/test-operator-console.js` — 34 integration tests covering static file serving, health integration, job mutation endpoints, 404 handling
+  - All interactive elements have ARIA labels and are keyboard-navigable
+
+- **Job Cancel/Retry/Review Mutation Endpoints (M6 operator-control-plane)** — completed 2026-07-12
+  - `companion/core/durable-job-store.js`: added `reviewJob()` method supporting 5 review actions (`request_review`, `approve`, `reject`, `request_correction`, `stop`) with full state validation, review metadata persistence, and updated `VALID_TRANSITIONS` for `paused_review` and `running`
+  - `companion/schemas/internal/durable-job.schema.json`: added `review` property definition
+  - `companion/server.js`: added `POST /jobs/:id/cancel`, `POST /jobs/:id/retry`, `POST /jobs/:id/review` endpoints with proper 404/400 error handling and JSON envelope responses
+  - `scripts/test-jobs-mutation.js`: 85 integration tests covering all cancel, retry, and review scenarios including edge cases, error states, persistence, and envelope shape
+
+- **Background Worker Polling Loop (M6 operator-control-plane)** — completed 2026-07-12
+  - `companion/jobs/worker.js` implements a polling worker with `start()`, `stop()`, and `getStatus()`
+  - Polls every 5 seconds (configurable) calling `durableJobStore.listClaimableJobs()`
+  - Claims queued jobs, transitions to `running`, executes via execution callbacks, completes/fails/retries
+  - Track-type jobs execute via `runTrack`; workflow-type jobs execute via `buildRunPlan`+`executeRunPlan`
+  - Retry logic: retryable errors with remaining attempts re-queue via `retryJob`; non-retryable or exhausted attempts leave in `failed`
+  - Single concurrency (`isProcessing` flag) — skips poll cycle if still processing
+  - Lifecycle events logged to console (claimed, started, completed, failed, retried)
+  - Wired into `companion/server.js` — worker starts automatically after server listens
+  - 44 integration tests in `scripts/test-jobs-worker.js` covering success paths, failure/retry, concurrency, polling, and lifecycle
+
+- **Durable Job Store API (M6 operator-control-plane)** — completed 2026-07-12
+  - `createDurableJobStore` imported and initialized in server.js
+  - `POST /jobs` creates persistent background jobs for track and workflow types with schema validation
+  - `GET /jobs` lists all jobs with optional `?status=` and `?limit=` query filters
+  - `GET /jobs/:id` returns the full job record (or 404 for unknown jobs)
+  - `GET /health` includes `jobTotals` with counts by all seven job statuses
+  - Jobs persist to `data/jobs/*.json` and survive server restart
+  - 64 integration tests in `scripts/test-jobs-api.js` covering create, list, filter, get, health, and persistence
+  - Changes are additive — no existing endpoint shapes modified
 
 - **M2: Multi-Track Qualification & Enforcement** — completed 2026-07-11
   - Created 4 Benchmark Lab suites (accessibility-deep, performance-budget, seo-audit, dealsniper) with case files, output schemas, and validators

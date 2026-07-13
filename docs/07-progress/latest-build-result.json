@@ -1,145 +1,96 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "M5-multi-device-workflow-coordination",
+  "build_slice": "08-operator-control-plane",
   "status": "complete",
-  "objective": "Multi-device workflow coordination built on M4 Relay Nodes — coordinator computes a step-to-node placement plan across healthy relay nodes, executes each workflow step on its assigned device, and falls back locally when an assigned node fails. Includes a placement planner, a placement-preview endpoint, and coordinated multi-device execution with audit trail.",
+  "objective": "Build the operator console web interface (HTML/CSS/JS) served at /operator so operators can view, manage, and act on durable jobs, relay nodes, and system health without reading raw state files.",
   "implemented": {
-    "placement_planner": [
-      "companion/relay/placement.js (createPlacementPlanner, buildPlacementFromTrack)"
+    "operator_static_files": [
+      "companion/operator/index.html — single-page operator dashboard with four panels (Dashboard, Jobs, Relay Nodes, Enqueue)",
+      "companion/operator/styles.css — dark theme with CSS custom properties, status colors, responsive Grid layout",
+      "companion/operator/app.js — all client-side logic: fetch wrappers, panel rendering, event handlers, keyboard shortcuts, auto-refresh, confirmation dialogs, ARIA accessibility"
     ],
-    "placement_policies": [
-      "distribute (spread model steps across capable healthy nodes, least-loaded)",
-      "local_first (local when locally capable, else route)",
-      "local_only (force all local)",
-      "prefer_relay / route_if_unavailable (M4 per-step dynamic decision, unchanged)"
-    ],
-    "assigned_node_routing": [
-      "companion/relay/router.js executeStepWithAssignedNode (route to specific node, fallback local + RELAY_FALLBACK audit on failure)",
-      "companion/relay/router.js executeStepViaRelayIfNeeded now consults options.relay.assignments[stepId]",
-      "companion/crew/orchestrator.js (DAG + linear) and companion/orchestration/run-plan-executor.js pass stepId"
-    ],
-    "server_wiring": [
-      "POST /relay/plan (placement preview for a track)",
-      "GET /relay/protocol now lists /relay/plan",
-      "applyRelayPlacement() attaches assignments + placementSummary for relay_policy=distribute on /tracks/run and /workflows/run",
-      "responses include relay_placement summary (counts + byNode)"
+    "server_routes": [
+      "companion/server.js — GET /operator serves companion/operator/index.html (text/html)",
+      "GET /operator/styles.css serves companion/operator/styles.css (text/css)",
+      "GET /operator/app.js serves companion/operator/app.js (application/javascript)",
+      "Follows existing console pattern (readFile from operator/ directory)"
     ],
     "tests": [
-      "scripts/test-relay-placement.cjs (14/14 — added dedupe/load-split coverage)",
-      "scripts/test-multi-device-e2e.cjs (22/22 — three Local Brain instances A orchestrator + B + C relay; distributed run, then kill C -> local fallback)"
-    ],
-    "package_scripts": [
-      "test:relay:placement",
-      "test:multi-device:e2e",
-      "test:m5"
+      "scripts/test-operator-console.js (34/34 — covers /operator/ HTML, /operator/styles.css CSS, /operator/app.js JS, /health jobTotals, /relay/nodes, job mutation endpoints, /operator/missing 404, /jobs/:id 404)"
     ],
     "all_test_results": {
-      "benchmark:test": "PASS",
-      "contract-test": "PASS",
-      "benchmark:status-smoke": "PASS",
-      "test:dag": "14/14 + 9/9 + workflow PASS",
-      "orchestration-unit-test": "PASS",
-      "smoke-test": "57/57 PASS",
-      "test:relay (unit)": "17/17 PASS (harness fixed: async checks now actually run)",
-      "test:memory-v1": "6/6 PASS",
-      "test:relay:e2e": "11/11 PASS",
-      "test:relay:placement": "14/14 PASS",
-      "test:multi-device:e2e": "22/22 PASS"
+      "test-durable-job-store": "117/117 PASS",
+      "test-jobs-api": "64/64 PASS",
+      "test-jobs-worker": "44/44 PASS",
+      "test-jobs-mutation": "85/85 PASS",
+      "test-operator-console": "34/34 PASS",
+      "contract-test": "PASS"
     }
   },
   "validation": {
     "passed": true,
     "results": [
-      "Placement planner distributes model steps across two relay nodes (B gets priority_helper, C gets developer/guardrail/testing writers) and keeps tool steps local",
-      "Multi-device e2e: Lighthouse Handoff runs on A with model steps executed on B and C; relay_placement summary reports 4 relayed / 6 local across both devices",
-      "Failure + local fallback: killing node C reroutes its steps locally and records RELAY_FALLBACK audit events; workflow still completes",
-      "Existing M4 relay e2e still passes (single-step prefer_relay unaffected)",
-      "All existing tests pass (backward compatible)"
+      "GET /operator returns HTML page (200, text/html, contains dashboard structure)",
+      "GET /operator/ returns HTML (200, text/html)",
+      "GET /operator/styles.css returns CSS (200, text/css, contains CSS variables)",
+      "GET /operator/app.js returns JavaScript (200, application/javascript)",
+      "GET /health still returns jobTotals by status (unchanged)",
+      "GET /relay/nodes still returns node list (unchanged)",
+      "Job mutation endpoints still work: cancel, retry, review",
+      "GET /operator/missing returns 404 NOT_FOUND",
+      "GET /jobs/nonexistent returns 404 JOB_NOT_FOUND",
+      "34/34 integration tests pass",
+      "Existing tests pass: 117+64+44+85 tests across all job store/api/worker/mutation suites"
     ]
   },
   "acceptance_criteria": {
     "passed": [
-      "Coordinator computes a placement plan across 2+ relay nodes for a workflow",
-      "Each step executes on its assigned device; tool steps stay local",
-      "Node failure mid-workflow falls back to local execution with audit trail",
-      "Placement preview endpoint reports assignments + summary",
-      "All existing tests still pass (backward compatible)",
-      "End-to-end: Lighthouse Handoff distributed across 3 devices, then degraded to 2 with fallback"
+      "GET /operator returns the operator console HTML page (200, text/html)",
+      "GET /operator/styles.css returns CSS (200, text/css)",
+      "GET /operator/app.js returns JavaScript (200, application/javascript)",
+      "The operator console shows job counts by status on load (from /health jobTotals)",
+      "The jobs panel lists jobs with optional status filtering",
+      "Clicking a job row shows full metadata including attempt count, timestamps, lease info, result/error, planned/actual node, fallback reason, review metadata",
+      "Cancel button appears for queued/claimed jobs and successfully cancels via POST /jobs/:id/cancel",
+      "Retry button appears for failed jobs with remaining attempts and successfully retries via POST /jobs/:id/retry",
+      "Request Review button appears for running jobs and transitions to paused_review via POST /jobs/:id/review",
+      "Approve/Reject/Request Correction/Stop buttons appear for paused_review jobs and work correctly",
+      "Review actions include confirmation prompt and optional reason input",
+      "The nodes panel shows relay node list with health status and last heartbeat",
+      "The enqueue form creates jobs via POST /jobs",
+      "Loading, empty, and error states are handled with visible messages",
+      "All interactive elements have ARIA labels and are keyboard-navigable",
+      "Keyboard shortcuts work (r, 1-4, Escape)",
+      "Dashboard auto-refreshes every 10 seconds",
+      "node scripts/test-operator-console.js passes all test cases (34/34)",
+      "Existing tests still pass: node scripts/test-jobs-mutation.js (85/85), node scripts/test-jobs-api.js (64/64), node scripts/test-jobs-worker.js (44/44), node scripts/test-durable-job-store.js (117/117), node scripts/contract-test.js",
+      "/health response and all job API responses are unchanged",
+      "No changes to existing endpoint response envelopes"
     ],
     "failed": [],
     "blockers": []
   },
   "scope_notes": [
-    "Single orchestrator, ephemeral relay nodes — no distributed consensus or global scheduler",
-    "Placement is capability + health + least-loaded; no latency/bandwidth awareness",
-    "Tool steps are always local by design (relay nodes are model-capability targets)",
-    "Local fallback is per-step; a failed node is marked unhealthy for 60s (registry stale window)"
+    "CLI commands for cancel/retry/review not included",
+    "Modifying the existing /console UI or its endpoints not included",
+    "Adding new API endpoints not included (only static file serving added)",
+    "Modifying companion/core/durable-job-store.js or any store logic not included",
+    "Modifying companion/jobs/worker.js not included",
+    "Modifying existing /tasks/run, /tracks/run, /workflows/run, /analyze response envelope shapes not included",
+    "No cross-process workers, worker pools, or separate Node.js processes",
+    "No import of benchmark-lab/engine/ modules",
+    "Server remains localhost-only"
   ],
   "stop_conditions_honored": [
-    "Local Brain localhost-only by default (no public exposure)",
-    "Relay nodes are execution targets only (no control-plane ops)",
-    "No automatic model swapping / Model Garage",
-    "No distributed consensus / Byzantine fault tolerance claimed",
-    "Failures degrade gracefully to local execution (no data loss)"
+    "No modifications to companion/core/durable-job-store.js",
+    "No modifications to companion/jobs/worker.js",
+    "No modifications to existing endpoint response envelopes",
+    "No import of benchmark-lab/engine/ modules",
+    "Server remains localhost-only",
+    "No new npm dependencies",
+    "No modifications to existing /console UI or its endpoints"
   ],
-  "last_fresh_validation": "2026-07-11 (M5 complete + review fixes — multi-device workflow coordination)",
-  "next_milestones": "M6: Trusted Relay Execution and Actual-Placement Evidence — node pairing/authentication, capability verification, allowed-network restrictions, minimal-context envelopes, planned-vs-actual placement records, remote output schema validation, explicit relay fallback reasons, one real two-device pilot, performance comparison, human-readable operator view",
-  "updated_at": "2026-07-11",
-  "architectural_review_2026-07-11": {
-    "scope": "M5 architectural review for safety, evidence integrity, and deployment readiness",
-    "findings": [
-      {
-        "severity": "high",
-        "title": "Relay communication has no visible trust boundary",
-        "description": "No authentication token, signature, node certificate, request nonce, or pairing credential. Registration and heartbeat calls are unauthenticated. A rogue or accidentally registered LAN node could receive workflow context, user-derived content, and return manipulated results.",
-        "current_state": "Trusted-development-network only",
-        "fix": "M6 objective #1: Node pairing and authentication"
-      },
-      {
-        "severity": "medium",
-        "title": "Planned relay placement can silently become local execution",
-        "description": "When an assigned node is missing or unhealthy, executeStepWithAssignedNode() falls back to local execution without recording a fallback audit. Run reports placement plan assigning step to relay node, but actual execution occurred locally with no recorded reason.",
-        "consequence": "Planned and executed topology can diverge silently, weakening the evidence system",
-        "fix": "M6 objective #5: Planned-versus-actual placement records"
-      },
-      {
-        "severity": "medium",
-        "title": "local_first defaults to effectively local-only",
-        "description": "Every role is treated as locally capable when localCapableRoles is omitted. local_first immediately assigns locally when the role is considered locally capable.",
-        "consequence": "Without explicit local-capability data, relay nodes are never used for model steps",
-        "fix": "Document that local_first requires explicit localCapableRoles for correct behavior"
-      },
-      {
-        "severity": "medium",
-        "title": "Approved evidence was written with an agent as approver",
-        "description": "Several new evidence records use approvedBy: locaily-agent. Blurs distinction between generated, promoted, machine-reviewed, human-reviewed, and approved for qualification.",
-        "fix": "Use promotionActor instead of approvedBy; reserve approvedBy for actual human approval"
-      }
-    ],
-    "recommendation": "M6: Trusted Relay Execution and Actual-Placement Evidence — harden one real two-device path, prove the evidence is truthful, and measure whether distribution creates value",
-    "assessment": "Today's work passes as a major milestone. The structure is disciplined, modular, test-oriented, and aligned with the Locaily thesis. The system did not take the lazy route of bolting HTTP calls onto the workflow runner; it created actual placement, registry, protocol, routing, evidence, and fallback concepts. The next danger is scope excitement."
-  },
-  "review_2026-07-11": {
-    "scope": "Post-completion review of M4 + M5 for bugs, mistakes, and unfinished items",
-    "issues_found": [
-      "registry.selectForRole sorted descending (picked most-loaded node) — wrong least-loaded behavior",
-      "placement byRole double-counted a node advertising both `role` and `role:role`",
-      "no direct unit test for executeStepWithAssignedNode (M5 assigned-node routing)",
-      "relay-node-protocol.md documented M4 only, missing M5 placement/distribute/POST /relay/plan",
-      "HIDDEN: test-relay-unit.cjs async checks were fire-and-forget before process.exit — never executed (false confidence); exposed a wrong audit-field assertion (r.code vs r.error_code)"
-    ],
-    "fixes_applied": [
-      "companion/relay/registry.js: selectForRole now sorts ascending (a.dispatchCount - b.dispatchCount)",
-      "companion/relay/placement.js: byRole dedupes nodes per role",
-      "scripts/test-relay-unit.cjs: harness now awaits async checks; added 3 executeStepWithAssignedNode tests; corrected audit assertion to r.error_code",
-      "scripts/test-relay-placement.cjs: added dedupe/least-loaded load-split test",
-      "docs/05-integrations/relay-node-protocol.md: added M5 placement section (distribute policy, POST /relay/plan, relay_placement, assignments)"
-    ],
-    "verification": {
-      "test:relay (unit)": "17/17 PASS",
-      "test:relay:placement": "14/14 PASS",
-      "test:multi-device:e2e": "22/22 PASS"
-    },
-    "outcome": "All M4/M5 review issues resolved; no blockers remaining for M5 acceptance."
-  }
+  "last_fresh_validation": "2026-07-12 (operator console UI implemented and tested — 34/34; all 310 existing job/store/worker/mutation tests pass)",
+  "next_milestones": "CLI commands for cancel/retry/review; broader operator control plane features",
+  "updated_at": "2026-07-12"
 }
