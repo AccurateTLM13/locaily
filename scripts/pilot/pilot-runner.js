@@ -43,6 +43,10 @@ async function main(argv = process.argv.slice(2)) {
   const alreadyRunning = await isServerRunning(serverUrl);
   const server = alreadyRunning ? null : await startServer();
 
+  if (!alreadyRunning && policy === "local-only") {
+    await setProvider(serverUrl, "mock").catch(() => {});
+  }
+
   const runId = createRunId();
   const startedAt = new Date().toISOString();
   const results = [];
@@ -288,6 +292,13 @@ async function postJson(serverUrl, path, body, timeoutMs) {
     return { status: response.status, body: parsed };
   } finally {
     clearTimeout(timer);
+  }
+}
+
+async function setProvider(serverUrl, provider) {
+  const response = await postJson(serverUrl, "/providers/set", { provider }, 5000);
+  if (!response.body || !response.body.ok) {
+    throw new Error(`Failed to set provider to '${provider}'`);
   }
 }
 

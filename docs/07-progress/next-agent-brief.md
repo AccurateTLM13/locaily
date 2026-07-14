@@ -133,14 +133,12 @@ Real URL validation set:
 
 ## Current Task
 
-The cancel, retry, and human-gate review mutation endpoints are now implemented. Operators can manage durable jobs via:
-- `POST /jobs/:id/cancel` — cancels queued or claimed jobs
-- `POST /jobs/:id/retry` — re-queues failed jobs with remaining attempts
-- `POST /jobs/:id/review` — supports `request_review` (running→paused_review), `approve` (paused_review→queued), `reject` (paused_review→failed), `request_correction` (paused_review→queued with note), `stop` (paused_review→cancelled)
-- Review metadata (action, reviewer, timestamp, reason) persists on the job record and survives server restart
+The M9 physical multi-device pilot infrastructure is prepared. Hardware profile schema, template, and pilot runner CLI are implemented under `scripts/pilot/`. The pilot runner executes track workflows with three relay policies (local-only, local-first, distributed), collects timing metrics and relay placement evidence, and writes per-run JSON evidence files plus a summary CSV. Documentation for the pilot procedure is at `docs/05-integrations/multi-device-pilot.md`. The pilot has not yet been executed on physical hardware — this is infrastructure preparation only.
 
 ### Immediate Next
-- CLI commands for cancel/retry/review
+- Execute the pilot on two physical devices with Ollama installed
+- Collect and analyze evidence from local-only, local-first, and distributed policy modes
+- Compare timing metrics and relay placement across policies
 
 ## Completed Since Last Update
 

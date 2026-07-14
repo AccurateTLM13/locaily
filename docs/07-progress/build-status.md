@@ -1,10 +1,10 @@
 # Build Status
 
-**Updated:** 2026-07-14 (M9 pilot infrastructure prepared — hardware profile schema, pilot runner CLI, multi-device pilot plan documented)
+**Updated:** 2026-07-13 (M9 pilot infrastructure prepared — hardware profile schema, pilot runner CLI, and pilot plan documentation implemented)
 
 ## Current Stage
 
-Pipeline-stage **Local Brain** with **Crew track runner**, JSON-first internal contracts, workflow orchestration, Memory Bridge v0, and Benchmark Lab Milestone 1 complete and operator-ready.
+Pipeline-stage **Local Brain** with **Crew track runner**, JSON-first internal contracts, workflow orchestration, Memory Bridge v0, and Benchmark Lab Milestone 1 complete and operator-ready. M9 physical multi-device pilot infrastructure is prepared (not yet executed on hardware).
 
 North Star direction is now documented as a local capability network: route track contracts to the smallest qualified capability, validate results, and preserve structured evidence for future routing and track improvement.
 
@@ -20,6 +20,7 @@ North Star direction is now documented as a local capability network: route trac
 | **5 - Benchmark Lab** | Complete — Milestone 1 operator-ready |
 | **6 - Relay Nodes (M4)** | Complete |
 | **7 - Multi-Device Workflow Coordination (M5)** | Complete |
+| **8 - Pilot Infrastructure (M9)** | Infrastructure prepared — not yet executed on hardware |
 | **8 - Operator Control Plane (M6)** | Complete |
 | **9 - Physical Multi-Device Pilot (M9)** | Infrastructure prepared — pilot not yet executed |
 
@@ -54,7 +55,7 @@ North Star direction is now documented as a local capability network: route trac
 - Memory Bridge v0 endpoints (disabled by default)
 - Relay Node protocol, node registry, cross-node routing with local fallback (`companion/relay/*`, `/relay/*` endpoints)
 - Multi-device workflow placement planner (`companion/relay/placement.js`) + `POST /relay/plan` preview; distributed step execution with local fallback on node failure
-- Pilot runner (`scripts/pilot/pilot-runner.js`) — CLI for executing tracks across policy modes with evidence collection
+- Pilot infrastructure for M9 physical multi-device pilot (`scripts/pilot/`): hardware profile schema, template, pilot runner CLI with three relay policies, evidence collection, and summary CSV generation
 - Memory Bridge v1: structured search (`/memory/search`) + writeback-apply (`/memory/writeback/apply`, opt-in)
 - Current verification suite passes; see the latest progress log or CI evidence for counts
 - Windows launch helpers

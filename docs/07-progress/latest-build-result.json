@@ -4,45 +4,38 @@
   "status": "complete",
   "objective": "Create pilot infrastructure — hardware profile schema, pilot run orchestrator script, and pilot plan documentation — in preparation for the physical multi-device pilot (M9).",
   "implemented": {
-    "pilot_schema": [
-      "scripts/pilot/hardware-profile.schema.json — JSON schema with required fields: deviceName, os, cpu, ram, vram, runtimeProvider, availableModels, advertisedCapabilities, networkAddress"
+    "pilot_infrastructure": [
+      "scripts/pilot/hardware-profile.schema.json — JSON schema defining required fields for device hardware profiles (deviceName, os, cpu, ram, vram, runtimeProvider, availableModels, advertisedCapabilities, networkAddress)",
+      "scripts/pilot/hardware-profile-template.json — template with placeholder comments for operators to fill in",
+      "scripts/pilot/pilot-runner.js — CLI script that executes track workflows with three relay policies (local-only, local-first, distributed), collects timing metrics and relay placement evidence, writes per-run JSON evidence files and summary CSV",
+      "docs/05-integrations/multi-device-pilot.md — pilot plan document covering prerequisites, setup, run procedures, evidence collection, and tear-down"
     ],
-    "pilot_template": [
-      "scripts/pilot/hardware-profile-template.json — operator-fillable template with placeholder values and _comment instructions"
-    ],
-    "pilot_runner": [
-      "scripts/pilot/pilot-runner.js — CLI script accepting --policy (local-only/local-first/distributed), --workflow, --input, --output-dir, --repeat, --server flags",
-      "Executes tracks via POST /tracks/run on the Local Brain",
-      "Collects timing metrics (total_duration_ms), relay_placement summary, per-step details",
-      "Writes per-run evidence JSON files and summary CSV to output directory",
-      "Auto-starts Local Brain if not already running",
-      "Verified working in local-only mode with mock provider (2/2 runs ok)"
-    ],
-    "pilot_docs": [
-      "docs/05-integrations/multi-device-pilot.md — pilot plan document covering prerequisites, hardware profile instructions, setup, run procedures for each policy mode, evidence collection, tear-down, known limitations, and stop conditions"
-    ],
-    "npm_scripts": [
-      "package.json: pilot:local-only, pilot:local-first, pilot:distributed"
+    "package_scripts": [
+      "pilot:local-only — runs pilot with local-only relay policy",
+      "pilot:local-first — runs pilot with local-first relay policy",
+      "pilot:distributed — runs pilot with distributed relay policy"
     ],
     "tests": [
-      "npm run benchmark:test — PASS",
-      "npm run benchmark:status-smoke — PASS",
-      "node scripts/contract-test.js — PASS",
-      "node scripts/test-relay-unit.cjs — 52/52 PASS",
-      "node scripts/test-relay-placement.cjs — 17/17 PASS"
+      "All existing tests pass: benchmark:test, benchmark:status-smoke, contract-test, test-relay-unit.cjs (52/52), test-relay-placement.cjs (17/17)",
+      "Pilot runner tested in local-only mode against running Local Brain with mock provider — successfully executes tracks and writes evidence"
     ]
   },
   "validation": {
     "passed": true,
     "results": [
-      "hardware-profile.schema.json loads and validates with all 9 required fields",
-      "hardware-profile-template.json loads with all required keys",
-      "pilot-runner.js exports main, parseFlags, buildSummaryCsv, summarizeRelayPlacement",
-      "Pilot runner executed 2 runs in local-only mode against mock provider — both ok=true",
-      "Evidence JSON files contain: run_id, run_number, policy, workflow, total_duration_ms, ok, relay_placement, track_run_record_id, steps, provider, model",
-      "Summary CSV contains correct columns: policy, workflow, run_number, total_duration_ms, ok, relay_nodes_used",
-      "All 5 required test suites pass without failure",
-      "No existing files outside scope modified"
+      "hardware-profile.schema.json validates against JSON Schema draft-07",
+      "hardware-profile-template.json contains all required fields with placeholder values",
+      "pilot-runner.js runs without error in local-only mode against a running Local Brain (mock provider)",
+      "Pilot runner collects per-run timing metrics (total_duration_ms), relay_placement summary, and writes evidence JSON files",
+      "Pilot runner writes summary CSV with columns: policy, workflow, run_number, total_duration_ms, ok, relay_nodes_used",
+      "docs/05-integrations/multi-device-pilot.md exists covering prerequisites, setup, run procedures, evidence collection, and tear-down",
+      "package.json has pilot:local-only, pilot:local-first, pilot:distributed scripts",
+      "npm run benchmark:test passes (no failure)",
+      "npm run benchmark:status-smoke passes",
+      "node scripts/contract-test.js passes",
+      "node scripts/test-relay-unit.cjs passes (52/52 assertions)",
+      "node scripts/test-relay-placement.cjs passes (17/17 assertions)",
+      "No existing files outside the defined scope are modified"
     ]
   },
   "acceptance_criteria": {
@@ -57,8 +50,8 @@
       "npm run benchmark:test passes (no failure)",
       "npm run benchmark:status-smoke passes",
       "node scripts/contract-test.js passes",
-      "node scripts/test-relay-unit.cjs passes (52/52 assertions)",
-      "node scripts/test-relay-placement.cjs passes (17/17 assertions)",
+      "node scripts/test-relay-unit.cjs passes (all assertions)",
+      "node scripts/test-relay-placement.cjs passes (all assertions)",
       "docs/07-progress/next-agent-brief.md updated with M9 pilot infrastructure status",
       "docs/07-progress/build-status.md updated",
       "docs/07-progress/latest-build-result.json updated",
@@ -68,28 +61,29 @@
     "blockers": []
   },
   "scope_notes": [
-    "Infrastructure-only — pilot not executed on physical hardware",
-    "No modifications to companion/ files",
-    "No modifications to benchmark-lab/ files",
+    "Physical hardware setup not performed — this is infrastructure preparation only",
+    "No actual hardware profiles created for real devices — only templates",
+    "Pilot has not been executed on physical hardware — this is preparation only",
+    "No modifications to companion/ server, relay, crew, core, orchestration, tools",
+    "No modifications to benchmark-lab/",
     "No modifications to existing test files",
-    "No modifications to tool-packs/",
-    "No new API endpoints added",
-    "No modifications to server.js",
-    "No new npm dependencies"
+    "No modifications to existing tool packs",
+    "No new API endpoints added to the Local Brain server",
+    "No modifications to API response envelopes or existing endpoint behavior"
   ],
   "stop_conditions_honored": [
     "No modifications to companion/ files",
     "No modifications to benchmark-lab/ files",
     "No modifications to existing test files under scripts/test-*.js or scripts/test-*.cjs",
-    "No modifications to tool-packs/",
-    "No physical hardware setup required",
-    "No actual hardware profiles created — only templates",
-    "No claim that pilot has been executed",
+    "No modifications to existing tool packs under tool-packs/",
+    "No physical hardware setup performed",
+    "No actual hardware profiles created for real devices",
+    "No claim that the pilot has been executed",
     "No modifications to API response envelopes",
-    "No new endpoints added",
+    "No new endpoints added to the Local Brain server",
     "No modifications to companion/server.js"
   ],
-  "last_fresh_validation": "2026-07-14 (pilot infrastructure verified — schema/template/runner all load correctly; pilot runner executed 2/2 runs ok in local-only mode with mock provider; all 5 required test suites pass)",
-  "next_milestones": "Execute pilot on physical hardware with two devices; collect comparative evidence across local-only, local-first, and distributed policies",
-  "updated_at": "2026-07-14"
+  "last_fresh_validation": "2026-07-13 (pilot infrastructure implemented and tested — all existing tests pass, pilot runner executes successfully in local-only mode)",
+  "next_milestones": "Execute the pilot on two physical devices with Ollama installed; collect and analyze evidence from local-only, local-first, and distributed policy modes",
+  "updated_at": "2026-07-13"
 }
