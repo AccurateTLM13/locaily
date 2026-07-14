@@ -14,6 +14,33 @@
   Criteria** sections. The worker is forbidden from touching excluded areas.
 - Prefer small, working increments over large speculative changes.
 
+## Task sizing rules
+
+The worker has a time limit (currently 15 minutes). A task that takes longer
+will time out and fail even if the code is correct. Size tasks accordingly.
+
+- A task should target **8 minutes or less** of worker time. This leaves headroom
+  for test execution, commit, and result writing.
+- A task should touch **3–5 related files** maximum. If more files are needed,
+  split into multiple tasks.
+- Each task does **one** of these, not all:
+  - Implement one code slice
+  - Add tests for one slice
+  - Update documentation
+  - Run validation and report results
+- **Full regression testing is a separate task.** Do not bundle "run all test
+  suites" into an implementation task — validation takes time and the worker
+  will time out before finishing the code.
+- **Documentation updates are a separate finalization task.** Do not append
+  doc edits to the last implementation task.
+- When a task has implementation + tests + docs, **split before dispatch**.
+  Issue three tasks: implement, validate, document.
+- The worker must commit after each coherent result. Multiple commits per task
+  are fine. Partial work lost to timeout is worse than extra commits.
+
+If a worker times out, the task was too large. Re-plan it as two or three
+smaller tasks for the next iteration.
+
 ## Locaily non-negotiables
 
 - Preserve the platform-first / Local Brain architecture. `companion/` is the

@@ -153,6 +153,11 @@ Also obey the project-wide rules in `AGENTS.md` and
   tasks, but you may NOT infer, begin, or drift into another milestone. When the
   active objective is complete, emit `objective_complete: true` and STOP. Do not
   read queue files or advance to the next milestone — only the sequencer does that.
+- **Task sizing.** The worker has a 15-minute timeout. A task that bundles
+  implementation + broad tests + documentation updates WILL time out. Issue
+  narrow tasks: build one slice, or add tests, or update docs — not all three.
+  The worker should finish in ~8 minutes. If a previous worker timed out, the
+  task was too large — split it for this turn.
 - Never edit files under `companion/`, `tool-packs/`, `benchmark-lab/`, `scripts/`,
   or `docs/` directly. Those are the worker's domain. You only write under
   `.opencode/agents/`.
