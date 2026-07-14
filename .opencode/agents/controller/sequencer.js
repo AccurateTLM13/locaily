@@ -256,6 +256,12 @@ function main() {
     });
     console.error(`[sequencer] supervisor exit code: ${result.status}`);
 
+    // Check for unexpected-exit diagnostic from supervisor
+    if (result.status !== 0 || (result.error && result.error.code)) {
+      const exitErr = result.error ? ` (${result.error.code || result.error.message})` : "";
+      console.error(`[sequencer] supervisor may have crashed${exitErr}. Check .opencode/agents/runs/*-exit.log`);
+    }
+
     // Check final state
     const finalState = readJson(STATE_PATH, {});
     const complete = finalState.status === "complete" || finalState.objective_complete === true;

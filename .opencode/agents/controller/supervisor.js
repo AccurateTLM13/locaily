@@ -456,6 +456,24 @@ function main() {
   const cfg = loadConfig();
   if (!fs.existsSync(STATE_PATH)) writeJson(STATE_PATH, DEFAULT_STATE);
 
+  // Diagnostic: log unexpected exits. If the process dies without an explicit
+  // "done" or "abort" message, these handlers tell us why.
+  let exitedCleanly = false;
+  const exitLog = path.join(RUNS_DIR, `${tsFile()}-exit.log`);
+  ensureDir(RUNS_DIR);
+  process.on("exit", (code) => {
+    if (!exitedCleanly) {
+      fs.writeFileSync(exitLog, `exit: ${code}\nat: ${new Date().toISOString()}\n`);
+    }
+  });
+  process.on("uncaughtException", (err) => {
+    fs.writeFileSync(exitLog, `uncaughtException: ${err.message}\n${err.stack}\nat: ${new Date().toISOString()}\n`);
+    process.exit(1);
+  });
+  process.on("unhandledRejection", (reason) => {
+    fs.writeFileSync(exitLog, `unhandledRejection: ${reason}\nat: ${new Date().toISOString()}\n`);
+  });
+
   let guard = 0;
   const hardCap = (cfg.loop.max_iterations || 3) * 4 + 8;
 
@@ -493,6 +511,13 @@ function main() {
 
       const phase = state.phase || "plan";
       const prevTaskText = phase === "plan" ? readText(ACTIVE_TASK_PATH) : null;
+
+      // Heartbeat: record exact phase transition point before CLI launch.
+      // If the process dies silently, this pinpoints where it stopped.
+      state.phase_entered = phase;
+      state.phase_entered_at = new Date().toISOString();
+      writeJson(STATE_PATH, state);
+
       clearArtifacts(phase);
       const res = runCli(phase, phase === "worker" ? renderWorkerPrompt(state) : renderSupervisorPrompt(state, phase), cfg);
       let ok = res.ok;
@@ -530,6 +555,7 @@ function main() {
     console.error(`\n[controller] done. status=${finalState.status} iteration=${finalState.iteration} blocker=${finalState.blocker}`);
     // Final sanitized history snapshot
     snapshotHistory("final", finalState, null);
+    exitedCleanly = true;
     return 0;
   } catch (e) {
     console.error(`[controller] abort: ${e.message}`);
