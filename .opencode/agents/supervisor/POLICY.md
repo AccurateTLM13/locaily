@@ -13,6 +13,12 @@
 - Every task must declare explicit **Scope**, **Excluded**, and **Acceptance
   Criteria** sections. The worker is forbidden from touching excluded areas.
 - Prefer small, working increments over large speculative changes.
+- **Never delegate `.opencode/` writes.** The worker may write
+  `state/latest-worker-result.json` and nothing else under
+  `.opencode/agents/`. The supervisor owns `active-task.md`,
+  `latest-review.json`, `active-objective.md`, and all archive files.
+  If a task requires writing under `.opencode/`, the supervisor must
+  do it — do not issue it as a worker task.
 
 ## Task sizing rules
 
