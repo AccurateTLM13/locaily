@@ -108,7 +108,8 @@ function loadConfig() {
     agents: c.agents || { supervisor: { agent: "plan", model: null }, worker: { agent: "build", model: null } },
     loop: {
       max_iterations: 3, max_corrections_per_task: 2, max_consecutive_failures: 2,
-      stop_on_blocker: true, seconds_between_steps: 1, ...(c.loop || {})
+      stop_on_blocker: true, seconds_between_steps: 1,
+      max_worker_timeout_retries: 1, ...(c.loop || {})
     },
     git: {
       protected_branches: ["main", "master"],
@@ -494,7 +495,21 @@ function main() {
       const prevTaskText = phase === "plan" ? readText(ACTIVE_TASK_PATH) : null;
       clearArtifacts(phase);
       const res = runCli(phase, phase === "worker" ? renderWorkerPrompt(state) : renderSupervisorPrompt(state, phase), cfg);
-      const ok = res.ok;
+      let ok = res.ok;
+
+      // Retry worker once on timeout
+      if (!ok && phase === "worker" && res.timedOut) {
+        const retries = (state.worker_timeout_retries || 0);
+        if (retries < (cfg.loop.max_worker_timeout_retries || 1)) {
+          console.error(`[controller] worker timed out — retrying (${retries + 1}/${cfg.loop.max_worker_timeout_retries || 1})...`);
+          state.worker_timeout_retries = retries + 1;
+          sleep((cfg.loop.seconds_between_steps || 1) * 1000);
+          clearArtifacts(phase);
+          const retryRes = runCli(phase, renderWorkerPrompt(state), cfg);
+          ok = retryRes.ok;
+        }
+      }
+
       if (cfg.loop.seconds_between_steps) sleep((cfg.loop.seconds_between_steps || 1) * 1000);
 
       if (phase === "plan") state = reconcileAfterPlan(state, cfg, ok, prevTaskText);

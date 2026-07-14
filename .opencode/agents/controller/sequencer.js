@@ -276,17 +276,21 @@ function main() {
       } catch (e) { console.error(`[sequencer] durable record finalize failed: ${e.message}`); }
     }
 
-    // Archive queue file (handle case where supervisor switch branches left it missing)
+    // Archive queue file. Non-fatal — a failed archive must not crash the sequencer.
     const destDir = complete ? completedDir : failedDir;
     const destPath = path.join(destDir, file);
-    if (fs.existsSync(sourcePath)) {
-      try { fs.renameSync(sourcePath, destPath); } catch (e) {
-        fs.copyFileSync(sourcePath, destPath);
-        fs.unlinkSync(sourcePath);
+    ensureDir(destDir);
+    try {
+      if (fs.existsSync(sourcePath)) {
+        try { fs.renameSync(sourcePath, destPath); } catch (e) {
+          try { fs.copyFileSync(sourcePath, destPath); fs.unlinkSync(sourcePath); } catch {}
+        }
+        console.error(`[sequencer] archived ${file} → ${complete ? "completed" : "failed"}/`);
+      } else {
+        console.error(`[sequencer] ${file} disappeared from queue/ — marking ${complete ? "complete" : "failed"} without archiving`);
       }
-      console.error(`[sequencer] archived ${file} → ${complete ? "completed" : "failed"}/`);
-    } else {
-      console.error(`[sequencer] ${file} disappeared from queue/ (supervisor changed branches) — marking ${complete ? "complete" : "failed"} without archiving`);
+    } catch (e) {
+      console.error(`[sequencer] archive failed for ${file}: ${e.message} — continuing`);
     }
 
     results.push({
