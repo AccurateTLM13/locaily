@@ -1,96 +1,95 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "08-operator-control-plane",
+  "build_slice": "09-physical-multi-device-pilot",
   "status": "complete",
-  "objective": "Build the operator console web interface (HTML/CSS/JS) served at /operator so operators can view, manage, and act on durable jobs, relay nodes, and system health without reading raw state files.",
+  "objective": "Create pilot infrastructure — hardware profile schema, pilot run orchestrator script, and pilot plan documentation — in preparation for the physical multi-device pilot (M9).",
   "implemented": {
-    "operator_static_files": [
-      "companion/operator/index.html — single-page operator dashboard with four panels (Dashboard, Jobs, Relay Nodes, Enqueue)",
-      "companion/operator/styles.css — dark theme with CSS custom properties, status colors, responsive Grid layout",
-      "companion/operator/app.js — all client-side logic: fetch wrappers, panel rendering, event handlers, keyboard shortcuts, auto-refresh, confirmation dialogs, ARIA accessibility"
+    "pilot_schema": [
+      "scripts/pilot/hardware-profile.schema.json — JSON schema with required fields: deviceName, os, cpu, ram, vram, runtimeProvider, availableModels, advertisedCapabilities, networkAddress"
     ],
-    "server_routes": [
-      "companion/server.js — GET /operator serves companion/operator/index.html (text/html)",
-      "GET /operator/styles.css serves companion/operator/styles.css (text/css)",
-      "GET /operator/app.js serves companion/operator/app.js (application/javascript)",
-      "Follows existing console pattern (readFile from operator/ directory)"
+    "pilot_template": [
+      "scripts/pilot/hardware-profile-template.json — operator-fillable template with placeholder values and _comment instructions"
+    ],
+    "pilot_runner": [
+      "scripts/pilot/pilot-runner.js — CLI script accepting --policy (local-only/local-first/distributed), --workflow, --input, --output-dir, --repeat, --server flags",
+      "Executes tracks via POST /tracks/run on the Local Brain",
+      "Collects timing metrics (total_duration_ms), relay_placement summary, per-step details",
+      "Writes per-run evidence JSON files and summary CSV to output directory",
+      "Auto-starts Local Brain if not already running",
+      "Verified working in local-only mode with mock provider (2/2 runs ok)"
+    ],
+    "pilot_docs": [
+      "docs/05-integrations/multi-device-pilot.md — pilot plan document covering prerequisites, hardware profile instructions, setup, run procedures for each policy mode, evidence collection, tear-down, known limitations, and stop conditions"
+    ],
+    "npm_scripts": [
+      "package.json: pilot:local-only, pilot:local-first, pilot:distributed"
     ],
     "tests": [
-      "scripts/test-operator-console.js (34/34 — covers /operator/ HTML, /operator/styles.css CSS, /operator/app.js JS, /health jobTotals, /relay/nodes, job mutation endpoints, /operator/missing 404, /jobs/:id 404)"
-    ],
-    "all_test_results": {
-      "test-durable-job-store": "117/117 PASS",
-      "test-jobs-api": "64/64 PASS",
-      "test-jobs-worker": "44/44 PASS",
-      "test-jobs-mutation": "85/85 PASS",
-      "test-operator-console": "34/34 PASS",
-      "contract-test": "PASS"
-    }
+      "npm run benchmark:test — PASS",
+      "npm run benchmark:status-smoke — PASS",
+      "node scripts/contract-test.js — PASS",
+      "node scripts/test-relay-unit.cjs — 52/52 PASS",
+      "node scripts/test-relay-placement.cjs — 17/17 PASS"
+    ]
   },
   "validation": {
     "passed": true,
     "results": [
-      "GET /operator returns HTML page (200, text/html, contains dashboard structure)",
-      "GET /operator/ returns HTML (200, text/html)",
-      "GET /operator/styles.css returns CSS (200, text/css, contains CSS variables)",
-      "GET /operator/app.js returns JavaScript (200, application/javascript)",
-      "GET /health still returns jobTotals by status (unchanged)",
-      "GET /relay/nodes still returns node list (unchanged)",
-      "Job mutation endpoints still work: cancel, retry, review",
-      "GET /operator/missing returns 404 NOT_FOUND",
-      "GET /jobs/nonexistent returns 404 JOB_NOT_FOUND",
-      "34/34 integration tests pass",
-      "Existing tests pass: 117+64+44+85 tests across all job store/api/worker/mutation suites"
+      "hardware-profile.schema.json loads and validates with all 9 required fields",
+      "hardware-profile-template.json loads with all required keys",
+      "pilot-runner.js exports main, parseFlags, buildSummaryCsv, summarizeRelayPlacement",
+      "Pilot runner executed 2 runs in local-only mode against mock provider — both ok=true",
+      "Evidence JSON files contain: run_id, run_number, policy, workflow, total_duration_ms, ok, relay_placement, track_run_record_id, steps, provider, model",
+      "Summary CSV contains correct columns: policy, workflow, run_number, total_duration_ms, ok, relay_nodes_used",
+      "All 5 required test suites pass without failure",
+      "No existing files outside scope modified"
     ]
   },
   "acceptance_criteria": {
     "passed": [
-      "GET /operator returns the operator console HTML page (200, text/html)",
-      "GET /operator/styles.css returns CSS (200, text/css)",
-      "GET /operator/app.js returns JavaScript (200, application/javascript)",
-      "The operator console shows job counts by status on load (from /health jobTotals)",
-      "The jobs panel lists jobs with optional status filtering",
-      "Clicking a job row shows full metadata including attempt count, timestamps, lease info, result/error, planned/actual node, fallback reason, review metadata",
-      "Cancel button appears for queued/claimed jobs and successfully cancels via POST /jobs/:id/cancel",
-      "Retry button appears for failed jobs with remaining attempts and successfully retries via POST /jobs/:id/retry",
-      "Request Review button appears for running jobs and transitions to paused_review via POST /jobs/:id/review",
-      "Approve/Reject/Request Correction/Stop buttons appear for paused_review jobs and work correctly",
-      "Review actions include confirmation prompt and optional reason input",
-      "The nodes panel shows relay node list with health status and last heartbeat",
-      "The enqueue form creates jobs via POST /jobs",
-      "Loading, empty, and error states are handled with visible messages",
-      "All interactive elements have ARIA labels and are keyboard-navigable",
-      "Keyboard shortcuts work (r, 1-4, Escape)",
-      "Dashboard auto-refreshes every 10 seconds",
-      "node scripts/test-operator-console.js passes all test cases (34/34)",
-      "Existing tests still pass: node scripts/test-jobs-mutation.js (85/85), node scripts/test-jobs-api.js (64/64), node scripts/test-jobs-worker.js (44/44), node scripts/test-durable-job-store.js (117/117), node scripts/contract-test.js",
-      "/health response and all job API responses are unchanged",
-      "No changes to existing endpoint response envelopes"
+      "scripts/pilot/hardware-profile.schema.json exists with required fields (deviceName, os, cpu, ram, vram, runtimeProvider, availableModels, advertisedCapabilities, networkAddress)",
+      "scripts/pilot/hardware-profile-template.json exists with placeholder comments",
+      "scripts/pilot/pilot-runner.js runs without error in local-only mode against a running Local Brain (mock provider)",
+      "Pilot runner collects per-run timing metrics (total duration at minimum), relay_placement summary, and writes evidence JSON files",
+      "Pilot runner writes a summary CSV with one row per run including: policy, workflow, run_number, total_duration_ms, ok, relay_nodes_used",
+      "docs/05-integrations/multi-device-pilot.md exists covering prerequisites, setup, run procedures, evidence collection, and tear-down",
+      "package.json has pilot:local-only, pilot:local-first, pilot:distributed scripts",
+      "npm run benchmark:test passes (no failure)",
+      "npm run benchmark:status-smoke passes",
+      "node scripts/contract-test.js passes",
+      "node scripts/test-relay-unit.cjs passes (52/52 assertions)",
+      "node scripts/test-relay-placement.cjs passes (17/17 assertions)",
+      "docs/07-progress/next-agent-brief.md updated with M9 pilot infrastructure status",
+      "docs/07-progress/build-status.md updated",
+      "docs/07-progress/latest-build-result.json updated",
+      "No existing files outside the defined scope are modified"
     ],
     "failed": [],
     "blockers": []
   },
   "scope_notes": [
-    "CLI commands for cancel/retry/review not included",
-    "Modifying the existing /console UI or its endpoints not included",
-    "Adding new API endpoints not included (only static file serving added)",
-    "Modifying companion/core/durable-job-store.js or any store logic not included",
-    "Modifying companion/jobs/worker.js not included",
-    "Modifying existing /tasks/run, /tracks/run, /workflows/run, /analyze response envelope shapes not included",
-    "No cross-process workers, worker pools, or separate Node.js processes",
-    "No import of benchmark-lab/engine/ modules",
-    "Server remains localhost-only"
+    "Infrastructure-only — pilot not executed on physical hardware",
+    "No modifications to companion/ files",
+    "No modifications to benchmark-lab/ files",
+    "No modifications to existing test files",
+    "No modifications to tool-packs/",
+    "No new API endpoints added",
+    "No modifications to server.js",
+    "No new npm dependencies"
   ],
   "stop_conditions_honored": [
-    "No modifications to companion/core/durable-job-store.js",
-    "No modifications to companion/jobs/worker.js",
-    "No modifications to existing endpoint response envelopes",
-    "No import of benchmark-lab/engine/ modules",
-    "Server remains localhost-only",
-    "No new npm dependencies",
-    "No modifications to existing /console UI or its endpoints"
+    "No modifications to companion/ files",
+    "No modifications to benchmark-lab/ files",
+    "No modifications to existing test files under scripts/test-*.js or scripts/test-*.cjs",
+    "No modifications to tool-packs/",
+    "No physical hardware setup required",
+    "No actual hardware profiles created — only templates",
+    "No claim that pilot has been executed",
+    "No modifications to API response envelopes",
+    "No new endpoints added",
+    "No modifications to companion/server.js"
   ],
-  "last_fresh_validation": "2026-07-12 (operator console UI implemented and tested — 34/34; all 310 existing job/store/worker/mutation tests pass)",
-  "next_milestones": "CLI commands for cancel/retry/review; broader operator control plane features",
-  "updated_at": "2026-07-12"
+  "last_fresh_validation": "2026-07-14 (pilot infrastructure verified — schema/template/runner all load correctly; pilot runner executed 2/2 runs ok in local-only mode with mock provider; all 5 required test suites pass)",
+  "next_milestones": "Execute pilot on physical hardware with two devices; collect comparative evidence across local-only, local-first, and distributed policies",
+  "updated_at": "2026-07-14"
 }

@@ -50,6 +50,9 @@
   "test:memory-v1": "node scripts/test-memory-v1.cjs",
   "test:m4": "node scripts/test-relay-unit.cjs && node scripts/test-memory-v1.cjs && node scripts/test-relay-e2e.cjs",
   "test:m5": "node scripts/test-relay-placement.cjs && node scripts/test-multi-device-e2e.cjs",
-    "dag:plan": "curl.exe -s -X POST http://127.0.0.1:31313/tracks/plan -H \"Content-Type: application/json\" -d \"{\\\"request\\\":\\\"$*\\\"}\""
+    "dag:plan": "curl.exe -s -X POST http://127.0.0.1:31313/tracks/plan -H \"Content-Type: application/json\" -d \"{\\\"request\\\":\\\"$*\\\"}\"",
+    "pilot:local-only": "node scripts/pilot/pilot-runner.js --policy local-only",
+    "pilot:local-first": "node scripts/pilot/pilot-runner.js --policy local-first",
+    "pilot:distributed": "node scripts/pilot/pilot-runner.js --policy distributed"
   }
 }

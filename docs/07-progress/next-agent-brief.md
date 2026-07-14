@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-12 (M6: durable job store wired into Local Brain; `/jobs` API endpoints implemented; background worker polling loop claims and executes queued jobs; cancel/retry/review mutation endpoints added; operator console UI at /operator)
+**Updated:** 2026-07-14 (M9: pilot infrastructure prepared — hardware profile schema, pilot runner CLI, and multi-device pilot plan documented)
 
 ## Read First
 
@@ -83,6 +83,18 @@ LFM2.5-1.2B-Thinking is the first qualified model capability for a companion ser
 ### Pilot Enforcement Validation
 
 The first enforcement pilot is active. `website_audit.lighthouse_handoff` is approved and in `enforced` state for role `priority_helper`. The qualified capability id is `lfm25-1p2b-thinking-local`; runtime execution uses `hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest` from the qualification record's `runtimeModelName`. First 10 monitored enforced executions succeeded, with persisted Track Run Records showing `routing.enforcementDecision.applied=true`, `executedCapabilityId=lfm25-1p2b-thinking-local`, no fallback, and the Thinking runtime model in model step metadata.
+
+### M9 Pilot Infrastructure
+
+Pilot infrastructure for the physical multi-device pilot is prepared (infrastructure-only; pilot not yet executed on physical hardware).
+
+- `scripts/pilot/hardware-profile.schema.json` — JSON schema defining required fields for device hardware profiles (deviceName, os, cpu, ram, vram, runtimeProvider, availableModels, advertisedCapabilities, networkAddress)
+- `scripts/pilot/hardware-profile-template.json` — operator-fillable template with placeholder values
+- `scripts/pilot/pilot-runner.js` — CLI script that accepts `--policy` (local-only/local-first/distributed), `--workflow`, `--input`, `--output-dir`, `--repeat` flags; executes tracks via `/tracks/run`; collects timing metrics and relay_placement summaries; writes per-run evidence JSON files and summary CSV
+- `docs/05-integrations/multi-device-pilot.md` — pilot plan document covering prerequisites, hardware profile instructions, setup, run procedures for each policy mode, evidence collection, tear-down, known limitations, and stop conditions
+- `package.json` scripts: `pilot:local-only`, `pilot:local-first`, `pilot:distributed`
+- Pilot runner verified working in local-only mode against a running Local Brain with mock provider (2/2 runs ok, evidence files and summary CSV written correctly)
+- All existing test suites pass: benchmark:test, benchmark:status-smoke, contract-test, test-relay-unit.cjs (52/52), test-relay-placement.cjs (17/17)
 
 ### Output Quality Review Foundation
 

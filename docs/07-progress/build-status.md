@@ -1,6 +1,6 @@
 # Build Status
 
-**Updated:** 2026-07-11 (Full Lighthouse Handoff product loop complete — 4 roles qualified, 10 track steps, full assembled artifact validated)
+**Updated:** 2026-07-14 (M9 pilot infrastructure prepared — hardware profile schema, pilot runner CLI, multi-device pilot plan documented)
 
 ## Current Stage
 
@@ -20,6 +20,8 @@ North Star direction is now documented as a local capability network: route trac
 | **5 - Benchmark Lab** | Complete — Milestone 1 operator-ready |
 | **6 - Relay Nodes (M4)** | Complete |
 | **7 - Multi-Device Workflow Coordination (M5)** | Complete |
+| **8 - Operator Control Plane (M6)** | Complete |
+| **9 - Physical Multi-Device Pilot (M9)** | Infrastructure prepared — pilot not yet executed |
 
 ## Current Proof
 
@@ -52,6 +54,7 @@ North Star direction is now documented as a local capability network: route trac
 - Memory Bridge v0 endpoints (disabled by default)
 - Relay Node protocol, node registry, cross-node routing with local fallback (`companion/relay/*`, `/relay/*` endpoints)
 - Multi-device workflow placement planner (`companion/relay/placement.js`) + `POST /relay/plan` preview; distributed step execution with local fallback on node failure
+- Pilot runner (`scripts/pilot/pilot-runner.js`) — CLI for executing tracks across policy modes with evidence collection
 - Memory Bridge v1: structured search (`/memory/search`) + writeback-apply (`/memory/writeback/apply`, opt-in)
 - Current verification suite passes; see the latest progress log or CI evidence for counts
 - Windows launch helpers
