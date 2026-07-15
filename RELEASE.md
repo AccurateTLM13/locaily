@@ -77,7 +77,7 @@ These capabilities are under active development. They exist in code but are not 
 - **Memory Bridge v0 is disabled by default** and not production-hardened. Writeback is proposal-only; no automatic vault edits.
 - **Benchmark Lab evidence is narrow.** Qualification records exist for specific model/track/role combinations (LFM2.5-1.2B-Thinking for Lighthouse Handoff roles, llama3.2 for website audits and DealSniper). This is not comprehensive coverage across all models and tracks.
 - **No telemetry or analytics.** The server does not collect or transmit usage data.
-- **Relay trust boundary** — no authentication, pairing, or signed requests between orchestrator and relay nodes in the current protocol. Trusted-development-network only.
+- **Relay trust boundary** — Pre-shared token (Bearer) authentication only — no cryptographic signing or dynamic device pairing. Trusted-development-network only.
 - **Fallback ladder is partial.** Retry-once for the same model is supported; full escalation handling is not implemented.
 
 ---
