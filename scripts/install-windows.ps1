@@ -28,18 +28,23 @@ Write-Host "  Node.js $nodeVersionRaw OK"
 
 # --- 2. npm install ---
 Write-Host "[2/4] Installing dependencies (npm install)..."
-$npmCmd = Get-Command npm.cmd -ErrorAction SilentlyContinue
-if ($npmCmd) {
-  & npm.cmd install
-} else {
-  & npm install
+Push-Location $repoRoot
+try {
+  $npmCmd = Get-Command npm.cmd -ErrorAction SilentlyContinue
+  if ($npmCmd) {
+    & npm.cmd install
+  } else {
+    & npm install
+  }
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host ""
+    Write-Host "ERROR: npm install failed (exit code $LASTEXITCODE)." -ForegroundColor Red
+    exit 1
+  }
+  Write-Host "  Dependencies installed."
+} finally {
+  Pop-Location
 }
-if ($LASTEXITCODE -ne 0) {
-  Write-Host ""
-  Write-Host "ERROR: npm install failed (exit code $LASTEXITCODE)." -ForegroundColor Red
-  exit 1
-}
-Write-Host "  Dependencies installed."
 
 # --- 3. Create companion/config.json from example if missing ---
 Write-Host "[3/4] Checking runtime config..."
