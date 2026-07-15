@@ -1,14 +1,291 @@
 {
+  // ── server ──────────────────────────────────────────────────────────
+  // Required. Controls how the Local Brain HTTP server binds.
   "server": {
+    // Required. TCP port the companion server listens on.
+    // Valid values: any unused port 1-65535. Common: 31313.
+    // If omitted, the server defaults to port 31313.
     "port": 31313,
+
+    // Required. IP address the server binds to.
+    // Valid values: "127.0.0.1" (localhost only, recommended) or "0.0.0.0" (all interfaces — insecure).
+    // If omitted, defaults to "127.0.0.1".
     "host": "127.0.0.1"
   },
+
+  // ── runtime ─────────────────────────────────────────────────────────
+  // Required. Configures the AI model provider connection.
   "runtime": {
+    // Required. Name of the model provider adapter to use.
+    // Valid values: "ollama" (local Ollama server), "mock" (built-in test adapter).
+    // If omitted, defaults to "ollama".
     "provider": "ollama",
+
+    // Required. Base URL of the provider's HTTP API.
+    // For local Ollama: "http://127.0.0.1:11434". For remote: use the host IP.
+    // The "//" inside this URL is part of the value and must NOT be stripped.
+    // If omitted, defaults to "http://127.0.0.1:11434".
     "baseUrl": "http://127.0.0.1:11434",
+
+    // Required. Default model identifier used when no role-specific model is set.
+    // Valid values: any model name available in your provider (e.g. "llama3.2", "mistral").
+    // If omitted, requests that need a model will fail.
     "model": "llama3.2"
   },
+
+  // ── modelRoles ──────────────────────────────────────────────────────
+  // Optional. Maps named roles to specific models so tools and tracks can
+  // request a role (e.g. "fast_worker") instead of a hardcoded model name.
+  // If a role is missing from this map, the runtime default model is used.
+  "modelRoles": {
+    // Required within modelRoles. Object mapping role names to model identifiers.
+    // Set a role to null to disable it or force fallback to the default model.
+    "roles": {
+      // Fast, low-latency model for simple tasks (classification, extraction).
+      "fast_worker": "llama3.2",
+      // General-purpose model for standard requests.
+      "default_worker": "llama3.2",
+      // Lightweight model for quick helper and priority responses.
+      "priority_helper": "llama3.2",
+      // Larger model for complex reasoning and multi-step analysis.
+      "reasoning_worker": "llama3.2",
+      // Fallback model used when the primary model is unavailable.
+      "fallback_worker": "llama3.2",
+      // Writes developer-facing task descriptions and specs.
+      "developer_task_writer": "llama3.2",
+      // Writes guardrail and safety policy text.
+      "guardrail_writer": "llama3.2",
+      // Generates testing checklists from requirements.
+      "testing_checklist_writer": "llama3.2",
+      // Analyzes accessibility issues in web content.
+      "a11y_analyzer": "llama3.2",
+      // Recommends accessibility improvements.
+      "a11y_recommender": "llama3.2",
+      // Analyzes SEO issues in web content.
+      "seo_analyzer": "llama3.2",
+      // Recommends SEO improvements.
+      "seo_recommender": "llama3.2",
+      // Analyzes performance budget impact.
+      "budget_analyzer": "llama3.2",
+      // Recommends budget adjustments.
+      "budget_recommender": "llama3.2",
+      // Voice/STT worker — null means not yet configured.
+      "voice_worker": null
+    },
+
+    // Optional. Per-provider role overrides. Each key is a provider name
+    // (e.g. "mock") mapping to its own role→model object.
+    // If omitted, the top-level "roles" map is used for all providers.
+    "providers": {
+      // Mock provider role mappings (used in tests and when Ollama is unavailable).
+      "mock": {
+        "fast_worker": "mock-local-model",
+        "default_worker": "mock-local-model",
+        "reasoning_worker": "mock-local-model",
+        "developer_task_writer": "mock-local-model",
+        "guardrail_writer": "mock-local-model",
+        "testing_checklist_writer": "mock-local-model",
+        "a11y_analyzer": "mock-local-model",
+        "a11y_recommender": "mock-local-model",
+        "seo_analyzer": "mock-local-model",
+        "seo_recommender": "mock-local-model",
+        "budget_analyzer": "mock-local-model",
+        "budget_recommender": "mock-local-model",
+        "voice_worker": null
+      }
+    }
+  },
+
+  // ── modelProfiles ───────────────────────────────────────────────────
+  // Optional. Named profiles that bundle role-to-model mappings so an
+  // operator can switch configurations with a single API call
+  // (POST /models/profiles/set). If omitted, the top-level modelRoles
+  // values are used directly.
+  "modelProfiles": {
+    // Required within modelProfiles. Name of the currently active profile.
+    // Valid values: any key defined under "profiles" below.
+    // If omitted, no profile switching is active.
+    "active": "balanced",
+
+    // Required within modelProfiles. One or more named profiles.
+    "profiles": {
+      // Minimal resource usage — disables heavy reasoning roles.
+      "lightweight": {
+        "roles": {
+          "reasoning_worker": null,
+          "voice_worker": null
+        }
+      },
+
+      // Default balanced profile — moderate speed and capability.
+      "balanced": {
+        "roles": {
+          "fast_worker": "llama3.2",
+          "default_worker": "llama3.2",
+          "priority_helper": "llama3.2",
+          "reasoning_worker": "llama3.2",
+          "fallback_worker": "llama3.2"
+        },
+        // Optional per-provider overrides within this profile.
+        "providers": {
+          "mock": {
+            "fast_worker": "mock-fast-model",
+            "default_worker": "mock-local-model",
+            "reasoning_worker": "mock-reasoning-model"
+          }
+        }
+      },
+
+      // Full-capability developer profile for analysis and code tasks.
+      "developer": {
+        "roles": {
+          "fast_worker": "llama3.2",
+          "default_worker": "llama3.2",
+          "priority_helper": "llama3.2",
+          "reasoning_worker": "llama3.2",
+          "fallback_worker": "llama3.2"
+        },
+        "providers": {
+          "mock": {
+            "fast_worker": "mock-fast-model",
+            "default_worker": "mock-local-model",
+            "reasoning_worker": "mock-reasoning-model"
+          }
+        }
+      }
+    }
+  },
+
+  // ── tools ───────────────────────────────────────────────────────────
+  // Optional. Controls which registered tools are available at runtime.
+  // If this entire section is omitted, all registered tools are enabled.
   "tools": {
-    "enabled": ["deal-sniper", "lighthouse-handoff"]
+    // Required within tools. Array of tool IDs to enable.
+    // Valid values: any tool ID from the registry (see GET /tools).
+    // Tools not listed here will not be callable via /tasks/run or /analyze.
+    // If omitted or empty, no tools are enabled.
+    "enabled": [
+      "deal-sniper",
+      "lighthouse-handoff",
+      "text.clean",
+      "text.summarize",
+      "text.extract_json",
+      "text.classify",
+      "text.detect_injection",
+      "text.validate_schema",
+      "lighthouse.parse",
+      "lighthouse.classify_audits",
+      "lighthouse.validate_priority_fixes",
+      "lighthouse.match_fixes",
+      "lighthouse.verify_handoff",
+      "editorial.scan_vault",
+      "editorial.verify_report",
+      "editorial.collect_evidence",
+      "editorial.verify_operator_log",
+      "lighthouse.extract_category_audits",
+      "lighthouse.assemble_audit_report",
+      "track-planner"
+    ]
+  },
+
+  // ── permissions ─────────────────────────────────────────────────────
+  // Optional. Controls which platform capabilities are allowed or denied.
+  // If omitted, a default safe set is used (model.run allowed, dangerous
+  // operations denied).
+  "permissions": {
+    // Required within permissions. Path to the on-disk permissions store.
+    // Valid values: any relative path (from repo root) or absolute file path.
+    // If omitted, defaults to "data/permissions.json".
+    "filePath": "data/permissions.json",
+
+    // Required within permissions. Capability IDs explicitly allowed.
+    // Valid values: "model.run", "memory.read", "memory.writeback.propose", etc.
+    // If omitted or empty, no capabilities are approved by default.
+    "approved": [
+      "model.run",
+      "memory.read",
+      "memory.writeback.propose"
+    ],
+
+    // Required within permissions. Capability IDs explicitly denied.
+    // Denied takes precedence over approved when both match.
+    // Valid values: "file.delete", "file.write", "network.send",
+    //   "browser.write", "memory.delete", etc.
+    // If omitted or empty, no capabilities are explicitly denied.
+    "denied": [
+      "file.delete",
+      "file.write",
+      "network.send",
+      "browser.write",
+      "memory.delete"
+    ]
+  },
+
+  // ── memoryBridge ────────────────────────────────────────────────────
+  // Optional. Configures the Memory Bridge for local markdown vault
+  // integration. When disabled, memory endpoints return a disabled status.
+  // If the entire section is omitted, Memory Bridge is disabled by default.
+  "memoryBridge": {
+    // Required within memoryBridge. Enable or disable the Memory Bridge.
+    // Valid values: true, false.
+    // If false or omitted, memory endpoints return { enabled: false }.
+    "enabled": false,
+
+    // Required within memoryBridge when enabled. Absolute path to the
+    // local markdown vault directory.
+    // Valid values: any directory path containing markdown files, or null.
+    // If null or omitted, Memory Bridge cannot read or write vault content.
+    "vaultPath": null,
+
+    // Required within memoryBridge when enabled. Storage backend mode.
+    // Valid values: "local_markdown_vault" (only supported value).
+    // If omitted, defaults to "local_markdown_vault".
+    "mode": "local_markdown_vault",
+
+    // Required within memoryBridge when enabled. Controls which vault
+    // paths can be read. "allowlist" restricts reads to allowedPaths only.
+    // Valid values: "allowlist" (recommended), "open" (insecure).
+    // If omitted, defaults to "allowlist".
+    "readPolicy": "allowlist",
+
+    // Required within memoryBridge when enabled. Controls write behavior.
+    // "proposal_only" queues writes for operator review before applying.
+    // Valid values: "proposal_only" (recommended), "direct" (auto-applies).
+    // If omitted, defaults to "proposal_only".
+    "writebackMode": "proposal_only",
+
+    // Required within memoryBridge when enabled. Allow raw file access
+    // bypassing the allowlist. Security risk — keep false in production.
+    // Valid values: true, false.
+    // If omitted, defaults to false.
+    "rawAccess": false,
+
+    // Required within memoryBridge when enabled. Paths relative to the
+    // vault root that are readable. Directory entries end with "/".
+    // Valid values: array of relative path strings.
+    // If omitted, no paths are allowed (empty vault access).
+    "allowedPaths": [
+      "index.md",
+      "log.md",
+      "SCHEMA.md",
+      "projects/",
+      "topics/",
+      "wiki/projects/",
+      "wiki/topics/",
+      "wiki/concepts/",
+      "wiki/entities/"
+    ],
+
+    // Required within memoryBridge when enabled. Paths that are never
+    // readable or writable, even if matched by allowedPaths.
+    // Valid values: array of relative path strings.
+    // If omitted, no extra paths are blocked (allowedPaths is the only gate).
+    "blockedPaths": [
+      "raw/",
+      "private/",
+      "personal/",
+      ".git/",
+      ".memory-bridge/writeback-inbox/"
+    ]
   }
 }

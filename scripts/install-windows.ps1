@@ -56,8 +56,13 @@ if (Test-Path $configTargetPath) {
     Write-Host "ERROR: config.example.json not found at $configExamplePath" -ForegroundColor Red
     exit 1
   }
-  Copy-Item -LiteralPath $configExamplePath -Destination $configTargetPath
-  Write-Host "  Created companion/config.json from config.example.json"
+  # Strip //-style line comments from config.example.json before writing.
+  # The regex matches only lines where // is preceded by whitespace or is at
+  # start-of-line, so "//" inside string values (e.g. "http://…") is preserved.
+  $rawContent = Get-Content -LiteralPath $configExamplePath -Raw -Encoding UTF8
+  $strippedContent = $rawContent -replace '(?m)^[ \t]*//.*$', ''
+  [System.IO.File]::WriteAllText($configTargetPath, $strippedContent, [System.Text.UTF8Encoding]::new($false))
+  Write-Host "  Created companion/config.json from config.example.json (comments stripped)"
 }
 
 # --- 4. Check Ollama reachability (warn, do not abort) ---
