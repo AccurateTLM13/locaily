@@ -322,6 +322,12 @@ node companion/server.js
 
 This creates `companion/config.json` from `config.example.json` if it does not already exist. For configuration details, see [`config.example.json`](../../config.example.json).
 
+### Backup and Restore
+
+Before upgrading or moving your installation, back up the `data/` directory at the repository root. It contains all evidence records, job state, enforcement policy, audit logs, and console configuration.
+
+For step-by-step backup, restore, and state migration instructions, see the [Backup and Restore Guide](backup-and-restore.md).
+
 ---
 
 ## Further Reading
