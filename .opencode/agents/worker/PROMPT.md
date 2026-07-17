@@ -27,6 +27,7 @@ Also obey the project-wide rules in `AGENTS.md` and
 
 - `run_id`: `{{RUN_ID}}`
 - `iteration`: `{{ITERATION}}`
+- `task_id`: `{{TASK_ID}}`
 
 ## What to do
 

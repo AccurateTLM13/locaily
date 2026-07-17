@@ -36,9 +36,11 @@ Also obey the project-wide rules in `AGENTS.md` and
 ```
 
 ## Freshness stamp (copy into your review file verbatim)
-
 - `run_id`: `{{RUN_ID}}`
+
 - `iteration`: `{{ITERATION}}`
+
+- `task_id`: `{{TASK_ID}}`
 
 ## Latest worker result (review phase only)
 
@@ -116,7 +118,7 @@ Also obey the project-wide rules in `AGENTS.md` and
    - Otherwise reject with a concrete `correction`.
 4. Write `.opencode/agents/state/latest-review.json`. **Required fields**:
    `run_id`, `iteration`, `task_id` (equals `task`), `created_at` (ISO-8601 now)
-   — use the freshness stamp above; plus the fields below. The controller
+   — use the freshness stamp above (copy `task_id` exactly, do not re-derive it); plus the fields below. The controller
    overwrites this file with a stale sentinel before each turn, so you MUST
    rewrite it fresh.
 

@@ -239,7 +239,8 @@ function renderSupervisorPrompt(state, phase) {
     .replace("{{WORKER_RESULT}}", workerResult)
     .replace("{{LAST_REVIEW}}", review)
     .replace("{{RUN_ID}}", state.run_id || "")
-    .replace("{{ITERATION}}", String(state.iteration));
+    .replace("{{ITERATION}}", String(state.iteration))
+    .replace("{{TASK_ID}}", state.current_task || "");
 }
 function renderWorkerPrompt(state) {
   const tmpl = readText(path.join(AGENTS_DIR, "worker", "PROMPT.md"));
@@ -248,7 +249,8 @@ function renderWorkerPrompt(state) {
     .replace("{{ACTIVE_TASK}}", activeTask.trim())
     .replace("{{RUN_STATE}}", JSON.stringify(state, null, 2))
     .replace("{{RUN_ID}}", state.run_id || "")
-    .replace("{{ITERATION}}", String(state.iteration));
+    .replace("{{ITERATION}}", String(state.iteration))
+    .replace("{{TASK_ID}}", state.current_task || "");
 }
 
 // ---------- CLI runner ----------
