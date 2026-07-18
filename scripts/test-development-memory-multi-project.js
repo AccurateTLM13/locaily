@@ -152,6 +152,48 @@ async function run() {
 
       rmSync(root, { recursive: true, force: true });
     }],
+    ["server memory services resolve active project paths", async () => {
+      const root = mkdtempSync(join(tmpdir(), "locaily-dm10-services-"));
+      const registry = createDevelopmentProjectRegistry({
+        repoRoot: root,
+        registryRoot: join(root, "memory", "projects")
+      });
+      const { createDevelopmentMemoryServices } = require("../companion/memory/projects/memory-services");
+
+      registry.registerProject({ slug: "alpha", displayName: "Alpha", workspaceRoot: root, setActive: true });
+      registry.registerProject({ slug: "beta", displayName: "Beta", workspaceRoot: root });
+
+      const alphaServices = createDevelopmentMemoryServices(registry).forProject("alpha");
+      const betaServices = createDevelopmentMemoryServices(registry).forProject("beta");
+
+      await alphaServices.eventStore.appendEvent(await loadValidEvent({
+        eventId: "evt_alpha_service_001",
+        project: "alpha",
+        eventType: "human_note",
+        source: { adapter: "human" },
+        summary: "Alpha service event"
+      }));
+
+      await betaServices.eventStore.appendEvent(await loadValidEvent({
+        eventId: "evt_beta_service_001",
+        project: "beta",
+        eventType: "human_note",
+        source: { adapter: "human" },
+        summary: "Beta service event"
+      }));
+
+      const alphaQuery = await alphaServices.eventStore.queryEvents({ project: "alpha" });
+      const betaQuery = await betaServices.eventStore.queryEvents({ project: "beta" });
+
+      assert.strictEqual(alphaQuery.result.count, 1);
+      assert.strictEqual(betaQuery.result.count, 1);
+      assert.ok(alphaServices.paths.eventsDir.includes(`${join("projects", "alpha")}`));
+      assert.ok(betaServices.paths.eventsDir.includes(`${join("projects", "beta")}`));
+      assert.notStrictEqual(alphaServices.paths.candidatesRoot, betaServices.paths.candidatesRoot);
+      assert.notStrictEqual(alphaServices.paths.maintainerRoot, betaServices.paths.maintainerRoot);
+
+      rmSync(root, { recursive: true, force: true });
+    }],
     ["rejects duplicate project registration", async () => {
       const root = mkdtempSync(join(tmpdir(), "locaily-dm10-dup-"));
       const registry = createDevelopmentProjectRegistry({

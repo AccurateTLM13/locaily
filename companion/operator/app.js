@@ -373,10 +373,10 @@
     var msg = confirmMessages[action];
     if (!msg) return;
 
-    var confirmed = await showConfirm(msg, action !== "cancel" && action !== "retry");
-    if (!confirmed) return;
+    var confirmResult = await showConfirm(msg, action !== "cancel" && action !== "retry");
+    if (!confirmResult.confirmed) return;
 
-    var payload = { action: action, reviewedBy: "operator-console", reason: confirmed.reason || null };
+    var payload = { action: action, reviewedBy: "operator-console", reason: confirmResult.reason || null };
 
     try {
       var res = await apiPost("/jobs/" + encodeURIComponent(jobId) + "/" + actionEndpoint(action), payload);
@@ -547,7 +547,7 @@
         }
       }
 
-      var payload = { type: type, input: input };
+      var payload = { executionType: type, input: input };
       if (type === "track") payload.trackId = id;
       else payload.workflowId = id;
 

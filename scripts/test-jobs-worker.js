@@ -249,6 +249,85 @@ async function testWorkerDoesNotRetryWhenErrorNotRetryable() {
   });
 }
 
+async function testWorkerFailsWorkflowWithFailedStatus() {
+  console.log("TEST: worker marks job failed when workflow returns failed status without throwing");
+  await withTempDir(async (dir) => {
+    const store = createDurableJobStore({ dataDir: dir });
+    const created = store.createJob({
+      executionType: "workflow",
+      workflowId: "lighthouse_full",
+      input: {},
+      context: {},
+      options: {},
+      maxAttempts: 1
+    });
+    const jobId = created.job.jobId;
+
+    const worker = createBackgroundWorker({
+      durableJobStore: store,
+      executionCallbacks: {
+        runTrack: async () => { throw new Error("not expected"); },
+        runWorkflow: async () => ({
+          plan: { status: "failed", workflow_id: "lighthouse_full" },
+          result: {},
+          schemaValid: true,
+          validation: { ok: false, errors: ["step failed"] },
+          durationMs: 12,
+          evidence: null
+        })
+      },
+      config: { pollIntervalMs: 100, workerName: "test-worker" }
+    });
+
+    worker.start();
+    const failed = await waitForJobStatus(store, jobId, "failed");
+    worker.stop();
+
+    assert(failed !== null, "job found");
+    assert(failed.status === "failed", "job ended in failed");
+    assert(failed.error && failed.error.code === "WORKFLOW_FAILED", "workflow failure code recorded");
+  });
+}
+
+async function testWorkerFailsTrackWithInvalidSchema() {
+  console.log("TEST: worker marks job failed when track returns schemaValid false");
+  await withTempDir(async (dir) => {
+    const store = createDurableJobStore({ dataDir: dir });
+    const created = store.createJob({
+      executionType: "track",
+      trackId: "test.invalid_schema",
+      input: {},
+      context: {},
+      options: {},
+      maxAttempts: 1
+    });
+    const jobId = created.job.jobId;
+
+    const worker = createBackgroundWorker({
+      durableJobStore: store,
+      executionCallbacks: {
+        runTrack: async () => ({
+          track_id: "test.invalid_schema",
+          result: { meta: { verification: { valid: true } } },
+          schemaValid: false,
+          durationMs: 5,
+          evidence: null
+        }),
+        runWorkflow: async () => { throw new Error("not expected"); }
+      },
+      config: { pollIntervalMs: 100, workerName: "test-worker" }
+    });
+
+    worker.start();
+    const failed = await waitForJobStatus(store, jobId, "failed");
+    worker.stop();
+
+    assert(failed !== null, "job found");
+    assert(failed.status === "failed", "job ended in failed");
+    assert(failed.error && failed.error.code === "SCHEMA_VALIDATION_FAILED", "schema failure code recorded");
+  });
+}
+
 // ==================== Single Concurrency Tests ====================
 
 async function testWorkerProcessesOneJobPerCycle() {
@@ -483,6 +562,8 @@ async function runAllTests() {
   await testWorkerFailsAndRetries();
   await testWorkerDoesNotRetryOnMaxAttemptsExhausted();
   await testWorkerDoesNotRetryWhenErrorNotRetryable();
+  await testWorkerFailsWorkflowWithFailedStatus();
+  await testWorkerFailsTrackWithInvalidSchema();
 
   // Single concurrency
   await testWorkerProcessesOneJobPerCycle();

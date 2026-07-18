@@ -128,23 +128,23 @@ function startTestServer(store) {
           return sendJson(response, 400, { ok: false, code: "BAD_JSON", message: "Request body could not be parsed as JSON." });
         }
 
-        const { type, trackId, workflowId, input, context, options, maxAttempts, correlationId } = bodyResult.body || {};
+        const { executionType, trackId, workflowId, input, context, options, maxAttempts, correlationId } = bodyResult.body || {};
 
-        if (!type || (type !== "track" && type !== "workflow")) {
-          return sendJson(response, 400, { ok: false, code: "INVALID_TYPE", message: "type must be 'track' or 'workflow'." });
+        if (!executionType || (executionType !== "track" && executionType !== "workflow")) {
+          return sendJson(response, 400, { ok: false, code: "INVALID_EXECUTION_TYPE", message: "executionType must be 'track' or 'workflow'." });
         }
 
-        if (type === "track" && !trackId) {
-          return sendJson(response, 400, { ok: false, code: "MISSING_TRACK_ID", message: "trackId is required when type is 'track'." });
+        if (executionType === "track" && !trackId) {
+          return sendJson(response, 400, { ok: false, code: "MISSING_TRACK_ID", message: "trackId is required when executionType is 'track'." });
         }
 
-        if (type === "workflow" && !workflowId) {
-          return sendJson(response, 400, { ok: false, code: "MISSING_WORKFLOW_ID", message: "workflowId is required when type is 'workflow'." });
+        if (executionType === "workflow" && !workflowId) {
+          return sendJson(response, 400, { ok: false, code: "MISSING_WORKFLOW_ID", message: "workflowId is required when executionType is 'workflow'." });
         }
 
         const createResult = store.createJob({
-          executionType: type, trackId: type === "track" ? trackId : null,
-          workflowId: type === "workflow" ? workflowId : null,
+          executionType, trackId: executionType === "track" ? trackId : null,
+          workflowId: executionType === "workflow" ? workflowId : null,
           input: input || {}, context: context || {}, options: options || {},
           maxAttempts: typeof maxAttempts === "number" ? maxAttempts : 3,
           correlationId: correlationId || null
@@ -154,7 +154,7 @@ function startTestServer(store) {
           return sendJson(response, 400, { ok: false, code: createResult.code, message: createResult.message });
         }
 
-        return sendJson(response, 201, { ok: true, job: createResult.job });
+        return sendJson(response, 200, { ok: true, job: createResult.job });
       }
 
       if (request.method === "GET" && url.pathname === "/jobs") {

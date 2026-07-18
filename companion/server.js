@@ -43,9 +43,7 @@ const { createVaultAdapter } = require("./memory/vault-adapter");
 const { WIKI_ALLOWED_PATHS } = require("./memory/allowlist-presets");
 const { buildContextPack } = require("./memory/context-pack-builder");
 const { createWritebackProposal, renderProposalMarkdown } = require("./memory/writeback-proposal");
-const { createDevelopmentEventStore } = require("./memory/events/event-store");
-const { createDevelopmentCandidateReviewInbox } = require("./memory/events/candidate-review-inbox");
-const { createDevelopmentMaintainerManager } = require("./memory/events/maintainer-manager");
+const { createDevelopmentMemoryServices } = require("./memory/projects/memory-services");
 const {
   createDevelopmentCaptureProcessor,
   createDevelopmentCaptureWorker,
@@ -299,25 +297,18 @@ const durableJobStore = createDurableJobStore({
   dataDir: join(__dirname, "..", "data")
 });
 
-const developmentEventStore = createDevelopmentEventStore({
-  dataDir: join(__dirname, "..", "data", "memory", "development-events")
-});
-
-const developmentCandidateReviewInbox = createDevelopmentCandidateReviewInbox({
-  eventsDir: join(__dirname, "..", "data", "memory", "development-events"),
-  candidatesRoot: join(__dirname, "..", "data", "memory", "development-candidates"),
-  getVaultAdapter: () => vaultAdapter
-});
-
-const developmentMaintainerManager = createDevelopmentMaintainerManager({
-  candidatesRoot: join(__dirname, "..", "data", "memory", "development-candidates"),
-  maintainerRoot: join(__dirname, "..", "data", "memory", "development-maintainer"),
-  getVaultAdapter: () => vaultAdapter
-});
-
 const developmentProjectRegistry = createDevelopmentProjectRegistry({
   repoRoot: join(__dirname, "..")
 });
+
+const developmentMemoryServices = createDevelopmentMemoryServices(developmentProjectRegistry, {
+  repoRoot: join(__dirname, ".."),
+  getVaultAdapter: () => vaultAdapter
+});
+
+function getActiveDevelopmentMemory() {
+  return developmentMemoryServices.forActiveProject();
+}
 
 let developmentCaptureWorker = null;
 const developmentCaptureProcessor = createDevelopmentCaptureProcessor({
@@ -1665,7 +1656,7 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 403, responseBody);
       }
 
-      const appendResult = await developmentEventStore.appendEvent(bodyResult.body || {});
+      const appendResult = await getActiveDevelopmentMemory().eventStore.appendEvent(bodyResult.body || {});
       const responseBody = buildMemoryActionResponse({
         identity,
         startedAt,
@@ -1708,7 +1699,7 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 403, responseBody);
       }
 
-      const queryResult = await developmentEventStore.queryEvents({
+      const queryResult = await getActiveDevelopmentMemory().eventStore.queryEvents({
         project: url.searchParams.get("project") || undefined,
         eventType: url.searchParams.get("eventType") || undefined,
         branch: url.searchParams.get("branch") || undefined,
@@ -1763,7 +1754,7 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 403, responseBody);
       }
 
-      const eventResult = await developmentEventStore.getEvent(memoryEventGetMatch[1]);
+      const eventResult = await getActiveDevelopmentMemory().eventStore.getEvent(memoryEventGetMatch[1]);
       const responseBody = buildMemoryActionResponse({
         identity,
         startedAt,
@@ -1798,7 +1789,7 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 403, responseBody);
       }
 
-      const summaryResult = developmentCandidateReviewInbox.getInboxSummary({
+      const summaryResult = getActiveDevelopmentMemory().reviewInbox.getInboxSummary({
         project: url.searchParams.get("project") || undefined
       });
       const responseBody = buildMemoryActionResponse({
@@ -1827,7 +1818,7 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 403, responseBody);
       }
 
-      const inboxResult = await developmentCandidateReviewInbox.listInbox({
+      const inboxResult = await getActiveDevelopmentMemory().reviewInbox.listInbox({
         project: url.searchParams.get("project") || undefined,
         status: url.searchParams.get("status") || "pending",
         candidateType: url.searchParams.get("candidateType") || undefined,
@@ -1860,7 +1851,7 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 403, responseBody);
       }
 
-      const detailResult = await developmentCandidateReviewInbox.getReviewDetail(memoryCandidateReviewMatch[1]);
+      const detailResult = await getActiveDevelopmentMemory().reviewInbox.getReviewDetail(memoryCandidateReviewMatch[1]);
       const responseBody = buildMemoryActionResponse({
         identity,
         startedAt,
@@ -1901,7 +1892,7 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 403, responseBody);
       }
 
-      const actionResult = await developmentCandidateReviewInbox.performAction({
+      const actionResult = await getActiveDevelopmentMemory().reviewInbox.performAction({
         candidateId: memoryCandidateReviewMatch[1],
         action: bodyResult.body && bodyResult.body.action,
         reviewer: bodyResult.body && bodyResult.body.reviewer,
@@ -1934,7 +1925,7 @@ const server = http.createServer(async (request, response) => {
         }));
       }
 
-      const statusResult = developmentMaintainerManager.getStatus({
+      const statusResult = getActiveDevelopmentMemory().maintainerManager.getStatus({
         project: url.searchParams.get("project") || undefined
       });
       return sendJson(response, 200, buildMemoryActionResponse({
@@ -1973,7 +1964,7 @@ const server = http.createServer(async (request, response) => {
         }));
       }
 
-      const planResult = developmentMaintainerManager.planRun({
+      const planResult = getActiveDevelopmentMemory().maintainerManager.planRun({
         project: (bodyResult.body && bodyResult.body.project) || "locaily"
       });
       return sendJson(response, planResult.ok ? 200 : 400, buildMemoryActionResponse({
@@ -2000,7 +1991,7 @@ const server = http.createServer(async (request, response) => {
         }));
       }
 
-      const runsResult = developmentMaintainerManager.listRuns({
+      const runsResult = getActiveDevelopmentMemory().maintainerManager.listRuns({
         project: url.searchParams.get("project") || undefined
       });
       return sendJson(response, 200, buildMemoryActionResponse({
@@ -2028,7 +2019,7 @@ const server = http.createServer(async (request, response) => {
         }));
       }
 
-      const runResult = developmentMaintainerManager.getRun(memoryMaintainerRunMatch[1]);
+      const runResult = getActiveDevelopmentMemory().maintainerManager.getRun(memoryMaintainerRunMatch[1]);
       return sendJson(response, runResult.ok ? 200 : 404, buildMemoryActionResponse({
         identity,
         startedAt,
@@ -2065,7 +2056,7 @@ const server = http.createServer(async (request, response) => {
         }));
       }
 
-      const applyResult = developmentMaintainerManager.applyRun({
+      const applyResult = getActiveDevelopmentMemory().maintainerManager.applyRun({
         runId: memoryMaintainerRunMatch[1],
         allowApplyLowRisk: Boolean(bodyResult.body && bodyResult.body.allowApplyLowRisk),
         allowApplyHighRisk: Boolean(bodyResult.body && bodyResult.body.allowApplyHighRisk)
@@ -2916,8 +2907,8 @@ async function buildConsoleStatusResponse(modelOverride = null) {
       projectCount: memoryStatus.projectCount,
       topicCount: memoryStatus.topicCount,
       warnings: memoryStatus.warnings || [],
-      developmentMemoryReview: developmentCandidateReviewInbox.getInboxSummary().result,
-      developmentMemoryMaintainer: developmentMaintainerManager.getStatus().result,
+      developmentMemoryReview: getActiveDevelopmentMemory().reviewInbox.getInboxSummary().result,
+      developmentMemoryMaintainer: getActiveDevelopmentMemory().maintainerManager.getStatus().result,
       developmentMemoryCapture: (await developmentCaptureProcessor.getStatus()).result,
       developmentMemoryProjects: developmentProjectRegistry.getRegistrySummary()
     },
