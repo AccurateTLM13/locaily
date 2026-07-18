@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-18 (DM10: multi-project template — project registry, namespaced isolation, setup flow; 5/5 multi-project tests; **DM1–DM10 complete**)
+**Updated:** 2026-07-18 (Post-merge stabilization complete — four defects fixed, `test:full` + CI updated)
 
 ## Read First
 
@@ -247,14 +247,27 @@ Real URL validation set:
 
 ## Current Task
 
-The M9 physical multi-device pilot infrastructure is prepared. Hardware profile schema, template, and pilot runner CLI are implemented under `scripts/pilot/`. The pilot runner executes track workflows with three relay policies (local-only, local-first, distributed), collects timing metrics and relay placement evidence, and writes per-run JSON evidence files plus a summary CSV. Documentation for the pilot procedure is at `docs/05-integrations/multi-device-pilot.md`. The pilot has not yet been executed on physical hardware — this is infrastructure preparation only.
+**Post-merge stabilization is complete (2026-07-18).** Local main was synced to PR #19, four confirmed defects were fixed with regression tests, and canonical validation is restored.
 
-### Immediate Next
-- Execute the pilot on two physical devices with Ollama installed
-- Collect and analyze evidence from local-only, local-first, and distributed policy modes
-- Compare timing metrics and relay placement across policies
+### Stabilization fixes
+1. **Confirm dialog** — operator console checks `confirmResult.confirmed` before job mutations; cancel/Escape no longer executes destructive actions
+2. **Job creation contract** — operator enqueue sends `executionType`; production `/jobs` route tested via `npm run test:jobs:production`
+3. **Job outcome rules** — worker uses `companion/jobs/job-outcome.js` to fail jobs on workflow failed status or invalid schema
+4. **DM project paths** — server memory endpoints resolve active-project paths via `memory-services.js`
+
+### Validation
+- `npm run test:full` — canonical offline non-hardware suite
+- `node scripts/smoke-test.js` — 58/58 (requires server)
+- CI runs `test:full`, smoke, `test:jobs:production`, and relay e2e
 
 ## Completed Since Last Update
+
+- **Post-Merge Stabilization** — completed 2026-07-18
+  - Fixed four high-priority defects with bounded diffs and regression coverage
+  - Added `companion/jobs/job-outcome.js`, `companion/memory/projects/memory-services.js`
+  - Added `scripts/test-operator-confirm.js`, `scripts/test-jobs-api-production.js`
+  - Added `npm run test:full`, `test:jobs`, `test:jobs:production`, `test:operator`, `test:qualification`, `test:track-records`
+  - Updated `.github/workflows/ci.yml` to run canonical non-hardware validation
 
 - **Operator Console UI (M6 operator-control-plane)** — completed 2026-07-12
   - `companion/operator/index.html` — single-page operator dashboard with four panels (Dashboard, Jobs, Relay Nodes, Enqueue)
@@ -304,22 +317,20 @@ The M9 physical multi-device pilot infrastructure is prepared. Hardware profile 
 
 ## Next Task
 
-**M6: Trusted Relay Execution and Actual-Placement Evidence** is the recommended next milestone. Do not immediately add more node types or a bigger autonomous scheduler.
+**Development Memory end-to-end proof using a second real project**
 
-Build the layer that makes today's architecture honest and safe:
+Prove the DM1–DM10 loop on a non-Locaily registered project with real capture, session aggregation, candidate extraction, human review, maintainer planning, and retrieval — not simulation-only evidence.
 
-1. **Node pairing and authentication** — pre-shared credentials or bearer tokens for relay node registration and step execution
-2. **Capability verification** — validate that nodes advertising capabilities actually possess them
-3. **Allowed-network and URL restrictions** — restrict relay traffic to private LAN ranges
-4. **Minimal-context envelopes** — send only the minimum required context to relay nodes, not entire workflow state
-5. **Planned-versus-actual placement records** — separate `plannedPlacement` from `actualExecutionPlacement` in run results
-6. **Remote output schema validation** — validate relay responses against expected output schemas
-7. **Explicit relay fallback reasons** — record why fallback occurred (node missing, unhealthy, disabled, connector unavailable)
-8. **One real two-device pilot** — prove the system works on actual hardware
-9. **Performance comparison** — local-only vs. relay-only vs. distributed
-10. **Human-readable operator view** — show where each step actually ran
+Suggested proof steps:
+1. Register a second real project (non-Locaily repo or workspace)
+2. Generate vault, enable capture, run a bounded development session
+3. Extract candidates, perform review actions, verify retrieval in context pack
+4. Document evidence paths and operator workflow
 
-This converts today's architecture from "it can distribute work" into "we can trust and evaluate distributed work."
+**Hardware/external work remains separate:**
+- Physical multi-device pilot — requires two devices + Ollama (`scripts/pilot/pilot-runner.js` ready)
+- Live Ollama qualification — provider required
+- Clean-machine packaging acceptance — manual gate (`scripts/acceptance-test.ps1`)
 
 **Do not:**
 - Remove linear track runner
