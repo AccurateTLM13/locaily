@@ -1,0 +1,22 @@
+{
+  "_comment": "Hardware profile template — fill in values for each device participating in the M9 pilot. Copy this file and replace placeholders with real values.",
+  "deviceName": "REPLACE_WITH_DEVICE_NAME",
+  "os": "REPLACE_WITH_OS_AND_VERSION",
+  "cpu": "REPLACE_WITH_CPU_MODEL_AND_CORES",
+  "ram": {
+    "gb": 0,
+    "type": "REPLACE_WITH_MEMORY_TYPE"
+  },
+  "vram": {
+    "gb": 0,
+    "gpu": "REPLACE_WITH_GPU_MODEL_OR_NONE"
+  },
+  "runtimeProvider": "REPLACE_WITH_RUNTIME_PROVIDER",
+  "availableModels": [
+    "REPLACE_WITH_AVAILABLE_MODEL_NAMES"
+  ],
+  "advertisedCapabilities": [
+    "REPLACE_WITH_CAPABILITY_ROLES"
+  ],
+  "networkAddress": "REPLACE_WITH_BASE_URL"
+}

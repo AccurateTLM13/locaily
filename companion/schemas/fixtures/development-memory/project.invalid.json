@@ -1,0 +1,14 @@
+{
+  "slug": "Bad Slug",
+  "displayName": "",
+  "workspaceRoot": "",
+  "repositoryIdentity": {
+    "repository": "https://github.com/example/bad"
+  },
+  "vaultPath": null,
+  "storageLayout": "cloud",
+  "captureEnabled": "yes",
+  "allowedPaths": "projects/",
+  "extraField": true,
+  "createdAt": "2026-07-18T12:00:00.000Z"
+}

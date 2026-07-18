@@ -1,145 +1,68 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "M5-multi-device-workflow-coordination",
+  "build_slice": "dm10-multi-project-template",
   "status": "complete",
-  "objective": "Multi-device workflow coordination built on M4 Relay Nodes — coordinator computes a step-to-node placement plan across healthy relay nodes, executes each workflow step on its assigned device, and falls back locally when an assigned node fails. Includes a placement planner, a placement-preview endpoint, and coordinated multi-device execution with audit trail.",
+  "objective": "Reuse the Development Memory Loop for Locaily or any other project with guided setup and per-project isolation.",
   "implemented": {
-    "placement_planner": [
-      "companion/relay/placement.js (createPlacementPlanner, buildPlacementFromTrack)"
+    "project_modules": [
+      "companion/memory/projects/project-paths.js",
+      "companion/memory/projects/project-registry.js",
+      "companion/memory/projects/vault-generator.js",
+      "companion/memory/projects/vault-import.js",
+      "companion/memory/projects/project-health.js",
+      "companion/memory/projects/project-setup.js",
+      "companion/memory/projects/index.js"
     ],
-    "placement_policies": [
-      "distribute (spread model steps across capable healthy nodes, least-loaded)",
-      "local_first (local when locally capable, else route)",
-      "local_only (force all local)",
-      "prefer_relay / route_if_unavailable (M4 per-step dynamic decision, unchanged)"
+    "schemas": [
+      "companion/schemas/development-memory-project.schema.json",
+      "companion/schemas/development-memory-project-registry.schema.json",
+      "companion/schemas/fixtures/development-memory/project*.json"
     ],
-    "assigned_node_routing": [
-      "companion/relay/router.js executeStepWithAssignedNode (route to specific node, fallback local + RELAY_FALLBACK audit on failure)",
-      "companion/relay/router.js executeStepViaRelayIfNeeded now consults options.relay.assignments[stepId]",
-      "companion/crew/orchestrator.js (DAG + linear) and companion/orchestration/run-plan-executor.js pass stepId"
+    "api": [
+      "GET /memory/projects",
+      "GET /memory/projects/health",
+      "POST /memory/projects/register",
+      "GET /memory/projects/:slug",
+      "POST /memory/projects/:slug",
+      "GET /memory/projects/:slug/health"
     ],
-    "server_wiring": [
-      "POST /relay/plan (placement preview for a track)",
-      "GET /relay/protocol now lists /relay/plan",
-      "applyRelayPlacement() attaches assignments + placementSummary for relay_policy=distribute on /tracks/run and /workflows/run",
-      "responses include relay_placement summary (counts + byNode)"
+    "cli": [
+      "scripts/memory-project.js",
+      "npm run memory:project:list",
+      "npm run memory:project:register",
+      "npm run memory:project:activate",
+      "npm run memory:project:generate-vault",
+      "npm run memory:project:health"
+    ],
+    "integrations": [
+      "companion/server.js — developmentProjectRegistry and capture processor path resolution",
+      "companion/memory/events/capture/capture-processor.js — resolveContext/createManagers for active project",
+      "docs/05-integrations/backup-and-restore.md — development memory paths"
     ],
     "tests": [
-      "scripts/test-relay-placement.cjs (14/14 — added dedupe/load-split coverage)",
-      "scripts/test-multi-device-e2e.cjs (22/22 — three Local Brain instances A orchestrator + B + C relay; distributed run, then kill C -> local fallback)"
-    ],
-    "package_scripts": [
-      "test:relay:placement",
-      "test:multi-device:e2e",
-      "test:m5"
-    ],
-    "all_test_results": {
-      "benchmark:test": "PASS",
-      "contract-test": "PASS",
-      "benchmark:status-smoke": "PASS",
-      "test:dag": "14/14 + 9/9 + workflow PASS",
-      "orchestration-unit-test": "PASS",
-      "smoke-test": "57/57 PASS",
-      "test:relay (unit)": "17/17 PASS (harness fixed: async checks now actually run)",
-      "test:memory-v1": "6/6 PASS",
-      "test:relay:e2e": "11/11 PASS",
-      "test:relay:placement": "14/14 PASS",
-      "test:multi-device:e2e": "22/22 PASS"
-    }
+      "scripts/test-development-memory-multi-project.js — 5/5",
+      "scripts/test-development-memory-capture-processor.js — 5/5",
+      "scripts/test-development-memory-retrieval.js — 5/5",
+      "scripts/test-development-memory-maintainer.js — 4/4",
+      "scripts/test-development-memory-candidate-review.js — 5/5",
+      "scripts/test-development-memory-candidates.js — 5/5",
+      "scripts/test-development-memory-sessions.js — 5/5",
+      "scripts/test-development-memory-capture.js — 7/7",
+      "scripts/test-development-memory-events.js — 13/13",
+      "scripts/test-development-memory-schemas.js — all fixtures including project schemas",
+      "scripts/test-memory-v1.cjs — 6/6"
+    ]
   },
   "validation": {
     "passed": true,
     "results": [
-      "Placement planner distributes model steps across two relay nodes (B gets priority_helper, C gets developer/guardrail/testing writers) and keeps tool steps local",
-      "Multi-device e2e: Lighthouse Handoff runs on A with model steps executed on B and C; relay_placement summary reports 4 relayed / 6 local across both devices",
-      "Failure + local fallback: killing node C reroutes its steps locally and records RELAY_FALLBACK audit events; workflow still completes",
-      "Existing M4 relay e2e still passes (single-step prefer_relay unaffected)",
-      "All existing tests pass (backward compatible)"
+      "Namespaced projects store events in isolated directories",
+      "Legacy locaily project keeps flat data/memory/development-* paths",
+      "Starter vault generation and import validation succeed",
+      "Setup flow registers, generates vault, enables capture, and reports health",
+      "DM1–DM9 regression suite remains green"
     ]
   },
-  "acceptance_criteria": {
-    "passed": [
-      "Coordinator computes a placement plan across 2+ relay nodes for a workflow",
-      "Each step executes on its assigned device; tool steps stay local",
-      "Node failure mid-workflow falls back to local execution with audit trail",
-      "Placement preview endpoint reports assignments + summary",
-      "All existing tests still pass (backward compatible)",
-      "End-to-end: Lighthouse Handoff distributed across 3 devices, then degraded to 2 with fallback"
-    ],
-    "failed": [],
-    "blockers": []
-  },
-  "scope_notes": [
-    "Single orchestrator, ephemeral relay nodes — no distributed consensus or global scheduler",
-    "Placement is capability + health + least-loaded; no latency/bandwidth awareness",
-    "Tool steps are always local by design (relay nodes are model-capability targets)",
-    "Local fallback is per-step; a failed node is marked unhealthy for 60s (registry stale window)"
-  ],
-  "stop_conditions_honored": [
-    "Local Brain localhost-only by default (no public exposure)",
-    "Relay nodes are execution targets only (no control-plane ops)",
-    "No automatic model swapping / Model Garage",
-    "No distributed consensus / Byzantine fault tolerance claimed",
-    "Failures degrade gracefully to local execution (no data loss)"
-  ],
-  "last_fresh_validation": "2026-07-11 (M5 complete + review fixes — multi-device workflow coordination)",
-  "next_milestones": "M6: Trusted Relay Execution and Actual-Placement Evidence — node pairing/authentication, capability verification, allowed-network restrictions, minimal-context envelopes, planned-vs-actual placement records, remote output schema validation, explicit relay fallback reasons, one real two-device pilot, performance comparison, human-readable operator view",
-  "updated_at": "2026-07-11",
-  "architectural_review_2026-07-11": {
-    "scope": "M5 architectural review for safety, evidence integrity, and deployment readiness",
-    "findings": [
-      {
-        "severity": "high",
-        "title": "Relay communication has no visible trust boundary",
-        "description": "No authentication token, signature, node certificate, request nonce, or pairing credential. Registration and heartbeat calls are unauthenticated. A rogue or accidentally registered LAN node could receive workflow context, user-derived content, and return manipulated results.",
-        "current_state": "Trusted-development-network only",
-        "fix": "M6 objective #1: Node pairing and authentication"
-      },
-      {
-        "severity": "medium",
-        "title": "Planned relay placement can silently become local execution",
-        "description": "When an assigned node is missing or unhealthy, executeStepWithAssignedNode() falls back to local execution without recording a fallback audit. Run reports placement plan assigning step to relay node, but actual execution occurred locally with no recorded reason.",
-        "consequence": "Planned and executed topology can diverge silently, weakening the evidence system",
-        "fix": "M6 objective #5: Planned-versus-actual placement records"
-      },
-      {
-        "severity": "medium",
-        "title": "local_first defaults to effectively local-only",
-        "description": "Every role is treated as locally capable when localCapableRoles is omitted. local_first immediately assigns locally when the role is considered locally capable.",
-        "consequence": "Without explicit local-capability data, relay nodes are never used for model steps",
-        "fix": "Document that local_first requires explicit localCapableRoles for correct behavior"
-      },
-      {
-        "severity": "medium",
-        "title": "Approved evidence was written with an agent as approver",
-        "description": "Several new evidence records use approvedBy: locaily-agent. Blurs distinction between generated, promoted, machine-reviewed, human-reviewed, and approved for qualification.",
-        "fix": "Use promotionActor instead of approvedBy; reserve approvedBy for actual human approval"
-      }
-    ],
-    "recommendation": "M6: Trusted Relay Execution and Actual-Placement Evidence — harden one real two-device path, prove the evidence is truthful, and measure whether distribution creates value",
-    "assessment": "Today's work passes as a major milestone. The structure is disciplined, modular, test-oriented, and aligned with the Locaily thesis. The system did not take the lazy route of bolting HTTP calls onto the workflow runner; it created actual placement, registry, protocol, routing, evidence, and fallback concepts. The next danger is scope excitement."
-  },
-  "review_2026-07-11": {
-    "scope": "Post-completion review of M4 + M5 for bugs, mistakes, and unfinished items",
-    "issues_found": [
-      "registry.selectForRole sorted descending (picked most-loaded node) — wrong least-loaded behavior",
-      "placement byRole double-counted a node advertising both `role` and `role:role`",
-      "no direct unit test for executeStepWithAssignedNode (M5 assigned-node routing)",
-      "relay-node-protocol.md documented M4 only, missing M5 placement/distribute/POST /relay/plan",
-      "HIDDEN: test-relay-unit.cjs async checks were fire-and-forget before process.exit — never executed (false confidence); exposed a wrong audit-field assertion (r.code vs r.error_code)"
-    ],
-    "fixes_applied": [
-      "companion/relay/registry.js: selectForRole now sorts ascending (a.dispatchCount - b.dispatchCount)",
-      "companion/relay/placement.js: byRole dedupes nodes per role",
-      "scripts/test-relay-unit.cjs: harness now awaits async checks; added 3 executeStepWithAssignedNode tests; corrected audit assertion to r.error_code",
-      "scripts/test-relay-placement.cjs: added dedupe/least-loaded load-split test",
-      "docs/05-integrations/relay-node-protocol.md: added M5 placement section (distribute policy, POST /relay/plan, relay_placement, assignments)"
-    ],
-    "verification": {
-      "test:relay (unit)": "17/17 PASS",
-      "test:relay:placement": "14/14 PASS",
-      "test:multi-device:e2e": "22/22 PASS"
-    },
-    "outcome": "All M4/M5 review issues resolved; no blockers remaining for M5 acceptance."
-  }
+  "next_milestones": "Development Memory Loop DM1–DM10 complete. Follow-on candidates (E2E proof scenario, review console UI, embeddings) require explicit objectives.",
+  "updated_at": "2026-07-18"
 }

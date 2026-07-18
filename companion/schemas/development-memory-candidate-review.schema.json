@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-memory-candidate-review.schema.json",
+  "title": "Development Memory Candidate Review Record",
+  "description": "Layer B review state for a knowledge candidate. Separate from the candidate payload so evidence links stay immutable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reviewId",
+    "schemaVersion",
+    "candidateId",
+    "status",
+    "writebackDeliveryMode",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "reviewId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^rev_"
+    },
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "candidateId": {
+      "type": "string",
+      "pattern": "^cand_"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "approved", "rejected", "deferred", "merged"]
+    },
+    "action": {
+      "type": ["string", "null"],
+      "enum": ["approve", "edit_approve", "reject", "defer", "merge", null]
+    },
+    "reviewer": {
+      "type": ["string", "null"]
+    },
+    "reviewedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "editedStatement": {
+      "type": ["string", "null"],
+      "maxLength": 4000
+    },
+    "mergeTargetId": {
+      "type": ["string", "null"],
+      "pattern": "^cand_"
+    },
+    "proposalId": {
+      "type": ["string", "null"]
+    },
+    "proposalPath": {
+      "type": ["string", "null"]
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "maxLength": 2000
+    },
+    "writebackDeliveryMode": {
+      "type": "string",
+      "enum": ["proposal_only", "disabled"]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

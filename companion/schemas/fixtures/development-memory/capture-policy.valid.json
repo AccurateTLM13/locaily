@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "enabled": false,
+  "project": "locaily",
+  "capture": {
+    "commits": true,
+    "pullRequests": true,
+    "objectiveTransitions": true,
+    "taskResults": true,
+    "testResults": true,
+    "humanDecisions": true,
+    "blockers": true,
+    "releases": true,
+    "workingTreeChanges": false,
+    "terminalOutput": false,
+    "modelTranscripts": false
+  },
+  "writeback": {
+    "mode": "review",
+    "autoApplyRiskLevels": ["low"],
+    "requireHumanReviewFor": [
+      "decision",
+      "architecture",
+      "operating_rule",
+      "project_identity",
+      "security_policy"
+    ]
+  },
+  "retention": {
+    "keepRawEvents": true,
+    "rawEventDays": 90,
+    "keepAppliedProposals": true
+  }
+}

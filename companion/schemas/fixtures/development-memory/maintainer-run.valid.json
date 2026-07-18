@@ -1,0 +1,37 @@
+{
+  "runId": "maint_20260718_locaily",
+  "schemaVersion": "1.0",
+  "project": "locaily",
+  "status": "planned",
+  "autoApplyLowRisk": false,
+  "autoApplyHighRisk": false,
+  "items": [
+    {
+      "candidateId": "cand_20260718_status001",
+      "reviewId": "rev_20260718_status001",
+      "targetVaultPath": "projects/locaily/STATUS.md",
+      "suggestedOperation": "update_section",
+      "proposedStatement": "DM7 maintainer planned a status update.",
+      "driftStatus": "none",
+      "driftDetail": "No duplicate statement detected; maintainer can plan a section update.",
+      "plannedAction": "append_section",
+      "applyAllowed": true,
+      "reviewRisk": "low",
+      "evidenceEventIds": ["evt_20260718_status001"],
+      "applied": false,
+      "rollbackId": null
+    }
+  ],
+  "summary": {
+    "approvedCandidates": 1,
+    "plannedUpdates": 1,
+    "skippedDuplicates": 0,
+    "driftDetected": 0,
+    "reviewRequired": 0,
+    "appliedUpdates": 0
+  },
+  "rollbackIds": [],
+  "createdAt": "2026-07-18T18:00:00.000Z",
+  "plannedAt": "2026-07-18T18:00:00.000Z",
+  "appliedAt": null
+}

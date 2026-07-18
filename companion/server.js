@@ -1,5 +1,6 @@
 const http = require("node:http");
 const { readFileSync } = require("node:fs");
+const { readFile } = require("node:fs/promises");
 const { join } = require("node:path");
 const { createRunIdentity } = require("./core/ids");
 const {
@@ -42,6 +43,20 @@ const { createVaultAdapter } = require("./memory/vault-adapter");
 const { WIKI_ALLOWED_PATHS } = require("./memory/allowlist-presets");
 const { buildContextPack } = require("./memory/context-pack-builder");
 const { createWritebackProposal, renderProposalMarkdown } = require("./memory/writeback-proposal");
+const { createDevelopmentEventStore } = require("./memory/events/event-store");
+const { createDevelopmentCandidateReviewInbox } = require("./memory/events/candidate-review-inbox");
+const { createDevelopmentMaintainerManager } = require("./memory/events/maintainer-manager");
+const {
+  createDevelopmentCaptureProcessor,
+  createDevelopmentCaptureWorker,
+  configureCaptureGate
+} = require("./memory/events/capture");
+const {
+  createDevelopmentProjectRegistry,
+  runProjectSetupStep,
+  buildProjectHealthReport,
+  buildAllProjectsHealthReport
+} = require("./memory/projects");
 const { buildMemoryAuditEvent } = require("./core/audit-log");
 const { createConsoleController } = require("./console/controller");
 const { createRunStore } = require("./console/run-store");
@@ -53,6 +68,8 @@ const { createQualificationResolver } = require("./core/qualification-resolver")
 const { createCapabilityRegistry } = require("./core/capability-registry");
 const { createRelayRegistry } = require("./relay/registry");
 const { createRelayConnector } = require("./relay/connector");
+const { createDurableJobStore } = require("./core/durable-job-store");
+const { createBackgroundWorker } = require("./jobs/worker");
 const { createRelayAuth } = require("./relay/auth");
 const { createRelayRouter, executeStepViaRelayIfNeeded, ROUTING_POLICY } = require("./relay/router");
 const { buildPlacementFromTrack } = require("./relay/placement");
@@ -126,7 +143,7 @@ const DEFAULT_CONFIG = {
   },
   permissions: {
     filePath: join(__dirname, "..", "data", "permissions.json"),
-    approved: ["model.run", "memory.read", "memory.writeback.propose", "memory.writeback.apply"],
+    approved: ["model.run", "memory.read", "memory.writeback.propose", "memory.writeback.apply", "memory.candidates.review", "memory.maintainer.run"],
     denied: ["file.delete", "file.write", "network.send", "browser.write", "memory.delete"]
   },
   memoryBridge: {
@@ -278,6 +295,87 @@ const consoleController = createConsoleController({
   onSetupSaved: refreshVaultAdapterForConsoleSetup
 });
 
+const durableJobStore = createDurableJobStore({
+  dataDir: join(__dirname, "..", "data")
+});
+
+const developmentEventStore = createDevelopmentEventStore({
+  dataDir: join(__dirname, "..", "data", "memory", "development-events")
+});
+
+const developmentCandidateReviewInbox = createDevelopmentCandidateReviewInbox({
+  eventsDir: join(__dirname, "..", "data", "memory", "development-events"),
+  candidatesRoot: join(__dirname, "..", "data", "memory", "development-candidates"),
+  getVaultAdapter: () => vaultAdapter
+});
+
+const developmentMaintainerManager = createDevelopmentMaintainerManager({
+  candidatesRoot: join(__dirname, "..", "data", "memory", "development-candidates"),
+  maintainerRoot: join(__dirname, "..", "data", "memory", "development-maintainer"),
+  getVaultAdapter: () => vaultAdapter
+});
+
+const developmentProjectRegistry = createDevelopmentProjectRegistry({
+  repoRoot: join(__dirname, "..")
+});
+
+let developmentCaptureWorker = null;
+const developmentCaptureProcessor = createDevelopmentCaptureProcessor({
+  projectRegistry: developmentProjectRegistry,
+  vaultPath: config.memoryBridge && config.memoryBridge.vaultPath ? config.memoryBridge.vaultPath : null,
+  idleSessionCloseMs: 1000,
+  getWorkerStatus: () => (developmentCaptureWorker ? developmentCaptureWorker.getStatus() : null)
+});
+
+developmentCaptureWorker = createDevelopmentCaptureWorker({
+  processor: developmentCaptureProcessor,
+  pollIntervalMs: 15000,
+  workerName: "development-capture-worker"
+});
+
+configureCaptureGate({
+  project: process.env.DEVELOPMENT_MEMORY_PROJECT || "locaily",
+  vaultPath: config.memoryBridge && config.memoryBridge.vaultPath ? config.memoryBridge.vaultPath : null
+});
+
+const backgroundWorker = createBackgroundWorker({
+  durableJobStore,
+  executionCallbacks: {
+    runTrack: async (trackId, input, context, options) => {
+      const runtime = getActiveRuntime();
+      const result = await runTrack({
+        trackId,
+        input,
+        runtime,
+        toolRegistry,
+        options: buildModelRoutingOptions(options || {}),
+        meta: { source: "background-worker", trackId }
+      });
+      return result;
+    },
+    runWorkflow: async (workflowId, input, context, options) => {
+      const runtime = getActiveRuntime();
+      const plan = buildRunPlan({
+        workflowId,
+        input,
+        options: options || {}
+      });
+      const execution = await executeRunPlan({
+        plan,
+        runtime,
+        toolRegistry,
+        options: buildModelRoutingOptions(options || {}),
+        meta: { source: "background-worker", workflowId }
+      });
+      return execution;
+    }
+  },
+  config: {
+    pollIntervalMs: 5000,
+    workerName: "background-worker"
+  }
+});
+
 const server = http.createServer(async (request, response) => {
   const startedAt = Date.now();
   const identity = createRunIdentity();
@@ -289,6 +387,22 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && consoleAsset) {
       return sendContent(response, consoleAsset.statusCode, consoleAsset.contentType, consoleAsset.body);
+    }
+
+    // Operator console static files
+    if (request.method === "GET" && (url.pathname === "/operator" || url.pathname === "/operator/")) {
+      const body = await readFile(join(__dirname, "operator", "index.html"));
+      return sendContent(response, 200, "text/html; charset=utf-8", body);
+    }
+
+    if (request.method === "GET" && url.pathname === "/operator/styles.css") {
+      const body = await readFile(join(__dirname, "operator", "styles.css"));
+      return sendContent(response, 200, "text/css; charset=utf-8", body);
+    }
+
+    if (request.method === "GET" && url.pathname === "/operator/app.js") {
+      const body = await readFile(join(__dirname, "operator", "app.js"));
+      return sendContent(response, 200, "text/javascript; charset=utf-8", body);
     }
 
     if (request.method === "GET" && url.pathname === "/console/status") {
@@ -1503,6 +1617,922 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, applyResult.ok ? 200 : 400, responseBody);
     }
 
+    if (request.method === "POST" && url.pathname === "/memory/events") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid development memory event JSON object.",
+          warnings: ["Invalid JSON body."]
+        });
+        await recordMemoryAudit({
+          identity,
+          startedAt,
+          endpoint: "memory/events",
+          requestBody: {},
+          responseBody,
+          statusCode: 400
+        });
+        return sendJson(response, 400, responseBody);
+      }
+
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.events.write"] },
+        requestedPermissions: ["memory.events.write"]
+      });
+
+      if (!permissionResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.events.write permission denied."]
+        });
+        await recordMemoryAudit({
+          identity,
+          startedAt,
+          endpoint: "memory/events",
+          requestBody: bodyResult.body,
+          responseBody,
+          statusCode: 403
+        });
+        return sendJson(response, 403, responseBody);
+      }
+
+      const appendResult = await developmentEventStore.appendEvent(bodyResult.body || {});
+      const responseBody = buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: appendResult
+      });
+      await recordMemoryAudit({
+        identity,
+        startedAt,
+        endpoint: "memory/events",
+        requestBody: bodyResult.body,
+        responseBody,
+        statusCode: appendResult.ok ? 200 : 400
+      });
+      return sendJson(response, appendResult.ok ? 200 : 400, responseBody);
+    }
+
+    if (request.method === "GET" && url.pathname === "/memory/events") {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        });
+        await recordMemoryAudit({
+          identity,
+          startedAt,
+          endpoint: "memory/events/query",
+          requestBody: {},
+          responseBody,
+          statusCode: 403
+        });
+        return sendJson(response, 403, responseBody);
+      }
+
+      const queryResult = await developmentEventStore.queryEvents({
+        project: url.searchParams.get("project") || undefined,
+        eventType: url.searchParams.get("eventType") || undefined,
+        branch: url.searchParams.get("branch") || undefined,
+        objectiveId: url.searchParams.get("objectiveId") || undefined,
+        taskId: url.searchParams.get("taskId") || undefined,
+        runId: url.searchParams.get("runId") || undefined,
+        sessionId: url.searchParams.get("sessionId") || undefined,
+        from: url.searchParams.get("from") || undefined,
+        to: url.searchParams.get("to") || undefined,
+        limit: url.searchParams.get("limit") ? Number(url.searchParams.get("limit")) : undefined
+      });
+      const responseBody = buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: queryResult
+      });
+      await recordMemoryAudit({
+        identity,
+        startedAt,
+        endpoint: "memory/events/query",
+        requestBody: Object.fromEntries(url.searchParams.entries()),
+        responseBody,
+        statusCode: 200
+      });
+      return sendJson(response, 200, responseBody);
+    }
+
+    const memoryEventGetMatch = url.pathname.match(/^\/memory\/events\/([^/]+)$/);
+    if (request.method === "GET" && memoryEventGetMatch) {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        });
+        await recordMemoryAudit({
+          identity,
+          startedAt,
+          endpoint: "memory/events/get",
+          requestBody: { eventId: memoryEventGetMatch[1] },
+          responseBody,
+          statusCode: 403
+        });
+        return sendJson(response, 403, responseBody);
+      }
+
+      const eventResult = await developmentEventStore.getEvent(memoryEventGetMatch[1]);
+      const responseBody = buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: eventResult
+      });
+      await recordMemoryAudit({
+        identity,
+        startedAt,
+        endpoint: "memory/events/get",
+        requestBody: { eventId: memoryEventGetMatch[1] },
+        responseBody,
+        statusCode: eventResult.ok ? 200 : 404
+      });
+      return sendJson(response, eventResult.ok ? 200 : 404, responseBody);
+    }
+
+    if (request.method === "GET" && url.pathname === "/memory/candidates/review/status") {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        });
+        return sendJson(response, 403, responseBody);
+      }
+
+      const summaryResult = developmentCandidateReviewInbox.getInboxSummary({
+        project: url.searchParams.get("project") || undefined
+      });
+      const responseBody = buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: summaryResult
+      });
+      return sendJson(response, 200, responseBody);
+    }
+
+    if (request.method === "GET" && url.pathname === "/memory/candidates/review") {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        });
+        return sendJson(response, 403, responseBody);
+      }
+
+      const inboxResult = await developmentCandidateReviewInbox.listInbox({
+        project: url.searchParams.get("project") || undefined,
+        status: url.searchParams.get("status") || "pending",
+        candidateType: url.searchParams.get("candidateType") || undefined,
+        sessionId: url.searchParams.get("sessionId") || undefined
+      });
+      const responseBody = buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: inboxResult
+      });
+      return sendJson(response, 200, responseBody);
+    }
+
+    const memoryCandidateReviewMatch = url.pathname.match(/^\/memory\/candidates\/review\/([^/]+)$/);
+    if (request.method === "GET" && memoryCandidateReviewMatch) {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        });
+        return sendJson(response, 403, responseBody);
+      }
+
+      const detailResult = await developmentCandidateReviewInbox.getReviewDetail(memoryCandidateReviewMatch[1]);
+      const responseBody = buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: detailResult
+      });
+      return sendJson(response, detailResult.ok ? 200 : 404, responseBody);
+    }
+
+    if (request.method === "POST" && memoryCandidateReviewMatch) {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid review action JSON object.",
+          warnings: ["Invalid JSON body."]
+        });
+        return sendJson(response, 400, responseBody);
+      }
+
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.candidates.review"] },
+        requestedPermissions: ["memory.candidates.review"]
+      });
+
+      if (!permissionResult.ok) {
+        const responseBody = buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.candidates.review permission denied."]
+        });
+        return sendJson(response, 403, responseBody);
+      }
+
+      const actionResult = await developmentCandidateReviewInbox.performAction({
+        candidateId: memoryCandidateReviewMatch[1],
+        action: bodyResult.body && bodyResult.body.action,
+        reviewer: bodyResult.body && bodyResult.body.reviewer,
+        editedStatement: bodyResult.body && bodyResult.body.editedStatement,
+        mergeTargetId: bodyResult.body && bodyResult.body.mergeTargetId,
+        notes: bodyResult.body && bodyResult.body.notes
+      });
+      const responseBody = buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult
+      });
+      return sendJson(response, actionResult.ok ? 200 : 400, responseBody);
+    }
+
+    if (request.method === "GET" && url.pathname === "/memory/maintainer/status") {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        }));
+      }
+
+      const statusResult = developmentMaintainerManager.getStatus({
+        project: url.searchParams.get("project") || undefined
+      });
+      return sendJson(response, 200, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: statusResult
+      }));
+    }
+
+    if (request.method === "POST" && url.pathname === "/memory/maintainer/plan") {
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid maintainer plan request.",
+          warnings: ["Invalid JSON body."]
+        }));
+      }
+
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.maintainer.run"] },
+        requestedPermissions: ["memory.maintainer.run"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.maintainer.run permission denied."]
+        }));
+      }
+
+      const planResult = developmentMaintainerManager.planRun({
+        project: (bodyResult.body && bodyResult.body.project) || "locaily"
+      });
+      return sendJson(response, planResult.ok ? 200 : 400, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: planResult
+      }));
+    }
+
+    if (request.method === "GET" && url.pathname === "/memory/maintainer/runs") {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        }));
+      }
+
+      const runsResult = developmentMaintainerManager.listRuns({
+        project: url.searchParams.get("project") || undefined
+      });
+      return sendJson(response, 200, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: runsResult
+      }));
+    }
+
+    const memoryMaintainerRunMatch = url.pathname.match(/^\/memory\/maintainer\/runs\/([^/]+)$/);
+    if (request.method === "GET" && memoryMaintainerRunMatch) {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        }));
+      }
+
+      const runResult = developmentMaintainerManager.getRun(memoryMaintainerRunMatch[1]);
+      return sendJson(response, runResult.ok ? 200 : 404, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: runResult
+      }));
+    }
+
+    if (request.method === "POST" && memoryMaintainerRunMatch) {
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send maintainer apply flags.",
+          warnings: ["Invalid JSON body."]
+        }));
+      }
+
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.maintainer.run"] },
+        requestedPermissions: ["memory.maintainer.run"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.maintainer.run permission denied."]
+        }));
+      }
+
+      const applyResult = developmentMaintainerManager.applyRun({
+        runId: memoryMaintainerRunMatch[1],
+        allowApplyLowRisk: Boolean(bodyResult.body && bodyResult.body.allowApplyLowRisk),
+        allowApplyHighRisk: Boolean(bodyResult.body && bodyResult.body.allowApplyHighRisk)
+      });
+      return sendJson(response, applyResult.ok ? 200 : 400, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: applyResult
+      }));
+    }
+
+    if (request.method === "GET" && url.pathname === "/memory/capture/status") {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        }));
+      }
+
+      const statusResult = await developmentCaptureProcessor.getStatus();
+      return sendJson(response, 200, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: statusResult
+      }));
+    }
+
+    if (request.method === "POST" && url.pathname === "/memory/capture/pause") {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.capture.control"] },
+        requestedPermissions: ["memory.capture.control"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.capture.control permission denied."]
+        }));
+      }
+
+      const pauseResult = await developmentCaptureProcessor.pauseCapture();
+      return sendJson(response, 200, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: pauseResult
+      }));
+    }
+
+    if (request.method === "POST" && url.pathname === "/memory/capture/resume") {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.capture.control"] },
+        requestedPermissions: ["memory.capture.control"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.capture.control permission denied."]
+        }));
+      }
+
+      const resumeResult = await developmentCaptureProcessor.resumeCapture();
+      return sendJson(response, 200, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: resumeResult
+      }));
+    }
+
+    if (request.method === "POST" && url.pathname === "/memory/capture/process") {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.capture.control"] },
+        requestedPermissions: ["memory.capture.control"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.capture.control permission denied."]
+        }));
+      }
+
+      const processResult = await developmentCaptureProcessor.processOnce();
+      return sendJson(response, 200, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: processResult
+      }));
+    }
+
+    if (request.method === "GET" && url.pathname === "/memory/projects") {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        }));
+      }
+
+      return sendJson(response, 200, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: {
+          ok: true,
+          result: developmentProjectRegistry.getRegistrySummary(),
+          warnings: []
+        }
+      }));
+    }
+
+    if (request.method === "GET" && url.pathname === "/memory/projects/health") {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        }));
+      }
+
+      const healthResult = await buildAllProjectsHealthReport(developmentProjectRegistry);
+      return sendJson(response, 200, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: healthResult
+      }));
+    }
+
+    if (request.method === "POST" && url.pathname === "/memory/projects/register") {
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid project registration payload.",
+          warnings: ["Invalid JSON body."]
+        }));
+      }
+
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.capture.control"] },
+        requestedPermissions: ["memory.capture.control"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.capture.control permission denied."]
+        }));
+      }
+
+      const registerResult = developmentProjectRegistry.registerProject(bodyResult.body || {});
+      return sendJson(response, registerResult.ok ? 200 : 400, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: registerResult
+      }));
+    }
+
+    const memoryProjectMatch = url.pathname.match(/^\/memory\/projects\/([^/]+)$/);
+    if (request.method === "GET" && memoryProjectMatch) {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        }));
+      }
+
+      const project = developmentProjectRegistry.getProject(memoryProjectMatch[1]);
+      if (!project) {
+        return sendJson(response, 404, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PROJECT_NOT_FOUND",
+          message: `Project '${memoryProjectMatch[1]}' is not registered.`,
+          nextStep: "Register the project first."
+        }));
+      }
+
+      return sendJson(response, 200, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: { ok: true, result: project, warnings: [] }
+      }));
+    }
+
+    if (request.method === "POST" && memoryProjectMatch) {
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid project action payload.",
+          warnings: ["Invalid JSON body."]
+        }));
+      }
+
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.capture.control"] },
+        requestedPermissions: ["memory.capture.control"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.capture.control permission denied."]
+        }));
+      }
+
+      const action = bodyResult.body && bodyResult.body.action ? bodyResult.body.action : "activate";
+      let actionResult;
+
+      if (action === "activate") {
+        actionResult = developmentProjectRegistry.setActiveProject(memoryProjectMatch[1]);
+      } else {
+        actionResult = runProjectSetupStep(developmentProjectRegistry, action, {
+          ...(bodyResult.body || {}),
+          slug: memoryProjectMatch[1]
+        });
+      }
+
+      return sendJson(response, actionResult.ok ? 200 : 400, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult
+      }));
+    }
+
+    const memoryProjectHealthMatch = url.pathname.match(/^\/memory\/projects\/([^/]+)\/health$/);
+    if (request.method === "GET" && memoryProjectHealthMatch) {
+      const permissionResult = permissionManager.check({
+        tool: { permissions: ["memory.read"] },
+        requestedPermissions: ["memory.read"]
+      });
+
+      if (!permissionResult.ok) {
+        return sendJson(response, 403, buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: "PERMISSION_DENIED",
+          message: permissionResult.error.message,
+          nextStep: permissionResult.error.nextStep,
+          warnings: ["memory.read permission denied."]
+        }));
+      }
+
+      const healthResult = await buildProjectHealthReport(developmentProjectRegistry, memoryProjectHealthMatch[1]);
+      return sendJson(response, healthResult.ok ? 200 : 404, buildMemoryActionResponse({
+        identity,
+        startedAt,
+        actionResult: healthResult
+      }));
+    }
+
+    if (request.method === "POST" && url.pathname === "/jobs") {
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with executionType, input, and trackId or workflowId."
+        });
+      }
+
+      const { executionType, trackId, workflowId, input, context, options, maxAttempts, correlationId } = bodyResult.body || {};
+
+      const createResult = durableJobStore.createJob({
+        executionType,
+        trackId,
+        workflowId,
+        input,
+        context,
+        options,
+        maxAttempts,
+        correlationId
+      });
+
+      if (!createResult.ok) {
+        const statusCode = createResult.code === "INVALID_EXECUTION_TYPE" || createResult.code === "MISSING_TRACK_ID" || createResult.code === "MISSING_WORKFLOW_ID" ? 400 : 500;
+        return sendJson(response, statusCode, {
+          ok: false,
+          code: createResult.code,
+          message: createResult.message
+        });
+      }
+
+      return sendJson(response, 200, {
+        ok: true,
+        job: createResult.job
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/jobs") {
+      const filter = {};
+      const status = url.searchParams.get("status");
+      if (status) filter.status = status;
+      const executionTypeParam = url.searchParams.get("executionType");
+      if (executionTypeParam) filter.executionType = executionTypeParam;
+      const trackIdParam = url.searchParams.get("trackId");
+      if (trackIdParam) filter.trackId = trackIdParam;
+
+      const jobs = durableJobStore.listJobs(Object.keys(filter).length > 0 ? filter : {});
+
+      return sendJson(response, 200, {
+        ok: true,
+        jobs
+      });
+    }
+
+    const jobGetMatch = url.pathname.match(/^\/jobs\/([^/]+)$/);
+    if (jobGetMatch && request.method === "GET") {
+      const jobId = decodeURIComponent(jobGetMatch[1]);
+      const job = durableJobStore.getJob(jobId);
+
+      if (!job) {
+        return sendJson(response, 404, {
+          ok: false,
+          code: "JOB_NOT_FOUND",
+          message: `Job '${jobId}' was not found.`,
+          nextStep: "Use GET /jobs to list all jobs."
+        });
+      }
+
+      return sendJson(response, 200, {
+        ok: true,
+        job
+      });
+    }
+
+    const jobCancelMatch = url.pathname.match(/^\/jobs\/([^/]+)\/cancel$/);
+    if (jobCancelMatch && request.method === "POST") {
+      const jobId = decodeURIComponent(jobCancelMatch[1]);
+      const result = durableJobStore.cancelJob(jobId);
+      if (!result.ok) {
+        const statusCode = result.code === "JOB_NOT_FOUND" ? 404 : 400;
+        return sendJson(response, statusCode, {
+          ok: false,
+          code: result.code,
+          message: result.message,
+          nextStep: result.code === "JOB_NOT_FOUND" ? "Use GET /jobs to list all jobs." : "Only queued or claimed jobs can be cancelled."
+        });
+      }
+      return sendJson(response, 200, {
+        ok: true,
+        job: result.job
+      });
+    }
+
+    const jobRetryMatch = url.pathname.match(/^\/jobs\/([^/]+)\/retry$/);
+    if (jobRetryMatch && request.method === "POST") {
+      const jobId = decodeURIComponent(jobRetryMatch[1]);
+      const result = durableJobStore.retryJob(jobId);
+      if (!result.ok) {
+        const statusCode = result.code === "JOB_NOT_FOUND" ? 404 : 400;
+        return sendJson(response, statusCode, {
+          ok: false,
+          code: result.code,
+          message: result.message,
+          nextStep: result.code === "JOB_NOT_FOUND" ? "Use GET /jobs to list all jobs." : "Only failed jobs with remaining attempts can be retried."
+        });
+      }
+      return sendJson(response, 200, {
+        ok: true,
+        job: result.job
+      });
+    }
+
+    const jobReviewMatch = url.pathname.match(/^\/jobs\/([^/]+)\/review$/);
+    if (jobReviewMatch && request.method === "POST") {
+      const jobId = decodeURIComponent(jobReviewMatch[1]);
+      const bodyResult = await readJsonBody(request);
+
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send a valid JSON object with action, reviewedBy, and reason."
+        });
+      }
+
+      const { action, reviewedBy, reason } = bodyResult.body || {};
+
+      if (!action || typeof action !== "string") {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "MISSING_ACTION",
+          message: "Review action is required.",
+          nextStep: "Send action as one of: request_review, approve, reject, request_correction, stop."
+        });
+      }
+
+      const result = durableJobStore.reviewJob(jobId, action, { reviewedBy, reason });
+      if (!result.ok) {
+        const statusCode = result.code === "JOB_NOT_FOUND" ? 404 : 400;
+        return sendJson(response, statusCode, {
+          ok: false,
+          code: result.code,
+          message: result.message,
+          nextStep: "Check the job status and review action and try again."
+        });
+      }
+      return sendJson(response, 200, {
+        ok: true,
+        job: result.job
+      });
+    }
+
     if (request.method === "POST" && url.pathname === "/analyze") {
       const bodyResult = await readJsonBody(request);
 
@@ -1540,7 +2570,7 @@ const server = http.createServer(async (request, response) => {
       ok: false,
       code: "NOT_FOUND",
       message: `No route matched ${request.method} ${url.pathname}.`,
-      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, or legacy POST /analyze."
+      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, POST /jobs, GET /jobs, GET /jobs/:id, POST /jobs/:id/cancel, POST /jobs/:id/retry, POST /jobs/:id/review, or legacy POST /analyze."
     });
   } catch (error) {
     console.error("Unexpected server error.");
@@ -1578,6 +2608,10 @@ server.listen(config.server.port, config.server.host, async () => {
     console.warn("[Enforcement Policy] Initialization warning:", initError.message);
   }
   await printStartupStatus();
+  backgroundWorker.start();
+  if (process.env.DEVELOPMENT_MEMORY_CAPTURE !== "0") {
+    developmentCaptureWorker.start();
+  }
 });
 
 function loadConfig() {
@@ -1675,6 +2709,16 @@ async function buildHealthResponse() {
   const enforcementStore = enforcementPolicy.getStore ? enforcementPolicy.getStore() : null;
   const enforcementHealth = enforcementStore ? enforcementStore.getStoreHealth() : { healthy: false, initialized: false };
 
+  const allJobs = durableJobStore.listJobs();
+  const total = allJobs.length;
+  const queued = allJobs.filter((j) => j.status === "queued").length;
+  const claimed = allJobs.filter((j) => j.status === "claimed").length;
+  const running = allJobs.filter((j) => j.status === "running").length;
+  const completed = allJobs.filter((j) => j.status === "completed").length;
+  const failed = allJobs.filter((j) => j.status === "failed").length;
+  const cancelled = allJobs.filter((j) => j.status === "cancelled").length;
+  const jobTotals = { total, queued, claimed, running, completed, failed, cancelled };
+
   const health = {
     ok: true,
     engine: "local-ai-engine-core",
@@ -1721,7 +2765,8 @@ async function buildHealthResponse() {
       safeFallback: enforcementHealth.safeFallback,
       enforcementLocked: enforcementHealth.enforcementLocked,
       policyEndpoint: "/enforcement/policy"
-    }
+    },
+    jobTotals
   };
 
   if (runtimeState.warning) {
@@ -1745,6 +2790,7 @@ async function printStartupStatus() {
   console.log("Canonical API: POST /tasks/run");
   console.log("Track API: POST /tracks/run");
   console.log("Workflow API: POST /workflows/plan, POST /workflows/run");
+  console.log("Jobs API: POST /jobs, GET /jobs, GET /jobs/:id, POST /jobs/:id/cancel, POST /jobs/:id/retry, POST /jobs/:id/review");
   console.log("Compatibility API: POST /analyze");
   console.log(`Active provider: ${activeProvider}`);
 
@@ -1869,7 +2915,11 @@ async function buildConsoleStatusResponse(modelOverride = null) {
       effectiveBlockedPaths: memoryStatus.effectiveBlockedPaths,
       projectCount: memoryStatus.projectCount,
       topicCount: memoryStatus.topicCount,
-      warnings: memoryStatus.warnings || []
+      warnings: memoryStatus.warnings || [],
+      developmentMemoryReview: developmentCandidateReviewInbox.getInboxSummary().result,
+      developmentMemoryMaintainer: developmentMaintainerManager.getStatus().result,
+      developmentMemoryCapture: (await developmentCaptureProcessor.getStatus()).result,
+      developmentMemoryProjects: developmentProjectRegistry.getRegistrySummary()
     },
     auditLogging: auditStatus,
     warnings

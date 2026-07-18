@@ -1,5 +1,281 @@
 # Decision Log
 
+## 2026-07-18 — Development Memory Loop DM10: Multi-Project Local Brain Template
+
+### Context
+
+DM9 kept a single implicit project (`locaily`) with flat `data/memory/development-*` paths. Operators needed the same Development Memory Loop for other repositories without mixing evidence across projects.
+
+### Decision
+
+- Persist a project registry at `data/memory/projects/registry.json` with schema-valid project records
+- Bootstrap `locaily` with `storageLayout: "legacy"` so existing flat paths remain unchanged
+- Store new projects under namespaced paths: `data/memory/projects/{slug}/development-*`
+- Resolve capture processor, event store, and health paths from the active registered project
+- Provide guided setup steps (register, generate/import vault, configure capture, validate) via API and `scripts/memory-project.js`
+- Document backup paths for the full `data/memory/` tree
+
+### Consequences
+
+- Multiple projects can share one Local Brain with isolated Layer A/B stores
+- Cross-project isolation relies on separate directories plus event `project` field filtering
+- Development Memory Loop roadmap DM1–DM10 is complete; follow-on work (E2E proof scenario, review UI, embeddings) requires new objectives
+
+### Status
+
+Accepted (DM10 complete).
+
+---
+
+## 2026-07-18 — Development Memory Loop DM9: Continuous but Controlled Capture
+
+### Context
+
+DM8 made accepted knowledge retrievable, but session close and candidate extraction still required manual CLI steps. Operators also needed capture lag visibility and a way to pause ingestion without disabling retrieval.
+
+### Decision
+
+- Add a non-blocking capture processor worker with durable checkpoint state at `data/memory/development-capture/`
+- Automatically recover interrupted sessions, close idle open sessions, and extract candidates from closed sessions (idempotent via extraction reports + checkpoint IDs)
+- Load capture policy from `.memory-bridge/capture-policy.json` or `development-capture/capture-policy.json`
+- Separate runtime pause (`POST /memory/capture/pause`) from retrieval; `DEVELOPMENT_MEMORY_CAPTURE=0` remains the hard off switch
+- Expose DM9 status fields on `GET /memory/capture/status` and `/console/status`
+
+### Consequences
+
+- Local Brain can stay current during ongoing development without manual `memory:session:close` / `memory:candidates:extract` for every cycle
+- Capture backlog and review counts are visible to operators and console UI
+- Next milestone: Development Memory Loop follow-on candidates (E2E proof scenario, review console UI) — requires explicit objective
+
+### Status
+
+Accepted (DM9 complete).
+
+---
+
+## 2026-07-18 — Development Memory Loop DM8: Retrieval Integration
+
+### Context
+
+DM7 maintained canonical vault pages from approved candidates, but context packs still used v0 filename heuristics without evidence linkage or warnings when Layer B state conflicted with retrieved content.
+
+### Decision
+
+- Extend context packs additively with `evidenceReferences` and `retrieval` metadata
+- Prefer canonical project pages under `projects/{slug}/` over raw session logs (`updates/`, `evidence/`)
+- Enforce `contextBudgetChars` (total excerpt budget) and `maintainerPageBudget` (cap maintainer-backed pages)
+- Surface stale warnings for pending candidates and maintainer drift on retrieved paths
+- Surface contradiction warnings when candidates on retrieved paths have `possible` or `confirmed` contradiction status
+- Keep retrieval logic in `companion/memory/retrieval/*`; integrate through `context-pack-builder.js`
+
+### Consequences
+
+- Context packs remain compact and inspectable; no full vault dumps
+- Agents can trace pack content to candidate and maintainer evidence
+- Next milestone: DM9 continuous but controlled capture
+
+### Status
+
+Accepted (DM8 complete).
+
+---
+
+## 2026-07-18 — Development Memory Loop DM7: Project Memory Maintainer
+
+### Context
+
+DM6 approved candidates and created writeback proposals, but canonical project vault pages still needed deterministic maintenance planning with drift detection and safe apply semantics.
+
+### Decision
+
+- Plan maintainer runs from approved candidates against canonical project vault paths
+- Detect drift: missing targets, duplicate statements, conflicting objective wording
+- Default to plan-only runs with schema-valid manifests at `data/memory/development-maintainer/runs/`
+- Apply low-risk updates only with explicit `--allow-apply-low-risk`; high-risk items stay `review_required`
+- Capture rollback snapshots at `development-maintainer/rollbacks/` before any apply
+
+### Consequences
+
+- Maintainer planning is deterministic and does not mutate vault pages by default
+- Low-risk apply remains opt-in even when global vault apply is enabled
+- Next milestone: DM9 continuous capture processing
+
+### Status
+
+Accepted (DM7 complete).
+
+---
+
+## 2026-07-18 — Development Memory Loop DM6: Memory Review Inbox
+
+### Context
+
+DM5 produced Layer B candidates but had no review surface. Operators needed a human gate before any durable vault update, especially while global Memory Bridge settings still expose propose vs apply tension.
+
+### Decision
+
+- Store review records separately from candidate payloads under `development-candidates/reviews/`
+- Expose inbox list/detail/action endpoints and CLI commands
+- Approve and edit_approve always deliver `proposal_only` writeback proposals, never auto-apply vault pages
+- Resolve writebackMode tension explicitly: global vault apply settings do not bypass candidate review
+- Surface pending candidate counts in `/console/status` under `memory.developmentMemoryReview`
+
+### Consequences
+
+- Layer A evidence remains immutable through all review actions
+- High-risk candidates still require human review before any vault change
+- Next milestone: DM7 project memory maintainer
+
+### Status
+
+Accepted (DM6 complete).
+
+---
+
+## 2026-07-18 — Development Memory Loop DM5: Knowledge Candidate Extraction
+
+### Context
+
+DM4 grouped Layer A events into session manifests. DM5 converts closed session evidence into Layer B knowledge candidates using deterministic rules only.
+
+### Decision
+
+- Extract candidates from closed/interrupted sessions via `candidate-extractor.js` event-type rules
+- Persist schema-valid candidates under `data/memory/development-candidates/candidates/`
+- Surface duplicates and contradictions in non-destructive extraction reports
+- Expose CLI: `memory:candidates:extract|list|status`
+- Defer model-assisted extraction until deterministic coverage is proven
+
+### Consequences
+
+- Candidates always include `evidenceEventIds` and suggested vault targets
+- No automatic vault writeback (DM6 review inbox next)
+- Contradiction marking is conservative (`possible` only for completion vs blocker conflicts)
+
+### Status
+
+Accepted (DM5 complete).
+
+---
+
+## 2026-07-18 — Development Memory Loop DM4: Session Aggregation
+
+### Context
+
+DM3 captured Layer A events but did not group them into bounded work periods. DM4 adds immutable session manifests with deterministic factual summaries rebuilt from source events.
+
+### Decision
+
+- Store session manifests under `data/memory/development-sessions/manifests/` with an `active-session.json` pointer
+- Append a sync `human_note` session marker event at start so open manifests satisfy schema `linkedEventIds` requirements
+- Correlate events by `correlation.sessionId` first, then objective/run scope within the session time window
+- Expose operator commands: `memory:session:start|status|close|rebuild`
+- Wire sequencer to start/close sessions around each objective without blocking the controller loop
+
+### Consequences
+
+- Session close/rebuild never deletes Layer A evidence
+- Capture adapters inherit active `sessionId` automatically
+- Next milestone: DM5 knowledge candidate extraction
+
+### Status
+
+Accepted (DM4 complete).
+
+---
+
+## 2026-07-18 — Development Memory Loop DM3: Capture Adapters
+
+### Decision
+
+Wire autonomous development activity into the DM2 event store through capture adapters under `companion/memory/events/capture/`. Controller processes emit events via direct store append (non-blocking); failures log to `capture-failures.jsonl` without blocking sequencer/supervisor loops.
+
+Adapters integrated into:
+- `.opencode/agents/controller/sequencer.js` (objective started/completed/blocked)
+- `.opencode/agents/controller/supervisor.js` (task dispatched/accepted/rejected, worker validation, git commits, objective lifecycle)
+- `scripts/memory-decision.js` CLI (`decision_recorded`)
+
+Stable event IDs use deterministic hashing (`buildStableEventId`) for idempotent retries.
+
+### Why
+
+DM2 provided storage; DM3 connects real development workflows to Layer A evidence without transcript capture or vault automation.
+
+### Consequences
+
+- New scripts: `memory:decision`, `test:development-memory-capture`
+- `invariants.recordAcceptedTask` now called from supervisor on task accept
+- Capture disabled with `DEVELOPMENT_MEMORY_CAPTURE=0`
+- Next milestone: DM4 session aggregation
+
+### Status
+
+Accepted (DM3 complete).
+
+---
+
+## 2026-07-18 — Development Memory Loop DM2: Immutable Event Store
+
+### Decision
+
+Implement DM2 append-only development event storage under `companion/memory/events/` with persistence at `data/memory/development-events/`. Add permission-gated endpoints:
+
+- `POST /memory/events` — requires `memory.events.write`
+- `GET /memory/events` — requires `memory.read`
+- `GET /memory/events/:eventId` — requires `memory.read`
+
+Events are validated against `development-memory-event.schema.json`, rejected when secrets are detected, idempotent on duplicate `eventId`, and written atomically (temp file + rename).
+
+### Why
+
+DM1 defined contracts; DM2 provides trustworthy Layer A evidence storage without capture adapters or vault automation.
+
+### Consequences
+
+- New permission `memory.events.write` added to default approved list in `companion/config.json`
+- Memory Bridge read/write endpoints unchanged in behavior
+- Audit redaction extended for memory event endpoints (metadata only)
+- Tests: `scripts/test-development-memory-events.js` (13/13)
+- Next milestone: DM3 capture adapters
+
+### Status
+
+Accepted (DM2 complete).
+
+---
+
+## 2026-07-18 — Development Memory Loop DM1: Contracts as Memory Bridge Extension
+
+### Decision
+
+Define the **Development Memory Loop** as an internal extension of Memory Bridge (not a new public product layer). DM1 delivers contracts only:
+
+- Architecture docs: `docs/01-architecture/development-memory-loop.md`, `development-memory-events.md`
+- Roadmap: `docs/02-planning/development-memory-roadmap.md` (DM1–DM10)
+- Four JSON schemas under `companion/schemas/` (not root `schemas/`)
+- Fixtures + `scripts/test-development-memory-schemas.js`
+- Proposed DM2 objective: `.opencode/agents/objectives/queue/dm2-immutable-event-store.md`
+
+Three layers remain distinct: **Source Evidence** (events) → **Knowledge Candidates** → **Durable Memory** (existing vault writeback). Track Run Records remain separate product execution evidence.
+
+### Why
+
+Locaily needs trustworthy development capture before automation. Contracts must precede event store and adapters so DM2+ can implement without architectural guessing. Memory Bridge v0/v1 behavior must remain unchanged in DM1.
+
+### Consequences
+
+- No new HTTP endpoints or capture adapters in DM1
+- Schemas are spec-only until DM2 runtime enforcement
+- Known Memory Bridge doc/code drift documented as debt (writeback apply docs, `writebackMode` tension, `memory.read` not enforced on reads) — deferred to DM6 for behavioral fixes
+- Capture defaults conservative: development capture opt-in, transcripts/terminal output disabled, secrets prohibited
+- Next milestone: DM2 immutable event store at `companion/memory/events/`
+
+### Status
+
+Accepted (DM1 complete).
+
+---
+
 ## 2026-07-11 — M5 Architectural Review: Trust Boundary, Placement Evidence, and M6 Scope
 
 ### Decision

@@ -1,0 +1,10 @@
+{
+  "reviewId": "bad_review",
+  "schemaVersion": "2.0",
+  "candidateId": "not-a-candidate",
+  "status": "unknown",
+  "writebackDeliveryMode": "auto_apply",
+  "createdAt": "not-a-date",
+  "updatedAt": "not-a-date",
+  "extraField": true
+}

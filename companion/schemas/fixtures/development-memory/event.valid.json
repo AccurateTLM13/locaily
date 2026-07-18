@@ -1,0 +1,33 @@
+{
+  "eventId": "evt_20260718_commit001",
+  "schemaVersion": "1.0",
+  "project": "locaily",
+  "eventType": "commit_created",
+  "occurredAt": "2026-07-18T15:30:00.000Z",
+  "capturedAt": "2026-07-18T15:30:01.000Z",
+  "source": {
+    "adapter": "git",
+    "repository": "AccurateTLM13/locaily",
+    "branch": "main",
+    "commit": "abc123def456789"
+  },
+  "summary": "Added Development Memory Loop contract schemas and documentation (DM1).",
+  "artifacts": [
+    {
+      "kind": "file_path",
+      "ref": "companion/schemas/development-memory-event.schema.json",
+      "label": "New schema file"
+    }
+  ],
+  "validation": {
+    "sourceVerified": true,
+    "status": "accepted"
+  },
+  "sensitivity": "internal",
+  "correlation": {
+    "runId": "run_dm1_001",
+    "objectiveId": "dm1-contracts",
+    "taskId": "task_schema_authoring",
+    "sessionId": null
+  }
+}

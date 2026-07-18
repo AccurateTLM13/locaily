@@ -1,0 +1,17 @@
+{
+  "reviewId": "rev_20260718_decision001",
+  "schemaVersion": "1.0",
+  "candidateId": "cand_20260718_decision001",
+  "status": "approved",
+  "action": "approve",
+  "reviewer": "human",
+  "reviewedAt": "2026-07-18T17:00:00.000Z",
+  "editedStatement": null,
+  "mergeTargetId": null,
+  "proposalId": "2026-07-18-locaily-decision",
+  "proposalPath": ".memory-bridge/writeback-inbox/2026-07-18-locaily-decision-cand_20260718_decision001.md",
+  "notes": "Approved through DM6 review inbox.",
+  "writebackDeliveryMode": "proposal_only",
+  "createdAt": "2026-07-18T16:55:00.000Z",
+  "updatedAt": "2026-07-18T17:00:00.000Z"
+}

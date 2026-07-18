@@ -1,10 +1,10 @@
 # Build Status
 
-**Updated:** 2026-07-11 (Full Lighthouse Handoff product loop complete — 4 roles qualified, 10 track steps, full assembled artifact validated)
+**Updated:** 2026-07-18 (Development Memory Loop DM1–DM10 complete — events through multi-project template)
 
 ## Current Stage
 
-Pipeline-stage **Local Brain** with **Crew track runner**, JSON-first internal contracts, workflow orchestration, Memory Bridge v0, and Benchmark Lab Milestone 1 complete and operator-ready.
+Pipeline-stage **Local Brain** with **Crew track runner**, JSON-first internal contracts, workflow orchestration, Memory Bridge v0, and Benchmark Lab Milestone 1 complete and operator-ready. M9 physical multi-device pilot infrastructure is prepared (not yet executed on hardware).
 
 North Star direction is now documented as a local capability network: route track contracts to the smallest qualified capability, validate results, and preserve structured evidence for future routing and track improvement.
 
@@ -20,6 +20,10 @@ North Star direction is now documented as a local capability network: route trac
 | **5 - Benchmark Lab** | Complete — Milestone 1 operator-ready |
 | **6 - Relay Nodes (M4)** | Complete |
 | **7 - Multi-Device Workflow Coordination (M5)** | Complete |
+| **8 - Pilot Infrastructure (M9)** | Infrastructure prepared — not yet executed on hardware |
+| **8 - Operator Control Plane (M6)** | Complete |
+| **9 - Physical Multi-Device Pilot (M9)** | Infrastructure prepared — pilot not yet executed |
+| **Development Memory Loop (DM1–DM10)** | Complete — events, capture, sessions, candidates, review, maintainer, retrieval, processor, multi-project |
 
 ## Current Proof
 
@@ -52,7 +56,9 @@ North Star direction is now documented as a local capability network: route trac
 - Memory Bridge v0 endpoints (disabled by default)
 - Relay Node protocol, node registry, cross-node routing with local fallback (`companion/relay/*`, `/relay/*` endpoints)
 - Multi-device workflow placement planner (`companion/relay/placement.js`) + `POST /relay/plan` preview; distributed step execution with local fallback on node failure
+- Pilot infrastructure for M9 physical multi-device pilot (`scripts/pilot/`): hardware profile schema, template, pilot runner CLI with three relay policies, evidence collection, and summary CSV generation
 - Memory Bridge v1: structured search (`/memory/search`) + writeback-apply (`/memory/writeback/apply`, opt-in)
+- Development Memory Loop DM1–DM10: event store, capture adapters, sessions, candidates, review inbox, maintainer, context-pack retrieval, background capture processor, multi-project registry (`/memory/projects/*`, `npm run memory:*`, `npm run test:development-memory`)
 - Current verification suite passes; see the latest progress log or CI evidence for counts
 - Windows launch helpers
 
@@ -62,7 +68,7 @@ North Star direction is now documented as a local capability network: route trac
 - Model qualification coverage (Milestone 1 engine and operator workflow complete; broader model, track, and hardware qualification remains incremental)
 - Model scorecards / skill sheets (direction; qualification records are the current evidence-backed runtime surface)
 - Scoreboard (records runs; no full rubric harness)
-- Memory Bridge (v1 apply is opt-in; no embeddings/vector search yet)
+- Memory Bridge (v1 apply is opt-in; Development Memory Loop complete; no embeddings/vector search yet)
 - Fallback ladder (retry only; relay fallback added for cross-node routing)
 - Validation console (early UI)
 

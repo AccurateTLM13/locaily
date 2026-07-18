@@ -35,6 +35,9 @@ const AGENTS_DIR = path.resolve(HERE, "..");
 const PROJECT_ROOT = path.resolve(AGENTS_DIR, "..", "..");
 const CONFIG_PATH = path.join(HERE, "config.json");
 
+let developmentMemory = null;
+try { developmentMemory = require("./development-memory-capture"); } catch { developmentMemory = null; }
+
 const STATE_PATH = path.join(AGENTS_DIR, "state", "run-state.json");
 const REVIEW_PATH = path.join(AGENTS_DIR, "state", "latest-review.json");
 const WORKER_RESULT_PATH = path.join(AGENTS_DIR, "state", "latest-worker-result.json");
@@ -108,7 +111,8 @@ function loadConfig() {
     agents: c.agents || { supervisor: { agent: "plan", model: null }, worker: { agent: "build", model: null } },
     loop: {
       max_iterations: 3, max_corrections_per_task: 2, max_consecutive_failures: 2,
-      stop_on_blocker: true, seconds_between_steps: 1, ...(c.loop || {})
+      stop_on_blocker: true, seconds_between_steps: 1,
+      max_worker_timeout_retries: 1, ...(c.loop || {})
     },
     git: {
       protected_branches: ["main", "master"],
@@ -238,7 +242,8 @@ function renderSupervisorPrompt(state, phase) {
     .replace("{{WORKER_RESULT}}", workerResult)
     .replace("{{LAST_REVIEW}}", review)
     .replace("{{RUN_ID}}", state.run_id || "")
-    .replace("{{ITERATION}}", String(state.iteration));
+    .replace("{{ITERATION}}", String(state.iteration))
+    .replace("{{TASK_ID}}", state.current_task || "");
 }
 function renderWorkerPrompt(state) {
   const tmpl = readText(path.join(AGENTS_DIR, "worker", "PROMPT.md"));
@@ -247,7 +252,8 @@ function renderWorkerPrompt(state) {
     .replace("{{ACTIVE_TASK}}", activeTask.trim())
     .replace("{{RUN_STATE}}", JSON.stringify(state, null, 2))
     .replace("{{RUN_ID}}", state.run_id || "")
-    .replace("{{ITERATION}}", String(state.iteration));
+    .replace("{{ITERATION}}", String(state.iteration))
+    .replace("{{TASK_ID}}", state.current_task || "");
 }
 
 // ---------- CLI runner ----------
@@ -327,6 +333,15 @@ function reconcileAfterPlan(state, cfg, cliOk, prevTaskText) {
   state.phase = "worker";
   state.last_worker_status = "pending";
   snapshotHistory("plan", state, null);
+  if (developmentMemory) {
+    developmentMemory.emitTaskDispatched({
+      projectRoot: PROJECT_ROOT,
+      objectiveId: state.objective,
+      taskId: state.current_task,
+      runId: state.run_id,
+      iteration: state.iteration
+    });
+  }
   return state;
 }
 
@@ -366,6 +381,26 @@ function reconcileAfterWorker(state, cfg, cliOk) {
   else if (statLines.lines > cfg.git.max_diff_lines) { state.blocker = `worker_diff_too_large_lines:${statLines.lines}`; state.last_worker_status = "failed"; }
   if (wr.blocker) state.blocker = state.blocker || `worker: ${wr.blocker}`;
 
+  if (developmentMemory) {
+    developmentMemory.emitWorkerValidationCompleted({
+      projectRoot: PROJECT_ROOT,
+      objectiveId: state.objective,
+      taskId: state.current_task,
+      runId: state.run_id,
+      workerResult: wr
+    });
+    if (state.last_worker_status === "complete") {
+      developmentMemory.emitCommitsSinceRef({
+        projectRoot: PROJECT_ROOT,
+        objectiveId: state.objective,
+        taskId: state.current_task,
+        runId: state.run_id,
+        baseRef: ref,
+        headRef: "HEAD"
+      });
+    }
+  }
+
   state.phase = "review";
   snapshotHistory("worker", state, wr);
   return state;
@@ -396,8 +431,64 @@ function reconcileAfterReview(state, cfg, cliOk) {
   archiveTask(state, accepted);
   snapshotHistory("review", state, review);
 
-  if (state.objective_complete) { state.status = "complete"; state.phase = "stop"; return state; }
-  if (state.blocker && cfg.loop.stop_on_blocker) { state.status = "blocked"; state.phase = "stop"; return state; }
+  if (developmentMemory) {
+    if (accepted) {
+      let invariantsModule = null;
+      try { invariantsModule = require("./invariants"); } catch {}
+      const commitSha = gitOk(["rev-parse", "HEAD"]);
+      if (invariantsModule) {
+        invariantsModule.recordAcceptedTask(state.objective, state.current_task, commitSha);
+      }
+      developmentMemory.emitTaskAccepted({
+        projectRoot: PROJECT_ROOT,
+        objectiveId: state.objective,
+        taskId: state.current_task,
+        runId: state.run_id,
+        iteration: state.iteration
+      });
+      if (commitSha) {
+        developmentMemory.emitCommitCreated({
+          projectRoot: PROJECT_ROOT,
+          objectiveId: state.objective,
+          taskId: state.current_task,
+          runId: state.run_id,
+          commitSha
+        });
+      }
+    } else {
+      developmentMemory.emitTaskRejected({
+        projectRoot: PROJECT_ROOT,
+        objectiveId: state.objective,
+        taskId: state.current_task,
+        runId: state.run_id,
+        iteration: state.iteration,
+        reason: review.blocker || review.status
+      });
+    }
+  }
+
+  if (state.objective_complete) {
+    if (developmentMemory) {
+      developmentMemory.emitObjectiveCompleted({
+        projectRoot: PROJECT_ROOT,
+        objectiveId: state.objective,
+        runId: state.run_id
+      });
+    }
+    state.status = "complete"; state.phase = "stop"; return state;
+  }
+  if (state.blocker && cfg.loop.stop_on_blocker) {
+    if (developmentMemory) {
+      developmentMemory.emitObjectiveBlocked({
+        projectRoot: PROJECT_ROOT,
+        objectiveId: state.objective,
+        runId: state.run_id,
+        blocker: state.blocker,
+        adapter: "supervisor"
+      });
+    }
+    state.status = "blocked"; state.phase = "stop"; return state;
+  }
 
   if (accepted) {
     state.iteration += 1;
@@ -455,6 +546,24 @@ function main() {
   const cfg = loadConfig();
   if (!fs.existsSync(STATE_PATH)) writeJson(STATE_PATH, DEFAULT_STATE);
 
+  // Diagnostic: log unexpected exits. If the process dies without an explicit
+  // "done" or "abort" message, these handlers tell us why.
+  let exitedCleanly = false;
+  const exitLog = path.join(RUNS_DIR, `${tsFile()}-exit.log`);
+  ensureDir(RUNS_DIR);
+  process.on("exit", (code) => {
+    if (!exitedCleanly) {
+      fs.writeFileSync(exitLog, `exit: ${code}\nat: ${new Date().toISOString()}\n`);
+    }
+  });
+  process.on("uncaughtException", (err) => {
+    fs.writeFileSync(exitLog, `uncaughtException: ${err.message}\n${err.stack}\nat: ${new Date().toISOString()}\n`);
+    process.exit(1);
+  });
+  process.on("unhandledRejection", (reason) => {
+    fs.writeFileSync(exitLog, `unhandledRejection: ${reason}\nat: ${new Date().toISOString()}\n`);
+  });
+
   let guard = 0;
   const hardCap = (cfg.loop.max_iterations || 3) * 4 + 8;
 
@@ -492,9 +601,30 @@ function main() {
 
       const phase = state.phase || "plan";
       const prevTaskText = phase === "plan" ? readText(ACTIVE_TASK_PATH) : null;
+
+      // Heartbeat: record exact phase transition point before CLI launch.
+      // If the process dies silently, this pinpoints where it stopped.
+      state.phase_entered = phase;
+      state.phase_entered_at = new Date().toISOString();
+      writeJson(STATE_PATH, state);
+
       clearArtifacts(phase);
       const res = runCli(phase, phase === "worker" ? renderWorkerPrompt(state) : renderSupervisorPrompt(state, phase), cfg);
-      const ok = res.ok;
+      let ok = res.ok;
+
+      // Retry worker once on timeout
+      if (!ok && phase === "worker" && res.timedOut) {
+        const retries = (state.worker_timeout_retries || 0);
+        if (retries < (cfg.loop.max_worker_timeout_retries || 1)) {
+          console.error(`[controller] worker timed out — retrying (${retries + 1}/${cfg.loop.max_worker_timeout_retries || 1})...`);
+          state.worker_timeout_retries = retries + 1;
+          sleep((cfg.loop.seconds_between_steps || 1) * 1000);
+          clearArtifacts(phase);
+          const retryRes = runCli(phase, renderWorkerPrompt(state), cfg);
+          ok = retryRes.ok;
+        }
+      }
+
       if (cfg.loop.seconds_between_steps) sleep((cfg.loop.seconds_between_steps || 1) * 1000);
 
       if (phase === "plan") state = reconcileAfterPlan(state, cfg, ok, prevTaskText);
@@ -515,6 +645,7 @@ function main() {
     console.error(`\n[controller] done. status=${finalState.status} iteration=${finalState.iteration} blocker=${finalState.blocker}`);
     // Final sanitized history snapshot
     snapshotHistory("final", finalState, null);
+    exitedCleanly = true;
     return 0;
   } catch (e) {
     console.error(`[controller] abort: ${e.message}`);

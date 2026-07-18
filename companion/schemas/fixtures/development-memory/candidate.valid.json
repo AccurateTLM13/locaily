@@ -1,0 +1,20 @@
+{
+  "candidateId": "cand_20260718_decision001",
+  "schemaVersion": "1.0",
+  "candidateType": "decision",
+  "proposedStatement": "Keep proposal-only writeback as the default Memory Bridge behavior until DM6 review inbox is complete.",
+  "confidence": 0.95,
+  "evidenceEventIds": [
+    "evt_20260718_commit001"
+  ],
+  "targetProject": "locaily",
+  "suggestedVaultPath": "projects/locaily/DECISIONS.md",
+  "suggestedOperation": "append",
+  "contradictionStatus": "none",
+  "reviewRisk": "high",
+  "generatedBy": {
+    "method": "deterministic"
+  },
+  "createdAt": "2026-07-18T16:00:00.000Z",
+  "sessionId": "sess_20260718_dm1"
+}

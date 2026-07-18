@@ -27,7 +27,10 @@ If full-content packs are added later, they must be an explicit request flag and
     "constraints",
     "open_questions"
   ],
-  "maxFiles": 8
+  "maxFiles": 8,
+  "preferCanonicalPages": true,
+  "contextBudgetChars": 3200,
+  "maintainerPageBudget": 4
 }
 ```
 
@@ -37,6 +40,10 @@ If full-content packs are added later, they must be an explicit request flag and
 | `task` | yes | Keyword match against topics and excerpts |
 | `include` | no | Hints which sections to prioritize |
 | `maxFiles` | no | Default `8` |
+| `preferCanonicalPages` | no | Default `true` (DM8) — prefer `projects/{slug}/PROJECT.md`, `STATUS.md`, etc. |
+| `contextBudgetChars` | no | Default `3200` — total excerpt character budget |
+| `maintainerPageBudget` | no | Default `4` — cap maintainer-backed canonical pages |
+| `excerptCharLimit` | no | Default `400` — per-file excerpt truncation |
 
 ## Response (success)
 
@@ -64,7 +71,24 @@ If full-content packs are added later, they must be an explicit request flag and
     "knownConstraints": ["Writeback is proposal-only."],
     "openQuestions": ["When to wire Lighthouse Handoff?"],
     "warnings": [],
-    "recommendedNextStep": "Review filesUsed before running the task."
+    "recommendedNextStep": "Review filesUsed, evidenceReferences, and excerpts before executing the task.",
+    "evidenceReferences": [
+      {
+        "source": "candidate",
+        "vaultPath": "projects/locaily/DECISIONS.md",
+        "candidateId": "cand_example_001",
+        "reviewStatus": "approved",
+        "eventIds": ["evt_example_001"]
+      }
+    ],
+    "retrieval": {
+      "projectSlug": "locaily",
+      "preferCanonicalPages": true,
+      "evidenceCount": 1,
+      "contextBudget": { "limit": 3200, "used": 840, "filesIncluded": 4 },
+      "staleWarnings": [],
+      "contradictionWarnings": []
+    }
   },
   "warnings": [],
   "meta": {
@@ -88,17 +112,21 @@ If full-content packs are added later, they must be an explicit request flag and
 | `openQuestions` | Extracted from `## Open questions` / similar headings |
 | `warnings` | Pack-level warnings (also mirrored at envelope root when applicable) |
 | `recommendedNextStep` | Suggested next action for the agent or human |
+| `evidenceReferences` | Optional (DM8) — links selected vault paths to candidate or maintainer-run evidence |
+| `retrieval` | Optional (DM8) — budget usage, stale warnings, contradiction warnings |
 
 ## v0 Selection Rules (Deterministic)
 
 No embeddings or model calls in v0.
 
 1. If allowlisted, include `index.md` and `log.md` when relevant to `include`.
-2. Match `project` to filenames under `projects/` or `wiki/projects/`.
-3. Match `task` keywords to topic filenames and early content under `topics/` or `wiki/topics/`, `wiki/concepts/`, `wiki/entities/`.
-4. Respect `maxFiles`; skip files blocked by `blockedPaths` even if allowlisted.
-5. Extract structured lists from standard Markdown headings.
-6. Build `summary` from index + matched titles + first excerpt lines.
+2. **DM8:** Prefer canonical project pages under `projects/{slug}/` (`PROJECT.md`, `STATUS.md`, `DECISIONS.md`, …) before fuzzy filename matches. Skip raw session logs under `updates/` and `evidence/` unless explicitly requested later.
+3. Match `project` to filenames under `projects/` or `wiki/projects/` when canonical pages are unavailable.
+4. Match `task` keywords to topic filenames and early content under `topics/` or `wiki/topics/`, `wiki/concepts/`, `wiki/entities/`.
+5. Respect `maxFiles`, `contextBudgetChars`, and `maintainerPageBudget`; skip files blocked by `blockedPaths` even if allowlisted.
+6. Extract structured lists from standard Markdown headings.
+7. Build `summary` from index + matched titles + first excerpt lines.
+8. **DM8:** Attach `evidenceReferences` from approved/pending candidates and maintainer runs; emit stale/contradiction warnings when retrieved paths conflict with Layer B state.
 
 ## Errors and Degraded Mode
 

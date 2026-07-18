@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "enabled": true,
+  "project": "locaily",
+  "capture": {
+    "commits": true,
+    "pullRequests": false,
+    "objectiveTransitions": true,
+    "taskResults": true,
+    "testResults": true,
+    "humanDecisions": true,
+    "blockers": true,
+    "releases": false,
+    "workingTreeChanges": false,
+    "terminalOutput": true,
+    "modelTranscripts": true
+  },
+  "writeback": {
+    "mode": "invalid_mode",
+    "autoApplyRiskLevels": ["critical"],
+    "requireHumanReviewFor": []
+  },
+  "retention": {
+    "keepRawEvents": true,
+    "rawEventDays": 0,
+    "keepAppliedProposals": true
+  }
+}

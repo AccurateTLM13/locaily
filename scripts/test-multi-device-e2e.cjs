@@ -1,9 +1,9 @@
 const assert = require("node:assert");
 const { spawn } = require("node:child_process");
 
-const PORT_A = 31313;
-const PORT_B = 31314;
-const PORT_C = 31315;
+const PORT_A = 41313;
+const PORT_B = 41314;
+const PORT_C = 41315;
 const BASE_A = `http://127.0.0.1:${PORT_A}`;
 const BASE_B = `http://127.0.0.1:${PORT_B}`;
 const BASE_C = `http://127.0.0.1:${PORT_C}`;
@@ -91,6 +91,37 @@ function stepMeta(body) {
 
 function relayedTo(steps, nodeId) {
   return steps.filter((s) => s.worker_used && s.worker_used.routed_via === "relay" && s.worker_used.node_id === nodeId);
+}
+
+function stopAllChildren() {
+  return Promise.all(children.map((child) => new Promise((resolve) => {
+    if (!child || child.exitCode !== null) {
+      resolve();
+      return;
+    }
+
+    const timer = setTimeout(resolve, 5000);
+    child.once("exit", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+
+    try {
+      child.kill("SIGTERM");
+      setTimeout(() => {
+        try {
+          if (child.exitCode === null) {
+            child.kill("SIGKILL");
+          }
+        } catch (_error) {
+          // ignore
+        }
+      }, 1000);
+    } catch (_error) {
+      clearTimeout(timer);
+      resolve();
+    }
+  })));
 }
 
 async function main() {
@@ -190,18 +221,17 @@ async function main() {
   check("relay fallback audit event recorded for node C", fallbackEvents.some((e) => e.error_code === "RELAY_FALLBACK"), `fallbackEvents=${fallbackEvents.length}`);
 
   console.log(`\n${passed}/${passed + failed} multi-device e2e tests passed`);
-  process.exit(failed === 0 ? 0 : 1);
+  return failed === 0 ? 0 : 1;
 }
 
-main().catch((error) => {
-  console.error("Multi-device e2e harness error:", error);
-  process.exit(1);
-}).finally(() => {
-  for (const child of children) {
-    try {
-      if (child && !child.killed) child.kill("SIGKILL");
-    } catch (_error) {
-      // ignore
-    }
-  }
-});
+main()
+  .catch((error) => {
+    console.error("Multi-device e2e harness error:", error);
+    return 1;
+  })
+  .finally(async () => {
+    await stopAllChildren();
+  })
+  .then((code) => {
+    process.exit(code ?? 1);
+  });

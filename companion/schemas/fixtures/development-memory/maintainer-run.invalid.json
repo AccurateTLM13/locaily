@@ -1,0 +1,16 @@
+{
+  "runId": "bad_run",
+  "schemaVersion": "2.0",
+  "project": "",
+  "status": "unknown",
+  "items": [],
+  "summary": {
+    "approvedCandidates": -1,
+    "plannedUpdates": 0,
+    "skippedDuplicates": 0,
+    "driftDetected": 0,
+    "reviewRequired": 0
+  },
+  "createdAt": "not-a-date",
+  "extraField": true
+}

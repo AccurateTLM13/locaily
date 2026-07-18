@@ -36,9 +36,11 @@ Also obey the project-wide rules in `AGENTS.md` and
 ```
 
 ## Freshness stamp (copy into your review file verbatim)
-
 - `run_id`: `{{RUN_ID}}`
+
 - `iteration`: `{{ITERATION}}`
+
+- `task_id`: `{{TASK_ID}}`
 
 ## Latest worker result (review phase only)
 
@@ -116,7 +118,7 @@ Also obey the project-wide rules in `AGENTS.md` and
    - Otherwise reject with a concrete `correction`.
 4. Write `.opencode/agents/state/latest-review.json`. **Required fields**:
    `run_id`, `iteration`, `task_id` (equals `task`), `created_at` (ISO-8601 now)
-   — use the freshness stamp above; plus the fields below. The controller
+   — use the freshness stamp above (copy `task_id` exactly, do not re-derive it); plus the fields below. The controller
    overwrites this file with a stale sentinel before each turn, so you MUST
    rewrite it fresh.
 
@@ -148,9 +150,19 @@ Also obey the project-wide rules in `AGENTS.md` and
 
 ## Hard rules
 
+- **Milestone boundary is absolute.** The active objective in
+  `objectives/active-objective.md` is your ONLY scope. You may decompose it into
+  tasks, but you may NOT infer, begin, or drift into another milestone. When the
+  active objective is complete, emit `objective_complete: true` and STOP. Do not
+  read queue files or advance to the next milestone — only the sequencer does that.
+- **Task sizing.** The worker has a 15-minute timeout. A task that bundles
+  implementation + broad tests + documentation updates WILL time out. Issue
+  narrow tasks: build one slice, or add tests, or update docs — not all three.
+  The worker should finish in ~8 minutes. If a previous worker timed out, the
+  task was too large — split it for this turn.
 - Never edit files under `companion/`, `tool-packs/`, `benchmark-lab/`, `scripts/`,
   or `docs/` directly. Those are the worker's domain. You only write under
   `.opencode/agents/`.
 - Never accept work you have not verified against tests.
-- If you hit a stop condition from your policy, set `blocker` in `run-state.json`
+- If you hit a stop condition from your policy, set `blocker` in your review
   and output `{"next":"stop"}`.

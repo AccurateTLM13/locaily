@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2.0",
+  "activeProjectSlug": "",
+  "projects": {
+    "bad": {
+      "slug": "Bad Slug",
+      "displayName": "",
+      "workspaceRoot": "",
+      "repositoryIdentity": {
+        "repository": "https://github.com/example/bad"
+      },
+      "vaultPath": null,
+      "storageLayout": "cloud",
+      "captureEnabled": true,
+      "allowedPaths": [],
+      "createdAt": "2026-07-18T12:00:00.000Z",
+      "updatedAt": "2026-07-18T12:00:00.000Z"
+    }
+  },
+  "extraField": true
+}

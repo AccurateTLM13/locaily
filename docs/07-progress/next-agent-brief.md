@@ -2,13 +2,15 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-11 (M5 complete + post-completion review: 4 implementation issues fixed + architectural review identifying M6 scope)
+**Updated:** 2026-07-18 (DM10: multi-project template — project registry, namespaced isolation, setup flow; 5/5 multi-project tests; **DM1–DM10 complete**)
 
 ## Read First
 
 1. [../00-start-here/current-state.md](../00-start-here/current-state.md)
 2. [active-build-slice.md](./active-build-slice.md)
-3. [build-status.md](./build-status.md)
+3. [../01-architecture/development-memory-loop.md](../01-architecture/development-memory-loop.md) *(Development Memory Loop DM1–DM10 complete)*
+4. [../02-planning/development-memory-roadmap.md](../02-planning/development-memory-roadmap.md)
+5. [build-status.md](./build-status.md)
 4. [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md)
 5. [benchmark-lab/OPERATOR_GUIDE.md](../../benchmark-lab/OPERATOR_GUIDE.md)
 6. [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md)
@@ -37,6 +39,118 @@ Broader model, track, hardware, prompt regression, and live qualification covera
 Preserve runtime separation: Local Brain may consume compact qualification artifacts but must not import `benchmark-lab/engine/` modules.
 
 ## Completed
+
+### Development Memory Loop DM10 (Multi-Project Local Brain Template)
+
+DM10 makes the Development Memory Loop reusable across registered projects with isolated storage and guided setup.
+
+- `companion/memory/projects/*` — registry, path resolution, vault generator/import, health, setup steps
+- Registry: `data/memory/projects/registry.json`; legacy `locaily` keeps flat `data/memory/development-*` paths
+- New projects: namespaced `data/memory/projects/{slug}/development-*`
+- API: `GET/POST /memory/projects/*` (register, activate, setup steps, health)
+- CLI: `npm run memory:project:list|register|activate|generate-vault|health`
+- Capture processor resolves stores from active registered project
+- Tests: `node scripts/test-development-memory-multi-project.js` (5/5); full DM1–DM10 suite green
+
+**Development Memory Loop roadmap (DM1–DM10) is complete.** Follow-on candidates (E2E proof scenario, candidate review console UI, embeddings) require explicit objectives.
+
+### Development Memory Loop DM9 (Continuous but Controlled Capture)
+
+DM9 keeps the Local Brain current during ongoing development without manual session maintenance every time.
+
+- `companion/memory/events/capture/capture-*` — policy loader, gate, processor store, processor, worker
+- Background worker closes/recovers sessions and extracts candidates from closed sessions (idempotent)
+- Pause/resume capture without disabling retrieval (`POST /memory/capture/pause|resume`)
+- Status fields: `captureEnabled`, `lastEventAt`, `unprocessedEvents`, `openSessions`, `pendingCandidates`, `pendingHumanReview`, `lastSuccessfulWritebackAt`, `warnings`
+- CLI: `npm run memory:capture:status|pause|resume|process`
+- Tests: `node scripts/test-development-memory-capture-processor.js` (5/5)
+
+### Development Memory Loop DM8 (Retrieval Integration)
+
+DM8 makes accepted project knowledge useful during future work through project-aware context packs.
+
+- `companion/memory/retrieval/*` — canonical page ranking, evidence index, budget-aware selection, warnings
+- Context packs prefer `projects/{slug}/PROJECT.md`, `STATUS.md`, `DECISIONS.md`, etc. over raw session logs
+- Optional request flags: `preferCanonicalPages`, `contextBudgetChars`, `maintainerPageBudget`, `excerptCharLimit`
+- Response extensions: `evidenceReferences`, `retrieval` (budget usage, stale/contradiction warnings)
+- Tests: `node scripts/test-development-memory-retrieval.js` (5/5)
+
+### Development Memory Loop DM7 (Project Memory Maintainer)
+
+DM7 maintains canonical project vault pages from approved candidates.
+
+- `companion/memory/events/maintainer-{drift,planner,store,manager}.js`
+- Runs: `data/memory/development-maintainer/runs/`; rollbacks: `rollbacks/`
+- Drift detection: missing target, duplicate statement, content drift
+- CLI: `npm run memory:maintainer:plan|status|list|show|apply`
+- Apply requires `--allow-apply-low-risk`; high-risk stays `review_required`
+- Tests: `node scripts/test-development-memory-maintainer.js` (4/4)
+
+### Development Memory Loop DM6 (Memory Review Inbox)
+
+DM6 adds the human gate between Layer B candidates and vault writeback.
+
+- `companion/memory/events/candidate-review-*` + `candidate-proposal-bridge.js`
+- Review records: `data/memory/development-candidates/reviews/`
+- API: `GET/POST /memory/candidates/review*`
+- CLI: `npm run memory:candidates:review-status|review-list|review-show|review`
+- Approve always creates `proposal_only` writeback (never auto-apply)
+- `/console/status` includes `memory.developmentMemoryReview` pending counts
+- Tests: `node scripts/test-development-memory-candidate-review.js` (5/5)
+
+### Development Memory Loop DM5 (Knowledge Candidate Extraction)
+
+DM5 converts closed session evidence into Layer B candidates.
+
+- `companion/memory/events/candidate-{extractor,analysis,store,manager}.js`
+- Storage: `data/memory/development-candidates/`
+- CLI: `npm run memory:candidates:extract|list|status`
+- Deterministic event-type rules; duplicate/contradiction reports
+- Tests: `node scripts/test-development-memory-candidates.js` (5/5)
+
+### Development Memory Loop DM4 (Session Aggregation)
+
+DM4 groups Layer A events into bounded development sessions.
+
+- `companion/memory/events/session-{store,summary,manager}.js`
+- Manifests: `data/memory/development-sessions/manifests/`
+- CLI: `npm run memory:session:start|status|close|rebuild`
+- Sequencer auto start/close per objective; capture stamps active `sessionId`
+- Tests: `node scripts/test-development-memory-sessions.js` (5/5)
+
+### Development Memory Loop DM3 (Capture Adapters)
+
+DM3 connects autonomous development workflows to the event store.
+
+- `companion/memory/events/capture/` — recorder, git metadata, adapter emitters
+- Sequencer: `objective_started`, `objective_completed`, `objective_blocked`
+- Supervisor: `task_dispatched`, `task_accepted`, `task_rejected`, `test_completed`, `blocker_recorded`, `commit_created`
+- CLI: `npm run memory:decision -- --project locaily --title "..." --reason "..."`
+- Disable capture: `DEVELOPMENT_MEMORY_CAPTURE=0`
+- Tests: `node scripts/test-development-memory-capture.js` (7/7)
+
+### Development Memory Loop DM2 (Immutable Event Store)
+
+DM2 adds runtime Layer A evidence storage extending Memory Bridge.
+
+- `companion/memory/events/event-store.js` — append-only store at `data/memory/development-events/`
+- `companion/memory/events/event-redaction.js` — secret detection/rejection
+- Endpoints: `POST /memory/events`, `GET /memory/events`, `GET /memory/events/:eventId`
+- Permissions: `memory.events.write` (POST), `memory.read` (GET)
+- Tests: `node scripts/test-development-memory-events.js` (13/13)
+
+### Development Memory Loop DM1 (Contracts)
+
+DM1 defines the Development Memory Loop as a Memory Bridge extension — contracts only, no capture automation.
+
+- `docs/01-architecture/development-memory-loop.md` — capability matrix, three layers (events / candidates / durable memory), trust boundaries, known Memory Bridge drift
+- `docs/01-architecture/development-memory-events.md` — event contract, 17 event types, integration points (sequencer, supervisor, worker, git, jobs, console)
+- `docs/02-planning/development-memory-roadmap.md` — DM1–DM10 milestones (complete)
+- Schemas: `companion/schemas/development-memory-*.schema.json` including project registry schemas
+- Fixtures: `companion/schemas/fixtures/development-memory/`
+- Tests: `node scripts/test-development-memory-schemas.js`; `node scripts/test-memory-v1.cjs` (6/6)
+
+**Do not** conflate Development Memory with Track Run Records (product execution evidence).
 
 ### Canonical Track Run Records
 
@@ -84,6 +198,18 @@ LFM2.5-1.2B-Thinking is the first qualified model capability for a companion ser
 
 The first enforcement pilot is active. `website_audit.lighthouse_handoff` is approved and in `enforced` state for role `priority_helper`. The qualified capability id is `lfm25-1p2b-thinking-local`; runtime execution uses `hf.co/LiquidAI/LFM2.5-1.2B-Thinking-GGUF:latest` from the qualification record's `runtimeModelName`. First 10 monitored enforced executions succeeded, with persisted Track Run Records showing `routing.enforcementDecision.applied=true`, `executedCapabilityId=lfm25-1p2b-thinking-local`, no fallback, and the Thinking runtime model in model step metadata.
 
+### M9 Pilot Infrastructure
+
+Pilot infrastructure for the physical multi-device pilot is prepared (infrastructure-only; pilot not yet executed on physical hardware).
+
+- `scripts/pilot/hardware-profile.schema.json` — JSON schema defining required fields for device hardware profiles (deviceName, os, cpu, ram, vram, runtimeProvider, availableModels, advertisedCapabilities, networkAddress)
+- `scripts/pilot/hardware-profile-template.json` — operator-fillable template with placeholder values
+- `scripts/pilot/pilot-runner.js` — CLI script that accepts `--policy` (local-only/local-first/distributed), `--workflow`, `--input`, `--output-dir`, `--repeat` flags; executes tracks via `/tracks/run`; collects timing metrics and relay_placement summaries; writes per-run evidence JSON files and summary CSV
+- `docs/05-integrations/multi-device-pilot.md` — pilot plan document covering prerequisites, hardware profile instructions, setup, run procedures for each policy mode, evidence collection, tear-down, known limitations, and stop conditions
+- `package.json` scripts: `pilot:local-only`, `pilot:local-first`, `pilot:distributed`
+- Pilot runner verified working in local-only mode against a running Local Brain with mock provider (2/2 runs ok, evidence files and summary CSV written correctly)
+- All existing test suites pass: benchmark:test, benchmark:status-smoke, contract-test, test-relay-unit.cjs (52/52), test-relay-placement.cjs (17/17)
+
 ### Output Quality Review Foundation
 
 Human review records can now be attached to Track Run Records without mutating original model output or enforcement decisions. Review/correction records live separately under `data/evidence/human-reviews/`. APIs: `POST /runs/:id/review`, `GET /runs/:id/review`, `GET /enforcement/quality-summary`. Operator CLI: `npm.cmd run quality-review -- list|show|pass|needs-edit|fail|summary` works without the server. The summary reports verdict counts, pass/correction rates, score averages, common failure reasons, and critical risk count. Tests: `node scripts/test-human-review-records.js` or `npm.cmd run quality-review:test`.
@@ -121,30 +247,49 @@ Real URL validation set:
 
 ## Current Task
 
-M5 is complete and reviewed. The system can now distribute workflow steps across multiple relay nodes with local fallback. The architectural review identified four issues that need attention before the relay system can be used outside trusted development networks:
+The M9 physical multi-device pilot infrastructure is prepared. Hardware profile schema, template, and pilot runner CLI are implemented under `scripts/pilot/`. The pilot runner executes track workflows with three relay policies (local-only, local-first, distributed), collects timing metrics and relay placement evidence, and writes per-run JSON evidence files plus a summary CSV. Documentation for the pilot procedure is at `docs/05-integrations/multi-device-pilot.md`. The pilot has not yet been executed on physical hardware — this is infrastructure preparation only.
 
-### High: Relay communication has no visible trust boundary
-- No authentication token, signature, node certificate, request nonce, or pairing credential
-- Registration and heartbeat calls are unauthenticated
-- A rogue or accidentally registered LAN node could receive workflow context, user-derived content, and return manipulated results
-- **Current state:** Trusted-development-network only
-
-### Medium: Planned relay placement can silently become local execution
-- When an assigned node is missing or unhealthy, `executeStepWithAssignedNode()` falls back to local execution without recording a fallback audit
-- Run reports placement plan assigning step to relay node, but actual execution occurred locally with no recorded reason
-- **Consequence:** Planned and executed topology can diverge silently, weakening the evidence system
-
-### Medium: `local_first` defaults to effectively local-only
-- Every role is treated as locally capable when `localCapableRoles` is omitted
-- `local_first` immediately assigns locally when the role is considered locally capable
-- **Consequence:** Without explicit local-capability data, relay nodes are never used for model steps
-
-### Medium: "Approved evidence" was written with an agent as approver
-- Several new evidence records use `"approvedBy": "locaily-agent"`
-- Blurs distinction between generated, promoted, machine-reviewed, human-reviewed, and approved for qualification
-- **Fix:** Use `promotionActor` instead of `approvedBy`; reserve `approvedBy` for actual human approval
+### Immediate Next
+- Execute the pilot on two physical devices with Ollama installed
+- Collect and analyze evidence from local-only, local-first, and distributed policy modes
+- Compare timing metrics and relay placement across policies
 
 ## Completed Since Last Update
+
+- **Operator Console UI (M6 operator-control-plane)** — completed 2026-07-12
+  - `companion/operator/index.html` — single-page operator dashboard with four panels (Dashboard, Jobs, Relay Nodes, Enqueue)
+  - `companion/operator/styles.css` — dark theme with CSS custom properties, status colors, responsive grid layout
+  - `companion/operator/app.js` — all client-side logic: fetch wrappers, panel rendering, event handlers, keyboard shortcuts (1-4/R/Esc), auto-refresh, confirmation dialogs, ARIA accessibility, outcome layer badges
+  - `companion/server.js` — added `GET /operator`, `/operator/styles.css`, `/operator/app.js` static file routes
+  - `scripts/test-operator-console.js` — 34 integration tests covering static file serving, health integration, job mutation endpoints, 404 handling
+  - All interactive elements have ARIA labels and are keyboard-navigable
+
+- **Job Cancel/Retry/Review Mutation Endpoints (M6 operator-control-plane)** — completed 2026-07-12
+  - `companion/core/durable-job-store.js`: added `reviewJob()` method supporting 5 review actions (`request_review`, `approve`, `reject`, `request_correction`, `stop`) with full state validation, review metadata persistence, and updated `VALID_TRANSITIONS` for `paused_review` and `running`
+  - `companion/schemas/internal/durable-job.schema.json`: added `review` property definition
+  - `companion/server.js`: added `POST /jobs/:id/cancel`, `POST /jobs/:id/retry`, `POST /jobs/:id/review` endpoints with proper 404/400 error handling and JSON envelope responses
+  - `scripts/test-jobs-mutation.js`: 85 integration tests covering all cancel, retry, and review scenarios including edge cases, error states, persistence, and envelope shape
+
+- **Background Worker Polling Loop (M6 operator-control-plane)** — completed 2026-07-12
+  - `companion/jobs/worker.js` implements a polling worker with `start()`, `stop()`, and `getStatus()`
+  - Polls every 5 seconds (configurable) calling `durableJobStore.listClaimableJobs()`
+  - Claims queued jobs, transitions to `running`, executes via execution callbacks, completes/fails/retries
+  - Track-type jobs execute via `runTrack`; workflow-type jobs execute via `buildRunPlan`+`executeRunPlan`
+  - Retry logic: retryable errors with remaining attempts re-queue via `retryJob`; non-retryable or exhausted attempts leave in `failed`
+  - Single concurrency (`isProcessing` flag) — skips poll cycle if still processing
+  - Lifecycle events logged to console (claimed, started, completed, failed, retried)
+  - Wired into `companion/server.js` — worker starts automatically after server listens
+  - 44 integration tests in `scripts/test-jobs-worker.js` covering success paths, failure/retry, concurrency, polling, and lifecycle
+
+- **Durable Job Store API (M6 operator-control-plane)** — completed 2026-07-12
+  - `createDurableJobStore` imported and initialized in server.js
+  - `POST /jobs` creates persistent background jobs for track and workflow types with schema validation
+  - `GET /jobs` lists all jobs with optional `?status=` and `?limit=` query filters
+  - `GET /jobs/:id` returns the full job record (or 404 for unknown jobs)
+  - `GET /health` includes `jobTotals` with counts by all seven job statuses
+  - Jobs persist to `data/jobs/*.json` and survive server restart
+  - 64 integration tests in `scripts/test-jobs-api.js` covering create, list, filter, get, health, and persistence
+  - Changes are additive — no existing endpoint shapes modified
 
 - **M2: Multi-Track Qualification & Enforcement** — completed 2026-07-11
   - Created 4 Benchmark Lab suites (accessibility-deep, performance-budget, seo-audit, dealsniper) with case files, output schemas, and validators
@@ -250,6 +395,7 @@ Target routing principle: smallest qualified capability.
 | Proof workflows | `lighthouse-handoff.track.json`, `dealsniper.track.json` |
 | Relay Nodes | `companion/relay/` (protocol, registry, connector, router) |
 | Memory Bridge | `companion/memory/vault-adapter.js`, `companion/memory/writeback-proposal.js` |
+| Development Memory Loop | `companion/memory/events/`, `companion/schemas/development-memory-*.schema.json`, `docs/01-architecture/development-memory-*.md` |
 
 ## Before Reporting Success
 
@@ -263,6 +409,9 @@ node scripts/test-enforcement-policy-store.js
 node scripts/test-enforcement-policy.js
 node scripts/test-enforcement-routing.js
 npm.cmd run test:relay
+node scripts/test-development-memory-schemas.js
+node scripts/test-development-memory-events.js
+node scripts/test-development-memory-capture.js
 npm.cmd run test:memory-v1
 npm.cmd run test:relay:e2e
 ```

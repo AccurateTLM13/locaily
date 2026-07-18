@@ -1,13 +1,19 @@
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { validateResult } = require("../core/result-validator");
+const {
+  createDevelopmentMemoryRetrieval,
+  defaultRetrievalRoots,
+  DEFAULT_CONTEXT_BUDGET_CHARS,
+  DEFAULT_EXCERPT_CHAR_LIMIT
+} = require("./retrieval/index");
 
 const CONTEXT_PACK_SCHEMA = JSON.parse(
   readFileSync(join(__dirname, "..", "schemas", "context-pack.schema.json"), "utf8")
 );
 
 const DEFAULT_MAX_FILES = 8;
-const EXCERPT_CHAR_LIMIT = 400;
+const EXCERPT_CHAR_LIMIT = DEFAULT_EXCERPT_CHAR_LIMIT;
 const SUMMARY_CHAR_LIMIT = 600;
 
 const HEADING_PATTERNS = {
@@ -16,8 +22,19 @@ const HEADING_PATTERNS = {
   openQuestions: [/^##\s+open questions?\b/i, /^##\s+questions?\b/i]
 };
 
-const PROJECT_PREFIXES = ["projects/", "wiki/projects/"];
-const TOPIC_PREFIXES = ["topics/", "wiki/topics/", "wiki/concepts/", "wiki/entities/"];
+let sharedRetrieval = null;
+
+function getRetrieval(options = {}) {
+  if (options.retrieval) {
+    return options.retrieval;
+  }
+
+  if (!sharedRetrieval) {
+    sharedRetrieval = createDevelopmentMemoryRetrieval(defaultRetrievalRoots());
+  }
+
+  return sharedRetrieval;
+}
 
 function buildContextPack(adapter, request = {}) {
   const warnings = [];
@@ -64,12 +81,25 @@ function buildContextPack(adapter, request = {}) {
   }
 
   const include = normalizeInclude(request.include);
-  const candidates = selectCandidateFiles(adapter, { project, task, include, maxFiles, warnings });
+  const retrieval = getRetrieval(request);
+  const retrievalOptions = retrieval.enrichContextPackRequest(adapter, request);
+  const candidates = retrieval.selectFiles(adapter, {
+    project,
+    task,
+    include,
+    maxFiles,
+    warnings,
+    preferCanonicalPages: retrievalOptions.preferCanonicalPages,
+    evidenceIndex: retrievalOptions.evidenceIndex,
+    maintainerPageBudget: retrievalOptions.maintainerPageBudget
+  });
+
   const filesUsed = [];
   const excerpts = [];
   const keyDecisions = [];
   const knownConstraints = [];
   const openQuestions = [];
+  let excerptBudgetUsed = 0;
 
   for (const filePath of candidates) {
     const readResult = adapter.readMarkdownFile(filePath);
@@ -79,16 +109,24 @@ function buildContextPack(adapter, request = {}) {
       continue;
     }
 
-    filesUsed.push(filePath);
-
     const sections = parseMarkdownSections(readResult.content);
     const primaryHeading = sections[0] ? sections[0].heading : filePath;
-    const excerptText = buildExcerptText(sections);
+    const excerptText = truncateText(buildExcerptText(sections), retrievalOptions.excerptCharLimit);
+
+    if (excerptBudgetUsed + excerptText.length > retrievalOptions.contextBudgetChars && filesUsed.length > 0) {
+      warnings.push(
+        `Context budget reached (${retrievalOptions.contextBudgetChars} chars); skipped ${filePath}.`
+      );
+      continue;
+    }
+
+    filesUsed.push(filePath);
+    excerptBudgetUsed += excerptText.length;
 
     excerpts.push({
       path: filePath,
       heading: primaryHeading,
-      text: truncateText(excerptText, EXCERPT_CHAR_LIMIT)
+      text: excerptText
     });
 
     if (shouldIncludeDecisions(include)) {
@@ -118,7 +156,7 @@ function buildContextPack(adapter, request = {}) {
   }
 
   const summary = buildSummary({ project, task, excerpts, filesUsed });
-  const contextPack = {
+  let contextPack = {
     contextPackId: buildContextPackId(project, task),
     project,
     task,
@@ -129,7 +167,24 @@ function buildContextPack(adapter, request = {}) {
     knownConstraints: dedupeStrings(knownConstraints),
     openQuestions: dedupeStrings(openQuestions),
     warnings,
-    recommendedNextStep: "Review filesUsed and excerpts before executing the task."
+    recommendedNextStep: "Review filesUsed, evidenceReferences, and excerpts before executing the task."
+  };
+
+  contextPack = retrieval.attachRetrievalMetadata(
+    contextPack,
+    filesUsed,
+    retrievalOptions.evidenceIndex
+  );
+
+  contextPack.retrieval = {
+    ...(contextPack.retrieval || {}),
+    preferCanonicalPages: retrievalOptions.preferCanonicalPages,
+    contextBudget: {
+      limit: retrievalOptions.contextBudgetChars,
+      used: excerptBudgetUsed,
+      filesIncluded: filesUsed.length
+    },
+    maintainerPageBudget: retrievalOptions.maintainerPageBudget
   };
 
   const validation = validateResult(contextPack, CONTEXT_PACK_SCHEMA);
@@ -155,87 +210,6 @@ function buildContextPack(adapter, request = {}) {
     result: contextPack,
     warnings
   };
-}
-
-function selectCandidateFiles(adapter, { project, task, include, maxFiles, warnings }) {
-  const allFiles = adapter.listMarkdownFiles();
-  const selected = [];
-  const used = new Set();
-  const projectNeedle = project.toLowerCase();
-  const taskTokens = tokenize(task);
-
-  const addFile = (filePath) => {
-    if (selected.length >= maxFiles || used.has(filePath)) {
-      return;
-    }
-
-    selected.push(filePath);
-    used.add(filePath);
-  };
-
-  if (shouldIncludeCurrentState(include)) {
-    if (allFiles.includes("index.md")) {
-      addFile("index.md");
-    } else {
-      warnings.push("index.md is not available for current_state.");
-    }
-
-    if (allFiles.includes("log.md")) {
-      addFile("log.md");
-    }
-  }
-
-  const projectMatches = allFiles.filter((filePath) => {
-    if (!PROJECT_PREFIXES.some((prefix) => filePath.startsWith(prefix))) {
-      return false;
-    }
-
-    const fileName = filePath.split("/").pop().toLowerCase();
-    return fileName.includes(projectNeedle) || projectNeedle.includes(fileName.replace(/\.md$/, ""));
-  });
-
-  for (const match of projectMatches) {
-    addFile(match);
-  }
-
-  if (projectMatches.length === 0) {
-    warnings.push(`No project page matched '${project}'.`);
-  }
-
-  const topicMatches = rankTopicMatches(allFiles, taskTokens);
-
-  for (const match of topicMatches) {
-    addFile(match.path);
-  }
-
-  if (topicMatches.length === 0) {
-    warnings.push(`No topic page strongly matched task '${task}'.`);
-  }
-
-  return selected;
-}
-
-function rankTopicMatches(allFiles, taskTokens) {
-  const topicFiles = allFiles.filter((filePath) =>
-    TOPIC_PREFIXES.some((prefix) => filePath.startsWith(prefix))
-  );
-
-  const scored = topicFiles.map((filePath) => {
-    const fileName = filePath.split("/").pop().toLowerCase();
-    let score = 0;
-
-    for (const token of taskTokens) {
-      if (fileName.includes(token)) {
-        score += 3;
-      }
-    }
-
-    return { path: filePath, score };
-  });
-
-  return scored
-    .filter((entry) => entry.score > 0)
-    .sort((left, right) => right.score - left.score);
 }
 
 function parseMarkdownSections(content) {
@@ -341,10 +315,6 @@ function normalizeMaxFiles(value) {
   return Math.min(parsed, 20);
 }
 
-function shouldIncludeCurrentState(include) {
-  return include.includes("current_state");
-}
-
 function shouldIncludeDecisions(include) {
   return include.includes("known_decisions") || include.includes("decisions");
 }
@@ -355,13 +325,6 @@ function shouldIncludeConstraints(include) {
 
 function shouldIncludeOpenQuestions(include) {
   return include.includes("open_questions") || include.includes("questions");
-}
-
-function tokenize(text) {
-  return String(text)
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter((token) => token.length >= 3);
 }
 
 function dedupeStrings(items) {
@@ -382,5 +345,7 @@ module.exports = {
   buildContextPack,
   buildContextPackId,
   parseMarkdownSections,
-  extractSectionItems
+  extractSectionItems,
+  DEFAULT_CONTEXT_BUDGET_CHARS,
+  EXCERPT_CHAR_LIMIT
 };

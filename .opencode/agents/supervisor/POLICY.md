@@ -2,6 +2,10 @@
 
 ## Scope discipline
 
+- **Milestone boundary is absolute.** You may only decompose the contents of
+  `objectives/active-objective.md`. You may NOT infer, select, or begin another
+  milestone. The sequencer chooses which milestone is active — you are a task
+  planner within a single milestone, not a milestone scheduler.
 - Honor the **Active Build Slice**. Do not begin unrelated work even when
   another roadmap item looks useful.
 - One bounded task per worker turn. A task must be small enough to be reviewed
@@ -9,6 +13,39 @@
 - Every task must declare explicit **Scope**, **Excluded**, and **Acceptance
   Criteria** sections. The worker is forbidden from touching excluded areas.
 - Prefer small, working increments over large speculative changes.
+- **Never delegate `.opencode/` writes.** The worker may write
+  `state/latest-worker-result.json` and nothing else under
+  `.opencode/agents/`. The supervisor owns `active-task.md`,
+  `latest-review.json`, `active-objective.md`, and all archive files.
+  If a task requires writing under `.opencode/`, the supervisor must
+  do it — do not issue it as a worker task.
+
+## Task sizing rules
+
+The worker has a time limit (currently 15 minutes). A task that takes longer
+will time out and fail even if the code is correct. Size tasks accordingly.
+
+- A task should target **8 minutes or less** of worker time. This leaves headroom
+  for test execution, commit, and result writing.
+- A task should touch **3–5 related files** maximum. If more files are needed,
+  split into multiple tasks.
+- Each task does **one** of these, not all:
+  - Implement one code slice
+  - Add tests for one slice
+  - Update documentation
+  - Run validation and report results
+- **Full regression testing is a separate task.** Do not bundle "run all test
+  suites" into an implementation task — validation takes time and the worker
+  will time out before finishing the code.
+- **Documentation updates are a separate finalization task.** Do not append
+  doc edits to the last implementation task.
+- When a task has implementation + tests + docs, **split before dispatch**.
+  Issue three tasks: implement, validate, document.
+- The worker must commit after each coherent result. Multiple commits per task
+  are fine. Partial work lost to timeout is worse than extra commits.
+
+If a worker times out, the task was too large. Re-plan it as two or three
+smaller tasks for the next iteration.
 
 ## Locaily non-negotiables
 
@@ -41,6 +78,18 @@
 - The implementation requires redesigning the track runner.
 - Tests fail for unrelated reasons you cannot triage into a bounded task.
 - The iteration budget in `state/run-state.json` is exhausted.
+
+## Milestone complete signal
+
+When you believe ALL completion conditions in `objectives/active-objective.md`
+are satisfied AND verified against tests:
+
+1. Set `objective_complete: true` in your review JSON.
+2. Emit `{"phase":"review","next":"stop","objective_complete":true}`.
+3. Do NOT begin a new milestone. Only the sequencer advances the queue.
+
+The sequencer reads `objective_complete` from run-state and archives the
+objective file. You must not touch queue files or select the next objective.
 
 ## Documentation
 

@@ -18,9 +18,26 @@ const OBJECTIVE_PATH = path.join(AGENTS_DIR, "objectives", "active-objective.md"
 const STATE_PATH = path.join(AGENTS_DIR, "state", "run-state.json");
 const CONFIG_PATH = path.join(HERE, "config.json");
 const SUPERVISOR_PATH = path.join(HERE, "supervisor.js");
+const INVARIANTS_PATH = path.join(HERE, "invariants.js");
 const HISTORY_DIR = path.join(AGENTS_DIR, "history");
 
 const SEQUENCER_BRANCH = "agents/sequencer/base";
+
+// Load invariants module
+let invariants = null;
+try { invariants = require(INVARIANTS_PATH); } catch { console.error("[sequencer] invariants.js not found — identity checks skipped."); }
+
+let developmentMemory = null;
+try { developmentMemory = require("./development-memory-capture"); } catch { developmentMemory = null; }
+
+let developmentSession = null;
+try {
+  const { createDevelopmentSessionManager } = require(path.join(PROJECT_ROOT, "companion", "memory", "events", "session-manager"));
+  developmentSession = createDevelopmentSessionManager({
+    eventsDir: path.join(PROJECT_ROOT, "data", "memory", "development-events"),
+    sessionsRoot: path.join(PROJECT_ROOT, "data", "memory", "development-sessions")
+  });
+} catch { developmentSession = null; }
 
 const DEFAULT_STATE = {
   objective: "",
@@ -105,8 +122,9 @@ function cleanRuntimeArtifacts() {
       if (f.includes("abort")) removeIfExists(path.join(HISTORY_DIR, f));
     }
   }
-  // Remove stale failed/ archive from prior run
-  removeIfExists(path.join(QUEUE_DIR, "failed"));
+  // Do NOT delete failed/ — it holds archived milestones that must persist
+  // across iterations. If a previous milestone failed, it stays in failed/
+  // until restoreFromFailed() moves it back to queue/ on the next sequencer run.
 }
 
 function ensureBaseBranch(protectedBranches, startBranch) {
@@ -130,6 +148,10 @@ function ensureBaseBranch(protectedBranches, startBranch) {
 }
 
 function main() {
+  return runSequencer();
+}
+
+async function runSequencer() {
   const cfg = readJson(CONFIG_PATH, {});
   const protectedBranches = (cfg.git && cfg.git.protected_branches) || ["main", "master"];
 
@@ -148,6 +170,13 @@ function main() {
   }
   console.error(`[sequencer] working from branch: ${baseBranch}`);
 
+  // Restore any failed milestones from a prior run BEFORE collecting queue
+  const completedDir = path.join(QUEUE_DIR, "completed");
+  const failedDir = path.join(QUEUE_DIR, "failed");
+  ensureDir(completedDir);
+  ensureDir(failedDir);
+  restoreFromFailed();
+
   // Collect queue entries (sorted, exclude .gitkeep and non-objective files)
   const all = fs.readdirSync(QUEUE_DIR)
     .filter(f => f.endsWith(".md") && !f.startsWith("BULK_") && f !== ".gitkeep" && f !== "TEMPLATE.md")
@@ -159,10 +188,17 @@ function main() {
   }
   console.error(`[sequencer] found ${all.length} queued objectives:\n  ${all.join("\n  ")}`);
 
-  const completedDir = path.join(QUEUE_DIR, "completed");
-  const failedDir = path.join(QUEUE_DIR, "failed");
-  ensureDir(completedDir);
-  ensureDir(failedDir);
+  // ---- queue completeness preflight ----
+  if (invariants) {
+    const qc = invariants.validateQueueCompleteness(QUEUE_DIR);
+    if (!qc.valid) {
+      console.error(`[sequencer] QUEUE INCOMPLETE — refusing to run.`);
+      console.error(`  Expected: ${(qc.expected || []).join(", ")}`);
+      console.error(`  Missing:  ${(qc.missing || []).join(", ")}`);
+      process.exit(1);
+    }
+    console.error(`[sequencer] queue completeness: OK (${(qc.found || []).length} files present)`);
+  }
 
   const results = [];
 
@@ -173,7 +209,7 @@ function main() {
     console.error(`\n${"=".repeat(60)}`);
     console.error(`[sequencer] starting objective: ${file}`);
 
-    // Force back to base branch — supervisor may have left us on a worker branch
+    // Force back to base branch
     const onBranch = currentBranch();
     if (onBranch !== baseBranch) {
       console.error(`[sequencer] resetting to ${baseBranch} (currently on ${onBranch})`);
@@ -183,9 +219,6 @@ function main() {
         break;
       }
     }
-
-    // Restore queue files from a prior failed run
-    restoreFromFailed();
 
     // Ensure queue file still exists
     if (!fs.existsSync(sourcePath)) {
@@ -199,10 +232,6 @@ function main() {
 
     // Clean runtime artifacts from prior runs
     cleanRuntimeArtifacts();
-
-    // Recreate archive dirs (cleanRuntimeArtifacts removes queue/failed/)
-    ensureDir(completedDir);
-    ensureDir(failedDir);
 
     // Remove stale worker branch from prior failed run
     const cfg2 = readJson(CONFIG_PATH, {});
@@ -220,6 +249,39 @@ function main() {
     // Reset run state for this milestone
     writeJson(STATE_PATH, { ...DEFAULT_STATE, objective: objectiveSlug });
 
+    if (developmentSession) {
+      try {
+        const sessionStart = developmentSession.startSession({
+          objectiveId: objectiveSlug,
+          runId: readJson(STATE_PATH, {}).run_id,
+          branch: currentBranch()
+        });
+        if (!sessionStart.ok) {
+          console.error(`[sequencer] development session start failed: ${sessionStart.error && sessionStart.error.message ? sessionStart.error.message : "unknown error"}`);
+        }
+      } catch (e) {
+        console.error(`[sequencer] development session start failed: ${e.message}`);
+      }
+    }
+
+    // Create durable milestone record
+    if (invariants) {
+      try {
+        const baseCommit = git(["rev-parse", "HEAD"], { shell: process.platform === "win32" });
+        const commit = baseCommit.status === 0 ? (baseCommit.stdout || "").trim() : "";
+        invariants.createMilestoneRecord(objectiveSlug, workerBranchName, commit);
+        console.error(`[sequencer] durable milestone record created: ${objectiveSlug}`);
+        if (developmentMemory) {
+          developmentMemory.emitObjectiveStarted({
+            projectRoot: PROJECT_ROOT,
+            objectiveId: objectiveSlug,
+            runId: readJson(STATE_PATH, {}).run_id,
+            baseCommit: commit
+          });
+        }
+      } catch (e) { console.error(`[sequencer] durable record create failed: ${e.message}`); }
+    }
+
     // Run supervisor (SEQUENCER_MODE env tells supervisor to skip dirty-tree check)
     console.error(`[sequencer] launching supervisor for ${file}...`);
     const childEnv = { ...process.env, SEQUENCER_MODE: "1" };
@@ -232,21 +294,78 @@ function main() {
     });
     console.error(`[sequencer] supervisor exit code: ${result.status}`);
 
+    // Check for unexpected-exit diagnostic from supervisor
+    if (result.status !== 0 || (result.error && result.error.code)) {
+      const exitErr = result.error ? ` (${result.error.code || result.error.message})` : "";
+      console.error(`[sequencer] supervisor may have crashed${exitErr}. Check .opencode/agents/runs/*-exit.log`);
+    }
+
     // Check final state
     const finalState = readJson(STATE_PATH, {});
     const complete = finalState.status === "complete" || finalState.objective_complete === true;
 
-    // Archive queue file (handle case where supervisor switch branches left it missing)
+    // Update durable milestone record and manifest
+    if (developmentSession) {
+      try {
+        const sessionClose = await developmentSession.closeSession({
+          interrupted: !complete
+        });
+        if (!sessionClose.ok) {
+          console.error(`[sequencer] development session close failed: ${sessionClose.error && sessionClose.error.message ? sessionClose.error.message : "unknown error"}`);
+        }
+      } catch (e) {
+        console.error(`[sequencer] development session close failed: ${e.message}`);
+      }
+    }
+
+    if (invariants) {
+      try {
+        if (complete) {
+          const manifest = invariants.buildMilestoneManifest(objectiveSlug, STATE_PATH);
+          const testsRun = (finalState.last_worker_status === "complete" ? ["see worker result"] : []);
+          invariants.finalizeMilestone(objectiveSlug, manifest, testsRun, true);
+          console.error(`[sequencer] milestone manifest validated: ${objectiveSlug}`);
+          invariants.markMilestoneComplete(objectiveSlug);
+          if (developmentMemory) {
+            const record = invariants.readMilestoneRecord(objectiveSlug);
+            developmentMemory.emitObjectiveCompleted({
+              projectRoot: PROJECT_ROOT,
+              objectiveId: objectiveSlug,
+              runId: finalState.run_id,
+              acceptedTaskCount: record && record.accepted_task_count ? record.accepted_task_count : 0
+            });
+          }
+        } else {
+          invariants.markMilestoneFailed(objectiveSlug, finalState.blocker || `supervisor exit code ${result.status}`);
+          if (developmentMemory) {
+            developmentMemory.emitObjectiveBlocked({
+              projectRoot: PROJECT_ROOT,
+              objectiveId: objectiveSlug,
+              runId: finalState.run_id,
+              blocker: finalState.blocker || `supervisor exit code ${result.status}`,
+              adapter: "controller"
+            });
+          }
+        }
+        console.error(`[sequencer] durable milestone record: ${objectiveSlug} → ${complete ? "complete" : "failed"}`);
+      } catch (e) { console.error(`[sequencer] durable record finalize failed: ${e.message}`); }
+    }
+
+    // Archive queue file. Non-fatal — a failed archive must not crash the sequencer.
     const destDir = complete ? completedDir : failedDir;
     const destPath = path.join(destDir, file);
-    if (fs.existsSync(sourcePath)) {
-      try { fs.renameSync(sourcePath, destPath); } catch (e) {
-        fs.copyFileSync(sourcePath, destPath);
-        fs.unlinkSync(sourcePath);
+    ensureDir(destDir);
+    try {
+      if (fs.existsSync(sourcePath)) {
+        try { fs.renameSync(sourcePath, destPath); } catch (e) {
+          try { fs.copyFileSync(sourcePath, destPath); fs.unlinkSync(sourcePath); } catch {}
+        }
+        console.error(`[sequencer] archived ${file} → ${complete ? "completed" : "failed"}/`);
+      } else {
+        console.error(`[sequencer] ${file} disappeared from queue/ — marking ${complete ? "complete" : "failed"} without archiving`);
       }
-      console.error(`[sequencer] archived ${file} → ${complete ? "completed" : "failed"}/`);
-    } else {
-      console.error(`[sequencer] ${file} disappeared from queue/ (supervisor changed branches) — marking ${complete ? "complete" : "failed"} without archiving`);
+    } catch (e) {
+      console.error(`[sequencer] archive failed for ${file}: ${e.message} — continuing`);
     }
 
     results.push({
@@ -274,4 +393,7 @@ function main() {
   console.error(`\n[sequencer] done — returned to branch: ${trueStartBranch}`);
 }
 
-main();
+main().catch((error) => {
+  console.error(error.message || error);
+  process.exit(1);
+});

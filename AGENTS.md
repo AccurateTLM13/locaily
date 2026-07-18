@@ -290,7 +290,7 @@ Implemented:
 - `companion/runtime/ollama.js`
 - `companion/tools/registry.js` (manifest-backed tool pack loader)
 - `companion/tools/deal-sniper.js`, `companion/tools/lighthouse-handoff.js`
-- `companion/memory/*` (Memory Bridge v0)
+- `companion/memory/*` (Memory Bridge v0; Development Memory Loop DM1–DM10 including `companion/memory/projects/` multi-project registry)
 - `companion/console/*` (local validation UI)
 - `benchmark-lab/` (complete Milestone 1: engine, CLI, adapters, schemas, evidence, qualifications, reports, model-cards, checksums)
 - `tool-packs/standard-text-pack/`, `tool-packs/lighthouse-parser-pack/`
@@ -301,6 +301,7 @@ Implemented:
 - `GET /providers/status`, `POST /providers/set`
 - `GET /models/roles`, `POST /models/roles/set`, `GET /models/profiles`, `POST /models/profiles/set`
 - `GET /memory/status`, `POST /memory/context-pack`, `POST /memory/writeback/propose`
+- `GET /memory/projects`, `POST /memory/projects/register`, `GET /memory/projects/:slug/health` (multi-project development memory)
 - `GET /benchmark/status` (read-only qualification/checksum status)
 - `GET /console/status`, `POST /console/run-validation`, `POST /console/setup/*`, `GET /console/runs`
 - `scripts/smoke-test.js`, `scripts/contract-test.js`, `scripts/benchmark-lab-*.js`
@@ -338,3 +339,20 @@ Current focus and follow-on candidates (see [docs/07-progress/current-sprint.md]
 | Agent rules | [docs/08-agents/agent-context.md](docs/08-agents/agent-context.md) |
 | Decisions | [docs/06-decisions/decision-log.md](docs/06-decisions/decision-log.md) |
 | Archive (context only) | [docs/99-archive/README.md](docs/99-archive/README.md) |
+
+## Learned User Preferences
+
+- When adding or changing validation, workflow, or memory features, also update the companion console (`companion/console/`) so the change can be tested from the local validation UI
+- During plan-driven implementation, do not edit the attached plan file; implement against it as specified
+- During multi-milestone roadmap execution (e.g. Development Memory Loop DM1–DM10), wait for explicit user approval (e.g. "proceed") before starting the next milestone
+- Do not introduce new public product names or top-level architecture layers without explicit user approval
+- Keep PRs draft until clean-server smoke tests pass before requesting merge to `main`
+- Before running model benchmarks, verify model provenance matches the requested model slug
+
+## Learned Workspace Facts
+
+- Locaily is public/open-source; the user's Second Brain vault is private — do not merge the repos or copy private Second Brain content into Locailly
+- Public Memory Bridge starter template uses flat `projects/` and `topics/`; private Obsidian-style vaults configure `wiki/projects/`, `wiki/topics/`, `wiki/concepts/`, and `wiki/entities/` paths via config
+- Development Memory Loop extends Memory Bridge internally; acceptable internal names include Project Learning Loop and Repository Memory Loop — it is not a separate public product layer
+- Companion contract JSON schemas belong under `companion/schemas/`, not a root-level `schemas/` directory
+- Console validation runs write artifacts under `data/validation/`; default mode bundles steps into one JSON per run (`VALIDATION_ARTIFACT_MODE=bundle`)

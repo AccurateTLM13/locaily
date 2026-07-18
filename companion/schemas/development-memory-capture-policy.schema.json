@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-memory-capture-policy.schema.json",
+  "title": "Development Memory Capture Policy",
+  "description": "Configurable rules for what development activity is worth recording and how writeback is gated. Target vault path: .memory-bridge/capture-policy.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "enabled", "project", "capture", "writeback", "retention"],
+  "properties": {
+    "version": {
+      "const": "1.0"
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Master switch for development capture. Default false until operator opts in."
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commits",
+        "pullRequests",
+        "objectiveTransitions",
+        "taskResults",
+        "testResults",
+        "humanDecisions",
+        "blockers",
+        "releases",
+        "workingTreeChanges",
+        "terminalOutput",
+        "modelTranscripts"
+      ],
+      "properties": {
+        "commits": { "type": "boolean" },
+        "pullRequests": { "type": "boolean" },
+        "objectiveTransitions": { "type": "boolean" },
+        "taskResults": { "type": "boolean" },
+        "testResults": { "type": "boolean" },
+        "humanDecisions": { "type": "boolean" },
+        "blockers": { "type": "boolean" },
+        "releases": { "type": "boolean" },
+        "workingTreeChanges": { "type": "boolean" },
+        "terminalOutput": { "type": "boolean" },
+        "modelTranscripts": { "type": "boolean" }
+      }
+    },
+    "writeback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "autoApplyRiskLevels", "requireHumanReviewFor"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["review", "proposal_only", "disabled"]
+        },
+        "autoApplyRiskLevels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          }
+        },
+        "requireHumanReviewFor": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "decision",
+              "architecture",
+              "operating_rule",
+              "project_identity",
+              "security_policy",
+              "status_update",
+              "blocker",
+              "lesson",
+              "deletion",
+              "contradiction_resolution"
+            ]
+          }
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["keepRawEvents", "rawEventDays", "keepAppliedProposals"],
+      "properties": {
+        "keepRawEvents": { "type": "boolean" },
+        "rawEventDays": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "keepAppliedProposals": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "sessionId": "bad_session_id",
+  "schemaVersion": "2.0",
+  "project": "locaily",
+  "status": "open",
+  "startedAt": "2026-07-18T14:00:00.000Z",
+  "eventIds": [],
+  "summary": {
+    "text": "Summary without linked events.",
+    "linkedEventIds": []
+  },
+  "metrics": {},
+  "createdAt": "2026-07-18T14:00:00.000Z"
+}
