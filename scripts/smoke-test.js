@@ -1,4 +1,5 @@
 const BASE_URL = process.env.LOCAL_AI_BASE_URL || "http://127.0.0.1:31313";
+const EXPECTED_STARTUP_PROVIDER = process.env.SMOKE_STARTUP_PROVIDER || "ollama";
 const path = require("node:path");
 const { cpSync, mkdtempSync, rmSync, existsSync } = require("node:fs");
 const { spawnSync } = require("node:child_process");
@@ -114,7 +115,7 @@ function assertHealthShape(body) {
   assert(body.ok === true, "Expected /health response with ok: true.");
   assert(body.service === "local-ai-platform", "Expected service name.");
   assert(typeof body.version === "string", "Expected platform version.");
-  assert(body.runtime && body.runtime.provider === "ollama", "Expected Ollama runtime provider.");
+  assert(body.runtime && body.runtime.provider === EXPECTED_STARTUP_PROVIDER, `Expected ${EXPECTED_STARTUP_PROVIDER} runtime provider.`);
   assert(typeof body.runtime.available === "boolean", "Expected runtime availability boolean.");
   assert(body.model && typeof body.model.name === "string", "Expected selected model name.");
   assert(typeof body.model.ready === "boolean", "Expected model readiness boolean.");
@@ -1755,9 +1756,27 @@ async function checkWorkflowRunLighthouseMockProvider() {
   }
 }
 
+async function ensureStartupProvider() {
+  const response = await request("/providers/set", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      provider: EXPECTED_STARTUP_PROVIDER
+    })
+  });
+
+  assert(response.response.status === 200, `Expected startup provider switch HTTP 200.`);
+  assertJsonObject(response.body, "/providers/set startup response");
+  assert(response.body.ok === true, "Expected startup provider switch ok true.");
+  assert(response.body.active_provider === EXPECTED_STARTUP_PROVIDER, `Expected active ${EXPECTED_STARTUP_PROVIDER} provider.`);
+}
+
 async function main() {
   console.log(`Smoke testing Local AI Platform at ${BASE_URL}`);
 
+  await runCheck("startup provider reset", ensureStartupProvider);
   await runCheck("GET /health", checkHealth);
   await runCheck("GET /benchmark/status", checkBenchmarkStatus);
   await runCheck("GET /tools", checkToolsEndpoint);
