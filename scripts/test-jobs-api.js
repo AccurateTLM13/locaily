@@ -52,14 +52,14 @@ function makeRequest(baseUrl, method, path, body = null) {
 // ==================== Integration Tests ====================
 
 async function testPostJobTrack() {
-  console.log("TEST: POST /jobs with type track");
+  console.log("TEST: POST /jobs with executionType track");
   const dir = createTempDataDir();
   const store = createDurableJobStore({ dataDir: dir });
   const server = await startTestServer(store);
 
   try {
     const res = await makeRequest(server.url, "POST", "/jobs", {
-      type: "track",
+      executionType: "track",
       trackId: "website_audit.lighthouse_handoff",
       input: { url: "https://example.com" },
       context: { memory: {} },
@@ -67,7 +67,7 @@ async function testPostJobTrack() {
       maxAttempts: 3,
       correlationId: "corr_test_track"
     });
-    assert(res.status === 201, "POST /jobs track returns 201");
+    assert(res.status === 200, "POST /jobs track returns 200");
     assert(res.body.ok === true, "POST /jobs track ok true");
     assert(res.body.job !== undefined, "POST /jobs track has job field");
     assert(res.body.job.executionType === "track", "job executionType is track");
@@ -82,19 +82,19 @@ async function testPostJobTrack() {
 }
 
 async function testPostJobWorkflow() {
-  console.log("TEST: POST /jobs with type workflow");
+  console.log("TEST: POST /jobs with executionType workflow");
   const dir = createTempDataDir();
   const store = createDurableJobStore({ dataDir: dir });
   const server = await startTestServer(store);
 
   try {
     const res = await makeRequest(server.url, "POST", "/jobs", {
-      type: "workflow",
+      executionType: "workflow",
       workflowId: "lighthouse_full",
       input: { url: "https://example.com" },
       options: {}
     });
-    assert(res.status === 201, "POST /jobs workflow returns 201");
+    assert(res.status === 200, "POST /jobs workflow returns 200");
     assert(res.body.ok === true, "POST /jobs workflow ok true");
     assert(res.body.job.executionType === "workflow", "job executionType is workflow");
     assert(res.body.job.workflowId === "lighthouse_full", "job workflowId set");
@@ -107,19 +107,19 @@ async function testPostJobWorkflow() {
 }
 
 async function testPostJobInvalidType() {
-  console.log("TEST: POST /jobs with invalid type");
+  console.log("TEST: POST /jobs with invalid executionType");
   const dir = createTempDataDir();
   const store = createDurableJobStore({ dataDir: dir });
   const server = await startTestServer(store);
 
   try {
     const res = await makeRequest(server.url, "POST", "/jobs", {
-      type: "invalid",
+      executionType: "invalid",
       input: {}
     });
-    assert(res.status === 400, "POST /jobs invalid type returns 400");
-    assert(res.body.ok === false, "POST /jobs invalid type ok false");
-    assert(res.body.code === "INVALID_TYPE", "POST /jobs invalid type code");
+    assert(res.status === 400, "POST /jobs invalid executionType returns 400");
+    assert(res.body.ok === false, "POST /jobs invalid executionType ok false");
+    assert(res.body.code === "INVALID_EXECUTION_TYPE", "POST /jobs invalid executionType code");
   } finally {
     await stopTestServer(server);
     rmSync(dir, { recursive: true, force: true });
@@ -134,7 +134,7 @@ async function testPostJobMissingTrackId() {
 
   try {
     const res = await makeRequest(server.url, "POST", "/jobs", {
-      type: "track",
+      executionType: "track",
       input: {}
     });
     assert(res.status === 400, "POST /jobs missing trackId returns 400");
@@ -154,7 +154,7 @@ async function testPostJobMissingWorkflowId() {
 
   try {
     const res = await makeRequest(server.url, "POST", "/jobs", {
-      type: "workflow",
+      executionType: "workflow",
       input: {}
     });
     assert(res.status === 400, "POST /jobs missing workflowId returns 400");
@@ -382,39 +382,34 @@ function startTestServer(store) {
           });
         }
 
-        const { type, trackId, workflowId, input, context, options, maxAttempts, correlationId } = bodyResult.body || {};
+        const { executionType, trackId, workflowId, input, context, options, maxAttempts, correlationId } = bodyResult.body || {};
 
-        if (!type || (type !== "track" && type !== "workflow")) {
+        if (!executionType || (executionType !== "track" && executionType !== "workflow")) {
           return sendJson(response, 400, {
-            ok: false, code: "INVALID_TYPE",
-            message: "type must be 'track' or 'workflow'.",
-            nextStep: "Set type to 'track' or 'workflow'."
+            ok: false, code: "INVALID_EXECUTION_TYPE",
+            message: "executionType must be 'track' or 'workflow'."
           });
         }
 
-        if (type === "track" && !trackId) {
+        if (executionType === "track" && !trackId) {
           return sendJson(response, 400, {
             ok: false, code: "MISSING_TRACK_ID",
-            message: "trackId is required when type is 'track'.",
-            nextStep: "Provide a trackId in the request body."
+            message: "trackId is required when executionType is 'track'."
           });
         }
 
-        if (type === "workflow" && !workflowId) {
+        if (executionType === "workflow" && !workflowId) {
           return sendJson(response, 400, {
             ok: false, code: "MISSING_WORKFLOW_ID",
-            message: "workflowId is required when type is 'workflow'.",
-            nextStep: "Provide a workflowId in the request body."
+            message: "workflowId is required when executionType is 'workflow'."
           });
         }
 
         const createResult = store.createJob({
-          executionType: type,
-          trackId: type === "track" ? trackId : null,
-          workflowId: type === "workflow" ? workflowId : null,
-          input: input || {},
-          context: context || {},
-          options: options || {},
+          executionType,
+          trackId: executionType === "track" ? trackId : null,
+          workflowId: executionType === "workflow" ? workflowId : null,
+          input: input || {}, context: context || {}, options: options || {},
           maxAttempts: typeof maxAttempts === "number" ? maxAttempts : 3,
           correlationId: correlationId || null
         });
@@ -422,12 +417,11 @@ function startTestServer(store) {
         if (!createResult.ok) {
           return sendJson(response, 400, {
             ok: false, code: createResult.code,
-            message: createResult.message,
-            nextStep: "Check the job parameters and try again."
+            message: createResult.message
           });
         }
 
-        return sendJson(response, 201, { ok: true, job: createResult.job });
+        return sendJson(response, 200, { ok: true, job: createResult.job });
       }
 
       if (request.method === "GET" && url.pathname === "/jobs") {

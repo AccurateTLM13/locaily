@@ -1,3 +1,5 @@
+const { evaluateExecutionOutcome } = require("./job-outcome");
+
 function createBackgroundWorker(options = {}) {
   const { durableJobStore, executionCallbacks, config = {} } = options;
 
@@ -94,9 +96,36 @@ function createBackgroundWorker(options = {}) {
           );
         }
 
-        const completeResult = durableJobStore.completeJob(job.jobId, executionResult);
-        if (completeResult.ok) {
-          console.log(`[Background Worker] Completed job ${job.jobId}`);
+        const outcome = evaluateExecutionOutcome(executionResult, job.executionType);
+        if (!outcome.ok) {
+          const errorDetails = {
+            code: outcome.code,
+            message: outcome.message,
+            retryable: outcome.retryable !== false,
+            details: outcome.details || {}
+          };
+
+          const failResult = durableJobStore.failJob(job.jobId, errorDetails);
+          if (failResult.ok) {
+            console.log(`[Background Worker] Failed job ${job.jobId}: ${errorDetails.message}`);
+
+            const shouldRetry = errorDetails.retryable !== false
+              && job.attempt < job.maxAttempts - 1;
+
+            if (shouldRetry) {
+              const retryResult = durableJobStore.retryJob(job.jobId);
+              if (retryResult.ok) {
+                console.log(`[Background Worker] Retried job ${job.jobId} (attempt ${job.attempt + 1}/${job.maxAttempts})`);
+              } else {
+                console.log(`[Background Worker] Job ${job.jobId} not retried: ${retryResult.message}`);
+              }
+            }
+          }
+        } else {
+          const completeResult = durableJobStore.completeJob(job.jobId, executionResult);
+          if (completeResult.ok) {
+            console.log(`[Background Worker] Completed job ${job.jobId}`);
+          }
         }
       } catch (error) {
         const errorDetails = {
