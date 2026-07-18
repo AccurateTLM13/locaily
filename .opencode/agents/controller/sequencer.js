@@ -27,6 +27,18 @@ const SEQUENCER_BRANCH = "agents/sequencer/base";
 let invariants = null;
 try { invariants = require(INVARIANTS_PATH); } catch { console.error("[sequencer] invariants.js not found — identity checks skipped."); }
 
+let developmentMemory = null;
+try { developmentMemory = require("./development-memory-capture"); } catch { developmentMemory = null; }
+
+let developmentSession = null;
+try {
+  const { createDevelopmentSessionManager } = require(path.join(PROJECT_ROOT, "companion", "memory", "events", "session-manager"));
+  developmentSession = createDevelopmentSessionManager({
+    eventsDir: path.join(PROJECT_ROOT, "data", "memory", "development-events"),
+    sessionsRoot: path.join(PROJECT_ROOT, "data", "memory", "development-sessions")
+  });
+} catch { developmentSession = null; }
+
 const DEFAULT_STATE = {
   objective: "",
   status: "running",
@@ -136,6 +148,10 @@ function ensureBaseBranch(protectedBranches, startBranch) {
 }
 
 function main() {
+  return runSequencer();
+}
+
+async function runSequencer() {
   const cfg = readJson(CONFIG_PATH, {});
   const protectedBranches = (cfg.git && cfg.git.protected_branches) || ["main", "master"];
 
@@ -233,6 +249,21 @@ function main() {
     // Reset run state for this milestone
     writeJson(STATE_PATH, { ...DEFAULT_STATE, objective: objectiveSlug });
 
+    if (developmentSession) {
+      try {
+        const sessionStart = developmentSession.startSession({
+          objectiveId: objectiveSlug,
+          runId: readJson(STATE_PATH, {}).run_id,
+          branch: currentBranch()
+        });
+        if (!sessionStart.ok) {
+          console.error(`[sequencer] development session start failed: ${sessionStart.error && sessionStart.error.message ? sessionStart.error.message : "unknown error"}`);
+        }
+      } catch (e) {
+        console.error(`[sequencer] development session start failed: ${e.message}`);
+      }
+    }
+
     // Create durable milestone record
     if (invariants) {
       try {
@@ -240,6 +271,14 @@ function main() {
         const commit = baseCommit.status === 0 ? (baseCommit.stdout || "").trim() : "";
         invariants.createMilestoneRecord(objectiveSlug, workerBranchName, commit);
         console.error(`[sequencer] durable milestone record created: ${objectiveSlug}`);
+        if (developmentMemory) {
+          developmentMemory.emitObjectiveStarted({
+            projectRoot: PROJECT_ROOT,
+            objectiveId: objectiveSlug,
+            runId: readJson(STATE_PATH, {}).run_id,
+            baseCommit: commit
+          });
+        }
       } catch (e) { console.error(`[sequencer] durable record create failed: ${e.message}`); }
     }
 
@@ -266,6 +305,19 @@ function main() {
     const complete = finalState.status === "complete" || finalState.objective_complete === true;
 
     // Update durable milestone record and manifest
+    if (developmentSession) {
+      try {
+        const sessionClose = await developmentSession.closeSession({
+          interrupted: !complete
+        });
+        if (!sessionClose.ok) {
+          console.error(`[sequencer] development session close failed: ${sessionClose.error && sessionClose.error.message ? sessionClose.error.message : "unknown error"}`);
+        }
+      } catch (e) {
+        console.error(`[sequencer] development session close failed: ${e.message}`);
+      }
+    }
+
     if (invariants) {
       try {
         if (complete) {
@@ -274,8 +326,26 @@ function main() {
           invariants.finalizeMilestone(objectiveSlug, manifest, testsRun, true);
           console.error(`[sequencer] milestone manifest validated: ${objectiveSlug}`);
           invariants.markMilestoneComplete(objectiveSlug);
+          if (developmentMemory) {
+            const record = invariants.readMilestoneRecord(objectiveSlug);
+            developmentMemory.emitObjectiveCompleted({
+              projectRoot: PROJECT_ROOT,
+              objectiveId: objectiveSlug,
+              runId: finalState.run_id,
+              acceptedTaskCount: record && record.accepted_task_count ? record.accepted_task_count : 0
+            });
+          }
         } else {
           invariants.markMilestoneFailed(objectiveSlug, finalState.blocker || `supervisor exit code ${result.status}`);
+          if (developmentMemory) {
+            developmentMemory.emitObjectiveBlocked({
+              projectRoot: PROJECT_ROOT,
+              objectiveId: objectiveSlug,
+              runId: finalState.run_id,
+              blocker: finalState.blocker || `supervisor exit code ${result.status}`,
+              adapter: "controller"
+            });
+          }
         }
         console.error(`[sequencer] durable milestone record: ${objectiveSlug} → ${complete ? "complete" : "failed"}`);
       } catch (e) { console.error(`[sequencer] durable record finalize failed: ${e.message}`); }
@@ -323,4 +393,7 @@ function main() {
   console.error(`\n[sequencer] done — returned to branch: ${trueStartBranch}`);
 }
 
-main();
+main().catch((error) => {
+  console.error(error.message || error);
+  process.exit(1);
+});

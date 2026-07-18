@@ -70,6 +70,54 @@
     },
     "recommendedNextStep": {
       "type": "string"
+    },
+    "evidenceReferences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "vaultPath"],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": ["candidate", "maintainer_run", "event"]
+          },
+          "vaultPath": { "type": "string" },
+          "candidateId": { "type": "string" },
+          "runId": { "type": "string" },
+          "reviewStatus": { "type": "string" },
+          "driftStatus": { "type": "string" },
+          "applied": { "type": "boolean" },
+          "eventIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "type": "object",
+      "properties": {
+        "projectSlug": { "type": "string" },
+        "preferCanonicalPages": { "type": "boolean" },
+        "evidenceCount": { "type": "number" },
+        "maintainerPageBudget": { "type": "number" },
+        "contextBudget": {
+          "type": "object",
+          "properties": {
+            "limit": { "type": "number" },
+            "used": { "type": "number" },
+            "filesIncluded": { "type": "number" }
+          }
+        },
+        "staleWarnings": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "contradictionWarnings": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      }
     }
   }
 }

@@ -68,6 +68,16 @@ function redactMemoryResultForAudit(result, endpoint = null) {
     ]));
   }
 
+  if (endpoint === "memory/events" || endpoint === "memory/events/get") {
+    return nullIfEmpty(pickAllowedFields(result, [
+      "eventId",
+      "duplicate",
+      "storedAt",
+      "count",
+      "totalMatched"
+    ]));
+  }
+
   if (result.contextPackId || result.filesUsed) {
     return nullIfEmpty(pickAllowedFields(result, [
       "contextPackId",
@@ -97,6 +107,14 @@ function redactMemoryRequestForAudit(requestBody = {}, endpoint = null) {
 
   if (requestBody.taskId) {
     safe.taskId = String(requestBody.taskId);
+  }
+
+  if (requestBody.eventId) {
+    safe.eventId = String(requestBody.eventId);
+  }
+
+  if (requestBody.eventType) {
+    safe.eventType = String(requestBody.eventType);
   }
 
   if (typeof requestBody.maxFiles === "number") {
@@ -151,7 +169,13 @@ function buildMemoryAuditEvent({
     model_role: null,
     permissions_used: endpoint === "memory/writeback/propose"
       ? ["memory.writeback.propose"]
-      : [],
+      : endpoint === "memory/events"
+        ? ["memory.events.write"]
+        : endpoint === "memory/writeback/apply"
+          ? ["memory.writeback.apply"]
+          : endpoint === "memory/events/get" || endpoint === "memory/events/query"
+            ? ["memory.read"]
+            : [],
     input_summary: redactMemoryRequestForAudit(requestBody, endpoint),
     output_summary: redactMemoryResultForAudit(result, endpoint) || {
       type: "memory_response",

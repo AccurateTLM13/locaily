@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-memory-candidate.schema.json",
+  "title": "Development Memory Knowledge Candidate",
+  "description": "Layer B proposal that a statement may become durable vault memory after review. Must link to evidence events.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidateId",
+    "schemaVersion",
+    "candidateType",
+    "proposedStatement",
+    "confidence",
+    "evidenceEventIds",
+    "targetProject",
+    "suggestedVaultPath",
+    "suggestedOperation",
+    "contradictionStatus",
+    "reviewRisk",
+    "generatedBy",
+    "createdAt"
+  ],
+  "properties": {
+    "candidateId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^cand_"
+    },
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "candidateType": {
+      "type": "string",
+      "enum": [
+        "status_update",
+        "decision",
+        "blocker",
+        "lesson",
+        "architecture_change",
+        "operating_rule",
+        "workflow_observation",
+        "completed_capability",
+        "open_question",
+        "resume_instruction",
+        "documentation_drift"
+      ]
+    },
+    "proposedStatement": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "evidenceEventIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^evt_"
+      }
+    },
+    "targetProject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "suggestedVaultPath": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Allowlisted relative vault path for the proposed update."
+    },
+    "suggestedOperation": {
+      "type": "string",
+      "enum": ["append", "insert_section", "update_section", "create_file"]
+    },
+    "contradictionStatus": {
+      "type": "string",
+      "enum": ["none", "possible", "confirmed"]
+    },
+    "reviewRisk": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "generatedBy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["deterministic", "model_assisted", "human"]
+        },
+        "model": {
+          "type": "string"
+        },
+        "sessionId": {
+          "type": "string"
+        }
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sessionId": {
+      "type": "string",
+      "description": "Optional link to the session that produced this candidate."
+    }
+  }
+}

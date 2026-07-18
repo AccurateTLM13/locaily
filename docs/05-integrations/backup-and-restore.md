@@ -21,6 +21,15 @@ The `data/` directory contains the following files and subdirectories:
 | `data/policy/enforcement-policy.json` | Enforcement policy state |
 | `data/enforcement-policy-audit.jsonl` | Enforcement policy audit log (append-only JSONL) |
 | `data/console/local-setup.json` | Console setup (PageSpeed API key, memory vault path) |
+| `data/memory/development-events/` | Layer A development events (legacy `locaily` project layout) |
+| `data/memory/development-sessions/` | Development session manifests (legacy layout) |
+| `data/memory/development-candidates/` | Knowledge candidates and review records (legacy layout) |
+| `data/memory/development-maintainer/` | Maintainer run plans, apply records, rollbacks (legacy layout) |
+| `data/memory/development-capture/` | Capture processor state and policy (legacy layout) |
+| `data/memory/projects/registry.json` | Registered development-memory projects and active project slug |
+| `data/memory/projects/{slug}/` | Per-project namespaced stores (`development-events`, `development-sessions`, etc.) |
+
+When backing up development memory for multiple registered projects, include the entire `data/memory/` tree so both the legacy Locaily paths and any namespaced project directories are captured.
 
 ---
 

@@ -1,0 +1,36 @@
+{
+  "sessionId": "sess_20260718_dm1",
+  "schemaVersion": "1.0",
+  "project": "locaily",
+  "status": "closed",
+  "startedAt": "2026-07-18T14:00:00.000Z",
+  "endedAt": "2026-07-18T16:30:00.000Z",
+  "eventIds": [
+    "evt_20260718_commit001"
+  ],
+  "summary": {
+    "text": "DM1 contracts milestone: authored four JSON schemas, architecture docs, fixtures, and validation tests.",
+    "linkedEventIds": [
+      "evt_20260718_commit001"
+    ]
+  },
+  "metrics": {
+    "objectivesAttempted": ["dm1-contracts"],
+    "tasksCompleted": 1,
+    "commitsProduced": 0,
+    "testsExecuted": 2,
+    "filesAffected": [
+      "companion/schemas/development-memory-event.schema.json",
+      "docs/01-architecture/development-memory-loop.md"
+    ],
+    "blockers": [],
+    "unresolvedWork": []
+  },
+  "correlation": {
+    "objectiveId": "dm1-contracts",
+    "runId": "run_dm1_001",
+    "branch": "main"
+  },
+  "createdAt": "2026-07-18T14:00:00.000Z",
+  "closedAt": "2026-07-18T16:30:00.000Z"
+}

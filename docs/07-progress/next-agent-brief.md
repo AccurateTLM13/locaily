@@ -2,13 +2,15 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-14 (M9: pilot infrastructure prepared — hardware profile schema, pilot runner CLI, and multi-device pilot plan documented)
+**Updated:** 2026-07-18 (DM10: multi-project template — project registry, namespaced isolation, setup flow; 5/5 multi-project tests; **DM1–DM10 complete**)
 
 ## Read First
 
 1. [../00-start-here/current-state.md](../00-start-here/current-state.md)
 2. [active-build-slice.md](./active-build-slice.md)
-3. [build-status.md](./build-status.md)
+3. [../01-architecture/development-memory-loop.md](../01-architecture/development-memory-loop.md) *(Development Memory Loop DM1–DM10 complete)*
+4. [../02-planning/development-memory-roadmap.md](../02-planning/development-memory-roadmap.md)
+5. [build-status.md](./build-status.md)
 4. [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md)
 5. [benchmark-lab/OPERATOR_GUIDE.md](../../benchmark-lab/OPERATOR_GUIDE.md)
 6. [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md)
@@ -37,6 +39,118 @@ Broader model, track, hardware, prompt regression, and live qualification covera
 Preserve runtime separation: Local Brain may consume compact qualification artifacts but must not import `benchmark-lab/engine/` modules.
 
 ## Completed
+
+### Development Memory Loop DM10 (Multi-Project Local Brain Template)
+
+DM10 makes the Development Memory Loop reusable across registered projects with isolated storage and guided setup.
+
+- `companion/memory/projects/*` — registry, path resolution, vault generator/import, health, setup steps
+- Registry: `data/memory/projects/registry.json`; legacy `locaily` keeps flat `data/memory/development-*` paths
+- New projects: namespaced `data/memory/projects/{slug}/development-*`
+- API: `GET/POST /memory/projects/*` (register, activate, setup steps, health)
+- CLI: `npm run memory:project:list|register|activate|generate-vault|health`
+- Capture processor resolves stores from active registered project
+- Tests: `node scripts/test-development-memory-multi-project.js` (5/5); full DM1–DM10 suite green
+
+**Development Memory Loop roadmap (DM1–DM10) is complete.** Follow-on candidates (E2E proof scenario, candidate review console UI, embeddings) require explicit objectives.
+
+### Development Memory Loop DM9 (Continuous but Controlled Capture)
+
+DM9 keeps the Local Brain current during ongoing development without manual session maintenance every time.
+
+- `companion/memory/events/capture/capture-*` — policy loader, gate, processor store, processor, worker
+- Background worker closes/recovers sessions and extracts candidates from closed sessions (idempotent)
+- Pause/resume capture without disabling retrieval (`POST /memory/capture/pause|resume`)
+- Status fields: `captureEnabled`, `lastEventAt`, `unprocessedEvents`, `openSessions`, `pendingCandidates`, `pendingHumanReview`, `lastSuccessfulWritebackAt`, `warnings`
+- CLI: `npm run memory:capture:status|pause|resume|process`
+- Tests: `node scripts/test-development-memory-capture-processor.js` (5/5)
+
+### Development Memory Loop DM8 (Retrieval Integration)
+
+DM8 makes accepted project knowledge useful during future work through project-aware context packs.
+
+- `companion/memory/retrieval/*` — canonical page ranking, evidence index, budget-aware selection, warnings
+- Context packs prefer `projects/{slug}/PROJECT.md`, `STATUS.md`, `DECISIONS.md`, etc. over raw session logs
+- Optional request flags: `preferCanonicalPages`, `contextBudgetChars`, `maintainerPageBudget`, `excerptCharLimit`
+- Response extensions: `evidenceReferences`, `retrieval` (budget usage, stale/contradiction warnings)
+- Tests: `node scripts/test-development-memory-retrieval.js` (5/5)
+
+### Development Memory Loop DM7 (Project Memory Maintainer)
+
+DM7 maintains canonical project vault pages from approved candidates.
+
+- `companion/memory/events/maintainer-{drift,planner,store,manager}.js`
+- Runs: `data/memory/development-maintainer/runs/`; rollbacks: `rollbacks/`
+- Drift detection: missing target, duplicate statement, content drift
+- CLI: `npm run memory:maintainer:plan|status|list|show|apply`
+- Apply requires `--allow-apply-low-risk`; high-risk stays `review_required`
+- Tests: `node scripts/test-development-memory-maintainer.js` (4/4)
+
+### Development Memory Loop DM6 (Memory Review Inbox)
+
+DM6 adds the human gate between Layer B candidates and vault writeback.
+
+- `companion/memory/events/candidate-review-*` + `candidate-proposal-bridge.js`
+- Review records: `data/memory/development-candidates/reviews/`
+- API: `GET/POST /memory/candidates/review*`
+- CLI: `npm run memory:candidates:review-status|review-list|review-show|review`
+- Approve always creates `proposal_only` writeback (never auto-apply)
+- `/console/status` includes `memory.developmentMemoryReview` pending counts
+- Tests: `node scripts/test-development-memory-candidate-review.js` (5/5)
+
+### Development Memory Loop DM5 (Knowledge Candidate Extraction)
+
+DM5 converts closed session evidence into Layer B candidates.
+
+- `companion/memory/events/candidate-{extractor,analysis,store,manager}.js`
+- Storage: `data/memory/development-candidates/`
+- CLI: `npm run memory:candidates:extract|list|status`
+- Deterministic event-type rules; duplicate/contradiction reports
+- Tests: `node scripts/test-development-memory-candidates.js` (5/5)
+
+### Development Memory Loop DM4 (Session Aggregation)
+
+DM4 groups Layer A events into bounded development sessions.
+
+- `companion/memory/events/session-{store,summary,manager}.js`
+- Manifests: `data/memory/development-sessions/manifests/`
+- CLI: `npm run memory:session:start|status|close|rebuild`
+- Sequencer auto start/close per objective; capture stamps active `sessionId`
+- Tests: `node scripts/test-development-memory-sessions.js` (5/5)
+
+### Development Memory Loop DM3 (Capture Adapters)
+
+DM3 connects autonomous development workflows to the event store.
+
+- `companion/memory/events/capture/` — recorder, git metadata, adapter emitters
+- Sequencer: `objective_started`, `objective_completed`, `objective_blocked`
+- Supervisor: `task_dispatched`, `task_accepted`, `task_rejected`, `test_completed`, `blocker_recorded`, `commit_created`
+- CLI: `npm run memory:decision -- --project locaily --title "..." --reason "..."`
+- Disable capture: `DEVELOPMENT_MEMORY_CAPTURE=0`
+- Tests: `node scripts/test-development-memory-capture.js` (7/7)
+
+### Development Memory Loop DM2 (Immutable Event Store)
+
+DM2 adds runtime Layer A evidence storage extending Memory Bridge.
+
+- `companion/memory/events/event-store.js` — append-only store at `data/memory/development-events/`
+- `companion/memory/events/event-redaction.js` — secret detection/rejection
+- Endpoints: `POST /memory/events`, `GET /memory/events`, `GET /memory/events/:eventId`
+- Permissions: `memory.events.write` (POST), `memory.read` (GET)
+- Tests: `node scripts/test-development-memory-events.js` (13/13)
+
+### Development Memory Loop DM1 (Contracts)
+
+DM1 defines the Development Memory Loop as a Memory Bridge extension — contracts only, no capture automation.
+
+- `docs/01-architecture/development-memory-loop.md` — capability matrix, three layers (events / candidates / durable memory), trust boundaries, known Memory Bridge drift
+- `docs/01-architecture/development-memory-events.md` — event contract, 17 event types, integration points (sequencer, supervisor, worker, git, jobs, console)
+- `docs/02-planning/development-memory-roadmap.md` — DM1–DM10 milestones (complete)
+- Schemas: `companion/schemas/development-memory-*.schema.json` including project registry schemas
+- Fixtures: `companion/schemas/fixtures/development-memory/`
+- Tests: `node scripts/test-development-memory-schemas.js`; `node scripts/test-memory-v1.cjs` (6/6)
+
+**Do not** conflate Development Memory with Track Run Records (product execution evidence).
 
 ### Canonical Track Run Records
 
@@ -281,6 +395,7 @@ Target routing principle: smallest qualified capability.
 | Proof workflows | `lighthouse-handoff.track.json`, `dealsniper.track.json` |
 | Relay Nodes | `companion/relay/` (protocol, registry, connector, router) |
 | Memory Bridge | `companion/memory/vault-adapter.js`, `companion/memory/writeback-proposal.js` |
+| Development Memory Loop | `companion/memory/events/`, `companion/schemas/development-memory-*.schema.json`, `docs/01-architecture/development-memory-*.md` |
 
 ## Before Reporting Success
 
@@ -294,6 +409,9 @@ node scripts/test-enforcement-policy-store.js
 node scripts/test-enforcement-policy.js
 node scripts/test-enforcement-routing.js
 npm.cmd run test:relay
+node scripts/test-development-memory-schemas.js
+node scripts/test-development-memory-events.js
+node scripts/test-development-memory-capture.js
 npm.cmd run test:memory-v1
 npm.cmd run test:relay:e2e
 ```

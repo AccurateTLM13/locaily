@@ -2,7 +2,7 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-07-12 (M6 scope: durable job store wired into Local Brain; `/jobs` API endpoints added: `POST /jobs`, `GET /jobs`, `GET /jobs/:id`, `POST /jobs/:id/cancel`, `POST /jobs/:id/retry`, `POST /jobs/:id/review`; `jobTotals` in `/health` response; background worker polling loop automatically claims and executes queued jobs; cancel/retry/review mutation endpoints for operator control; operator console UI at `/operator`)
+**Updated:** 2026-07-18 (DM10: multi-project template — project registry, namespaced isolation, setup flow, health API; DM1–DM10 complete)
 
 ## What Works
 
@@ -21,6 +21,15 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Memory Bridge v0** - `/memory/status`, `/memory/context-pack`, `/memory/writeback/propose` (disabled by default)
 - **Relay Node protocol (M4)** - `companion/relay/*`: registry, connector, router. Endpoints `GET /relay/protocol`, `GET /relay/nodes`, `POST /relay/register`, `POST /relay/heartbeat`, `POST /relay/unregister`, `POST /relay/step`. Cross-node routing wired into track + workflow step execution with local fallback + `RELAY_FALLBACK` audit. `GET /health` reports relay node counts.
 - **Memory Bridge v1 (M4)** - adds `POST /memory/search` (allowlisted ranked search) and `POST /memory/writeback/apply` (opt-in, vault-path-gated, `memory.writeback.apply` permission).
+- **Development Memory Loop DM1 (contracts)** - architecture docs, four JSON schemas, fixtures, validation tests
+- **Development Memory Loop DM3 (capture adapters)** - `companion/memory/events/capture/` emits schema-valid events from sequencer (objective lifecycle), supervisor (task lifecycle, worker validation, git commits), and `npm run memory:decision` (human decisions). Non-blocking capture with stable event IDs and failure log at `data/memory/development-events/capture-failures.jsonl`. Disable with `DEVELOPMENT_MEMORY_CAPTURE=0`.
+- **Development Memory Loop DM4 (session aggregation)** - `companion/memory/events/session-{store,summary,manager}.js` groups correlated events into immutable session manifests at `data/memory/development-sessions/`. Deterministic factual summaries link to source event IDs. CLI: `npm run memory:session:start|status|close|rebuild`. Sequencer starts/closes sessions per objective; capture stamps active `sessionId`.
+- **Development Memory Loop DM5 (knowledge candidate extraction)** - `companion/memory/events/candidate-{extractor,analysis,store,manager}.js` converts closed session evidence into schema-valid Layer B candidates at `data/memory/development-candidates/`. Deterministic event-type rules; duplicate and contradiction surfacing via extraction reports. CLI: `npm run memory:candidates:extract|list|status`.
+- **Development Memory Loop DM6 (memory review inbox)** - `companion/memory/events/candidate-review-*` provides review records, inbox list/detail/actions, and proposal-only approve flow. API: `/memory/candidates/review*`. CLI: `npm run memory:candidates:review*`. Pending counts exposed in `/console/status` as `memory.developmentMemoryReview`. Global vault apply settings do not bypass candidate review.
+- **Development Memory Loop DM7 (project memory maintainer)** - `companion/memory/events/maintainer-*` plans canonical vault updates from approved candidates with drift detection. Plan-only by default at `data/memory/development-maintainer/`. Low-risk apply requires explicit opt-in and writes rollback snapshots first. CLI: `npm run memory:maintainer:*`. API: `/memory/maintainer/*`.
+- **Development Memory Loop DM8 (retrieval integration)** - `companion/memory/retrieval/*` extends context packs to prefer canonical project pages (`projects/{slug}/STATUS.md`, `DECISIONS.md`, etc.), enforce excerpt/context budgets, surface `evidenceReferences` from candidates and maintainer runs, and emit stale/contradiction warnings. Integrated into `POST /memory/context-pack` via `buildContextPack`. Tests: `npm run test:development-memory-retrieval` (5/5).
+- **Development Memory Loop DM9 (continuous controlled capture)** - `companion/memory/events/capture/capture-*` runs a background worker that recovers/closes sessions and extracts candidates idempotently. Capture can be paused without disabling retrieval. API: `/memory/capture/*`. CLI: `npm run memory:capture:*`. Status surfaced in `/console/status` as `memory.developmentMemoryCapture`. Tests: `npm run test:development-memory-capture-processor` (5/5).
+- **Development Memory Loop DM10 (multi-project template)** - `companion/memory/projects/*` registers projects with repository identity, resolves legacy vs namespaced storage paths, generates starter vaults, validates imports, and reports per-project health. Registry at `data/memory/projects/registry.json`. API: `/memory/projects/*`. CLI: `npm run memory:project:*`. Capture processor resolves paths from the active registered project. Tests: `npm run test:development-memory-multi-project` (5/5). **DM1–DM10 roadmap complete.**
 - **Multi-Device Workflow Coordination (M5)** - `companion/relay/placement.js` placement planner distributes model steps across healthy relay nodes (capability + health + least-loaded; `distribute` policy). `POST /relay/plan` previews placement. `executeStepWithAssignedNode` routes each step to its assigned node and falls back locally (with `RELAY_FALLBACK` audit) on node failure. Wired into `/tracks/run` and `/workflows/run` for `relay_policy=distribute`; responses include `relay_placement` summary. Tests: `test-relay-placement.cjs` (14/14), `test-multi-device-e2e.cjs` (22/22), `test-relay` unit (17/17 after harness fix).
 - **Operator Log editorial tracks** - experimental discovery and human-selected draft proposal paths
 - **Benchmark Lab Milestone 1** - complete and operator-ready. Implements: engine and CLI (run, review, compare, promote, matrix, probe, diagnose, report, model-card, qualification, checksum-verify); 14 schemas with validation; mock + Ollama + ToolEvalRuntime adapters; execution-router with native/policy-routed/runtime-constrained modes; evidence promotion and checksum verification (canonical_text_v1/byte_exact); qualification-record generation; model capability probing; read-only runtime status at `GET /benchmark/status`; Local Brain consuming compact qualification data without importing Benchmark Lab engine internals
@@ -61,7 +70,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Model qualification coverage** - Qualification consumption engine and capability registry built; broader model, track, hardware, deeper live qualification evidence, and prompt/regression coverage remain incremental
 - **Model scorecards / skill sheets** - six-state qualification consumption engine + capability registry are the runtime surface
 - **Runtime Track Run Record emission** - The Crew orchestrator and workflow plan executor emit canonical Track Run Records for all supported runtime flows (direct track, workflow, Lighthouse Handoff, DealSniper). Records are persisted to `data/evidence/track-run-records/`. Responses from `/tracks/run` and `/worksflows/run` include evidence references. Failed executions also produce records. Qualification Evidence Linker connects records to qualification data.
-- **Memory Bridge** - v0 endpoints + v1 search/apply (apply opt-in); no embeddings yet
+- **Memory Bridge** - v0 endpoints + v1 search/apply (apply opt-in); DM1–DM10 development memory loop complete through multi-project template; no embeddings yet
 - **Console validation** - local validation UI exists; not a finished product surface
 - **Fallback ladder** - partial (`retry_same_model_once`); no full escalation handler
 - **Step input mapping** - declarative `input_map` on all track steps; legacy step-id fallbacks removed from `step-input.js`
@@ -73,7 +82,6 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 
 - **Automatic track classification** - no classifier selects workflow + track *(M3 follow-on)*
 - **Automatic model swapping / Model Garage auto-switching** - proposed only
-- **Extension to Local Brain HTTP bridge** - spec exists; not implemented end-to-end
 
 ## Canonical Track Run Records
 
@@ -134,8 +142,8 @@ The North Star is now documented as a local capability network: decompose work i
 
 | Layer | Focus |
 |---|---|
-| **Now** | M6: Operator Control Plane — durable job store API, background worker polling loop (claims + executes queued jobs), cancel/retry/review mutation endpoints (POST /jobs/:id/cancel, /retry, /review with paused_review transitions), operator console UI at /operator |
-| **Next** | Broader model qualification coverage; live Ollama qualification runs; operator-log tracks qualification; Model Garage evaluation harness (Phase 2 — spec only until evidence) |
+| **Now** | DM4: Session Aggregation — correlate events into session manifests with deterministic summaries |
+| **Next** | DM5 knowledge candidate extraction; broader model qualification coverage |
 | **Later** | Lighthouse canonical-path documentation; workflow audit summary hardening; Desktop Companion UI (deferred); automatic track classification |
 | **Archive** | Old companion-only architecture, pre-track planning docs |
 

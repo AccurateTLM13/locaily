@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-memory-project.schema.json",
+  "title": "Development Memory Registered Project",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "displayName",
+    "workspaceRoot",
+    "repositoryIdentity",
+    "vaultPath",
+    "storageLayout",
+    "captureEnabled",
+    "allowedPaths",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspaceRoot": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repositoryIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "branch"],
+      "properties": {
+        "repository": { "type": "string" },
+        "branch": { "type": "string" }
+      }
+    },
+    "vaultPath": {
+      "type": ["string", "null"]
+    },
+    "storageLayout": {
+      "type": "string",
+      "enum": ["legacy", "namespaced"]
+    },
+    "captureEnabled": {
+      "type": "boolean"
+    },
+    "allowedPaths": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "blockedPaths": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "capturePolicyPath": {
+      "type": ["string", "null"]
+    },
+    "createdAt": {
+      "type": "string"
+    },
+    "updatedAt": {
+      "type": "string"
+    }
+  }
+}

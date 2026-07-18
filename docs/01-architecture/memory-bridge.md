@@ -143,12 +143,26 @@ When `memoryBridge.enabled` is `false`, Locaily runs normally; memory endpoints 
 | POST | `/memory/writeback/propose` | Write reviewable proposal to inbox |
 | POST | `/memory/search` | Structured, allowlisted ranked search (v1) |
 | POST | `/memory/writeback/apply` | Apply reviewed proposal to allowlisted path (v1, opt-in) |
+| POST | `/memory/events` | Append validated development event (DM2, `memory.events.write`) |
+| GET | `/memory/events` | Query development events (DM2, `memory.read`) |
+| GET | `/memory/events/:eventId` | Fetch one development event (DM2, `memory.read`) |
 
 Contract detail: [api-contract.md](./api-contract.md), [context-packs.md](./context-packs.md), [memory-writeback.md](./memory-writeback.md).
+
+## Development Memory Loop (planned extension)
+
+DM1 defines contracts for capturing development activity into reviewed vault memory. See:
+
+- [development-memory-loop.md](./development-memory-loop.md)
+- [development-memory-events.md](./development-memory-events.md)
+- [../02-planning/development-memory-roadmap.md](../02-planning/development-memory-roadmap.md)
+
+DM1 adds schemas and docs only; no capture automation yet.
 
 ## Related
 
 - [context-packs.md](./context-packs.md)
 - [memory-writeback.md](./memory-writeback.md)
+- [development-memory-loop.md](./development-memory-loop.md)
 - [../06-decisions/second-brain-as-memory-layer.md](../06-decisions/second-brain-as-memory-layer.md)
 - [../../templates/memory-vault/README.md](../../templates/memory-vault/README.md)

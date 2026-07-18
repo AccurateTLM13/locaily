@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-memory-event.schema.json",
+  "title": "Development Memory Event",
+  "description": "Immutable source evidence record for a meaningful development state transition. Layer A in the Development Memory Loop.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "schemaVersion",
+    "project",
+    "eventType",
+    "occurredAt",
+    "capturedAt",
+    "source",
+    "summary",
+    "artifacts",
+    "validation",
+    "sensitivity",
+    "correlation"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^evt_",
+      "description": "Collision-resistant event identifier with evt_ prefix."
+    },
+    "schemaVersion": {
+      "const": "1.0",
+      "description": "Development memory event schema version."
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Registered project slug."
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "commit_created",
+        "pull_request_opened",
+        "pull_request_merged",
+        "objective_started",
+        "objective_completed",
+        "objective_blocked",
+        "task_dispatched",
+        "task_accepted",
+        "task_rejected",
+        "test_completed",
+        "decision_recorded",
+        "blocker_recorded",
+        "release_created",
+        "human_note",
+        "memory_proposal_created",
+        "memory_proposal_applied",
+        "memory_proposal_rejected"
+      ]
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "capturedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter"],
+      "properties": {
+        "adapter": {
+          "type": "string",
+          "enum": [
+            "controller",
+            "supervisor",
+            "worker",
+            "git",
+            "track",
+            "workflow",
+            "job",
+            "human",
+            "memory"
+          ]
+        },
+        "repository": {
+          "type": "string"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "string"
+        },
+        "objectiveSlug": {
+          "type": "string"
+        },
+        "taskSlug": {
+          "type": "string"
+        }
+      }
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "ref"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "file_path",
+              "commit_sha",
+              "record_id",
+              "url",
+              "manifest_path"
+            ]
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceVerified", "status"],
+      "properties": {
+        "sourceVerified": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["accepted", "rejected", "pending"]
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "sensitivity": {
+      "type": "string",
+      "enum": ["public", "internal", "restricted"]
+    },
+    "correlation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "runId": {
+          "type": ["string", "null"]
+        },
+        "objectiveId": {
+          "type": ["string", "null"]
+        },
+        "taskId": {
+          "type": ["string", "null"]
+        },
+        "sessionId": {
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}

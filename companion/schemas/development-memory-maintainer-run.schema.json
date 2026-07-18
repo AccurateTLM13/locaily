@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-memory-maintainer-run.schema.json",
+  "title": "Development Memory Maintainer Run",
+  "description": "Deterministic maintainer plan grouping approved candidate updates against canonical project vault pages.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runId",
+    "schemaVersion",
+    "project",
+    "status",
+    "items",
+    "summary",
+    "createdAt"
+  ],
+  "properties": {
+    "runId": {
+      "type": "string",
+      "pattern": "^maint_"
+    },
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["planned", "applied", "partial", "cancelled"]
+    },
+    "autoApplyLowRisk": {
+      "type": "boolean"
+    },
+    "autoApplyHighRisk": {
+      "type": "boolean"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "candidateId",
+          "targetVaultPath",
+          "suggestedOperation",
+          "proposedStatement",
+          "driftStatus",
+          "plannedAction",
+          "applyAllowed",
+          "evidenceEventIds"
+        ],
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "pattern": "^cand_"
+          },
+          "reviewId": {
+            "type": ["string", "null"],
+            "pattern": "^rev_"
+          },
+          "targetVaultPath": {
+            "type": "string"
+          },
+          "suggestedOperation": {
+            "type": "string",
+            "enum": ["append", "insert_section", "update_section", "create_file"]
+          },
+          "proposedStatement": {
+            "type": "string"
+          },
+          "driftStatus": {
+            "type": "string",
+            "enum": ["none", "missing_target", "statement_already_present", "content_drift"]
+          },
+          "driftDetail": {
+            "type": "string"
+          },
+          "plannedAction": {
+            "type": "string",
+            "enum": ["append_section", "create_file", "skip_duplicate", "review_required"]
+          },
+          "applyAllowed": {
+            "type": "boolean"
+          },
+          "reviewRisk": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          },
+          "evidenceEventIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^evt_"
+            }
+          },
+          "applied": {
+            "type": "boolean"
+          },
+          "rollbackId": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approvedCandidates",
+        "plannedUpdates",
+        "skippedDuplicates",
+        "driftDetected",
+        "reviewRequired"
+      ],
+      "properties": {
+        "approvedCandidates": { "type": "integer", "minimum": 0 },
+        "plannedUpdates": { "type": "integer", "minimum": 0 },
+        "skippedDuplicates": { "type": "integer", "minimum": 0 },
+        "driftDetected": { "type": "integer", "minimum": 0 },
+        "reviewRequired": { "type": "integer", "minimum": 0 },
+        "appliedUpdates": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "rollbackIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^rb_"
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "plannedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "appliedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  }
+}

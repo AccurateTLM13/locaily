@@ -1,0 +1,17 @@
+{
+  "candidateId": "cand_invalid_no_prefix",
+  "schemaVersion": "1.0",
+  "candidateType": "decision",
+  "proposedStatement": "Claim with no evidence attached.",
+  "confidence": 1.5,
+  "evidenceEventIds": [],
+  "targetProject": "locaily",
+  "suggestedVaultPath": "projects/locaily/DECISIONS.md",
+  "suggestedOperation": "append",
+  "contradictionStatus": "none",
+  "reviewRisk": "low",
+  "generatedBy": {
+    "method": "model_assisted"
+  },
+  "createdAt": "not-a-date"
+}

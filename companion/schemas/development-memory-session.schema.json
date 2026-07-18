@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-memory-session.schema.json",
+  "title": "Development Memory Session Manifest",
+  "description": "Immutable manifest grouping correlated development events into one bounded work period.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sessionId",
+    "schemaVersion",
+    "project",
+    "status",
+    "startedAt",
+    "eventIds",
+    "summary",
+    "metrics",
+    "createdAt"
+  ],
+  "properties": {
+    "sessionId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^sess_"
+    },
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["open", "closed", "interrupted"]
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "endedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "eventIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^evt_"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "linkedEventIds"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000,
+          "description": "Deterministic factual summary; every claim should map to linkedEventIds."
+        },
+        "linkedEventIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^evt_"
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "objectivesAttempted": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "tasksCompleted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "commitsProduced": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "testsExecuted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "filesAffected": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "blockers": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "unresolvedWork": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "correlation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "objectiveId": { "type": ["string", "null"] },
+        "runId": { "type": ["string", "null"] },
+        "branch": { "type": ["string", "null"] }
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "closedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  }
+}

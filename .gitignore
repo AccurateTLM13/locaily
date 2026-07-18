@@ -62,21 +62,22 @@ benchmark-lab/**/*.ndjson
 companion/evidence/records/*.json
 companion/evidence/lessons/*.json
 
-# Agent controller — transient queue state (completed/ is tracked for history)
+# Cursor local hooks/state
+.cursor/
+
+# Agent controller — transient run history and queue state (completed/ is tracked)
+.opencode/agents/history/
 .opencode/agents/objectives/queue/*.md
 !.opencode/agents/objectives/queue/BULK_MILESTONE_GUIDE.md
 !.opencode/agents/objectives/queue/TEMPLATE.md
 !.opencode/agents/objectives/queue/completed/
+.opencode/agents/objectives/queue/failed/
+.opencode/agents/objectives/queue/held/
 
 # Agent controller — transient run artifacts
 .opencode/agents/runs/
-.opencode/agents/state/run-state.json
-.opencode/agents/state/latest-review.json
-.opencode/agents/state/latest-worker-result.json
+.opencode/agents/state/
 .opencode/agents/tasks/active-task.md
-.opencode/agents/state/milestones/
-.opencode/agents/state/sessions/
-.opencode/agents/state/worktrees/
 
 # Preserve directory placeholders and sanitized fixtures
 !companion/evidence/records/.gitkeep

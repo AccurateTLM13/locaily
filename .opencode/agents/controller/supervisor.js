@@ -35,6 +35,9 @@ const AGENTS_DIR = path.resolve(HERE, "..");
 const PROJECT_ROOT = path.resolve(AGENTS_DIR, "..", "..");
 const CONFIG_PATH = path.join(HERE, "config.json");
 
+let developmentMemory = null;
+try { developmentMemory = require("./development-memory-capture"); } catch { developmentMemory = null; }
+
 const STATE_PATH = path.join(AGENTS_DIR, "state", "run-state.json");
 const REVIEW_PATH = path.join(AGENTS_DIR, "state", "latest-review.json");
 const WORKER_RESULT_PATH = path.join(AGENTS_DIR, "state", "latest-worker-result.json");
@@ -330,6 +333,15 @@ function reconcileAfterPlan(state, cfg, cliOk, prevTaskText) {
   state.phase = "worker";
   state.last_worker_status = "pending";
   snapshotHistory("plan", state, null);
+  if (developmentMemory) {
+    developmentMemory.emitTaskDispatched({
+      projectRoot: PROJECT_ROOT,
+      objectiveId: state.objective,
+      taskId: state.current_task,
+      runId: state.run_id,
+      iteration: state.iteration
+    });
+  }
   return state;
 }
 
@@ -369,6 +381,26 @@ function reconcileAfterWorker(state, cfg, cliOk) {
   else if (statLines.lines > cfg.git.max_diff_lines) { state.blocker = `worker_diff_too_large_lines:${statLines.lines}`; state.last_worker_status = "failed"; }
   if (wr.blocker) state.blocker = state.blocker || `worker: ${wr.blocker}`;
 
+  if (developmentMemory) {
+    developmentMemory.emitWorkerValidationCompleted({
+      projectRoot: PROJECT_ROOT,
+      objectiveId: state.objective,
+      taskId: state.current_task,
+      runId: state.run_id,
+      workerResult: wr
+    });
+    if (state.last_worker_status === "complete") {
+      developmentMemory.emitCommitsSinceRef({
+        projectRoot: PROJECT_ROOT,
+        objectiveId: state.objective,
+        taskId: state.current_task,
+        runId: state.run_id,
+        baseRef: ref,
+        headRef: "HEAD"
+      });
+    }
+  }
+
   state.phase = "review";
   snapshotHistory("worker", state, wr);
   return state;
@@ -399,8 +431,64 @@ function reconcileAfterReview(state, cfg, cliOk) {
   archiveTask(state, accepted);
   snapshotHistory("review", state, review);
 
-  if (state.objective_complete) { state.status = "complete"; state.phase = "stop"; return state; }
-  if (state.blocker && cfg.loop.stop_on_blocker) { state.status = "blocked"; state.phase = "stop"; return state; }
+  if (developmentMemory) {
+    if (accepted) {
+      let invariantsModule = null;
+      try { invariantsModule = require("./invariants"); } catch {}
+      const commitSha = gitOk(["rev-parse", "HEAD"]);
+      if (invariantsModule) {
+        invariantsModule.recordAcceptedTask(state.objective, state.current_task, commitSha);
+      }
+      developmentMemory.emitTaskAccepted({
+        projectRoot: PROJECT_ROOT,
+        objectiveId: state.objective,
+        taskId: state.current_task,
+        runId: state.run_id,
+        iteration: state.iteration
+      });
+      if (commitSha) {
+        developmentMemory.emitCommitCreated({
+          projectRoot: PROJECT_ROOT,
+          objectiveId: state.objective,
+          taskId: state.current_task,
+          runId: state.run_id,
+          commitSha
+        });
+      }
+    } else {
+      developmentMemory.emitTaskRejected({
+        projectRoot: PROJECT_ROOT,
+        objectiveId: state.objective,
+        taskId: state.current_task,
+        runId: state.run_id,
+        iteration: state.iteration,
+        reason: review.blocker || review.status
+      });
+    }
+  }
+
+  if (state.objective_complete) {
+    if (developmentMemory) {
+      developmentMemory.emitObjectiveCompleted({
+        projectRoot: PROJECT_ROOT,
+        objectiveId: state.objective,
+        runId: state.run_id
+      });
+    }
+    state.status = "complete"; state.phase = "stop"; return state;
+  }
+  if (state.blocker && cfg.loop.stop_on_blocker) {
+    if (developmentMemory) {
+      developmentMemory.emitObjectiveBlocked({
+        projectRoot: PROJECT_ROOT,
+        objectiveId: state.objective,
+        runId: state.run_id,
+        blocker: state.blocker,
+        adapter: "supervisor"
+      });
+    }
+    state.status = "blocked"; state.phase = "stop"; return state;
+  }
 
   if (accepted) {
     state.iteration += 1;

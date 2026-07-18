@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "activeProjectSlug": "locaily",
+  "projects": {
+    "locaily": {
+      "slug": "locaily",
+      "displayName": "Locaily",
+      "workspaceRoot": "C:/repos/locaily",
+      "repositoryIdentity": {
+        "repository": "https://github.com/example/locaily",
+        "branch": "main"
+      },
+      "vaultPath": null,
+      "storageLayout": "legacy",
+      "captureEnabled": true,
+      "allowedPaths": [
+        "projects/",
+        "topics/"
+      ],
+      "createdAt": "2026-07-18T12:00:00.000Z",
+      "updatedAt": "2026-07-18T12:00:00.000Z"
+    },
+    "alpha": {
+      "slug": "alpha",
+      "displayName": "Alpha Project",
+      "workspaceRoot": "C:/projects/alpha",
+      "repositoryIdentity": {
+        "repository": "https://github.com/example/alpha",
+        "branch": "main"
+      },
+      "vaultPath": "C:/vaults/alpha",
+      "storageLayout": "namespaced",
+      "captureEnabled": false,
+      "allowedPaths": [
+        "projects/",
+        "topics/"
+      ],
+      "createdAt": "2026-07-18T12:00:00.000Z",
+      "updatedAt": "2026-07-18T12:00:00.000Z"
+    }
+  },
+  "updatedAt": "2026-07-18T12:00:00.000Z"
+}

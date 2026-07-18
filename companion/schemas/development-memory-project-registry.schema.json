@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-memory-project-registry.schema.json",
+  "title": "Development Memory Project Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "activeProjectSlug", "projects", "updatedAt"],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "activeProjectSlug": {
+      "type": "string"
+    },
+    "projects": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "development-memory-project.schema.json"
+      }
+    },
+    "updatedAt": {
+      "type": "string"
+    }
+  }
+}

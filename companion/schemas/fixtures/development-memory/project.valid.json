@@ -1,0 +1,23 @@
+{
+  "slug": "alpha",
+  "displayName": "Alpha Project",
+  "workspaceRoot": "C:/projects/alpha",
+  "repositoryIdentity": {
+    "repository": "https://github.com/example/alpha",
+    "branch": "main"
+  },
+  "vaultPath": "C:/vaults/alpha",
+  "storageLayout": "namespaced",
+  "captureEnabled": false,
+  "allowedPaths": [
+    "projects/",
+    "topics/"
+  ],
+  "blockedPaths": [
+    "raw/",
+    "private/"
+  ],
+  "capturePolicyPath": "C:/vaults/alpha/.memory-bridge/capture-policy.json",
+  "createdAt": "2026-07-18T12:00:00.000Z",
+  "updatedAt": "2026-07-18T12:00:00.000Z"
+}

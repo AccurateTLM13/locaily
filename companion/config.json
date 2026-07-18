@@ -113,7 +113,7 @@
   },
   "permissions": {
     "filePath": "data/permissions.json",
-    "approved": ["model.run", "memory.read", "memory.writeback.propose"],
+    "approved": ["model.run", "memory.read", "memory.writeback.propose", "memory.events.write", "memory.candidates.review", "memory.maintainer.run", "memory.capture.control"],
     "denied": ["file.delete", "file.write", "network.send", "browser.write", "memory.delete"]
   },
   "memoryBridge": {

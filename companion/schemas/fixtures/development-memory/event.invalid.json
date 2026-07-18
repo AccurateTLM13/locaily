@@ -1,0 +1,20 @@
+{
+  "eventId": "evt_invalid_still_has_bad_type",
+  "schemaVersion": "1.0",
+  "project": "locaily",
+  "eventType": "unknown_event_type",
+  "occurredAt": "2026-07-18T15:30:00.000Z",
+  "capturedAt": "2026-07-18T15:30:01.000Z",
+  "source": {
+    "adapter": "git"
+  },
+  "summary": "Invalid event missing required structure.",
+  "artifacts": [],
+  "validation": {
+    "sourceVerified": true,
+    "status": "accepted"
+  },
+  "sensitivity": "internal",
+  "correlation": {},
+  "extraField": "not allowed"
+}

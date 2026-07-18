@@ -1,89 +1,68 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "09-physical-multi-device-pilot",
+  "build_slice": "dm10-multi-project-template",
   "status": "complete",
-  "objective": "Create pilot infrastructure — hardware profile schema, pilot run orchestrator script, and pilot plan documentation — in preparation for the physical multi-device pilot (M9).",
+  "objective": "Reuse the Development Memory Loop for Locaily or any other project with guided setup and per-project isolation.",
   "implemented": {
-    "pilot_infrastructure": [
-      "scripts/pilot/hardware-profile.schema.json — JSON schema defining required fields for device hardware profiles (deviceName, os, cpu, ram, vram, runtimeProvider, availableModels, advertisedCapabilities, networkAddress)",
-      "scripts/pilot/hardware-profile-template.json — template with placeholder comments for operators to fill in",
-      "scripts/pilot/pilot-runner.js — CLI script that executes track workflows with three relay policies (local-only, local-first, distributed), collects timing metrics and relay placement evidence, writes per-run JSON evidence files and summary CSV",
-      "docs/05-integrations/multi-device-pilot.md — pilot plan document covering prerequisites, setup, run procedures, evidence collection, and tear-down"
+    "project_modules": [
+      "companion/memory/projects/project-paths.js",
+      "companion/memory/projects/project-registry.js",
+      "companion/memory/projects/vault-generator.js",
+      "companion/memory/projects/vault-import.js",
+      "companion/memory/projects/project-health.js",
+      "companion/memory/projects/project-setup.js",
+      "companion/memory/projects/index.js"
     ],
-    "package_scripts": [
-      "pilot:local-only — runs pilot with local-only relay policy",
-      "pilot:local-first — runs pilot with local-first relay policy",
-      "pilot:distributed — runs pilot with distributed relay policy"
+    "schemas": [
+      "companion/schemas/development-memory-project.schema.json",
+      "companion/schemas/development-memory-project-registry.schema.json",
+      "companion/schemas/fixtures/development-memory/project*.json"
+    ],
+    "api": [
+      "GET /memory/projects",
+      "GET /memory/projects/health",
+      "POST /memory/projects/register",
+      "GET /memory/projects/:slug",
+      "POST /memory/projects/:slug",
+      "GET /memory/projects/:slug/health"
+    ],
+    "cli": [
+      "scripts/memory-project.js",
+      "npm run memory:project:list",
+      "npm run memory:project:register",
+      "npm run memory:project:activate",
+      "npm run memory:project:generate-vault",
+      "npm run memory:project:health"
+    ],
+    "integrations": [
+      "companion/server.js — developmentProjectRegistry and capture processor path resolution",
+      "companion/memory/events/capture/capture-processor.js — resolveContext/createManagers for active project",
+      "docs/05-integrations/backup-and-restore.md — development memory paths"
     ],
     "tests": [
-      "All existing tests pass: benchmark:test, benchmark:status-smoke, contract-test, test-relay-unit.cjs (52/52), test-relay-placement.cjs (17/17)",
-      "Pilot runner tested in local-only mode against running Local Brain with mock provider — successfully executes tracks and writes evidence"
+      "scripts/test-development-memory-multi-project.js — 5/5",
+      "scripts/test-development-memory-capture-processor.js — 5/5",
+      "scripts/test-development-memory-retrieval.js — 5/5",
+      "scripts/test-development-memory-maintainer.js — 4/4",
+      "scripts/test-development-memory-candidate-review.js — 5/5",
+      "scripts/test-development-memory-candidates.js — 5/5",
+      "scripts/test-development-memory-sessions.js — 5/5",
+      "scripts/test-development-memory-capture.js — 7/7",
+      "scripts/test-development-memory-events.js — 13/13",
+      "scripts/test-development-memory-schemas.js — all fixtures including project schemas",
+      "scripts/test-memory-v1.cjs — 6/6"
     ]
   },
   "validation": {
     "passed": true,
     "results": [
-      "hardware-profile.schema.json validates against JSON Schema draft-07",
-      "hardware-profile-template.json contains all required fields with placeholder values",
-      "pilot-runner.js runs without error in local-only mode against a running Local Brain (mock provider)",
-      "Pilot runner collects per-run timing metrics (total_duration_ms), relay_placement summary, and writes evidence JSON files",
-      "Pilot runner writes summary CSV with columns: policy, workflow, run_number, total_duration_ms, ok, relay_nodes_used",
-      "docs/05-integrations/multi-device-pilot.md exists covering prerequisites, setup, run procedures, evidence collection, and tear-down",
-      "package.json has pilot:local-only, pilot:local-first, pilot:distributed scripts",
-      "npm run benchmark:test passes (no failure)",
-      "npm run benchmark:status-smoke passes",
-      "node scripts/contract-test.js passes",
-      "node scripts/test-relay-unit.cjs passes (52/52 assertions)",
-      "node scripts/test-relay-placement.cjs passes (17/17 assertions)",
-      "No existing files outside the defined scope are modified"
+      "Namespaced projects store events in isolated directories",
+      "Legacy locaily project keeps flat data/memory/development-* paths",
+      "Starter vault generation and import validation succeed",
+      "Setup flow registers, generates vault, enables capture, and reports health",
+      "DM1–DM9 regression suite remains green"
     ]
   },
-  "acceptance_criteria": {
-    "passed": [
-      "scripts/pilot/hardware-profile.schema.json exists with required fields (deviceName, os, cpu, ram, vram, runtimeProvider, availableModels, advertisedCapabilities, networkAddress)",
-      "scripts/pilot/hardware-profile-template.json exists with placeholder comments",
-      "scripts/pilot/pilot-runner.js runs without error in local-only mode against a running Local Brain (mock provider)",
-      "Pilot runner collects per-run timing metrics (total duration at minimum), relay_placement summary, and writes evidence JSON files",
-      "Pilot runner writes a summary CSV with one row per run including: policy, workflow, run_number, total_duration_ms, ok, relay_nodes_used",
-      "docs/05-integrations/multi-device-pilot.md exists covering prerequisites, setup, run procedures, evidence collection, and tear-down",
-      "package.json has pilot:local-only, pilot:local-first, pilot:distributed scripts",
-      "npm run benchmark:test passes (no failure)",
-      "npm run benchmark:status-smoke passes",
-      "node scripts/contract-test.js passes",
-      "node scripts/test-relay-unit.cjs passes (all assertions)",
-      "node scripts/test-relay-placement.cjs passes (all assertions)",
-      "docs/07-progress/next-agent-brief.md updated with M9 pilot infrastructure status",
-      "docs/07-progress/build-status.md updated",
-      "docs/07-progress/latest-build-result.json updated",
-      "No existing files outside the defined scope are modified"
-    ],
-    "failed": [],
-    "blockers": []
-  },
-  "scope_notes": [
-    "Physical hardware setup not performed — this is infrastructure preparation only",
-    "No actual hardware profiles created for real devices — only templates",
-    "Pilot has not been executed on physical hardware — this is preparation only",
-    "No modifications to companion/ server, relay, crew, core, orchestration, tools",
-    "No modifications to benchmark-lab/",
-    "No modifications to existing test files",
-    "No modifications to existing tool packs",
-    "No new API endpoints added to the Local Brain server",
-    "No modifications to API response envelopes or existing endpoint behavior"
-  ],
-  "stop_conditions_honored": [
-    "No modifications to companion/ files",
-    "No modifications to benchmark-lab/ files",
-    "No modifications to existing test files under scripts/test-*.js or scripts/test-*.cjs",
-    "No modifications to existing tool packs under tool-packs/",
-    "No physical hardware setup performed",
-    "No actual hardware profiles created for real devices",
-    "No claim that the pilot has been executed",
-    "No modifications to API response envelopes",
-    "No new endpoints added to the Local Brain server",
-    "No modifications to companion/server.js"
-  ],
-  "last_fresh_validation": "2026-07-13 (pilot infrastructure implemented and tested — all existing tests pass, pilot runner executes successfully in local-only mode)",
-  "next_milestones": "Execute the pilot on two physical devices with Ollama installed; collect and analyze evidence from local-only, local-first, and distributed policy modes",
-  "updated_at": "2026-07-13"
+  "next_milestones": "Development Memory Loop DM1–DM10 complete. Follow-on candidates (E2E proof scenario, review console UI, embeddings) require explicit objectives.",
+  "updated_at": "2026-07-18"
 }

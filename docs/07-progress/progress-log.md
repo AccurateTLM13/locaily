@@ -6,6 +6,24 @@ Dated record of meaningful build and planning sessions.
 
 ---
 
+## 2026-07-18 — Development Memory Loop DM1–DM10 Complete
+
+### Changed
+
+- Implemented the full Development Memory Loop as a Memory Bridge extension: immutable events (DM2), capture adapters (DM3), session aggregation (DM4), candidate extraction (DM5), review inbox (DM6), project maintainer (DM7), retrieval integration (DM8), continuous capture processor (DM9), and multi-project template (DM10)
+- Added schemas, fixtures, CLIs, API routes, and offline test suites under `companion/memory/`, `companion/schemas/development-memory-*`, and `scripts/test-development-memory-*.js`
+- Multi-project registry with legacy `locaily` flat paths and namespaced `data/memory/projects/{slug}/` isolation
+- Updated handoff docs, backup guide, decision log, and active build slice
+
+### Evidence
+
+- `npm run test:development-memory` — all DM test suites green (schemas, events, capture, sessions, candidates, review, maintainer, retrieval, processor, multi-project)
+- `npm run test:memory-v1` — 6/6 unchanged
+
+### Next
+
+Development Memory Loop roadmap complete. Follow-on candidates (E2E proof scenario, candidate review console UI, embeddings) require explicit objectives.
+
 ## 2026-07-11 — M5 Architectural Review: Trust Boundary, Placement Evidence, and M6 Scope
 
 ### Changed
@@ -1172,11 +1190,17 @@ Reviewed completed M4 (Relay Nodes) and M5 (Multi-Device Workflow Coordination) 
 
 | # | Issue | Fix |
 |---|---|---|
-| 1 | egistry.selectForRole sorted descending (most-loaded first) | companion/relay/registry.js: sort ascending by dispatchCount |
-| 2 | Placement yRole double-counted nodes advertising both ole and ole:role | companion/relay/placement.js: dedupe nodes per role |
+| 1 | 
+egistry.selectForRole sorted descending (most-loaded first) | companion/relay/registry.js: sort ascending by dispatchCount |
+| 2 | Placement yRole double-counted nodes advertising both 
+ole and 
+ole:role | companion/relay/placement.js: dedupe nodes per role |
 | 3 | No direct unit test for M5 executeStepWithAssignedNode | Added 3 tests to scripts/test-relay-unit.cjs (routes to assigned node; falls back when unhealthy; falls back + RELAY_FALLBACK audit on failure) |
-| 4 | elay-node-protocol.md M4-only, missing M5 | Added M5 placement section (distribute, POST /relay/plan, relay_placement, assignments) |
-| H | 	est-relay-unit.cjs async checks were fire-and-forget before process.exit (never ran; masked wrong .code vs .error_code audit assertion) | Harness now awaits async checks; corrected assertion |
+| 4 | 
+elay-node-protocol.md M4-only, missing M5 | Added M5 placement section (distribute, POST /relay/plan, relay_placement, assignments) |
+| H | 	est-relay-unit.cjs async checks were fire-and-forget before process.exit (never ran; masked wrong 
+.code vs 
+.error_code audit assertion) | Harness now awaits async checks; corrected assertion |
 
 Verification after fixes:
 
@@ -1184,4 +1208,5 @@ Verification after fixes:
 - scripts/test-relay-placement.cjs � 14/14 PASS
 - scripts/test-multi-device-e2e.cjs � 22/22 PASS
 
-M4 + M5 acceptance criteria met; no blockers remaining. See docs/07-progress/latest-build-result.json eview_2026-07-11.
+M4 + M5 acceptance criteria met; no blockers remaining. See docs/07-progress/latest-build-result.json 
+eview_2026-07-11.
