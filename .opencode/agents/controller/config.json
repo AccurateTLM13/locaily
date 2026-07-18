@@ -13,7 +13,7 @@
     },
     "worker": {
       "agent": "worker",
-      "model": "opencode-go/qwen3.7-plus"
+      "model": "opencode-go/deepseek-v4-flash"
     }
   },
   "models": {
@@ -28,8 +28,8 @@
     }
   },
   "loop": {
-    "max_iterations": 10,
-    "max_corrections_per_task": 3,
+    "max_iterations": 15,
+    "max_corrections_per_task": 2,
     "max_consecutive_failures": 3,
     "stop_on_blocker": true,
     "seconds_between_steps": 1,

@@ -1,7 +1,7 @@
 ---
 description: Worker in the .opencode/agents control loop. Implements exactly one bounded task per invocation, runs tests, commits, writes a structured result. Invoked via the controller for the worker phase.
 mode: primary
-model: opencode-go/qwen3.7-plus
+model: opencode-go/deepseek-v4-flash
 permission:
   edit:
     "*": allow

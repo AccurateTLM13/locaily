@@ -782,6 +782,31 @@ checkAsync("router executeStepWithFallback no schema passes through unchanged", 
   assert.strictEqual(result.meta.outputValid, true);
 });
 
+checkAsync("orchestrator step meta includes plannedTarget/plannedNodeId/actualTarget/actualNodeId when relay is used", async () => {
+  const reg = createRelayRegistry();
+  reg.register({ nodeId: "b", baseUrl: "http://b:1", capabilities: ["default_worker"] });
+  const connector = {
+    async executeRemoteStep() {
+      return { ok: true, output: { summary: "relayed" }, meta: { role: "default_worker", model: "mock" } };
+    }
+  };
+  const router = createRelayRouter({ registry: reg, connector });
+
+  const result = await router.executeStepWithAssignedNode({
+    step: { id: "s1", executor: { type: "model", role: "default_worker" } },
+    context: {},
+    options: { relay: { enabled: true } },
+    assignedNodeId: "b",
+    assignmentTarget: "relay",
+    localExecute: async () => ({ output: { local: true }, meta: {} })
+  });
+
+  assert.strictEqual(result.meta.plannedTarget, "relay");
+  assert.strictEqual(result.meta.plannedNodeId, "b");
+  assert.strictEqual(result.meta.actualTarget, "relay");
+  assert.strictEqual(result.meta.actualNodeId, "b");
+});
+
 Promise.all(asyncChecks).then(() => {
   console.log(`\n${passed}/${passed + failed} relay unit tests passed`);
   process.exit(failed === 0 ? 0 : 1);
