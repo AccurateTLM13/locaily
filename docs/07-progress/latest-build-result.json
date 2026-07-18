@@ -1,52 +1,46 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "post-merge-stabilization",
+  "build_slice": "development-memory-e2e-second-project",
   "status": "complete",
-  "objective": "Make the current Locaily build internally trustworthy after PR #19 merge: verify behavior, repair confirmed defects, restore validation, reconcile docs.",
+  "objective": "Prove Development Memory DM1–DM10 loop on a non-Locaily registered project with capture, session, candidates, review, retrieval, and project isolation.",
   "implemented": {
-    "defect_fixes": [
-      {
-        "id": "confirm-dialog-cancel",
-        "fix": "Operator console checks confirmResult.confirmed before job mutations",
-        "tests": ["scripts/test-operator-confirm.js — 11/11"]
-      },
-      {
-        "id": "operator-job-creation-contract",
-        "fix": "Operator enqueue sends executionType; fake servers aligned; production route test added",
-        "tests": ["scripts/test-jobs-api.js — 64/64", "scripts/test-jobs-api-production.js — 8/8"]
-      },
-      {
-        "id": "failed-workflow-job-outcome",
-        "fix": "Background worker evaluates execution outcome via companion/jobs/job-outcome.js",
-        "tests": ["scripts/test-jobs-worker.js — 50/50"]
-      },
-      {
-        "id": "dm-multi-project-paths",
-        "fix": "Server Development Memory endpoints resolve active-project paths via memory-services.js",
-        "tests": ["scripts/test-development-memory-multi-project.js — 6/6"]
-      }
-    ],
-    "validation": [
-      "npm run test:full — canonical offline non-hardware suite",
-      "npm run test:jobs:production — real /jobs route with running server",
-      "node scripts/smoke-test.js — 58/58 with server",
-      ".github/workflows/ci.yml — runs test:full + smoke + jobs:production + relay:e2e"
-    ]
+    "e2e_proof": {
+      "project_slug": "pilot-workspace",
+      "storage_layout": "namespaced",
+      "loop_steps": [
+        "register",
+        "generate-vault",
+        "enable-capture",
+        "session-start",
+        "capture-events",
+        "session-close",
+        "candidate-extract",
+        "review-approve",
+        "context-pack-retrieval",
+        "locaily-isolation"
+      ],
+      "tests": ["scripts/test-development-memory-e2e-second-project.js — 4/4"],
+      "documentation": ["docs/04-validation/development-memory-e2e-proof.md"]
+    }
   },
   "validation": {
     "passed": true,
     "results": [
-      "test:full offline suite passed",
-      "smoke-test 58/58 passed",
-      "test:jobs:production 8/8 passed against real server",
-      "Four defects independently verified and fixed with regression coverage"
+      "test:development-memory-e2e 4/4 passed",
+      "Proof uses namespaced paths; locaily legacy paths remain isolated"
     ],
-    "not_run": [
-      "Physical multi-device pilot (hardware required)",
-      "Live Ollama qualification runs (provider required)",
-      "Clean-machine acceptance on fresh VM (manual packaging gate)"
+    "proven_in": "simulation",
+    "not_proven": [
+      "Real second-repository operator walkthrough (brief acceptance check pending)",
+      "Physical multi-device pilot",
+      "Live Ollama capture during real development"
     ]
   },
-  "next_milestone": "Development Memory end-to-end proof using a second real project",
+  "next_milestone": "Second-repo operator acceptance, then physical multi-device pilot",
+  "pending_acceptance": {
+    "name": "Real second-repository operator walkthrough",
+    "scope": "Brief acceptance check — register real repo, capture, review, confirm retrieval",
+    "blocks": "Physical multi-device pilot"
+  },
   "updated_at": "2026-07-18"
 }

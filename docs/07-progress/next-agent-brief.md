@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-18 (Post-merge stabilization complete — four defects fixed, `test:full` + CI updated)
+**Updated:** 2026-07-18 (Development Memory E2E proof on second project complete)
 
 ## Read First
 
@@ -247,20 +247,26 @@ Real URL validation set:
 
 ## Current Task
 
-**Post-merge stabilization is complete (2026-07-18).** Local main was synced to PR #19, four confirmed defects were fixed with regression tests, and canonical validation is restored.
+**Development Memory E2E proof is complete (2026-07-18).** The full DM1–DM10 loop is proven on a non-Locaily namespaced project (`pilot-workspace`) in simulation.
 
-### Stabilization fixes
-1. **Confirm dialog** — operator console checks `confirmResult.confirmed` before job mutations; cancel/Escape no longer executes destructive actions
-2. **Job creation contract** — operator enqueue sends `executionType`; production `/jobs` route tested via `npm run test:jobs:production`
-3. **Job outcome rules** — worker uses `companion/jobs/job-outcome.js` to fail jobs on workflow failed status or invalid schema
-4. **DM project paths** — server memory endpoints resolve active-project paths via `memory-services.js`
+### E2E proof coverage
+- Register → vault → capture → session → candidates → review → retrieval
+- Locaily legacy storage isolation verified
+- Regression: `npm run test:development-memory-e2e` (4/4)
+- Operator doc: [development-memory-e2e-proof.md](../04-validation/development-memory-e2e-proof.md)
 
-### Validation
-- `npm run test:full` — canonical offline non-hardware suite
-- `node scripts/smoke-test.js` — 58/58 (requires server)
-- CI runs `test:full`, smoke, `test:jobs:production`, and relay e2e
+**Proven in simulation** (automated E2E on `pilot-workspace` namespace). A **brief real second-repo operator acceptance check** is still required before the physical multi-device pilot — see sequence below.
+
+### Remaining acceptance (before physical pilot)
+
+Manual walkthrough on an actual second repository: register → small dev task → capture → close session → review → approve → later task confirms memory in context pack. Document result; no new features unless a blocker appears.
 
 ## Completed Since Last Update
+
+- **Development Memory E2E Proof (second project)** — completed 2026-07-18
+  - `scripts/test-development-memory-e2e-second-project.js` — 4/4
+  - `npm run test:development-memory-e2e` script added to `test:development-memory` and `test:full`
+  - Validation doc at `docs/04-validation/development-memory-e2e-proof.md`
 
 - **Post-Merge Stabilization** — completed 2026-07-18
   - Fixed four high-priority defects with bounded diffs and regression coverage
@@ -317,17 +323,10 @@ Real URL validation set:
 
 ## Next Task
 
-**Development Memory end-to-end proof using a second real project**
+**Sequence after this PR merges:**
 
-Prove the DM1–DM10 loop on a non-Locaily registered project with real capture, session aggregation, candidate extraction, human review, maintainer planning, and retrieval — not simulation-only evidence.
-
-Suggested proof steps:
-1. Register a second real project (non-Locaily repo or workspace)
-2. Generate vault, enable capture, run a bounded development session
-3. Extract candidates, perform review actions, verify retrieval in context pack
-4. Document evidence paths and operator workflow
-
-**Hardware/external work remains separate:**
+1. **Brief second-repo operator acceptance** — real repository, CLI/API workflow in [development-memory-e2e-proof.md](../04-validation/development-memory-e2e-proof.md). Record pass/fail; fix only if blocked.
+2. **Physical multi-device pilot** — requires two devices + Ollama. See `docs/05-integrations/multi-device-pilot.md`.
 - Physical multi-device pilot — requires two devices + Ollama (`scripts/pilot/pilot-runner.js` ready)
 - Live Ollama qualification — provider required
 - Clean-machine packaging acceptance — manual gate (`scripts/acceptance-test.ps1`)

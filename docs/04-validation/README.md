@@ -46,6 +46,7 @@ Evidence records for Locaily **tracks** and **workflows**.
 | [memory-bridge-local-setup.md](./memory-bridge-local-setup.md) | Private wiki vault setup (local only) |
 | [memory-bridge-manual-test-path.md](./memory-bridge-manual-test-path.md) | Manual Memory Bridge + Lighthouse integration steps |
 | [memory-bridge-lighthouse-v0.md](./memory-bridge-lighthouse-v0.md) | Memory Bridge + Lighthouse controlled validation (2026-06-13) |
+| [development-memory-e2e-proof.md](./development-memory-e2e-proof.md) | DM loop E2E proof on second namespaced project (simulation, 2026-07-18) |
 | [l2-live-ollama-memory-bridge.md](./l2-live-ollama-memory-bridge.md) | L2 live Ollama + Memory Bridge milestone |
 
 ### Strategy and index
