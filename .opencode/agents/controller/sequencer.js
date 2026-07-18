@@ -154,6 +154,13 @@ function main() {
   }
   console.error(`[sequencer] working from branch: ${baseBranch}`);
 
+  // Restore any failed milestones from a prior run BEFORE collecting queue
+  const completedDir = path.join(QUEUE_DIR, "completed");
+  const failedDir = path.join(QUEUE_DIR, "failed");
+  ensureDir(completedDir);
+  ensureDir(failedDir);
+  restoreFromFailed();
+
   // Collect queue entries (sorted, exclude .gitkeep and non-objective files)
   const all = fs.readdirSync(QUEUE_DIR)
     .filter(f => f.endsWith(".md") && !f.startsWith("BULK_") && f !== ".gitkeep" && f !== "TEMPLATE.md")
@@ -176,14 +183,6 @@ function main() {
     }
     console.error(`[sequencer] queue completeness: OK (${(qc.found || []).length} files present)`);
   }
-
-  const completedDir = path.join(QUEUE_DIR, "completed");
-  const failedDir = path.join(QUEUE_DIR, "failed");
-  ensureDir(completedDir);
-  ensureDir(failedDir);
-
-  // Restore any failed milestones from a prior run BEFORE processing queue
-  restoreFromFailed();
 
   const results = [];
 
