@@ -90,6 +90,14 @@
     "dag:plan": "curl.exe -s -X POST http://127.0.0.1:31313/tracks/plan -H \"Content-Type: application/json\" -d \"{\\\"request\\\":\\\"$*\\\"}\"",
     "pilot:local-only": "node scripts/pilot/pilot-runner.js --policy local-only",
     "pilot:local-first": "node scripts/pilot/pilot-runner.js --policy local-first",
-    "pilot:distributed": "node scripts/pilot/pilot-runner.js --policy distributed"
+    "pilot:distributed": "node scripts/pilot/pilot-runner.js --policy distributed",
+    "test:jobs": "node scripts/test-jobs-api.js && node scripts/test-jobs-mutation.js && node scripts/test-jobs-worker.js",
+    "test:jobs:production": "node scripts/test-jobs-api-production.js",
+    "test:operator": "node scripts/test-operator-console.js && node scripts/test-operator-confirm.js",
+    "test:controller": "node scripts/test-controller-invariants.js",
+    "test:qualification": "node scripts/test-qualification-resolver.js && node scripts/test-shadow-routing.js && node scripts/test-enforcement-policy.js && node scripts/test-enforcement-policy-store.js && node scripts/test-enforcement-routing.js",
+    "test:track-records": "node scripts/track-run-record-schema-test.js && node scripts/crew-track-run-record-test.js",
+    "test:human-review": "node scripts/test-human-review-records.js",
+    "test:full": "npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && npm run test:development-memory && npm run test:controller"
   }
 }

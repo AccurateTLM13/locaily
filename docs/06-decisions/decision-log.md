@@ -1520,6 +1520,29 @@ Confirmed.
 
 ---
 
+## 2026-07-18 — Post-Merge Stabilization: Job Outcome Rules and Project-Aware Memory Services
+
+### Decision
+
+Background job completion is determined by explicit execution outcome evaluation (`companion/jobs/job-outcome.js`), not merely whether the executor threw. Failed workflow status, invalid schema, and track verification failures mark jobs as `failed`. Development Memory server endpoints resolve storage paths from the active registered project via `companion/memory/projects/memory-services.js` instead of hardcoded legacy flat directories.
+
+### Why
+
+Post-merge review found four defects: confirm cancel still executed actions, operator/UI contract diverged from production `/jobs`, workers marked failed executions as completed, and DM components used inconsistent storage paths breaking multi-project isolation.
+
+### Status
+
+Confirmed.
+
+### Notes
+
+- Operator confirm contract: check `confirmResult.confirmed`, not truthiness of the result object.
+- Production `/jobs` accepts `executionType`, not legacy `type`.
+- Canonical validation: `npm run test:full` (offline) + `npm run test:jobs:production` (requires server).
+- Next milestone: Development Memory end-to-end proof on a second real project.
+
+---
+
 ```md
 ## YYYY-MM-DD — Title
 ### Decision

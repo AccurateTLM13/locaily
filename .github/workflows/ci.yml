@@ -18,21 +18,8 @@ jobs:
         with:
           node-version: "20"
 
-      # Locaily ships zero runtime dependencies (companion + benchmark-lab use
-      # only Node built-ins). npm install is intentionally skipped to keep CI
-      # fast and dependency-free. If dependencies are added later, add an
-      # `npm ci` step here.
-
-      - name: Offline test suites (no server required)
-        run: |
-          node scripts/contract-test.js
-          npm run test:dag
-          npm run benchmark:test
-          npm run benchmark:status-smoke
-          npm run test:relay
-          npm run test:memory-v1
-          npm run test:relay:placement
-          npm run test:multi-device:e2e
+      - name: Offline non-hardware validation suite
+        run: npm run test:full
 
       - name: Start Local Brain companion server
         run: |
@@ -53,6 +40,9 @@ jobs:
 
       - name: Server smoke test (mock provider, no Ollama required)
         run: node scripts/smoke-test.js
+
+      - name: Production jobs API contract (real server route)
+        run: npm run test:jobs:production
 
       - name: M4 relay end-to-end (two servers, discovery + routing + fallback)
         run: npm run test:relay:e2e

@@ -2,31 +2,39 @@
 
 ## Objective
 
-Implement DM10 — Multi-Project Local Brain Template for the Development Memory Loop.
+Post-merge stabilization and recovery — make the current Locaily build internally trustworthy.
 
 ## Current Slice
 
-**Complete:** DM10 — Multi-Project Local Brain Template
+**Complete:** Post-Merge Stabilization (2026-07-18)
 
-**Status:** Project registry, per-project storage isolation, guided setup flow, starter vault generation, import validation, health reports, API/CLI, and backup documentation are implemented. The Development Memory Loop roadmap (DM1–DM10) is complete.
+Four confirmed defects fixed with regression coverage. Canonical `npm run test:full` suite added. CI updated to run required non-hardware validation.
 
-## DM10 Deliverables (Complete)
+## Completed Stabilization Items
 
-| Deliverable | Status |
-|---|---|
-| `companion/memory/projects/*` — registry, paths, vault generator/import, health, setup | Complete |
-| Schemas `development-memory-project*.schema.json` + fixtures | Complete |
-| API routes `/memory/projects/*` | Complete |
-| `scripts/memory-project.js` + npm project commands | Complete |
-| Capture processor active-project path resolution | Complete |
-| `/console/status` → `memory.developmentMemoryProjects` | Complete |
-| `scripts/test-development-memory-multi-project.js` | Complete (5/5) |
-| Backup docs for `data/memory/` paths | Complete |
+| Defect | Fix | Regression tests |
+|---|---|---|
+| Confirm dialog cancellation | `confirmResult.confirmed` guard in operator console | `test-operator-confirm.js` (11) |
+| Operator job creation contract | `executionType` payload + production route test | `test-jobs-api.js` (64), `test-jobs-api-production.js` (8) |
+| Failed workflow jobs marked completed | `job-outcome.js` + worker outcome evaluation | `test-jobs-worker.js` (50) |
+| DM multi-project path isolation | `memory-services.js` for server endpoints | `test-development-memory-multi-project.js` (6) |
 
-## Key Principle
+## Validation Commands
 
-Each registered project gets isolated event/session/candidate stores. The bootstrap `locaily` project keeps legacy flat paths under `data/memory/development-*`. New projects use namespaced paths under `data/memory/projects/{slug}/`.
+```powershell
+npm.cmd run test:full
+npm.cmd run test:jobs:production   # requires running server
+node scripts/smoke-test.js          # requires running server
+```
 
-## Follow-On (Not Scoped)
+## Next Slice
 
-End-to-end proof scenario from the roadmap, candidate review console UI, embeddings, and cloud sync remain follow-on work — do not start without an explicit objective.
+**Development Memory end-to-end proof using a second real project**
+
+Prove the DM1–DM10 loop on a non-Locaily project with real capture, candidate extraction, review, and retrieval — not simulation-only evidence.
+
+## Stop Conditions
+
+- Do not expand product features during stabilization
+- Do not modify approved benchmark evidence
+- Hardware/provider tests remain explicitly out of scope until requested

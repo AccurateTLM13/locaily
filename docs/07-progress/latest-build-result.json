@@ -1,68 +1,52 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "dm10-multi-project-template",
+  "build_slice": "post-merge-stabilization",
   "status": "complete",
-  "objective": "Reuse the Development Memory Loop for Locaily or any other project with guided setup and per-project isolation.",
+  "objective": "Make the current Locaily build internally trustworthy after PR #19 merge: verify behavior, repair confirmed defects, restore validation, reconcile docs.",
   "implemented": {
-    "project_modules": [
-      "companion/memory/projects/project-paths.js",
-      "companion/memory/projects/project-registry.js",
-      "companion/memory/projects/vault-generator.js",
-      "companion/memory/projects/vault-import.js",
-      "companion/memory/projects/project-health.js",
-      "companion/memory/projects/project-setup.js",
-      "companion/memory/projects/index.js"
+    "defect_fixes": [
+      {
+        "id": "confirm-dialog-cancel",
+        "fix": "Operator console checks confirmResult.confirmed before job mutations",
+        "tests": ["scripts/test-operator-confirm.js — 11/11"]
+      },
+      {
+        "id": "operator-job-creation-contract",
+        "fix": "Operator enqueue sends executionType; fake servers aligned; production route test added",
+        "tests": ["scripts/test-jobs-api.js — 64/64", "scripts/test-jobs-api-production.js — 8/8"]
+      },
+      {
+        "id": "failed-workflow-job-outcome",
+        "fix": "Background worker evaluates execution outcome via companion/jobs/job-outcome.js",
+        "tests": ["scripts/test-jobs-worker.js — 50/50"]
+      },
+      {
+        "id": "dm-multi-project-paths",
+        "fix": "Server Development Memory endpoints resolve active-project paths via memory-services.js",
+        "tests": ["scripts/test-development-memory-multi-project.js — 6/6"]
+      }
     ],
-    "schemas": [
-      "companion/schemas/development-memory-project.schema.json",
-      "companion/schemas/development-memory-project-registry.schema.json",
-      "companion/schemas/fixtures/development-memory/project*.json"
-    ],
-    "api": [
-      "GET /memory/projects",
-      "GET /memory/projects/health",
-      "POST /memory/projects/register",
-      "GET /memory/projects/:slug",
-      "POST /memory/projects/:slug",
-      "GET /memory/projects/:slug/health"
-    ],
-    "cli": [
-      "scripts/memory-project.js",
-      "npm run memory:project:list",
-      "npm run memory:project:register",
-      "npm run memory:project:activate",
-      "npm run memory:project:generate-vault",
-      "npm run memory:project:health"
-    ],
-    "integrations": [
-      "companion/server.js — developmentProjectRegistry and capture processor path resolution",
-      "companion/memory/events/capture/capture-processor.js — resolveContext/createManagers for active project",
-      "docs/05-integrations/backup-and-restore.md — development memory paths"
-    ],
-    "tests": [
-      "scripts/test-development-memory-multi-project.js — 5/5",
-      "scripts/test-development-memory-capture-processor.js — 5/5",
-      "scripts/test-development-memory-retrieval.js — 5/5",
-      "scripts/test-development-memory-maintainer.js — 4/4",
-      "scripts/test-development-memory-candidate-review.js — 5/5",
-      "scripts/test-development-memory-candidates.js — 5/5",
-      "scripts/test-development-memory-sessions.js — 5/5",
-      "scripts/test-development-memory-capture.js — 7/7",
-      "scripts/test-development-memory-events.js — 13/13",
-      "scripts/test-development-memory-schemas.js — all fixtures including project schemas",
-      "scripts/test-memory-v1.cjs — 6/6"
+    "validation": [
+      "npm run test:full — canonical offline non-hardware suite",
+      "npm run test:jobs:production — real /jobs route with running server",
+      "node scripts/smoke-test.js — 58/58 with server",
+      ".github/workflows/ci.yml — runs test:full + smoke + jobs:production + relay:e2e"
     ]
   },
   "validation": {
     "passed": true,
     "results": [
-      "Namespaced projects store events in isolated directories",
-      "Legacy locaily project keeps flat data/memory/development-* paths",
-      "Starter vault generation and import validation succeed",
-      "Setup flow registers, generates vault, enables capture, and reports health",
-      "DM1–DM9 regression suite remains green"
+      "test:full offline suite passed",
+      "smoke-test 58/58 passed",
+      "test:jobs:production 8/8 passed against real server",
+      "Four defects independently verified and fixed with regression coverage"
+    ],
+    "not_run": [
+      "Physical multi-device pilot (hardware required)",
+      "Live Ollama qualification runs (provider required)",
+      "Clean-machine acceptance on fresh VM (manual packaging gate)"
     ]
   },
-  "next_milestones": "Development Memory Loop DM1–DM10 complete. Follow-on candidates (E2E proof scenario, review console UI, embeddings) require explicit objectives.",
+  "next_milestone": "Development Memory end-to-end proof using a second real project",
   "updated_at": "2026-07-18"
 }
