@@ -2,7 +2,7 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-07-18 (Post-merge stabilization: four high-priority defects fixed, `npm run test:full` canonical suite, CI strengthened)
+**Updated:** 2026-07-18 (Development Memory E2E proof on second project complete; post-merge stabilization landed)
 
 ## What Works
 
@@ -30,6 +30,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Development Memory Loop DM8 (retrieval integration)** - `companion/memory/retrieval/*` extends context packs to prefer canonical project pages (`projects/{slug}/STATUS.md`, `DECISIONS.md`, etc.), enforce excerpt/context budgets, surface `evidenceReferences` from candidates and maintainer runs, and emit stale/contradiction warnings. Integrated into `POST /memory/context-pack` via `buildContextPack`. Tests: `npm run test:development-memory-retrieval` (5/5).
 - **Development Memory Loop DM9 (continuous controlled capture)** - `companion/memory/events/capture/capture-*` runs a background worker that recovers/closes sessions and extracts candidates idempotently. Capture can be paused without disabling retrieval. API: `/memory/capture/*`. CLI: `npm run memory:capture:*`. Status surfaced in `/console/status` as `memory.developmentMemoryCapture`. Tests: `npm run test:development-memory-capture-processor` (5/5).
 - **Development Memory Loop DM10 (multi-project template)** - Tests: `npm run test:development-memory-multi-project` (6/6). Server memory endpoints use project-aware path resolver; two-project isolation verified for events, candidates, review, and maintainer paths.
+- **Development Memory E2E proof (second project, 2026-07-18)** - `pilot-workspace` namespaced project proves full DM loop in **simulation**: register → vault → capture → session → candidates → review → retrieval. Locaily legacy storage remains isolated. Tests: `npm run test:development-memory-e2e` (4/4). Doc: [development-memory-e2e-proof.md](../04-validation/development-memory-e2e-proof.md). **Brief real second-repo operator acceptance** still required before physical pilot.
 - **Multi-Device Workflow Coordination (M5)** - `companion/relay/placement.js` placement planner distributes model steps across healthy relay nodes (capability + health + least-loaded; `distribute` policy). `POST /relay/plan` previews placement. `executeStepWithAssignedNode` routes each step to its assigned node and falls back locally (with `RELAY_FALLBACK` audit) on node failure. Wired into `/tracks/run` and `/workflows/run` for `relay_policy=distribute`; responses include `relay_placement` summary. Tests: `test-relay-placement.cjs` (14/14), `test-multi-device-e2e.cjs` (22/22), `test-relay` unit (17/17 after harness fix).
 - **Operator Log editorial tracks** - experimental discovery and human-selected draft proposal paths
 - **Benchmark Lab Milestone 1** - complete and operator-ready. Implements: engine and CLI (run, review, compare, promote, matrix, probe, diagnose, report, model-card, qualification, checksum-verify); 14 schemas with validation; mock + Ollama + ToolEvalRuntime adapters; execution-router with native/policy-routed/runtime-constrained modes; evidence promotion and checksum verification (canonical_text_v1/byte_exact); qualification-record generation; model capability probing; read-only runtime status at `GET /benchmark/status`; Local Brain consuming compact qualification data without importing Benchmark Lab engine internals
@@ -143,9 +144,9 @@ The North Star is now documented as a local capability network: decompose work i
 
 | Layer | Focus |
 |---|---|
-| **Now** | DM4: Session Aggregation — correlate events into session manifests with deterministic summaries |
-| **Next** | DM5 knowledge candidate extraction; broader model qualification coverage |
-| **Later** | Lighthouse canonical-path documentation; workflow audit summary hardening; Desktop Companion UI (deferred); automatic track classification |
+| **Now** | Merge automated DM E2E proof; then brief second-repo operator acceptance |
+| **Next** | Physical multi-device pilot (infra ready; hardware execution pending) |
+| **Later** | Locaily v1 packaging / clean-machine acceptance; embedding-based retrieval |
 | **Archive** | Old companion-only architecture, pre-track planning docs |
 
 LFM2.5-1.2B-Thinking is now the first enforced qualified model capability for a companion server runtime track (`website_audit.lighthouse_handoff`, role `priority_helper`). Runtime execution uses `runtimeModelName` from the qualification record; policy and evidence keep the stable capability id `lfm25-1p2b-thinking-local`. Enforcement is still per-track only; no global enforcement is enabled.

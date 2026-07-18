@@ -1,5 +1,31 @@
 # Decision Log
 
+## 2026-07-18 — Development Memory E2E Proof (Second Project)
+
+### Context
+
+Post-merge stabilization restored trustworthy validation. DM1–DM10 was complete with multi-project isolation tests, but the full loop had not been proven end-to-end on a non-Locaily namespaced project.
+
+### Decision
+
+- Add `scripts/test-development-memory-e2e-second-project.js` exercising register → vault → capture → session → candidates → review → retrieval on slug `pilot-workspace`
+- Wire as `npm run test:development-memory-e2e` inside `test:development-memory` and `test:full`
+- Document operator evidence paths in `docs/04-validation/development-memory-e2e-proof.md`
+- Label proof as **simulation-proven** (automated E2E on second project namespace)
+- Require a **brief real second-repo operator acceptance check** before the physical multi-device pilot — not a major milestone, but not optional in the sequence
+
+### Consequences
+
+- Development Memory loop is regression-tested across project boundaries
+- Next milestone shifts to physical multi-device pilot (hardware-blocked)
+- Locaily legacy flat paths remain the default for the `locaily` slug only
+
+### Status
+
+Accepted (E2E proof complete in simulation).
+
+---
+
 ## 2026-07-18 — Development Memory Loop DM10: Multi-Project Local Brain Template
 
 ### Context

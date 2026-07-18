@@ -2,39 +2,43 @@
 
 ## Objective
 
-Post-merge stabilization and recovery — make the current Locaily build internally trustworthy.
+Development Memory end-to-end proof using a second registered project.
 
 ## Current Slice
 
-**Complete:** Post-Merge Stabilization (2026-07-18)
+**Complete:** Development Memory E2E Proof — Second Project (2026-07-18)
 
-Four confirmed defects fixed with regression coverage. Canonical `npm run test:full` suite added. CI updated to run required non-hardware validation.
+Proved the DM1–DM10 loop on a non-Locaily namespaced project (`pilot-workspace`) with capture, session aggregation, candidate extraction, human review, retrieval, and locaily isolation.
 
-## Completed Stabilization Items
+## Completed Items
 
-| Defect | Fix | Regression tests |
-|---|---|---|
-| Confirm dialog cancellation | `confirmResult.confirmed` guard in operator console | `test-operator-confirm.js` (11) |
-| Operator job creation contract | `executionType` payload + production route test | `test-jobs-api.js` (64), `test-jobs-api-production.js` (8) |
-| Failed workflow jobs marked completed | `job-outcome.js` + worker outcome evaluation | `test-jobs-worker.js` (50) |
-| DM multi-project path isolation | `memory-services.js` for server endpoints | `test-development-memory-multi-project.js` (6) |
+| Step | Evidence |
+|---|---|
+| Register second project | Namespaced storage under `data/memory/projects/{slug}/` |
+| Generate vault + enable capture | Setup flow in E2E test |
+| Session + capture events | Tasks, test, decision recorded |
+| Candidate extraction | Decision candidate from `decision_recorded` |
+| Human review approve | Review inbox `approve` action |
+| Retrieval in context pack | DECISIONS page + approved `evidenceReferences` |
+| Locaily isolation | Zero events in legacy flat paths |
+
+**Regression:** `npm run test:development-memory-e2e` (4/4)  
+**Documentation:** [development-memory-e2e-proof.md](../04-validation/development-memory-e2e-proof.md)
 
 ## Validation Commands
 
 ```powershell
+npm.cmd run test:development-memory-e2e
 npm.cmd run test:full
-npm.cmd run test:jobs:production   # requires running server
-node scripts/smoke-test.js          # requires running server
 ```
 
 ## Next Slice
 
-**Development Memory end-to-end proof using a second real project**
-
-Prove the DM1–DM10 loop on a non-Locaily project with real capture, candidate extraction, review, and retrieval — not simulation-only evidence.
+1. **Second-repo operator acceptance** (brief manual check on a real separate repository)
+2. **Physical multi-device pilot** (hardware-blocked until two devices available)
 
 ## Stop Conditions
 
-- Do not expand product features during stabilization
+- Do not claim hardware-proven until pilot runs on physical devices
 - Do not modify approved benchmark evidence
-- Hardware/provider tests remain explicitly out of scope until requested
+- Embedding-based retrieval remains out of scope
