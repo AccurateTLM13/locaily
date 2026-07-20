@@ -1,0 +1,11 @@
+﻿{
+    "slug":  "dm7-project-memory-maintainer",
+    "objective_id":  "dm7-project-memory-maintainer",
+    "superseded_by":  "dm10 (multi-project-template)",
+    "source_objective":  ".opencode/agents/objectives/queue/dm7-project-memory-maintainer.md",
+    "supersedes":  null,
+    "revision":  1,
+    "status":  "superseded",
+    "completed_at":  "2026-07-18T00:00:00.000Z",
+    "classification_note":  "Part of the Development Memory Loop DM1-DM10 roadmap. Implemented incrementally; all completion conditions rolled into DM10. Source .md file is gitignored; this meta record provides the canonical disposition."
+}

@@ -1,0 +1,6 @@
+{
+  "locked": true,
+  "reason": "Objective lifecycle and closeout maintenance",
+  "allowed_objective": "objective-lifecycle-closeout",
+  "queue_processing_allowed": false
+}

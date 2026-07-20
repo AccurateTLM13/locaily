@@ -1,0 +1,11 @@
+﻿{
+    "slug":  "durable-background-execution",
+    "objective_id":  "m07",
+    "completed_at":  null,
+    "source_objective":  ".opencode/agents/objectives/queue/completed/07-durable-background-execution.md",
+    "activated_at":  null,
+    "supersedes":  null,
+    "revision":  1,
+    "completion_commit":  null,
+    "status":  "completed"
+}

@@ -34,6 +34,12 @@ npm.cmd run test:full
 
 ## Next Slice
 
+**Objective Lifecycle Hardening and Work-Closeout — [maintenance-objective-lifecycle-closeout.md](./maintenance-objective-lifecycle-closeout.md)**
+
+Defined in the closeout brief. Inspect, harden, and enforce the objective lifecycle, queue archival, agent closeout, and startup continuity.
+
+### Deferred (after lifecycle hardening)
+
 1. **Second-repo operator acceptance** (brief manual check on a real separate repository)
 2. **Physical multi-device pilot** (hardware-blocked until two devices available)
 

@@ -1,0 +1,11 @@
+﻿{
+    "slug":  "operator-control-plane",
+    "objective_id":  "m08",
+    "completed_at":  null,
+    "source_objective":  ".opencode/agents/objectives/queue/completed/08-operator-control-plane.md",
+    "activated_at":  null,
+    "supersedes":  null,
+    "revision":  1,
+    "completion_commit":  null,
+    "status":  "completed"
+}

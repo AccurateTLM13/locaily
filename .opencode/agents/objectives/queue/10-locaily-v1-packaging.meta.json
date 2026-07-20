@@ -1,0 +1,12 @@
+{
+  "objective_id": "m10",
+  "slug": "locaily-v1-packaging",
+  "status": "queued",
+  "revision": 1,
+  "supersedes": null,
+  "superseded_by": null,
+  "source_objective": ".opencode/agents/objectives/queue/10-locaily-v1-packaging.md",
+  "activated_at": null,
+  "completed_at": null,
+  "completion_commit": null
+}

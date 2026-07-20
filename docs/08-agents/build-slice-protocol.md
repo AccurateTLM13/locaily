@@ -51,6 +51,16 @@ Record exact commands and results.
 
 A passing statement without commands or output is not sufficient evidence.
 
+## Startup Continuity
+
+Before beginning implementation on any build slice, run:
+
+```bash
+node scripts/objective-lifecycle.js continuity
+```
+
+If unresolved work exists and `safe_to_start_unrelated_work` is false, do not begin new work. Require an explicit disposition: continue, hold, abandon, supersede, or override.
+
 ## Required Completion Updates
 
 Before reporting completion, update:
@@ -59,6 +69,21 @@ Before reporting completion, update:
 - `docs/07-progress/next-agent-brief.md`
 - `docs/07-progress/latest-build-result.json`
 - `docs/06-decisions/decision-log.md` when a durable decision was made
+
+## Mandatory Work Closeout
+
+Before exiting any implementation session, write `docs/07-progress/work-closeout.json` documenting:
+
+- `work_id` and `objective_id`
+- `status` (complete, incomplete, blocked, interrupted, failed, awaiting_human_action, awaiting_external_validation, stopped)
+- `closed_at` (ISO-8601)
+- `original_goal`, items completed, items remaining
+- `safe_to_start_unrelated_work` (true/false) — based on explicit criteria
+- `working_branch`, `last_commit`
+- validation results (passed, failed, not_run)
+- `recommended_next_agent`
+
+The closeout schema is defined at `docs/07-progress/work-closeout.schema.json`. This file is tracked in git and survives clones.
 
 ## Completion Status
 

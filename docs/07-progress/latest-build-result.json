@@ -1,46 +1,35 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "development-memory-e2e-second-project",
+  "build_slice": "objective-lifecycle-closeout",
   "status": "complete",
-  "objective": "Prove Development Memory DM1–DM10 loop on a non-Locaily registered project with capture, session, candidates, review, retrieval, and project isolation.",
+  "objective": "Inspect and harden the objective lifecycle, queue archival process, agent closeout process, and startup continuity behavior.",
   "implemented": {
-    "e2e_proof": {
-      "project_slug": "pilot-workspace",
-      "storage_layout": "namespaced",
-      "loop_steps": [
-        "register",
-        "generate-vault",
-        "enable-capture",
-        "session-start",
-        "capture-events",
-        "session-close",
-        "candidate-extract",
-        "review-approve",
-        "context-pack-retrieval",
-        "locaily-isolation"
-      ],
-      "tests": ["scripts/test-development-memory-e2e-second-project.js — 4/4"],
-      "documentation": ["docs/04-validation/development-memory-e2e-proof.md"]
-    }
+    "lifecycle_manager": "scripts/objective-lifecycle.js",
+    "closeout_schema": "docs/07-progress/work-closeout.schema.json",
+    "closeout_record": "docs/07-progress/work-closeout.json",
+    "test_suite": "scripts/test-lifecycle.js — 21/21",
+    "queue_lock": ".opencode/agents/objectives/QUEUE_LOCK.json",
+    "integrity_check_cmd": "node scripts/objective-lifecycle.js check"
+  },
+  "cleanup": {
+    "encoding_fixed": ["completed/07-durable-background-execution.md", "completed/08-operator-control-plane.md"],
+    "duplicates_removed": ["queue/07-durable-background-execution.md", "queue/08-operator-control-plane.md"],
+    "stale_state_cleared": ["run-state.json reset", "milestones/06-trusted-relay-execution.json finalized"],
+    "meta_records_added": ["completed/*.meta.json (4)", "held/*.meta.json (1)", "failed/*.meta.json (2)"],
+    "held_renamed": "held/10-track-learning-evidence-loop.md → held/track-learning-evidence-loop.md (prefix collision)"
   },
   "validation": {
     "passed": true,
     "results": [
-      "test:development-memory-e2e 4/4 passed",
-      "Proof uses namespaced paths; locaily legacy paths remain isolated"
-    ],
-    "proven_in": "simulation",
-    "not_proven": [
-      "Real second-repository operator walkthrough (brief acceptance check pending)",
-      "Physical multi-device pilot",
-      "Live Ollama capture during real development"
+      "scripts/test-lifecycle.js — 21/21 passed",
+      "node scripts/objective-lifecycle.js check — 3 remaining (acceptable: duplicate slugs with meta files, stale active-objective with valid content)"
     ]
   },
-  "next_milestone": "Second-repo operator acceptance, then physical multi-device pilot",
+  "next_milestone": "Second-repo operator acceptance, then physical multi-device pilot (deferred after lifecycle hardening)",
   "pending_acceptance": {
     "name": "Real second-repository operator walkthrough",
     "scope": "Brief acceptance check — register real repo, capture, review, confirm retrieval",
     "blocks": "Physical multi-device pilot"
   },
-  "updated_at": "2026-07-18"
+  "updated_at": "2026-07-20"
 }

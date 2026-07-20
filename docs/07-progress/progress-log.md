@@ -1210,3 +1210,30 @@ Verification after fixes:
 
 M4 + M5 acceptance criteria met; no blockers remaining. See docs/07-progress/latest-build-result.json 
 eview_2026-07-11.
+
+---
+
+## 2026-07-20 — Objective Lifecycle Hardening and Mandatory Closeout
+
+### Changed
+
+- Created `scripts/objective-lifecycle.js` — lifecycle manager with 9 states (planned, queued, active, blocked, held, failed, completed, abandoned, superseded), validated transitions, terminal-state enforcement, stable objective identity via JSON meta files, transactional archive with encoding normalization, integrity check, and startup continuity gate
+- Created `docs/07-progress/work-closeout.schema.json` — canonical closeout record schema
+- Created `docs/07-progress/work-closeout.json` — active closeout record for current session
+- Created `scripts/test-lifecycle.js` — 21 tests covering state machine, duplicate detection, encoding, transactional archive, and startup continuity
+- Updated AGENTS.md, supervisor POLICY.md, worker POLICY.md, and build-slice-protocol.md with lifecycle and closeout policies
+- Cleaned up encoding corruption (UTF-16 LE BOM) in `completed/07-durable-background-execution.md` and `completed/08-operator-control-plane.md`
+- Removed duplicate tracked queue files `07-durable-background-execution.md` and `08-operator-control-plane.md` from queue root (archived in completed/)
+- Reset stale `run-state.json` and finalized `milestones/06-trusted-relay-execution.json`
+- Added `.meta.json` files with stable identity and supersession chains for all lifecycle directories
+- Resolved prefix collision in held objectives
+
+### Evidence
+
+- `node scripts/test-lifecycle.js` — 21/21 passed
+- `node scripts/objective-lifecycle.js check` — 3 issues remaining (acceptable: duplicate slugs with meta files, active-objective with valid content)
+- All existing offline test suites pass
+
+### Next
+
+Second-repo operator acceptance, then physical multi-device pilot.
