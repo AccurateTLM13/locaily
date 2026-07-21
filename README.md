@@ -1,309 +1,232 @@
 # Locaily
 
-Run one local AI coordinator. Power many tools and workflows.
+A local-first AI coordination stack. One coordinator, many capabilities.
 
-## What This Is
+## What It Is
 
-**Locaily** is a local-first AI coordination project. The **Local Brain** (companion server in this repo) runs on your machine, exposes a small HTTP API, and routes structured requests to tools, workflows, and local model providers.
+**Locaily** is a system for building and running practical AI workflows on your own
+machine. It is not a single tool or app. It is the coordination layer that lets
+small local models, deterministic tools, validators, tool packs, nearby devices,
+and structured workflows work together through a single local service.
 
-```txt
+The repository contains the **Local Brain** (the coordinator), **Tracks** (execution
+contracts), **The Crew** (specialized worker dispatch), **Tool Packs** (plugin-style
+capability bundles), **Benchmark Lab** (evidence and qualification subsystem),
+**Memory Bridge** (optional context integration), and **Relay Node** connectors
+(nearby-device capability layer).
+
+```
 Locaily
-├─ Local Brain        — coordinator and runtime (companion/server.js)
+├─ Local Brain        — coordinator and runtime
 ├─ Tracks             — reusable execution contracts
-├─ The Crew           — specialized workers and capabilities (formerly AI Pit Crew)
+├─ The Crew           — specialized worker dispatch
+├─ Tool Packs         — plugin-style capability bundles
 ├─ Model Lab          — evaluation and qualification layer
-│  └─ Benchmark Lab   — evidence and qualification subsystem (benchmark-lab/)
-├─ Relay Nodes        — nearby-device capability layer (planned)
-├─ Memory Bridge      — controlled local context integration
-└─ Lighthouse Handoff — first practical workflow / test bench
+│  └─ Benchmark Lab   — evidence and qualification subsystem
+├─ Memory Bridge      — optional local context integration
+├─ Relay Nodes        — nearby-device capability layer
+└─ Workflows          — composes tracks into end-to-end flows
 ```
 
-This repo is not a single Chrome extension or one demo tool. **DealSniper** is a showcase model-backed tool. **Lighthouse Handoff** is the first workflow test bench (deterministic fallback plus orchestrated AI when a runtime is available). The **Standard Text Pack** is the first manifest-backed engine pack.
+## The Problem
 
-**Model Lab** is the public Locaily architecture layer for evaluating and qualifying models. **Benchmark Lab** is the concrete repository subsystem that powers it — CLI evaluation commands, 13 schemas, mock + Ollama adapters, evidence promotion, checksum verification, and qualification records. Benchmark Lab Milestone 1 is complete and operator-ready. Broader coverage across additional models, Tracks, hardware profiles, and live qualification depth remains incremental.
+Many local AI setups center on selecting one model and routing most work
+through it. That can work, but it often treats very different tasks as though
+they require the same capability.
 
-The active build slice is **Canonical Track Run Records** — the first Track Learning Evidence Loop implementation step.
+Locaily flips the question. Instead of "which model is the smartest?" it asks:
 
-**Lighthouse client:** https://github.com/mnfrdrsh/lighthouse-handoff
+1. What is the actual task?
+2. Which capabilities does it need?
+3. What is the smallest qualified worker that satisfies the contract?
+4. How do we validate the result and fall back?
 
-**Docs entry point:** [docs/00-start-here/README.md](docs/00-start-here/README.md)
+## Capability-First Philosophy
 
-## Current API Shape
+Locaily treats **capability** as the unit of dispatch, not model size.
 
-Default local server:
+A task may use zero models (deterministic transform), one small model on a single
+step, several small models across steps, a tool pack, a validator, a rule, or a
+relayed capability from another device. The system prefers the **smallest qualified
+capability** — the least expensive worker that consistently meets the track contract.
 
-```txt
-http://127.0.0.1:31313
-```
+**Device = capability.** Not every node needs a model; every node needs a connector.
 
-Canonical engine endpoint for new clients:
+## Architecture
 
-```txt
-POST /tasks/run
-```
+### Local Brain
 
-Legacy compatibility endpoint for existing clients:
+The **Local Brain** (`companion/server.js`) is the localhost coordinator. It
+exposes a small HTTP API on `127.0.0.1:31313`, routes structured requests to tools
+and tracks, resolves model roles to provider models, validates outputs, and writes
+audit summaries. It owns the API surface, security gates, context handling, and
+response envelopes. It does not own extension UIs, workflow business logic, or
+model training.
 
-```txt
-POST /analyze
-```
+Internal orchestration state is JSON. Markdown is the export layer — rendered from
+JSON, not assembled as the source of truth.
 
-`/analyze` remains supported and keeps its legacy envelope. New tools and clients should prefer `/tasks/run`.
+Full detail: [docs/01-architecture/local-brain.md](docs/01-architecture/local-brain.md),
+[docs/01-architecture/api-contract.md](docs/01-architecture/api-contract.md)
 
-## Implemented Endpoints
+### Tracks
 
-```txt
-GET  /health
-GET  /tools
-GET  /tracks
-POST /tracks/run
-GET  /orchestration/tracks
-GET  /orchestration/workflows
-POST /workflows/plan
-POST /workflows/run
-POST /tasks/run
-GET  /audit
-GET  /scoreboard
-GET  /providers/status
-POST /providers/set
-GET  /models/roles
-POST /models/roles/set
-GET  /models/profiles
-POST /models/profiles/set
-GET  /memory/status
-POST /memory/context-pack
-POST /memory/writeback/propose
-GET  /benchmark/status
-GET  /console/status
-POST /console/run-validation
-POST /console/setup/pagespeed-key
-POST /console/setup/memory-vault
-GET  /console/runs
-POST /analyze          legacy compatibility
-```
+A **Track** is a reusable execution contract. It declares inputs, outputs, steps,
+required capabilities, model roles, validation rules, retry policies, and evidence
+expectations. Tracks decompose useful work into narrow contracts so each step can
+be routed to the smallest qualified capability.
 
-## Implemented Core
+Locaily routes tracks, not raw model names. Workflows compose tracks. Models,
+tools, validators, and relayed capabilities plug into track steps.
 
-```txt
-companion/
-  server.js          — Local Brain HTTP server
-  config.json
-  core/              — input gate, context, permissions, validator, audit, model-profiles
-  crew/              — track orchestrator, input maps, model/tool routers, track files
-  orchestration/     — workflow registry, run plan builder/executor
-  providers/         — provider router (Ollama + mock)
-  runtime/           — Ollama adapter
-  tools/             — tool registry, showcase tools
-  memory/            — Memory Bridge v0
-  console/           — local validation UI
+Track declarations are JSON files. Example tracks include:
 
-benchmark-lab/
-  engine/            — CLI entrypoints, runners, adapters, scorers, reporters
-  locaily/           — Locaily-specific suites, fixtures, prompts
-  schemas/           — 13 benchmark schemas with validation
-  evidence/          — curated, checksummed approved evidence
-  qualifications/    — runtime-facing qualification records
-  model-cards/       — published model cards
-  reports/           — published reports
-  models/            — model manifests
-  validators/        — contract and schema validators
-  configs/           — lab configuration
-  contracts/         — benchmark-facing validation contracts
+- `website_audit.lighthouse_handoff`
+- `marketplace.dealsniper`
 
-tool-packs/
-  standard-text-pack/
-  lighthouse-parser-pack/
+Full detail: [docs/02-track-system/README.md](docs/02-track-system/README.md)
 
-scripts/
-  smoke-test.js
-  contract-test.js
-  benchmark-lab-schema-test.js
-  benchmark-lab-run-test.js
-  benchmark-status-smoke-test.js
-  benchmark-lab-tool-eval-test.js
+### The Crew
 
-templates/
-  memory-vault/      — starter vault template
-```
+**The Crew** is the strategy for using multiple small specialists — model roles,
+deterministic tools, rules, validators, and future relayed capabilities — instead
+of one general model. The Crew is assembled per track contract, not a fixed set
+of agents.
 
-## Included Tools
+Model roles (`fast_worker`, `default_worker`, `reasoning_worker`, etc.) decouple
+track definitions from specific model names. The provider router resolves roles
+to available models at runtime.
 
-Showcase tools:
+Full detail: [docs/01-architecture/crew.md](docs/01-architecture/crew.md)
 
-```txt
-deal-sniper
-lighthouse-handoff
-```
+### Tool Packs
 
-Standard Text Pack:
+Tool packs are plugin-style bundles of tool definitions, schemas, prompts, and
+permissions. Each pack lives under `tool-packs/` with a `tool.json` manifest that
+the registry loads at startup. The **Standard Text Pack** (`text.clean`,
+`text.summarize`, `text.extract_json`, `text.classify`, `text.detect_injection`,
+`text.validate_schema`) is the first engine-native pack. The **Lighthouse Parser
+Pack** provides structured Lighthouse data processing.
 
-```txt
-text.clean
-text.summarize
-text.extract_json
-text.classify
-text.detect_injection
-text.validate_schema
-```
+Full detail: [docs/01-architecture/locaily-overview.md](docs/01-architecture/locaily-overview.md)
 
-`text.validate_schema` and Lighthouse Handoff's deterministic path do not require Ollama. Lighthouse Handoff can also run multi-step orchestration when a runtime is available. DealSniper and the other text tools are model-backed.
+### Model Lab / Benchmark Lab
 
-## How To Run
+**Model Lab** is the public architecture layer for evaluating and qualifying
+models. **Benchmark Lab** (`benchmark-lab/`) is the concrete subsystem that powers
+it — CLI evaluation commands, schemas, mock and Ollama adapters, evidence promotion,
+checksum verification, and qualification records.
+
+Qualification records are consumed by the Local Brain at runtime through
+compact JSON records. The lab produces evidence, reports, and model cards
+that inform routing decisions without assuming automatic model promotion.
+
+Full detail: [docs/02-track-system/benchmark-lab.md](docs/02-track-system/benchmark-lab.md)
+
+### Memory Bridge
+
+The **Memory Bridge** is optional. Locaily runs without a memory vault. When
+configured, it reads a user-owned local Markdown vault and supplies **Context
+Packs** for tasks. Writeback can be configured as a proposal-first workflow
+so humans review changes before they are applied to the vault. The vault stays
+private outside this repository.
+
+A starter vault template is at `templates/memory-vault/`.
+
+Full detail: [docs/01-architecture/memory-bridge.md](docs/01-architecture/memory-bridge.md)
+
+### Relay Nodes
+
+**Relay Nodes** extend Locaily beyond one machine by allowing trusted nearby
+devices to advertise usable capabilities through connectors. A Relay Node
+does not need an AI model. Protocol, discovery, authentication, and deployment
+details live in the Relay Node documentation.
+
+Full detail: [docs/01-architecture/nearby-node.md](docs/01-architecture/nearby-node.md)
+
+## Why Local-First
+
+- **Privacy:** sensitive inputs stay on your machine by default
+- **Cost:** smaller models and local hardware reduce cloud dependence
+- **Control:** you own the runtime, tools, tool packs, and audit trail
+- **Accessibility:** older or modest hardware can still run useful workflows
+- **Modularity:** tools, packs, and workflows evolve without rewriting the core
+
+## Example Workflows
+
+**Lighthouse Handoff** is the first practical workflow test bench. It translates
+Lighthouse and PageSpeed report data into structured developer handoff notes,
+with a deterministic fallback path when no model is available and a multi-step
+orchestrated path when a runtime is available.
+
+**DealSniper** is a model-backed showcase tool for marketplace listing analysis.
+
+These are demonstrations of the track system, not the entire product. New workflows
+can be built by composing tracks, tool packs, and validators.
+
+## Core Project Principles
+
+- Local-first, not local-only: prefer local execution with explicit policy-controlled escalation
+- Smallest qualified capability: select the least expensive worker that consistently meets the contract
+- Deterministic where possible: use code, rules, schemas, and validators before model inference
+- Models remain replaceable: tracks and agents declare capabilities, not permanent model dependencies
+- Nodes advertise; Local Brain decides: capacity reports what it can do; routing authority stays centralized
+- Evidence over intuition: routing, purchases, qualification, and track revisions should be supported by observed results
+- Graceful degradation: queue, retry, reduce scope, or escalate rather than fail opaquely
+- Human authority remains explicit: high-impact writeback, publishing, and destructive actions require approval
+
+## Getting Started
 
 Requirements:
 
-- Node.js 18 or newer
-- Ollama for live model-backed local analysis
-- Recommended model: `llama3.2`
+- **Node.js 18** or newer
+- **Ollama** (optional) for live model-backed analysis
 
-Install/pull the model:
-
-```bash
-ollama pull llama3.2
-```
-
-Start the server:
+Quick start:
 
 ```bash
 node companion/server.js
 ```
 
-Windows helper:
+Windows helpers:
 
 ```bat
 start-windows.bat
 ```
 
-PowerShell development helper:
-
 ```powershell
 .\start-dev.ps1
 ```
 
-Alternate development port:
+On startup, the server prints the local URL, active provider, model readiness,
+and registered tool count.
 
-```powershell
-.\start-dev.ps1 -Port 31314
-```
+**Full setup and configuration:** [docs/00-start-here/README.md](docs/00-start-here/README.md)
 
-On startup, the server prints the local URL, canonical API endpoint, active provider, provider availability, default model role, selected model readiness, registered tool count, and the smoke-test command.
+**Example requests and smoke tests:** [docs/01-architecture/api-contract.md](docs/01-architecture/api-contract.md)
 
-If port `31313` is already in use, either stop the existing server process or start on another port:
+## Status
 
-```powershell
-netstat -ano | findstr :31313
-.\start-dev.ps1 -Port 31314
-```
+Locaily is under active development.
 
-## Smoke Test
+For verified implementation status, current capabilities, known limitations,
+and active work, see:
 
-With the server running:
-
-```bash
-node scripts/smoke-test.js
-```
-
-If using an alternate port:
-
-```powershell
-$env:LOCAL_AI_BASE_URL = "http://127.0.0.1:31314"
-node scripts/smoke-test.js
-```
-
-Expected: all checks pass. See the latest progress log or CI evidence for current counts. Memory Bridge checks pass with memory disabled in default `companion/config.json`.
-
-## Non-Live Validation
-
-Benchmark Lab framework changes do not require a live Ollama:
-
-```powershell
-npm.cmd run benchmark:test
-npm.cmd run benchmark:status-smoke
-node scripts/contract-test.js
-```
-
-## Example `/tasks/run`
-
-```json
-{
-  "tool": "text.validate_schema",
-  "input": {
-    "data": {
-      "title": "Example"
-    },
-    "schema": {
-      "type": "object",
-      "required": ["title"]
-    }
-  },
-  "context": {
-    "source": "example-client"
-  },
-  "options": {}
-}
-```
-
-## Example Legacy `/analyze`
-
-```json
-{
-  "tool": "deal-sniper",
-  "task": "analyze-listing",
-  "input": {
-    "title": "Used Honda Generator",
-    "price": 450,
-    "description": "Runs good, pickup only."
-  }
-}
-```
-
-## Notes
-
-- The server binds to localhost by default.
-- Some older docs mention port `4317`; this repo keeps `31313` for compatibility.
-- Audit events are summary-only and do not persist raw input/output by default.
-- CORS remains minimal and should be expanded carefully for browser extension testing.
-
-## Project Policies
-
-- [Contributing](CONTRIBUTING.md)
-- [Security Policy](SECURITY.md)
-- [License](LICENSE)
+[docs/00-start-here/current-state.md](docs/00-start-here/current-state.md)
 
 ## Documentation
 
-Start at [docs/00-start-here/README.md](docs/00-start-here/README.md). **Blunt status:** [docs/00-start-here/current-state.md](docs/00-start-here/current-state.md).
+| Need | Start here |
+|---|---|
+| Setup and orientation | [docs/00-start-here/README.md](docs/00-start-here/README.md) |
+| Current verified status | [docs/00-start-here/current-state.md](docs/00-start-here/current-state.md) |
+| Vision and terminology | [docs/00-start-here/current-vision.md](docs/00-start-here/current-vision.md) |
+| Architecture | [docs/01-architecture/locaily-overview.md](docs/01-architecture/locaily-overview.md) |
+| Track system | [docs/02-track-system/README.md](docs/02-track-system/README.md) |
+| API contract | [docs/01-architecture/api-contract.md](docs/01-architecture/api-contract.md) |
+| Roadmap | [docs/05-product/roadmap.md](docs/05-product/roadmap.md) |
+| Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
-- [Track system](docs/02-track-system/README.md)
-- [Build status / next agent brief](docs/07-progress/next-agent-brief.md)
-- [Current vision](docs/00-start-here/current-vision.md)
-- [Repo map](docs/00-start-here/repo-map.md)
-- [Architecture overview](docs/01-architecture/locaily-overview.md)
-- [Memory Bridge](docs/01-architecture/memory-bridge.md)
-- [API contract](docs/01-architecture/api-contract.md)
-- [Lighthouse Handoff workflow](docs/03-workflows/lighthouse-handoff.md)
-- [Lighthouse validation record](docs/03-workflows/lighthouse-handoff-validation.md)
-- [Client integration guide](docs/08-agents/client-integration-guide.md)
-- [Agent context](docs/08-agents/agent-context.md)
-- [Roadmap](docs/05-product/roadmap.md)
-- [Packaging plan](docs/05-product/packaging-plan.md)
-- [Publish readiness checklist](docs/05-product/publish-readiness-checklist.md)
+## Key Integrations
 
-## The Crew Thesis
-
-Locaily explores whether multiple small local models, tools, rules, and validators—coordinated by **The Crew** strategy (formerly "AI Pit Crew")—can complete useful workflows without always defaulting to one large general-purpose model.
-
-Instead of treating model size as the primary measure of capability, the system treats each task as a **track**. Each track can decompose into smaller jobs routed to the best available model role, tool pack, ruleset, or verifier.
-
-**Device = capability. Not every node needs a model; every node needs a connector.**
-
-This architecture supports:
-
-- tiny local models and model roles
-- task decomposition and orchestration
-- tool packs and structured outputs
-- fallback handling and validation
-- older hardware reuse
-- future **Relay Node** capability connectors
-
-Do not claim benchmark wins without measured data in the repo.
+- **Lighthouse Handoff client:** https://github.com/mnfrdrsh/lighthouse-handoff
