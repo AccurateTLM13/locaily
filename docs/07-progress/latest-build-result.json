@@ -1,35 +1,41 @@
 {
   "schema_version": "1.0.0",
-  "build_slice": "objective-lifecycle-closeout",
+  "build_slice": "m12-track-learning-evidence-loop",
   "status": "complete",
-  "objective": "Inspect and harden the objective lifecycle, queue archival process, agent closeout process, and startup continuity behavior.",
+  "objective": "Implement the Track Learning Evidence Loop — connect shadow routing evidence, enforcement decisions, human reviews, and retry comparisons into a learning feedback loop.",
   "implemented": {
-    "lifecycle_manager": "scripts/objective-lifecycle.js",
-    "closeout_schema": "docs/07-progress/work-closeout.schema.json",
-    "closeout_record": "docs/07-progress/work-closeout.json",
-    "test_suite": "scripts/test-lifecycle.js — 21/21",
-    "queue_lock": ".opencode/agents/objectives/QUEUE_LOCK.json",
-    "integrity_check_cmd": "node scripts/objective-lifecycle.js check"
-  },
-  "cleanup": {
-    "encoding_fixed": ["completed/07-durable-background-execution.md", "completed/08-operator-control-plane.md"],
-    "duplicates_removed": ["queue/07-durable-background-execution.md", "queue/08-operator-control-plane.md"],
-    "stale_state_cleared": ["run-state.json reset", "milestones/06-trusted-relay-execution.json finalized"],
-    "meta_records_added": ["completed/*.meta.json (4)", "held/*.meta.json (1)", "failed/*.meta.json (2)"],
-    "held_renamed": "held/10-track-learning-evidence-loop.md → held/track-learning-evidence-loop.md (prefix collision)"
+    "disagreement_classification": {
+      "categories": ["model_regression", "qualification_stale", "runtime_unavailable", "unexplainable"],
+      "location": "companion/evidence/shadow-evidence-review.js"
+    },
+    "drift_detection": "companion/evidence/shadow-evidence-review.js (early/late period comparison)",
+    "learning_endpoint": "GET /evidence/learning (per-track record count, agreement %, coverage %, disagreement breakdown)",
+    "health_evidence": "/health includes learning_evidence.recordCount, trackCount, generatedAt",
+    "enforcement_recommendations": "/enforcement/status includes per-track recommendations with agreement rate, classification, coverage",
+    "retry_comparison": "companion/evidence/retry-comparison.js (compareOutputs, buildRetryComparison, buildCorrectionComparison)",
+    "documentation": "canonical-track-run-records.md (learning loop section), validation README (updated)",
+    "tests": "scripts/test-evidence-review.js — 17/17",
+    "lifecycle_archive": "m12 archived transactionally through lifecycle: held → completed"
   },
   "validation": {
     "passed": true,
     "results": [
-      "scripts/test-lifecycle.js — 21/21 passed",
-      "node scripts/objective-lifecycle.js check — 3 remaining (acceptable: duplicate slugs with meta files, stale active-objective with valid content)"
+      "scripts/test-lifecycle.js — 23/23",
+      "scripts/test-evidence-review.js — 17/17",
+      "scripts/contract-test.js — PASS",
+      "scripts/track-run-record-schema-test.js — PASS",
+      "scripts/benchmark-lab-schema-test.js — PASS",
+      "scripts/orchestration-unit-test.js — PASS",
+      "node --check companion/server.js — PASS",
+      "node scripts/objective-lifecycle.js check — PASS_WITH_NOTES (2 acceptable warnings)",
+      "node scripts/objective-lifecycle.js continuity — unresolved: false"
     ]
   },
-  "next_milestone": "Second-repo operator acceptance, then physical multi-device pilot (deferred after lifecycle hardening)",
+  "next_milestone": "m09 — Physical Multi-Device Pilot (requires hardware) then m10 — Locaily v1 Packaging",
   "pending_acceptance": {
-    "name": "Real second-repository operator walkthrough",
-    "scope": "Brief acceptance check — register real repo, capture, review, confirm retrieval",
-    "blocks": "Physical multi-device pilot"
+    "name": "Physical multi-device pilot",
+    "scope": "Execute on real hardware with paired nodes, measure local vs. distributed, test node loss/timeout.",
+    "blocks": "Locaily v1 Packaging (m10)"
   },
   "updated_at": "2026-07-20"
 }
