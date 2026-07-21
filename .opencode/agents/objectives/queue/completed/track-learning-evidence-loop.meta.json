@@ -1,0 +1,18 @@
+{
+  "objective_id": "m12",
+  "slug": "track-learning-evidence-loop",
+  "status": "completed",
+  "revision": 1,
+  "supersedes": null,
+  "superseded_by": null,
+  "source_objective": ".opencode\\agents\\objectives\\queue\\held\\track-learning-evidence-loop.md",
+  "activated_at": null,
+  "completed_at": "2026-07-21T01:40:31.568Z",
+  "completion_commit": "0a6059c0530bfd04a63d282a5004f5d5df8814ef",
+  "failed_at": null,
+  "failure_reason": null,
+  "abandoned_at": null,
+  "abandon_reason": null,
+  "held_at": null,
+  "hold_reason": null
+}

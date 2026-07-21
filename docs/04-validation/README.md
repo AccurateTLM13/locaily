@@ -77,7 +77,7 @@ Evidence records for Locaily **tracks** and **workflows**.
 | `node scripts/tool-registry-schema-test.js` | Tool registry schema tests | None |
 | `node scripts/audit-record-schema-test.js` | Audit record schema tests | None |
 
-**Canonical Track Run Records** are at the specification stage — no validation exists today for this layer.
+**Canonical Track Run Records** — schema defined, emitted by all Track runs, persisted to append-only store. Evidence review layer aggregates shadow comparisons and enforcement decisions. See [canonical-track-run-records.md](../02-track-system/canonical-track-run-records.md).
 
 ## Benchmark Lab Entry Point
 
@@ -108,8 +108,8 @@ Interpret warnings carefully:
 
 ## Current Limitations
 
-- Canonical Track Run Records are at specification stage — not yet implemented.
-- No automatic learning loop exists. Future learning validation is not established.
+- Canonical Track Run Records are implemented — schema, emission, store, and evidence review layer complete.
+- Track Learning Evidence Loop established: disagreement classification, drift detection, per-track learning state, and retry/correction comparisons. See `GET /evidence/learning` endpoint.
 - Extension ↔ Local Brain integration is not validated at L4.
 - Model qualification is specific to tested roles, Tracks, contracts, prompts, runtimes, and evidence — not general.
 - Historical smoke-test totals (e.g. 51/51, 55/55) reflect framework contract compliance, not production readiness.

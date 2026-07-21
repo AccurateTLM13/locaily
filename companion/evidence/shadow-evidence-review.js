@@ -1,4 +1,5 @@
 const { listAllRecords } = require("./track-run-record-store");
+const { listReviews, buildQualitySummary } = require("./human-review-record-store");
 
 function deduplicateByRecordId(records) {
   const seen = new Set();
@@ -64,6 +65,95 @@ function extractEnforcementRecords(records) {
   return deduplicateByRecordId(result);
 }
 
+function classifyDisagreement(record) {
+  const sr = record.routing && record.routing.shadowRecommendation;
+  if (!sr || sr.comparison !== "disagree") return null;
+
+  const selectedState = sr.selectedQualificationState || sr.state || "unknown";
+  const recommendedQualState = sr.recommendedQualificationState || "unknown";
+  const reason = (sr.reason || "").toLowerCase();
+
+  if (selectedState === "expired" || selectedState === "stale") {
+    return { classification: "qualification_stale", detail: `Selected model qualification is ${selectedState}.`, evidence: `currentState:${selectedState}` };
+  }
+
+  if (reason.includes("runtime") || reason.includes("unavailable") || reason.includes("not ready")) {
+    return { classification: "runtime_unavailable", detail: "Shadow routing detected runtime unavailability.", evidence: `reason:${sr.reason}` };
+  }
+
+  if (selectedState === "qualified" && recommendedQualState === "qualified") {
+    return { classification: "model_regression", detail: "Both models qualified but shadow recommends a different model, suggesting the current model may have regressed relative to the recommendation.", evidence: `selected:${sr.selectedCapabilityId} recommended:${sr.recommendedCapabilityId} selectedState:${selectedState} recommendedState:${recommendedQualState}` };
+  }
+
+  return { classification: "unexplainable", detail: `Disagreement with state: selected=${selectedState}, recommended=${recommendedQualState}. No clear classification matches.`, evidence: `selectedState:${selectedState} recommendedState:${recommendedQualState}` };
+}
+
+function detectDrift(records) {
+  const shadowRecords = extractShadowRecords(records);
+  if (shadowRecords.length < 4) return { driftDetected: false, reason: "Insufficient records for drift analysis (need 4+)." };
+
+  const sorted = [...shadowRecords].sort((a, b) => {
+    return (a.timestamps?.createdAt || "").localeCompare(b.timestamps?.createdAt || "");
+  });
+
+  const midpoint = Math.floor(sorted.length / 2);
+  const early = sorted.slice(0, midpoint);
+  const late = sorted.slice(midpoint);
+
+  function computeRate(bucket) {
+    let agree = 0;
+    const byComparison = {};
+    for (const r of bucket) {
+      const sr = r.routing && r.routing.shadowRecommendation;
+      const comp = sr ? sr.comparison : "unknown";
+      byComparison[comp] = (byComparison[comp] || 0) + 1;
+      if (comp === "agree") agree++;
+    }
+    return { total: bucket.length, agree, agreementRate: bucket.length > 0 ? Math.round((agree / bucket.length) * 10000) / 100 : 0, byComparison };
+  }
+
+  const earlyStats = computeRate(early);
+  const lateStats = computeRate(late);
+  const driftPoints = [];
+
+  const rateDiff = lateStats.agreementRate - earlyStats.agreementRate;
+  if (Math.abs(rateDiff) > 10) {
+    driftPoints.push({
+      metric: "agreement_rate",
+      early: earlyStats.agreementRate,
+      late: lateStats.agreementRate,
+      change: rateDiff,
+      direction: rateDiff > 0 ? "improving" : "degrading",
+      severity: Math.abs(rateDiff) > 25 ? "high" : "medium"
+    });
+  }
+
+  const earlyDisagree = earlyStats.byComparison.disagree || 0;
+  const lateDisagree = lateStats.byComparison.disagree || 0;
+  const earlyDisagreeRate = earlyStats.total > 0 ? (earlyDisagree / earlyStats.total) * 100 : 0;
+  const lateDisagreeRate = lateStats.total > 0 ? (lateDisagree / lateStats.total) * 100 : 0;
+  const disagreeDrift = lateDisagreeRate - earlyDisagreeRate;
+  if (Math.abs(disagreeDrift) > 10) {
+    driftPoints.push({
+      metric: "disagreement_rate",
+      early: Math.round(earlyDisagreeRate * 100) / 100,
+      late: Math.round(lateDisagreeRate * 100) / 100,
+      change: Math.round(disagreeDrift * 100) / 100,
+      direction: disagreeDrift > 0 ? "increasing" : "decreasing",
+      severity: Math.abs(disagreeDrift) > 25 ? "high" : "medium"
+    });
+  }
+
+  return {
+    driftDetected: driftPoints.length > 0,
+    driftPoints,
+    earlyPeriod: { start: early[0]?.timestamps?.createdAt, end: early[early.length - 1]?.timestamps?.createdAt, recordCount: early.length },
+    latePeriod: { start: late[0]?.timestamps?.createdAt, end: late[late.length - 1]?.timestamps?.createdAt, recordCount: late.length },
+    totalRecords: sorted.length,
+    generatedAt: new Date().toISOString()
+  };
+}
+
 function buildEvidenceReview(records) {
   const shadowRecords = extractShadowRecords(records);
 
@@ -83,13 +173,23 @@ function buildEvidenceReview(records) {
 
     const trackId = record.trackId || "unknown";
     if (!byTrack[trackId]) {
-      byTrack[trackId] = { total: 0, byComparison: {}, agreementRate: 0 };
+      byTrack[trackId] = { total: 0, byComparison: {}, agreementRate: 0, disagreementClassification: {} };
     }
     byTrack[trackId].total++;
     byTrack[trackId].byComparison[comparison] = (byTrack[trackId].byComparison[comparison] || 0) + 1;
 
     if (comparison === "agree") agreeCount++;
-    if (comparison === "disagree") disagreeCount++;
+    if (comparison === "disagree") {
+      disagreeCount++;
+      const cls = classifyDisagreement(record);
+      if (cls) {
+        const cat = cls.classification;
+        if (!byTrack[trackId].disagreementClassification[cat]) {
+          byTrack[trackId].disagreementClassification[cat] = 0;
+        }
+        byTrack[trackId].disagreementClassification[cat]++;
+      }
+    }
     if (comparison === "current-selection-unqualified") unqualifiedCount++;
     if (comparison === "recommendation-unavailable" || comparison === "no-qualified-capability") {
       coverageMissing++;
@@ -119,6 +219,8 @@ function buildEvidenceReview(records) {
     : 0;
 
   const enforcementMetrics = buildEnforcementMetrics(records);
+  const drift = detectDrift(records);
+  const disagreementBreakdown = buildDisagreementBreakdown(shadowRecords);
 
   return {
     totalShadowComparisons: total,
@@ -133,7 +235,106 @@ function buildEvidenceReview(records) {
     byRole,
     hasReviews: total > 0,
     generatedAt: new Date().toISOString(),
-    enforcement: enforcementMetrics
+    enforcement: enforcementMetrics,
+    drift,
+    disagreementBreakdown
+  };
+}
+
+function buildDisagreementBreakdown(shadowRecords) {
+  const classificationCounts = { model_regression: 0, qualification_stale: 0, runtime_unavailable: 0, unexplainable: 0 };
+  const byTrack = {};
+  let total = 0;
+
+  for (const record of shadowRecords) {
+    const cls = classifyDisagreement(record);
+    if (!cls) continue;
+    total++;
+    classificationCounts[cls.classification] = (classificationCounts[cls.classification] || 0) + 1;
+    const trackId = record.trackId || "unknown";
+    if (!byTrack[trackId]) byTrack[trackId] = {};
+    byTrack[trackId][cls.classification] = (byTrack[trackId][cls.classification] || 0) + 1;
+  }
+
+  return { totalClassifiedDisagreements: total, byClassification: classificationCounts, byTrack, generatedAt: new Date().toISOString() };
+}
+
+function buildDisagreementSummary(shadowRecords) {
+  const disagreements = shadowRecords.filter(
+    (r) => r.routing && r.routing.shadowRecommendation && r.routing.shadowRecommendation.comparison === "disagree"
+  );
+  return disagreements.map((r) => {
+    const sr = r.routing.shadowRecommendation;
+    const cls = classifyDisagreement(r);
+    return {
+      recordId: r.recordId,
+      trackId: r.trackId,
+      timestamp: r.timestamps?.createdAt,
+      selectedCapabilityId: sr.selectedCapabilityId,
+      recommendedCapabilityId: sr.recommendedCapabilityId,
+      reason: sr.reason,
+      score: sr.recommendedScore,
+      classification: cls ? cls.classification : null,
+      classificationDetail: cls ? cls.detail : null,
+      classificationEvidence: cls ? cls.evidence : null
+    };
+  });
+}
+
+function buildLearningState(records) {
+  const shadowRecords = extractShadowRecords(records);
+  const totalRecords = records.length;
+  const shadowCount = shadowRecords.length;
+
+  const byTrack = {};
+  for (const record of shadowRecords) {
+    const trackId = record.trackId || "unknown";
+    if (!byTrack[trackId]) {
+      byTrack[trackId] = { recordCount: 0, agreementCount: 0, disagreementCount: 0, coverageCount: 0, byClassification: {}, lastQualification: null, lastComparison: null };
+    }
+    const td = byTrack[trackId];
+    td.recordCount++;
+
+    const sr = record.routing.shadowRecommendation;
+    if (sr.comparison === "agree") td.agreementCount++;
+    if (sr.comparison === "disagree") {
+      td.disagreementCount++;
+      const cls = classifyDisagreement(record);
+      if (cls) td.byClassification[cls.classification] = (td.byClassification[cls.classification] || 0) + 1;
+    }
+
+    if (sr.recommendedQualificationState === "qualified" || sr.state === "qualified") {
+      td.coverageCount++;
+    }
+
+    if (sr.qualificationRecordId) {
+      td.lastQualification = sr.qualificationRecordId;
+    }
+    td.lastComparison = sr.comparison;
+    td.lastTimestamp = record.timestamps?.createdAt;
+  }
+
+  const trackStates = {};
+  for (const [trackId, td] of Object.entries(byTrack)) {
+    const agreementPercent = td.recordCount > 0 ? Math.round((td.agreementCount / td.recordCount) * 10000) / 100 : 0;
+    const coveragePercent = td.recordCount > 0 ? Math.round((td.coverageCount / td.recordCount) * 10000) / 100 : 0;
+    trackStates[trackId] = {
+      recordCount: td.recordCount,
+      agreementPercent,
+      disagreementCount: td.disagreementCount,
+      disagreementBreakdown: td.byClassification,
+      coveragePercent,
+      lastQualification: td.lastQualification,
+      lastComparison: td.lastComparison,
+      lastUpdated: td.lastTimestamp
+    };
+  }
+
+  return {
+    totalRecords,
+    shadowComparisonCount: shadowCount,
+    trackStates,
+    generatedAt: new Date().toISOString()
   };
 }
 
@@ -286,22 +487,7 @@ async function getDisagreements(trackId) {
     ? shadowRecords.filter((r) => r.trackId === trackId)
     : shadowRecords;
 
-  return relevant
-    .filter(
-      (r) =>
-        r.routing &&
-        r.routing.shadowRecommendation &&
-        r.routing.shadowRecommendation.comparison === "disagree"
-    )
-    .map((r) => ({
-      recordId: r.recordId,
-      trackId: r.trackId,
-      timestamp: r.timestamps?.createdAt,
-      selectedCapability: r.routing.shadowRecommendation.selectedCapabilityId,
-      recommendedCapability: r.routing.shadowRecommendation.recommendedCapabilityId,
-      reason: r.routing.shadowRecommendation.reason,
-      score: r.routing.shadowRecommendation.recommendedScore
-    }));
+  return buildDisagreementSummary(relevant);
 }
 
 async function getEnforcementDecisions(trackId) {
@@ -351,14 +537,31 @@ async function getShadowComparisons(trackId) {
   }));
 }
 
+async function getLearningState() {
+  const records = await listAllRecords();
+  return buildLearningState(records);
+}
+
+async function getDrift() {
+  const records = await listAllRecords();
+  return detectDrift(records);
+}
+
 module.exports = {
   getEvidenceReview,
   getTrackReview,
   getDisagreements,
   getEnforcementDecisions,
   getShadowComparisons,
+  getLearningState,
+  getDrift,
   buildEvidenceReview,
   buildEnforcementMetrics,
+  buildLearningState,
+  buildDisagreementBreakdown,
+  buildDisagreementSummary,
+  classifyDisagreement,
+  detectDrift,
   extractShadowRecords,
   extractEnforcementRecords
 };
