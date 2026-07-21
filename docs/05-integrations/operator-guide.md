@@ -105,7 +105,52 @@ Or open `http://127.0.0.1:31313/health` in your browser. A healthy response incl
 
 ---
 
-## 4. Running a Lighthouse Handoff
+## 4. Pairing a Relay Node (Optional)
+
+Relay Nodes extend Locaily's capability across nearby devices. Each node runs a Local Brain instance and registers with the orchestrator.
+
+### Prerequisites
+
+- A second machine on the same local network with Ollama and the Locaily companion installed
+- Both machines must be able to reach each other on the chosen port (default `31313`)
+
+### Pairing Steps
+
+1. **Start the orchestrator** (your primary Local Brain) on machine A.
+2. **Start the relay node** on machine B with the configured `baseUrl` that machine A can reach:
+   ```json
+   {
+     "server": { "host": "0.0.0.0", "port": 31313 },
+     "relay": { "enableRegistration": true }
+   }
+   ```
+3. **Register the node** from machine A:
+   ```powershell
+   curl -X POST http://127.0.0.1:31313/relay/register ^
+     -H "Content-Type: application/json" ^
+     -d "{\"nodeId\":\"device-b\",\"baseUrl\":\"http://192.168.1.101:31313\",\"capabilities\":[\"ollama\"]}"
+   ```
+4. **Verify pairing**:
+   ```powershell
+   curl http://127.0.0.1:31313/relay/nodes
+   ```
+   Expected response: node `device-b` appears with `healthy: true`.
+5. **Test routing** by running a track with `relay_policy=distribute`:
+   ```powershell
+   curl -X POST http://127.0.0.1:31313/tracks/run ^
+     -H "Content-Type: application/json" ^
+     -d "{\"trackId\":\"website_audit.lighthouse_handoff\",\"input\":{\"url\":\"https://example.com\"},\"options\":{\"relay_policy\":\"distribute\"}}"
+   ```
+
+The response includes `relay_placement` showing which steps executed on which node.
+
+For full protocol details, see [Relay Node Protocol](relay-node-protocol.md). For physical multi-device setup, see [Multi-Device Pilot](multi-device-pilot.md).
+
+> **Note:** The physical multi-device pilot (m09) is **deferred** pending two available test devices. The relay infrastructure, registration, and routing are implemented and tested in simulation.
+
+---
+
+## 5. Running a Lighthouse Handoff
 
 Lighthouse Handoff converts PageSpeed/Lighthouse report data into developer-ready handoff notes. It is Locaily's primary workflow.
 
@@ -179,7 +224,7 @@ For full endpoint details, request/response schemas, and error codes, see the [A
 
 ---
 
-## 5. Viewing the Operator Console
+## 6. Viewing the Operator Console
 
 The Local Brain includes a browser-based operator console for running validations and monitoring status.
 
@@ -207,7 +252,7 @@ The console communicates with the server through the `/console/*` endpoints. For
 
 ---
 
-## 6. Reading Evidence
+## 7. Reading Evidence
 
 Evidence records produced by track runs are stored under:
 
@@ -249,7 +294,7 @@ For the complete list of evidence and qualification endpoints, see the [API Refe
 
 ---
 
-## 7. Stopping the Server
+## 8. Stopping the Server
 
 Press **Ctrl+C** in the terminal where the server is running.
 
@@ -257,7 +302,7 @@ The server will shut down cleanly. If any background jobs were running at the ti
 
 ---
 
-## 8. Troubleshooting
+## 9. Troubleshooting
 
 ### Ollama is not running
 

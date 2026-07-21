@@ -58,11 +58,16 @@ These capabilities are implemented, tested, and backed by code, endpoints, or te
 
 These capabilities are under active development. They exist in code but are not claimed as complete or production-ready.
 
-- **Track Learning Evidence Loop** — the current active build slice. Canonical Track Run Records are implemented, but the full evidence → qualification → routing improvement loop is incremental.
-- **Relay Nodes physical multi-device (M9 pilot)** — protocol and placement planner exist, but no physical multi-device pilot evidence has been validated. Do not assume production multi-device capability.
 - **Model Lab broader qualification coverage** — Benchmark Lab Milestone 1 is complete, but coverage across additional models, tracks, hardware profiles, and live qualification depth remains incremental.
 - **Memory Bridge v1** — search and writeback-apply endpoints exist but are not production-hardened; no embeddings yet.
 - **DAG executor** — topological sort and parallel step execution are implemented but the track runner defaults to linear pipeline mode.
+
+## Deferred
+
+These capabilities were scoped but deferred pending hardware, external validation, or a sequenced follow-on objective.
+
+- **Physical multi-device pilot (m09)** — Relay protocol, placement planner, and pilot infrastructure are implemented and tested in simulation. The pilot requires two physical devices and a human operator. Formally deferred — second device unavailable. Re-entry condition: resume when two test devices and an operator are available.
+- **Second-repo operator acceptance** — Development Memory E2E is proven in simulation. A real second-repository walkthrough was deferred during lifecycle hardening. Re-entry condition: resume after m10 packaging.
 
 ---
 

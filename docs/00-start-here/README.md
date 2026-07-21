@@ -45,9 +45,15 @@ Locaily is **not** a chatbot product, a model marketplace, or a single Chrome ex
 
 ## Current Focus
 
-**Active slice:** Canonical Track Run Records.
+**Active slice:** Locaily v1 Packaging (m10).
 
-The Local Brain dispatches **tracks** (units of work with contracts), not raw models. The current slice turns completed track runs into structured evidence that can support future routing, validation, and track improvement. See [../07-progress/active-build-slice.md](../07-progress/active-build-slice.md), [../02-track-system/README.md](../02-track-system/README.md), and [north-star-local-capability-network.md](./north-star-local-capability-network.md).
+All core engine features are implemented: Local Brain server, Track runner, Crew orchestration, Memory Bridge, Benchmark Lab, Relay Nodes, Development Memory Loop, enforcement policy, evidence loop, and lifecycle management. The current slice packages the validated runtime into a release-ready state: documentation alignment, operator walkthrough completeness, and state migration tooling.
+
+**Recently completed:** Track Learning Evidence Loop (m12) — disagreement classification, drift detection, per-track learning state endpoint, retry/correction comparisons. Lifecycle hardening — stable objective IDs, mandatory closeout, continuity gate.
+
+**Deferred:** Physical multi-device pilot (m09) — requires two test devices and an operator. Infrastructure and relay protocol are implemented and tested in simulation.
+
+See [../07-progress/active-build-slice.md](../07-progress/active-build-slice.md), [../02-track-system/README.md](../02-track-system/README.md), and [north-star-local-capability-network.md](./north-star-local-capability-network.md).
 
 ## Naming Note
 
