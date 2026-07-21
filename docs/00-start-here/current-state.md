@@ -2,7 +2,7 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-07-18 (Development Memory E2E proof on second project complete; post-merge stabilization landed)
+**Updated:** 2026-07-20 (Objective lifecycle hardening and mandatory work closeout complete)
 
 ## What Works
 
@@ -85,6 +85,19 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Automatic track classification** - no classifier selects workflow + track *(M3 follow-on)*
 - **Automatic model swapping / Model Garage auto-switching** - proposed only
 
+## Lifecycle Infrastructure
+
+**Complete as of 2026-07-20:** Objective lifecycle hardening and mandatory work closeout.
+
+- **Lifecycle manager**: `scripts/objective-lifecycle.js` — 9 states with validated transitions, terminal-state enforcement, stable objective identity via JSON meta files, transactional archive with encoding normalization, and integrity check (`node scripts/objective-lifecycle.js check`)
+- **Integrity checking**: Detects duplicate slugs, colliding numeric prefixes, encoding corruption (UTF-16 LE BOM, UTF-8 BOM, mojibake), stale active-objective references, and stale milestone records
+- **Work closeout**: Schema at `docs/07-progress/work-closeout.schema.json`; canonical record at `docs/07-progress/work-closeout.json`. Every work session produces a closeout with status, validation results, and a `safe_to_start_unrelated_work` gate
+- **Startup continuity gate**: `node scripts/objective-lifecycle.js continuity` — checks for unresolved work before new implementation begins; requires one of: continue, hold, abandon, supersede, or override
+- **Queue lock**: `.opencode/agents/objectives/QUEUE_LOCK.json` prevents automated queue processing during maintenance
+- **Agent instructions**: AGENTS.md, supervisor POLICY.md, worker POLICY.md, and build-slice-protocol.md updated with lifecycle and closeout policies
+- **Cleanup performed**: Fixed UTF-16 LE BOM encoding in completed M7/M8 files; removed duplicate tracked queue entries; reset stale run-state and milestone records; added meta files for all lifecycle directories; resolved prefix collision in held objectives
+- **Tests**: `scripts/test-lifecycle.js` — 21/21 covering state machine, duplicate detection, encoding checks, transactional archive, and startup continuity
+
 ## Canonical Track Run Records
 
 The canonical Track Run Record schema (`locaily.track_run_record.v1`) is implemented at `companion/evidence/schemas/track-run-record.schema.json` with:
@@ -144,7 +157,7 @@ The North Star is now documented as a local capability network: decompose work i
 
 | Layer | Focus |
 |---|---|
-| **Now** | Merge automated DM E2E proof; then brief second-repo operator acceptance |
+| **Now** | Lifecycle hardening complete; brief second-repo operator acceptance |
 | **Next** | Physical multi-device pilot (infra ready; hardware execution pending) |
 | **Later** | Locaily v1 packaging / clean-machine acceptance; embedding-based retrieval |
 | **Archive** | Old companion-only architecture, pre-track planning docs |

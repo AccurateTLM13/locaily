@@ -20,7 +20,32 @@ A **Track Run Record** is a standardized JSON execution record produced by every
 - One qualification record may support many Track Run Records.
 - Many Track Run Records may contribute to future qualification decisions.
 
-## Schema
+## Learning Evidence Loop
+
+The Track Learning Evidence Loop connects record emission to routing improvement through four stages:
+
+### 1. Record Emission
+Every Track run (success or failure) emits a Track Run Record. All records include shadow routing comparisons and enforcement decisions where applicable.
+
+### 2. Aggregation and Review
+The evidence review layer (`companion/evidence/shadow-evidence-review.js`) produces:
+- **Shadow evidence review**: per-track agreement rate, disagreement rate, coverage rate, comparison breakdown
+- **Disagreement classification**: every "disagree" comparison is classified as model_regression, qualification_stale, runtime_unavailable, or unexplainable
+- **Drift detection**: early/late period comparison of agreement and disagreement rates to detect degrading or improving trends
+- **Learning state**: per-track record count, agreement percent, coverage percent, last qualification and comparison timestamp
+
+### 3. Evidence-Backed Recommendations
+The `/enforcement/status` endpoint returns per-track evidence recommendations including agreement rate, disagreement classification breakdown, coverage percent, and enforcement success rates.
+
+### 4. Human Review and Correction
+Human review records attach to Track Run Records via `POST /runs/:id/review`. Retry and correction comparisons show before/after output differences. The evidence store is append-only with summary-safe input/output fields.
+
+### Endpoints
+- `GET /evidence/learning` — per-track learning state (record count, agreement %, coverage %, disagreement breakdown)
+- `GET /enforcement/review` — evidence review with disagreements
+- `GET /enforcement/status` — policy summary plus per-track evidence recommendations
+
+### Schema
 
 The canonical schema is defined at `companion/evidence/schemas/track-run-record.schema.json` (version `locaily.track_run_record.v1`).
 

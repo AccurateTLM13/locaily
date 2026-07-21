@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Work Closeout Record",
+  "description": "Canonical closeout record for a work session. Every implementation session must produce one.",
+  "type": "object",
+  "required": ["work_id", "status", "closed_at", "original_goal", "safe_to_start_unrelated_work"],
+  "properties": {
+    "work_id": { "type": "string", "description": "Short identifier for the work session" },
+    "objective_id": { "type": "string", "description": "Objective ID this work belongs to" },
+    "status": {
+      "type": "string",
+      "enum": ["complete", "incomplete", "blocked", "interrupted", "failed", "awaiting_human_action", "awaiting_external_validation", "stopped"],
+      "description": "Current disposition of the work session"
+    },
+    "closed_at": { "type": "string", "format": "date-time", "description": "ISO-8601 timestamp when the session closed" },
+    "original_goal": { "type": "string", "description": "What the agent was trying to accomplish" },
+    "completed": { "type": "array", "items": { "type": "string" }, "description": "What was actually completed" },
+    "remaining": { "type": "array", "items": { "type": "string" }, "description": "What remains undone" },
+    "next_required_action": { "type": "string", "description": "Single next step required" },
+    "blockers": { "type": "array", "items": { "type": "string" }, "description": "Blocker descriptions" },
+    "safe_to_start_unrelated_work": { "type": "boolean", "description": "May unrelated work safely begin?" },
+    "working_branch": { "type": "string", "description": "Git branch the work was on" },
+    "last_commit": { "type": "string", "description": "Last commit SHA" },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "passed": { "type": "array", "items": { "type": "string" } },
+        "failed": { "type": "array", "items": { "type": "string" } },
+        "not_run": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "recommended_next_agent": { "type": "string", "enum": ["worker", "supervisor", "human", "any"] },
+    "files_changed": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

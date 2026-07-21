@@ -32,6 +32,46 @@ Record durable architecture decisions in:
 
 Important project state must not exist only in the agent's completion message.
 
+## Objective Lifecycle and Work Closeout
+
+### Core Principles
+
+- **Never silently abandon unfinished work.** A new prompt does not erase the previous closeout.
+- **Before unrelated work begins**, unresolved work must be continued, held, abandoned, superseded, or explicitly overridden.
+- **Every work session closes with a durable record**, even when the work did not complete.
+
+### Lifecycle States
+
+Every objective has a stable identity (`objective_id`) and exactly one canonical lifecycle state. Supported states: `planned`, `queued`, `active`, `blocked`, `held`, `failed`, `completed`, `abandoned`, `superseded`. Terminal states: `completed`, `failed`, `abandoned`.
+
+The lifecycle manager is at `scripts/objective-lifecycle.js`. Run integrity checks with:
+
+```bash
+node scripts/objective-lifecycle.js check
+```
+
+### Work Closeout Record
+
+Before ending any implementation session, write to `docs/07-progress/work-closeout.json`. The closeout MUST contain:
+
+- `work_id`, `objective_id`, `status` (one of: complete, incomplete, blocked, interrupted, failed, awaiting_human_action, awaiting_external_validation, stopped)
+- `closed_at` (ISO-8601), `original_goal`, `completed`, `remaining`
+- `safe_to_start_unrelated_work` (true/false) — based on explicit criteria, not agent mood
+- `working_branch`, `last_commit`, `validation` (passed/failed/not_run tests)
+- `recommended_next_agent`
+
+See `docs/07-progress/work-closeout.schema.json` for the full schema.
+
+### Startup Continuity Gate
+
+Before beginning new implementation work, check `docs/07-progress/work-closeout.json`:
+
+```bash
+node scripts/objective-lifecycle.js continuity
+```
+
+If unresolved work exists and `safe_to_start_unrelated_work` is false, the agent must not silently begin new work. Report the unresolved work, remaining items, branch, blocker, and validation state. Require one explicit disposition: `continue`, `hold`, `abandon`, `supersede`, or `override`.
+
 ## Role of the Coding Agent
 
 You are helping develop **Locaily**—a reusable local-first AI coordination stack. Your job is to keep the architecture clean, practical, and publishable.

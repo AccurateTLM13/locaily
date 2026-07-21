@@ -20,15 +20,16 @@ Practical sequencing for Locaily. No dates or numbered milestones — order refl
 - Smoke and contract tests
 - Standard Text Pack (`text.clean`, `text.summarize`), Lighthouse Parser Pack
 
-## Active Build Slice — Canonical Track Run Records
+## Completed — Canonical Track Run Records
 
-**Status:** Specification stage — not implemented.
+**Status:** Implemented. Schema defined, emitted by all Track runs, persisted to append-only store. Evidence review layer aggregates shadow comparisons, enforcement decisions, and human corrections.
 
-- [ ] Canonical track-run record schema
-- [ ] Emit valid records after successful and failed track executions
-- [ ] Store summary-safe evidence without raw sensitive inputs or outputs
-- [ ] Associate optional human correction records with existing runs
-- [ ] Validate Lighthouse Handoff and DealSniper produce valid evidence records
+- [x] Canonical track-run record schema
+- [x] Emit valid records after successful and failed track executions
+- [x] Store summary-safe evidence without raw sensitive inputs or outputs
+- [x] Associate optional human correction records with existing runs
+- [x] Lighthouse Handoff and DealSniper produce valid evidence records
+- [x] Track Learning Evidence Loop (m12) completed: disagreement classification, drift detection, per-track learning state, retry comparisons
 
 ## Candidate Follow-Ons (Unapproved)
 

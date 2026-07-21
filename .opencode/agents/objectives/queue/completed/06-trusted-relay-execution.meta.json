@@ -1,0 +1,11 @@
+﻿{
+    "slug":  "trusted-relay-execution",
+    "objective_id":  "m06",
+    "completed_at":  "2026-07-14T01:45:39.243Z",
+    "source_objective":  ".opencode/agents/objectives/queue/completed/06-trusted-relay-execution.md",
+    "activated_at":  "2026-07-14T00:00:00.000Z",
+    "supersedes":  null,
+    "revision":  1,
+    "completion_commit":  "eb3369b714b29ab3ae5e25014b80d9e0ba53f71e",
+    "status":  "completed"
+}

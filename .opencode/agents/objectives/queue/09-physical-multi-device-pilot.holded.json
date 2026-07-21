@@ -1,0 +1,10 @@
+{
+  "objective_id": "m09",
+  "slug": "physical-multi-device-pilot",
+  "status": "held",
+  "revision": 1,
+  "source_objective": ".opencode/agents/objectives/queue/held/09-physical-multi-device-pilot.md",
+  "held_at": "2026-07-20T23:59:00.000Z",
+  "hold_reason": "Second physical device unavailable",
+  "reentry_condition": "Resume when two test devices and an operator are available"
+}

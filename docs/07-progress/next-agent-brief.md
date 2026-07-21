@@ -2,18 +2,19 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-18 (Development Memory E2E proof on second project complete)
+**Updated:** 2026-07-20 (Objective lifecycle hardening — see [maintenance-objective-lifecycle-closeout.md](./maintenance-objective-lifecycle-closeout.md))
 
 ## Read First
 
 1. [../00-start-here/current-state.md](../00-start-here/current-state.md)
 2. [active-build-slice.md](./active-build-slice.md)
-3. [../01-architecture/development-memory-loop.md](../01-architecture/development-memory-loop.md) *(Development Memory Loop DM1–DM10 complete)*
-4. [../02-planning/development-memory-roadmap.md](../02-planning/development-memory-roadmap.md)
-5. [build-status.md](./build-status.md)
-4. [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md)
-5. [benchmark-lab/OPERATOR_GUIDE.md](../../benchmark-lab/OPERATOR_GUIDE.md)
-6. [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md)
+3. [maintenance-objective-lifecycle-closeout.md](./maintenance-objective-lifecycle-closeout.md) *(active objective)*
+4. [../01-architecture/development-memory-loop.md](../01-architecture/development-memory-loop.md) *(Development Memory Loop DM1–DM10 complete)*
+5. [../02-planning/development-memory-roadmap.md](../02-planning/development-memory-roadmap.md)
+6. [build-status.md](./build-status.md)
+7. [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md)
+8. [benchmark-lab/OPERATOR_GUIDE.md](../../benchmark-lab/OPERATOR_GUIDE.md)
+9. [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md)
 
 Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../08-agents/agent-context.md)
 
@@ -323,13 +324,18 @@ Manual walkthrough on an actual second repository: register → small dev task �
 
 ## Next Task
 
-**Sequence after this PR merges:**
+**Objective Lifecycle Hardening and Work-Closeout — [maintenance-objective-lifecycle-closeout.md](./maintenance-objective-lifecycle-closeout.md)**
 
-1. **Brief second-repo operator acceptance** — real repository, CLI/API workflow in [development-memory-e2e-proof.md](../04-validation/development-memory-e2e-proof.md). Record pass/fail; fix only if blocked.
+Inspect and harden the objective lifecycle, queue archival process, agent closeout process, and startup continuity behavior. Recent inspection found 7 distinct anomalies in the queue directory structure (stale tracked duplicates, untracked ghost planning files, three-way objective fragmentation, numbering collisions, stale active objective, encoding defects, never-actioned queued objectives).
+
+The full scope and completion conditions are detailed in the closeout brief.
+
+### Deferred (after lifecycle hardening)
+
+1. **Second-repo operator acceptance** — real repository, CLI/API workflow in [development-memory-e2e-proof.md](../04-validation/development-memory-e2e-proof.md). Record pass/fail; fix only if blocked.
 2. **Physical multi-device pilot** — requires two devices + Ollama. See `docs/05-integrations/multi-device-pilot.md`.
-- Physical multi-device pilot — requires two devices + Ollama (`scripts/pilot/pilot-runner.js` ready)
-- Live Ollama qualification — provider required
-- Clean-machine packaging acceptance — manual gate (`scripts/acceptance-test.ps1`)
+3. Live Ollama qualification — provider required
+4. Clean-machine packaging acceptance — manual gate (`scripts/acceptance-test.ps1`)
 
 **Do not:**
 - Remove linear track runner

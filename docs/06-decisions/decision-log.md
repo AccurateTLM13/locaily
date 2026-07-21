@@ -1,5 +1,55 @@
 # Decision Log
 
+## 2026-07-20 — Objective Lifecycle Hardening and Mandatory Closeout
+
+### Context
+
+The repository had seven distinct anomalies in the objective lifecycle: duplicate tracked queue files (M7/M8 in both queue root and completed/), UTF-16 LE BOM encoding corruption in completed objective files, stale active-objective reference to a held/failed objective, stuck run-state with abandoned blocker, numbering collisions (prefix "10" used by both `locaily-v1-packaging` and `track-learning-evidence-loop`), DM2–DM9 objectives remaining in queue after DM10 completed them all, and three copies of Track Learning Evidence Loop across active/held/failed states.
+
+No single canonical lifecycle system existed. Directory placement was the only state indicator. There was no mandatory closeout record — work could vanish between sessions. No startup continuity gate prevented new work from silently piling over unresolved work.
+
+### Decision
+
+- Create `scripts/objective-lifecycle.js` as the canonical lifecycle manager, defining 9 states (planned→queued→active→blocked→held→failed→completed→abandoned→superseded) with validated transitions, terminal-state enforcement, and human-approval requirements
+- Add stable identity via `objective_id` in JSON meta files (`.meta.json` alongside each `.md` objective file)
+- Add transactional archive with encoding normalization (UTF-16 LE BOM → clean UTF-8, strips UTF-8 BOM)
+- Add integrity check (`node scripts/objective-lifecycle.js check`) detecting: duplicate slugs, colliding prefixes, encoding corruption, stale active objectives, stale milestone records
+- Add startup continuity gate (`node scripts/objective-lifecycle.js continuity`) that checks for unresolved work before new work begins
+- Define `docs/07-progress/work-closeout.schema.json` and mandate that every work session produces a closeout record at `docs/07-progress/work-closeout.json`
+- Update AGENTS.md, supervisor POLICY.md, worker POLICY.md, and build-slice-protocol.md with lifecycle, closeout, and continuity policies
+- Lock queue processing via QUEUE_LOCK.json — only manual lifecycle maintenance is allowed
+
+### Cleanup Performed
+
+- Fixed UTF-16 LE BOM encoding in `completed/07-durable-background-execution.md` and `completed/08-operator-control-plane.md`
+- Removed duplicate tracked queue files `queue/07-durable-background-execution.md` and `queue/08-operator-control-plane.md` (completed versions remain in `completed/`)
+- Reset stale `run-state.json` to clean state
+- Finalized stale milestone record `06-trusted-relay-execution.json` (was stuck in_progress)
+- Added `.meta.json` files for all completed (4), held (1), and failed (2) objectives with stable identity, supersession chains, and status
+- Renamed `held/10-track-learning-evidence-loop.md` to `held/track-learning-evidence-loop.md` to resolve prefix collision with `10-locaily-v1-packaging.md`
+- Restored `active-objective.md` to reference the current maintenance objective
+- Added 21 focused tests in `scripts/test-lifecycle.js`
+
+### Cleanup Deferred
+
+- DM2–DM9 queue root files remain (gitignored; not tracked — cleanup is cosmetic only)
+- `09-physical-multi-device-pilot.md` and `10-locaily-v1-packaging.md` remain queued (not activated per scope)
+- `failed/track-learning-evidence-loop.md` and `failed/11-locaily-v1-packaging.md` remain (history preserved, supersession documented in meta files)
+
+### Consequences
+
+- Every coding agent must run `node scripts/objective-lifecycle.js continuity` before beginning new implementation work
+- Every work session must produce a `docs/07-progress/work-closeout.json` record
+- `scripts/objective-lifecycle.js check` provides a deterministic integrity check for lifecycle anomalies
+- Queue processing remains locked via QUEUE_LOCK.json until maintenance is explicitly released
+- Unresolved work cannot be silently abandoned — the startup gate enforces a disposition choice
+
+### Status
+
+Accepted — implementation complete (2026-07-20).
+
+---
+
 ## 2026-07-18 — Development Memory E2E Proof (Second Project)
 
 ### Context

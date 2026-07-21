@@ -91,6 +91,15 @@ are satisfied AND verified against tests:
 The sequencer reads `objective_complete` from run-state and archives the
 objective file. You must not touch queue files or select the next objective.
 
+## Objective Lifecycle and Closeout
+
+- **Never silently abandon unfinished work.** A new prompt does not erase the previous closeout.
+- **Before unrelated work begins**, unresolved work must be continued, held, abandoned, superseded, or explicitly overridden.
+- **Every work session closes with a durable record**, even when the work did not complete.
+- Verify the worker wrote a valid `docs/07-progress/work-closeout.json` and that `safe_to_start_unrelated_work` reflects explicit completion criteria.
+- Run `node scripts/objective-lifecycle.js check` after lifecycle-affecting changes to verify integrity.
+- Active objective must have exactly one canonical state. Do not leave stale `active-objective.md` content referencing completed or superseded objectives.
+
 ## Documentation
 
 - When behavior changes, require the worker (or do it yourself via a task) to

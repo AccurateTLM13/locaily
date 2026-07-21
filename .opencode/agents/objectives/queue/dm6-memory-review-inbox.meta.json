@@ -1,0 +1,11 @@
+﻿{
+    "slug":  "dm6-memory-review-inbox",
+    "objective_id":  "dm6-memory-review-inbox",
+    "superseded_by":  "dm10 (multi-project-template)",
+    "source_objective":  ".opencode/agents/objectives/queue/dm6-memory-review-inbox.md",
+    "supersedes":  null,
+    "revision":  1,
+    "status":  "superseded",
+    "completed_at":  "2026-07-18T00:00:00.000Z",
+    "classification_note":  "Part of the Development Memory Loop DM1-DM10 roadmap. Implemented incrementally; all completion conditions rolled into DM10. Source .md file is gitignored; this meta record provides the canonical disposition."
+}

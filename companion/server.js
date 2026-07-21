@@ -75,7 +75,7 @@ const { describeProtocol } = require("./relay/protocol");
 const { createQualificationEvidenceLinker } = require("./evidence/qualification-evidence-linker");
 const { createShadowRouter } = require("./core/shadow-routing");
 const { createEnforcementPolicy } = require("./core/enforcement-policy");
-const { getEvidenceReview, getTrackReview, getDisagreements, getEnforcementDecisions, getShadowComparisons, buildEnforcementMetrics } = require("./evidence/shadow-evidence-review");
+const { getEvidenceReview, getTrackReview, getDisagreements, getEnforcementDecisions, getShadowComparisons, getLearningState, getDrift, buildEnforcementMetrics, buildLearningState } = require("./evidence/shadow-evidence-review");
 const { loadRecord: loadTrackRunRecord } = require("./evidence/track-run-record-store");
 const {
   loadReview,
@@ -560,10 +560,33 @@ const server = http.createServer(async (request, response) => {
     if (request.method === "GET" && url.pathname === "/enforcement/status") {
       const review = await getEvidenceReview();
       const storeHealth = enforcementPolicy.getStore ? enforcementPolicy.getStore().getStoreHealth() : {};
+      const learning = await getLearningState();
+      const trackStates = enforcementPolicy.getTrackStates ? enforcementPolicy.getTrackStates() : {};
+      const perTrackRecommendations = [];
+      for (const [trackId, trackData] of Object.entries(review.byTrack || {})) {
+        const policyState = trackStates[trackId] || "unknown";
+        const learningTrack = (learning.trackStates || {})[trackId];
+        const qualifiedCaps = [];
+        if (review.enforcement && review.enforcement.byTrack && review.enforcement.byTrack[trackId]) {
+          const et = review.enforcement.byTrack[trackId];
+          qualifiedCaps.push({ enforcedSuccessRate: et.enforcedSuccessRate, appliedCount: et.applied, blockedCount: et.blocked });
+        }
+        perTrackRecommendations.push({
+          trackId,
+          policyState,
+          recordCount: trackData.total,
+          agreementRate: trackData.agreementRate,
+          disagreementClassification: trackData.disagreementClassification || {},
+          coveragePercent: learningTrack ? learningTrack.coveragePercent : null,
+          enforcementApplied: review.enforcement?.byTrack?.[trackId]?.applied || 0,
+          enforcementSuccessRate: review.enforcement?.byTrack?.[trackId]?.enforcedSuccessRate || null
+        });
+      }
       return sendJson(response, 200, {
         ok: true,
         policy: enforcementPolicy.getPolicySummary(),
         review,
+        perTrackRecommendations,
         storeHealth,
         pilotTrack: null,
         pilotReason: "No track has valid qualified capability and sufficient shadow coverage. Implementation complete with enforcement inactive."
@@ -828,6 +851,34 @@ const server = http.createServer(async (request, response) => {
       const trackId = url.searchParams.get("trackId");
       const decisions = await getEnforcementDecisions(trackId);
       return sendJson(response, 200, { ok: true, decisions, count: decisions.length });
+    }
+
+    if (request.method === "GET" && url.pathname === "/evidence/learning") {
+      const trackId = url.searchParams.get("trackId");
+      const allRecords = [];
+      const review = await getEvidenceReview();
+      const learning = await getLearningState();
+      const drift = await getDrift();
+      let trackState = null;
+      let trackDrift = null;
+      if (trackId) {
+        if (learning.trackStates && learning.trackStates[trackId]) {
+          trackState = learning.trackStates[trackId];
+        }
+        // Drift is global; extract per-track view if needed
+        trackDrift = drift;
+      }
+      return sendJson(response, 200, {
+        ok: true,
+        learning: trackId ? { trackId, ...trackState } : learning,
+        review: {
+          totalShadowComparisons: review.totalShadowComparisons,
+          agreementRate: review.agreementRate,
+          disagrementBreakdown: review.disagrementBreakdown
+        },
+        drift,
+        generatedAt: new Date().toISOString()
+      });
     }
 
     const runReviewMatch = url.pathname.match(/^\/runs\/([^/]+)\/review$/);
@@ -2710,6 +2761,11 @@ async function buildHealthResponse() {
   const cancelled = allJobs.filter((j) => j.status === "cancelled").length;
   const jobTotals = { total, queued, claimed, running, completed, failed, cancelled };
 
+  let learningState = { totalRecords: 0, shadowComparisonCount: 0, trackStates: {} };
+  try {
+    learningState = await getLearningState();
+  } catch {}
+
   const health = {
     ok: true,
     engine: "local-ai-engine-core",
@@ -2756,6 +2812,14 @@ async function buildHealthResponse() {
       safeFallback: enforcementHealth.safeFallback,
       enforcementLocked: enforcementHealth.enforcementLocked,
       policyEndpoint: "/enforcement/policy"
+    },
+    learning_evidence: {
+      available: learningState.shadowComparisonCount > 0,
+      recordCount: learningState.shadowComparisonCount,
+      totalRecords: learningState.totalRecords,
+      trackCount: Object.keys(learningState.trackStates).length,
+      lastAggregationTimestamp: learningState.generatedAt,
+      learningEndpoint: "/evidence/learning"
     },
     jobTotals
   };

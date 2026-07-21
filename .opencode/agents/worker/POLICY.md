@@ -68,6 +68,14 @@ turn.
 If you cannot complete the task, set `status: "failed"` and explain in
 `blocker`/`notes`. Do not silently leave the task half done.
 
+## Closeout
+
+- Before exiting, write or update `docs/07-progress/work-closeout.json` if this was a top-level work session (not a subtask within a supervisor loop).
+- The closeout must contain: `work_id`, `objective_id`, `status`, `closed_at` (ISO-8601), `original_goal`, completed/remaining items, `safe_to_start_unrelated_work` (true/false), `working_branch`, `last_commit`, validation results, and `recommended_next_agent`.
+- Valid statuses: complete, incomplete, blocked, interrupted, failed, awaiting_human_action, awaiting_external_validation, stopped.
+- `safe_to_start_unrelated_work` must be based on explicit criteria, not mood. Set false unless all completion conditions are met.
+- See `docs/07-progress/work-closeout.schema.json` for the full schema.
+
 ## Exit
 
 - One task per invocation. Write the result file, then stop.

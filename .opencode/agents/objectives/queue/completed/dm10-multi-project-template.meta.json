@@ -1,0 +1,11 @@
+﻿{
+    "slug":  "multi-project-template",
+    "objective_id":  "dm10",
+    "completed_at":  null,
+    "source_objective":  ".opencode/agents/objectives/queue/completed/dm10-multi-project-template.md",
+    "activated_at":  null,
+    "supersedes":  "dm2, dm3, dm4, dm5, dm6, dm7, dm8, dm9",
+    "revision":  1,
+    "completion_commit":  null,
+    "status":  "completed"
+}
