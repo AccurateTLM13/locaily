@@ -27,23 +27,23 @@
     "Fixed objective_id collision: m10 assigned to Locaily v1 Packaging; Track Learning renumbered to m12",
     "Added DUP_OBJECTIVE_ID integrity rule detecting shared objective IDs across lifecycle states",
     "Changed duplicate-slug severity from error to warning (acceptable with meta documentation)",
-    "Updated documentation: current-state.md, next-agent-brief.md, build-status.md, latest-build-result.json, progress-log.md, decision-log.md"
+    "Updated documentation: current-state.md, next-agent-brief.md, build-status.md, latest-build-result.json, progress-log.md, decision-log.md",
+    "Recorded 'continue m12' disposition per human decision. m12 held → active transition prepared."
   ],
   "remaining": [
-    "Track Learning Evidence Loop (m12) is held. Requires explicit decision to continue, supersede, or abandon before any new objective can begin.",
-    "Second-repo operator acceptance (after Track Learning disposition resolved)",
-    "Physical multi-device pilot (hardware-blocked, after Track Learning disposition resolved)"
+    "Second-repo operator acceptance (after m12 resolved)",
+    "Physical multi-device pilot (hardware-blocked, after m12 resolved)"
   ],
-  "next_required_action": "Resolve objective m12 (Track Learning Evidence Loop) disposition: continue, supersede, or abandon. Until then, the continuity gate will report unresolved work.",
+  "next_required_action": "Continue m12 — Track Learning Evidence Loop as the next active objective.",
   "blockers": [],
-  "safe_to_start_unrelated_work": false,
-  "safe_to_start_unrelated_work_reason": "Track Learning Evidence Loop (m12) is held with a re-entry condition but has never been explicitly abandoned or superseded. The continuity gate requires an explicit disposition before unrelated work begins.",
+  "safe_to_start_unrelated_work": true,
+  "safe_to_start_unrelated_work_reason": "Lifecycle maintenance complete. m12 disposition recorded as 'continue'. The next session will activate m12 as the active objective. Other queued objectives (M9, M10) remain locked from automatic processing.",
   "working_branch": null,
   "last_commit": null,
   "validation": {
     "passed": [
       "scripts/test-lifecycle.js — 23/23",
-      "node scripts/objective-lifecycle.js check — PASS (3 classified warnings)"
+      "node scripts/objective-lifecycle.js check — PASS_WITH_NOTES (2 warnings acceptable with meta documentation)"
     ],
     "failed": [],
     "not_run": [
@@ -52,8 +52,8 @@
       "node scripts/smoke-test.js (not required - no companion server changes)"
     ]
   },
-  "recommended_next_agent": "human",
-  "recommended_next_agent_reason": "The Track Learning Evidence Loop (m12) disposition requires a human decision: continue, supersede, or abandon.",
+  "recommended_next_agent": "worker",
+  "recommended_next_agent_reason": "Continue m12 — Track Learning Evidence Loop as the next active objective. Resume implementation of the completion conditions now that the lifecycle infrastructure is in place.",
   "files_changed": [
     "scripts/objective-lifecycle.js",
     "scripts/test-lifecycle.js",
