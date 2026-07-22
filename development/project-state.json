@@ -1,19 +1,15 @@
 {
   "schema": "locaily.development.project_state.v1",
   "project": "locaily",
-  "currentMilestone": "development-control-plane-v1",
-  "activeSession": "session-20260722-001",
-  "status": "active",
+  "currentMilestone": null,
+  "activeSession": null,
+  "status": "idle",
   "defaultBranch": "main",
-  "activeBranch": "feat/development-memory-second-project-proof",
+  "activeBranch": null,
   "lastCompletedMilestone": null,
-  "nextRecommendedAction": "Working on milestone 'development-control-plane-v1' — session 'session-20260722-001'",
+  "nextRecommendedAction": null,
   "blockers": [],
   "warnings": [],
-  "updatedAt": "2026-07-22T21:16:16.833Z",
-  "updatedBy": {
-    "type": "agent",
-    "name": "test",
-    "platform": "test"
-  }
+  "updatedAt": "2026-07-22T22:00:00.000Z",
+  "updatedBy": { "type": "agent", "name": "test", "platform": "test" }
 }
