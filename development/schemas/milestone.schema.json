@@ -96,9 +96,37 @@
     },
     "acceptanceCriteria": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "description": { "type": "string", "minLength": 1 },
+              "status": { "type": "string", "enum": ["pending", "satisfied", "waived"] },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string", "enum": ["generated-artifact", "test", "generator-test", "validation-record", "manual-verification", "document"] },
+                    "reference": { "type": "string", "minLength": 1 },
+                    "note": { "type": "string" }
+                  },
+                  "required": ["type", "reference"],
+                  "additionalProperties": false
+                }
+              },
+              "waivedReason": { "type": "string" }
+            },
+            "required": ["id", "description", "status"],
+            "additionalProperties": false
+          }
+        ]
+      },
       "minItems": 1,
-      "description": "Conditions that must be met for completion."
+      "description": "Conditions that must be met for completion. Strings are unsatisfied; objects carry evidence."
     },
     "validationProfile": {
       "type": ["string", "null"],

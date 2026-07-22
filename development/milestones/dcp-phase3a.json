@@ -11,19 +11,73 @@
     "excluded": ["Agent adapters", "Merge automation", "Session handoff generator"]
   },
   "acceptanceCriteria": [
-    "Dashboard shows current project state, subsystem maturity, milestone board",
-    "Validation scoreboard from real records",
-    "Staleness checks detect missing references, stale validation, orphaned state",
-    "Next-agent handoff generated from canonical state"
+    {
+      "id": "ac-dashboard-state",
+      "description": "Dashboard shows current project state, subsystem maturity, milestone board",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "generated-artifact",
+          "reference": "development/generated/roadmap.html",
+          "note": "Dashboard renders current project state, subsystem maturity cards, and milestone board from canonical records."
+        },
+        {
+          "type": "generated-artifact",
+          "reference": "development/generated/roadmap-data.json",
+          "note": "Machine-readable dashboard data includes projectState, subsystemMaturity, milestoneBoard, and git state."
+        }
+      ]
+    },
+    {
+      "id": "ac-validation-scoreboard",
+      "description": "Validation scoreboard from real records",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "generator-test",
+          "reference": "development/generated/roadmap-data.json",
+          "note": "Validation scoreboard is derived from canonical validation records directory and correctly renders empty state when none exist."
+        }
+      ]
+    },
+    {
+      "id": "ac-staleness-checks",
+      "description": "Staleness checks detect missing references, stale validation, orphaned state",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "scripts/generate-development-dashboard.js:checkStaleness",
+          "note": "Staleness checks verify: active milestone without session, paused without handoff, delivered without PR, completed with blockers, stale validation, missing references, stale generated files."
+        },
+        {
+          "type": "manual-verification",
+          "reference": "development/generated/roadmap-data.json:staleness",
+          "note": "Dashboard correctly reports 0 warnings for clean state and surfaces issues when they exist."
+        }
+      ]
+    },
+    {
+      "id": "ac-agent-handoff",
+      "description": "Next-agent handoff generated from canonical state",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "generated-artifact",
+          "reference": "development/generated/next-agent-handoff.md",
+          "note": "Handoff is generated from canonical project state, active milestone, session, validation records, and Git state."
+        }
+      ]
+    }
   ],
   "validationProfile": "builtin-quick",
   "dependencies": ["dcp-phase2c"],
   "blockers": [],
   "lifecycleRef": null,
   "latestValidationId": null,
-  "preparedCommit": "cc48cb337779ceef1258ffba7166e7c9fb69d3ac",
+  "preparedCommit": "fa7acd8b2c1f9a9a4cc67b98a61a1d9b21f4cb0a",
   "preparedBranch": "feat/development-memory-second-project-proof",
-  "preparedAt": "2026-07-22T21:24:33.000Z",
+  "preparedAt": "2026-07-22T21:54:25.419Z",
   "completionBranch": "feat/development-memory-second-project-proof",
   "completionHead": "cc48cb337779ceef1258ffba7166e7c9fb69d3ac",
   "createdAt": "2026-07-22T21:30:00.000Z",
