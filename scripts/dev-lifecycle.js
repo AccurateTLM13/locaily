@@ -192,10 +192,8 @@ function computeGitFingerprint() {
     }
   }
 
-  // Compute content hash of tracked source files (exclude development/ and .opencode/)
-  const treeHash = git(["rev-parse", "HEAD^{tree}"]) || "";
-
-  // Compute hash of uncommitted changes (exclude development/ and .opencode/)
+  // Compute hash of uncommitted changes to source files (exclude development/ and .opencode/)
+  // Do NOT include treeHash (HEAD^{tree}) — it changes with every commit
   const diffHash = git(["diff", "--", ":(exclude)development/", ":(exclude).opencode/"]) || "";
   const indexHash = git(["diff", "--cached", ":(exclude)development/", ":(exclude).opencode/"]) || "";
   const untrackedFiles = (git(["ls-files", "--others", "--exclude-standard"]) || "")
@@ -204,7 +202,6 @@ function computeGitFingerprint() {
     .join("\n");
 
   const fingerprint = crypto.createHash("sha256");
-  fingerprint.update(treeHash);
   fingerprint.update(diffHash);
   fingerprint.update(indexHash);
   fingerprint.update(untrackedFiles);
@@ -212,7 +209,6 @@ function computeGitFingerprint() {
   return {
     branch,
     headCommit: head,
-    treeHash,
     fingerprint: `sha256:${fingerprint.digest("hex").slice(0, 16)}`,
     changedFiles,
     computedAt: now(),
