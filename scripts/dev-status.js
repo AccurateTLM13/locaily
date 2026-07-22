@@ -222,21 +222,54 @@ function detectContradictions(projectState, gitState, legacyState, milestones, s
     }
   }
 
-  // --- WARNING: on non-default branch but no active milestone or session ---
-  if (!gitState.isDefault && !gitState.isMilestoneBranch && milestones.active.length === 0) {
-    const activeSessions = sessions.active.length > 0;
-    if (!activeSessions) {
-      add("warning", "BRANCH_NO_MILESTONE",
-        `On non-default branch '${gitState.branch}' but no active milestone or session`,
-        "Commit/discard work, merge branch, or create a milestone for this branch");
-    }
-  }
+  // --- Non-default branch classification ---
+  if (!gitState.isDefault) {
+    // Check if current branch matches any milestone's prepared or completion branch
+    const milestoneFiles = listJson(MILESTONES_DIR);
+    const allMilestones = milestoneFiles.map(f => readJson(path.join(MILESTONES_DIR, f), null)).filter(Boolean);
+    const branchOwner = allMilestones.find(m =>
+      m.preparedBranch === gitState.branch || m.completionBranch === gitState.branch
+    );
 
-  // --- WARNING: on a milestone/ branch but no active milestone ---
-  if (gitState.isMilestoneBranch && milestones.active.length === 0) {
-    add("warning", "MILESTONE_BRANCH_NO_ACTIVE",
-      `On milestone branch '${gitState.branch}' but no milestone has status 'active'`,
-      "Start the milestone with dev:milestone:start or switch branches");
+    if (branchOwner) {
+      // Branch is owned by a milestone — info level
+      const milestoneStatus = branchOwner.status;
+      if (milestoneStatus === "active") {
+        add("info", "BRANCH_OWNED_BY_ACTIVE",
+          `On branch '${gitState.branch}' owned by active milestone '${branchOwner.id}'`,
+          null);
+      } else if (milestoneStatus === "ready-for-delivery") {
+        add("info", "BRANCH_OWNED_BY_READY",
+          `On branch '${gitState.branch}' owned by milestone '${branchOwner.id}' (ready for delivery)`,
+          null);
+      } else if (milestoneStatus === "delivered" || milestoneStatus === "merged" || milestoneStatus === "completed") {
+        add("info", "BRANCH_OWNED_BY_COMPLETED",
+          `On branch '${gitState.branch}' owned by completed milestone '${branchOwner.id}'`,
+          "Consider merging or deleting this branch");
+      } else {
+        add("info", "BRANCH_OWNED",
+          `On branch '${gitState.branch}' owned by milestone '${branchOwner.id}' (status: ${milestoneStatus})`,
+          null);
+      }
+    } else if (!gitState.isMilestoneBranch && milestones.active.length === 0) {
+      // No milestone owns this branch and no active milestone
+      const hasReadyOrDelivered = allMilestones.some(m =>
+        m.status === "ready-for-delivery" || m.status === "delivered"
+      );
+      if (hasReadyOrDelivered) {
+        add("info", "BRANCH_NO_MILESTONE_BUT_DELIVERABLE",
+          `On non-default branch '${gitState.branch}' but no milestone owns it (deliverable milestones exist)`,
+          "This branch may be a pre-control-plane legacy branch");
+      } else {
+        add("warning", "BRANCH_NO_MILESTONE",
+          `On non-default branch '${gitState.branch}' but no active milestone or session`,
+          "Commit/discard work, merge branch, or create a milestone for this branch");
+      }
+    } else if (gitState.isMilestoneBranch && milestones.active.length === 0) {
+      add("warning", "MILESTONE_BRANCH_NO_ACTIVE",
+        `On milestone branch '${gitState.branch}' but no milestone has status 'active'`,
+        "Start the milestone with dev:milestone:start or switch branches");
+    }
   }
 
   // --- WARNING: legacy run-state shows running but project-state says idle ---
