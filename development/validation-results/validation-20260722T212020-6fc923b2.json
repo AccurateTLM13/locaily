@@ -1,34 +1,34 @@
 {
   "schema": "locaily.development.validation_result.v1",
-  "id": "validation-20260722T211942-355cee5f",
-  "milestoneId": "development-control-plane-v1",
+  "id": "validation-20260722T212020-6fc923b2",
+  "milestoneId": "dcp-v1",
   "profileId": "builtin-quick",
-  "status": "failed",
+  "status": "passed",
   "gitState": {
     "branch": "feat/development-memory-second-project-proof",
-    "headCommit": "98398b0280794ccd20bef0ecc4dfc565a8e7636f",
+    "headCommit": "6f54050b163757ce6b09da1d244797eeb5f55906",
     "treeHash": "",
     "fingerprint": "sha256:e3b0c44298fc1c14",
     "changedFiles": [
       {
-        "path": "evelopment/project-state.json",
-        "state": "M"
+        "path": "evelopment/milestones/development-control-plane-v1.json",
+        "state": "D"
       }
     ],
-    "computedAt": "2026-07-22T21:19:42.976Z"
+    "computedAt": "2026-07-22T21:20:20.651Z"
   },
-  "startedAt": "2026-07-22T21:19:42.977Z",
-  "completedAt": "2026-07-22T21:19:44.310Z",
+  "startedAt": "2026-07-22T21:20:20.652Z",
+  "completedAt": "2026-07-22T21:20:22.001Z",
   "results": [
     {
       "id": "strict-status",
       "command": "node scripts/dev-status.js --strict --json",
-      "status": "failed",
-      "exitCode": 1,
+      "status": "passed",
+      "exitCode": 0,
       "durationMs": 0,
-      "stdout": "[{\"severity\":\"error\",\"code\":\"CP_IDLE_ACTIVE_MILESTONE\",\"message\":\"project-state says 'idle' but a milestone has status 'active'\",\"fix\":\"Update project-state status to 'active' and set currentMilestone\"}]",
+      "stdout": "",
       "stderr": "",
-      "summary": "1 error/critical contradiction(s)",
+      "summary": "No error/critical contradictions",
       "required": true
     },
     {
@@ -36,7 +36,7 @@
       "command": "node scripts/objective-lifecycle.js check",
       "status": "passed",
       "exitCode": 0,
-      "durationMs": 116,
+      "durationMs": 115,
       "stdout": "Objective Lifecycle Integrity Check\n\n  WARN  2 warning(s):\n\n    WARN  [DUP_SLUG] duplicate_slug\n          Slug: locaily-v1-packaging\n          Safe: Duplicate in different lifecycle directories with .meta.json linking supersession chain.\n          Fix: Retain one canonical copy; mark others as superseded.\n\n    WARN  [DUP_SLUG] duplicate_slug\n          Slug: track-learning-evidence-loop\n          Safe: Duplicate in different lifecycle directories with .meta.json linking supersession chain.\n      ",
       "stderr": "",
       "summary": "Result: PASS_WITH_NOTES  (0 blocking errors, 0 total errors, 2 warnings)",
@@ -47,7 +47,7 @@
       "command": "node scripts/test-development-schemas.js",
       "status": "passed",
       "exitCode": 0,
-      "durationMs": 105,
+      "durationMs": 106,
       "stdout": "\n## Schema Structure\n  PASS  Schema delivery.schema.json has required fields\n  PASS  Schema milestone.schema.json has required fields\n  PASS  Schema project-state.schema.json has required fields\n  PASS  Schema session.schema.json has required fields\n  PASS  Schema validation-profile.schema.json has required fields\n  PASS  Schema validation-result.schema.json has required fields\n\n## Schema Content\n  PASS  project-state schema has correct status enum\n  PASS  milestone schema has correct status enu",
       "stderr": "",
       "summary": "## Results: 27 passed, 0 failed",
@@ -58,7 +58,7 @@
       "command": "node scripts/test-controller-invariants.js",
       "status": "passed",
       "exitCode": 0,
-      "durationMs": 267,
+      "durationMs": 287,
       "stdout": "\nTests: 11 passed, 0 failed\n",
       "stderr": "",
       "summary": "Tests: 11 passed, 0 failed",
@@ -69,7 +69,7 @@
       "command": "node scripts/test-lifecycle.js",
       "status": "passed",
       "exitCode": 0,
-      "durationMs": 159,
+      "durationMs": 162,
       "stdout": "\n## State Machine\n  PASS  STATES are frozen\n  PASS  isTerminal identifies terminal states\n  PASS  isValidTransition enforces legal transitions\n  PASS  Terminal states have no outgoing transitions\n\n## Objective Meta\n  PASS  createObjectiveMeta produces default meta\n  PASS  createObjectiveMeta accepts overrides\n\n## Objective Parsing\n  PASS  parseObjectiveId extracts prefix and slug\n  PASS  parseObjectiveId handles no prefix\n\n## Duplicate Detection\n  PASS  detectDuplicates finds slug duplicates\n  P",
       "stderr": "",
       "summary": "## Results: 23 passed, 0 failed",
