@@ -1,102 +1,37 @@
 {
-  "schema": "locaily.development.milestone.v1",
-  "id": "dcp-phase3a",
-  "title": "Development Control Plane Phase 3A — Dashboard",
-  "status": "active",
-  "type": "infrastructure",
-  "priority": "high",
-  "purpose": "Generated development dashboard: roadmap.html, roadmap-data.json, status-summary.md, next-agent-handoff.md. Area→Initiative→Milestone hierarchy. Staleness checks.",
-  "scope": {
-    "included": [
-      "generate-development-dashboard.js",
-      "roadmap.json",
-      "Generated HTML/MD/JSON",
-      "Staleness checks",
-      "Subsystem maturity tracking"
-    ],
-    "excluded": [
-      "Agent adapters",
-      "Merge automation",
-      "Session handoff generator"
-    ]
-  },
-  "acceptanceCriteria": [
-    {
-      "id": "ac-dashboard-state",
-      "description": "Dashboard shows current project state, subsystem maturity, milestone board",
-      "status": "satisfied",
-      "evidence": [
-        {
-          "type": "generated-artifact",
-          "reference": "development/generated/roadmap.html",
-          "note": "Dashboard renders current project state, subsystem maturity cards, and milestone board from canonical records."
-        },
-        {
-          "type": "generated-artifact",
-          "reference": "development/generated/roadmap-data.json",
-          "note": "Machine-readable dashboard data includes projectState, subsystemMaturity, milestoneBoard, and git state."
-        }
-      ]
-    },
-    {
-      "id": "ac-validation-scoreboard",
-      "description": "Validation scoreboard from real records",
-      "status": "satisfied",
-      "evidence": [
-        {
-          "type": "generator-test",
-          "reference": "development/generated/roadmap-data.json",
-          "note": "Validation scoreboard is derived from canonical validation records directory and correctly renders empty state when none exist."
-        }
-      ]
-    },
-    {
-      "id": "ac-staleness-checks",
-      "description": "Staleness checks detect missing references, stale validation, orphaned state",
-      "status": "satisfied",
-      "evidence": [
-        {
-          "type": "test",
-          "reference": "scripts/generate-development-dashboard.js:checkStaleness",
-          "note": "Staleness checks verify: active milestone without session, paused without handoff, delivered without PR, completed with blockers, stale validation, missing references, stale generated files."
-        },
-        {
-          "type": "manual-verification",
-          "reference": "development/generated/roadmap-data.json:staleness",
-          "note": "Dashboard correctly reports 0 warnings for clean state and surfaces issues when they exist."
-        }
-      ]
-    },
-    {
-      "id": "ac-agent-handoff",
-      "description": "Next-agent handoff generated from canonical state",
-      "status": "satisfied",
-      "evidence": [
-        {
-          "type": "generated-artifact",
-          "reference": "development/generated/next-agent-handoff.md",
-          "note": "Handoff is generated from canonical project state, active milestone, session, validation records, and Git state."
-        }
-      ]
-    }
-  ],
-  "validationProfile": "builtin-quick",
-  "dependencies": [
-    "dcp-phase2c"
-  ],
-  "blockers": [],
-  "lifecycleRef": null,
-  "latestValidationId": "validation-20260722T220118-fe259c2d",
-  "preparedCommit": "c17e182481f62998770770c8fd749cd7a178852e",
-  "preparedBranch": "feat/development-memory-second-project-proof",
-  "preparedAt": "2026-07-22T21:59:42.318Z",
-  "completionBranch": "feat/development-memory-second-project-proof",
-  "completionHead": "cc48cb337779ceef1258ffba7166e7c9fb69d3ac",
-  "createdAt": "2026-07-22T21:30:00.000Z",
-  "startedAt": "2026-07-22T21:30:00.000Z",
-  "completedAt": null,
-  "mergedAt": null,
-  "deliveredAt": null,
-  "prNumber": null,
-  "prUrl": null
+    "id":  "dcp-phase3a",
+    "blockers":  [
+
+                 ],
+    "validationProfile":  "builtin-quick",
+    "acceptanceCriteria":  [
+                               "Dashboard shows project state, subsystem maturity, milestone board",
+                               "Validation scoreboard from real records",
+                               "Staleness checks detect issues",
+                               "Next-agent handoff generated from canonical state"
+                           ],
+    "completedAt":  null,
+    "title":  "Development Control Plane Phase 3A - Dashboard",
+    "schema":  "locaily.development.milestone.v1",
+    "type":  "infrastructure",
+    "purpose":  "Generated development dashboard with roadmap, status summary, handoff, staleness checks.",
+    "status":  "active",
+    "dependencies":  [
+                         "dcp-phase2c"
+                     ],
+    "scope":  {
+                  "included":  [
+                                   "generate-development-dashboard.js",
+                                   "roadmap.json",
+                                   "Generated files",
+                                   "Staleness checks"
+                               ],
+                  "excluded":  [
+                                   "Agent adapters",
+                                   "Merge automation"
+                               ]
+              },
+    "priority":  "high",
+    "createdAt":  "2026-07-22T21:30:00.000Z",
+    "startedAt":  "2026-07-22T21:30:00.000Z"
 }

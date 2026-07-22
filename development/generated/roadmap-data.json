@@ -1,28 +1,28 @@
 {
   "schema": "locaily.development.dashboard.v1",
-  "generatedAt": "2026-07-22T21:46:10.020Z",
+  "generatedAt": "2026-07-22T22:02:37.165Z",
   "projectState": {
     "schema": "locaily.development.project_state.v1",
     "project": "locaily",
-    "currentMilestone": "dcp-phase3a",
-    "activeSession": "session-20260722-001",
-    "status": "active",
+    "currentMilestone": null,
+    "activeSession": null,
+    "status": "ready-for-delivery",
     "defaultBranch": "main",
     "activeBranch": "feat/development-memory-second-project-proof",
-    "lastCompletedMilestone": "dcp-phase2c",
-    "nextRecommendedAction": "Regenerate dashboard and verify consistency",
+    "lastCompletedMilestone": "dcp-phase3a",
+    "nextRecommendedAction": "Deliver milestone 'dcp-phase3a' (deliver-milestone.js --slug dcp-phase3a --all)",
     "blockers": [],
     "warnings": [],
-    "updatedAt": "2026-07-22T22:45:00.000Z",
+    "updatedAt": "2026-07-22T22:02:19.860Z",
     "updatedBy": {
       "type": "agent",
-      "name": "opencode",
-      "platform": "opencode"
+      "name": "dev-lifecycle",
+      "platform": "system"
     }
   },
   "git": {
     "branch": "feat/development-memory-second-project-proof",
-    "head": "cc48cb3",
+    "head": "967a0a8",
     "dirty": true
   },
   "subsystemMaturity": [
@@ -219,14 +219,7 @@
       }
     ],
     "ready": [],
-    "active": [
-      {
-        "id": "dcp-phase3a",
-        "title": "Development Control Plane Phase 3A — Dashboard",
-        "type": "infrastructure",
-        "priority": "high"
-      }
-    ],
+    "active": [],
     "paused": [],
     "blocked": [
       {
@@ -237,7 +230,14 @@
       }
     ],
     "validating": [],
-    "ready-for-delivery": [],
+    "ready-for-delivery": [
+      {
+        "id": "dcp-phase3a",
+        "title": "Development Control Plane Phase 3A — Dashboard",
+        "type": "infrastructure",
+        "priority": "high"
+      }
+    ],
     "delivered": [],
     "merged": [],
     "completed": [
@@ -310,74 +310,99 @@
     ],
     "cancelled": []
   },
-  "validationScoreboard": [],
+  "validationScoreboard": [
+    {
+      "id": "validation-20260722T220118-fe259c2d",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "feat/development-memory-second-project-proof",
+      "completedAt": "2026-07-22T22:01:19.367Z",
+      "requiredPassed": 5,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260722T220217-8f60710f",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "feat/development-memory-second-project-proof",
+      "completedAt": "2026-07-22T22:02:18.490Z",
+      "requiredPassed": 5,
+      "requiredFailed": 0
+    }
+  ],
   "recentActivity": [
     {
       "type": "session",
       "id": "session-20260722-001",
       "milestoneId": "dcp-phase3a",
-      "status": "active",
+      "status": "closed",
       "timestamp": "2026-07-22T22:30:00.000Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20260722T220217-8f60710f",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "timestamp": "2026-07-22T22:02:18.490Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20260722T220118-fe259c2d",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "timestamp": "2026-07-22T22:01:19.367Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20260722-001",
+      "milestoneId": "dcp-phase3a",
+      "timestamp": "2026-07-22T21:54:22.132Z"
     }
   ],
   "nextMilestone": {
-    "reason": "active_milestone",
+    "reason": "next_planned",
     "milestone": {
       "schema": "locaily.development.milestone.v1",
-      "id": "dcp-phase3a",
-      "title": "Development Control Plane Phase 3A — Dashboard",
-      "status": "active",
+      "id": "dcp-phase3b",
+      "title": "Development Control Plane Phase 3B — Session Handoff",
+      "status": "planned",
       "type": "infrastructure",
-      "priority": "high",
-      "purpose": "Generated development dashboard: roadmap.html, roadmap-data.json, status-summary.md, next-agent-handoff.md. Area→Initiative→Milestone hierarchy. Staleness checks.",
+      "priority": "medium",
+      "purpose": "Structured session handoff generator. Replace manual next-agent-brief with generated handoff from canonical state.",
       "scope": {
         "included": [
-          "generate-development-dashboard.js",
-          "roadmap.json",
-          "Generated HTML/MD/JSON",
-          "Staleness checks",
-          "Subsystem maturity tracking"
+          "Session handoff generator",
+          "Structured handoff format"
         ],
         "excluded": [
           "Agent adapters",
-          "Merge automation",
-          "Session handoff generator"
+          "Merge automation"
         ]
       },
       "acceptanceCriteria": [
-        "Dashboard shows current project state, subsystem maturity, milestone board",
-        "Validation scoreboard from real records",
-        "Staleness checks detect missing references, stale validation, orphaned state",
-        "Next-agent handoff generated from canonical state"
+        "Handoff generated from milestone, session, validation, delivery records",
+        "No manual maintenance of handoff documents"
       ],
       "validationProfile": "builtin-quick",
       "dependencies": [
-        "dcp-phase2c"
+        "dcp-phase3a"
       ],
       "blockers": [],
       "lifecycleRef": null,
-      "latestValidationId": null,
-      "preparedCommit": "cc48cb337779ceef1258ffba7166e7c9fb69d3ac",
-      "preparedBranch": "feat/development-memory-second-project-proof",
-      "preparedAt": "2026-07-22T21:24:33.000Z",
-      "completionBranch": "feat/development-memory-second-project-proof",
-      "completionHead": "cc48cb337779ceef1258ffba7166e7c9fb69d3ac",
-      "createdAt": "2026-07-22T21:30:00.000Z",
-      "startedAt": "2026-07-22T21:30:00.000Z",
-      "completedAt": null,
-      "mergedAt": null,
-      "deliveredAt": null,
-      "prNumber": null,
-      "prUrl": null
+      "createdAt": "2026-07-22T22:30:00.000Z",
+      "startedAt": null,
+      "completedAt": null
     }
   },
   "staleness": [],
   "stats": {
     "totalMilestones": 15,
-    "active": 1,
+    "active": 0,
     "completed": 11,
     "totalSessions": 1,
-    "totalValidations": 0,
+    "totalValidations": 2,
     "totalDeliveries": 0
   }
 }
