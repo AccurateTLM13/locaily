@@ -1,0 +1,19 @@
+{
+  "schema": "locaily.development.project_state.v1",
+  "project": "locaily",
+  "currentMilestone": "development-control-plane-v1",
+  "activeSession": "session-20260722-001",
+  "status": "active",
+  "defaultBranch": "main",
+  "activeBranch": "work/development-control-plane-v1",
+  "lastCompletedMilestone": "deliver-milestone-script",
+  "nextRecommendedAction": "Run dev:status to verify current state",
+  "blockers": [],
+  "warnings": [],
+  "updatedAt": "2026-07-22T12:00:00.000Z",
+  "updatedBy": {
+    "type": "agent",
+    "name": "opencode",
+    "platform": "opencode"
+  }
+}

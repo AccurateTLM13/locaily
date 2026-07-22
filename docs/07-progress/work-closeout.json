@@ -1,38 +1,37 @@
 {
-  "work_id": "m10-packaging",
-  "objective_id": "m10",
+  "work_id": "development-control-plane-phase2c",
+  "objective_id": "development-control-plane-v1",
   "status": "complete",
-  "closed_at": "2026-07-20T23:59:00.000Z",
-  "original_goal": "Package the validated Locaily runtime into a coherent release candidate with documentation alignment, operator walkthrough completeness, and state migration tooling.",
+  "closed_at": "2026-07-22T21:30:00.000Z",
+  "original_goal": "Phase 2C: Implement dev:prepare for commit preparation, rewrite deliver-milestone.js to consume canonical records, add delivery attempt records, ensure immutable commit throughout validation→delivery pipeline.",
   "completed": [
-    "Formally held m09 (Physical Multi-Device Pilot) with reason 'second physical device unavailable' and re-entry condition recorded",
-    "Created migration scaffolding script (scripts/state-migration.js) with status/run/validate commands",
-    "Added relay node pairing walkthrough to operator-guide.md with 5-step process, verification, and test routing",
-    "Fixed operator-guide.md section numbering (was 5,5,6,7,8 → now 4,5,6,7,8,9)",
-    "Fixed stale roadmap.md — Canonical Track Run Records marked as completed with checked items",
-    "Fixed stale start-here README.md — active slice updated to m10, m12 and m09 status documented",
-    "Added 'Deferred' section to RELEASE.md with m09 hold and second-repo walkthrough deferral",
-    "Added tracked hold reference record (.opencode/agents/objectives/queue/09-physical-multi-device-pilot.holded.json)",
-    "All existing test suites pass; lifecycle integrity clean"
+    "Implemented dev:prepare: validates session closed, non-default branch, stages scoped files, commits, records preparedCommit/preparedBranch/preparedAt on milestone, verifies clean tree",
+    "Rewrote deliver-milestone.js: consumes milestone, validation, and closeout records; preflight checks branch/HEAD/fingerprint/clean tree/blockers/closeout/remaining work",
+    "Added delivery attempt records (development/delivery/<slug>.json): tracks push success/failure, PR success/failure, attempts history",
+    "Added delivery schema: development/schemas/delivery.schema.json",
+    "Implemented idempotency: already-pushed commit treated as success, existing PR reused",
+    "Implemented failure safety: push/PR failures do not advance milestone state",
+    "Correct lifecycle: start → checkpoint → session:close → prepare → validate → complete → ready-for-delivery → push → draft PR",
+    "31 Phase 2C tests passing",
+    "All existing tests pass (Phase 2B 44/44, reconciliation 14/14, schemas 27/27, lifecycle 23/23, controller 11/11)"
   ],
   "remaining": [
-    "m09 — Physical Multi-Device Pilot (held; re-entry when devices available)",
-    "Second-repo operator acceptance (deferred; re-entry after m10)",
-    "Broader Model Lab qualification coverage (follow-on; not scoped)"
+    "Phase 3: HTML roadmap generator, session handoff generator, staleness monitor",
+    "Phase 4: Agent-specific adapters (Cursor, Claude, Codex)"
   ],
-  "next_required_action": "Proceed to Locaily v1 packaging release preparation when ready. The validated scope is documented honestly: no multi-device claims, m12 complete, deferred items listed.",
+  "next_required_action": "Phase 3: HTML roadmap generator from canonical JSON state.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
   "working_branch": "feat/development-memory-second-project-proof",
-  "last_commit": null,
+  "last_commit": "7b93e74",
   "validation": {
     "passed": [
-      "scripts/test-lifecycle.js — 23/23",
-      "scripts/test-evidence-review.js — 17/17",
-      "scripts/contract-test.js — PASS",
-      "node --check companion/server.js — PASS",
-      "node scripts/objective-lifecycle.js check — PASS_WITH_NOTES",
-      "node scripts/objective-lifecycle.js continuity — unresolved: false"
+      "node scripts/test-development-phase2c.js — 31/31",
+      "node scripts/test-development-phase2b.js — 44/44",
+      "node scripts/test-development-reconciliation.js — 14/14",
+      "node scripts/test-development-schemas.js — 27/27",
+      "node scripts/test-lifecycle.js — 23/23",
+      "node scripts/test-controller-invariants.js — 11/11"
     ],
     "failed": [],
     "not_run": []

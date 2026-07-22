@@ -1,0 +1,22 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "development-control-plane-v1",
+  "title": "Development Control Plane V1",
+  "status": "active",
+  "type": "feature",
+  "priority": "medium",
+  "purpose": "Agent-neutral development coordination layer with schemas, lifecycle commands, validation, and delivery",
+  "scope": {
+    "included": [],
+    "excluded": []
+  },
+  "acceptanceCriteria": [],
+  "validationProfile": null,
+  "dependencies": [],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-07-22T21:16:16.830Z",
+  "startedAt": "2026-07-22T21:16:16.831Z",
+  "completedAt": null,
+  "mergedAt": null
+}

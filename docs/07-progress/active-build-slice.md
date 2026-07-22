@@ -1,50 +1,37 @@
 # Active Build Slice
 
-## Objective
-
-Development Memory end-to-end proof using a second registered project.
+**Updated:** 2026-07-22
 
 ## Current Slice
 
-**Complete:** Development Memory E2E Proof — Second Project (2026-07-18)
+**None active.** No objective is currently in progress.
 
-Proved the DM1–DM10 loop on a non-Locaily namespaced project (`pilot-workspace`) with capture, session aggregation, candidate extraction, human review, retrieval, and locaily isolation.
+The repository is between build cycles. Lifecycle integrity passes; continuity check resolves cleanly. The queue is locked via `QUEUE_LOCK.json`.
 
-## Completed Items
+## Most Recently Completed Slice
 
-| Step | Evidence |
-|---|---|
-| Register second project | Namespaced storage under `data/memory/projects/{slug}/` |
-| Generate vault + enable capture | Setup flow in E2E test |
-| Session + capture events | Tasks, test, decision recorded |
-| Candidate extraction | Decision candidate from `decision_recorded` |
-| Human review approve | Review inbox `approve` action |
-| Retrieval in context pack | DECISIONS page + approved `evidenceReferences` |
-| Locaily isolation | Zero events in legacy flat paths |
+**Objective Lifecycle Hardening and Work-Closeout**
 
-**Regression:** `npm run test:development-memory-e2e` (4/4)  
-**Documentation:** [development-memory-e2e-proof.md](../04-validation/development-memory-e2e-proof.md)
+Defined in [maintenance-objective-lifecycle-closeout.md](./maintenance-objective-lifecycle-closeout.md). Inspected and hardened the objective lifecycle, queue archival process, agent closeout process, and startup continuity behavior. Fixed seven distinct anomalies in the queue directory structure.
 
-## Validation Commands
+## Completed Before That
 
-```powershell
-npm.cmd run test:development-memory-e2e
-npm.cmd run test:full
-```
+- Development Memory E2E Proof (second project, 2026-07-18)
+- Post-Merge Stabilization (2026-07-18)
+- Security Policy Foundation (docs/security/ + policies/)
 
-## Next Slice
+## Next Slice候选
 
-**Objective Lifecycle Hardening and Work-Closeout — [maintenance-objective-lifecycle-closeout.md](./maintenance-objective-lifecycle-closeout.md)**
+The next build slice must be explicitly selected. Candidates are listed in [current-sprint.md](./current-sprint.md).
 
-Defined in the closeout brief. Inspect, harden, and enforce the objective lifecycle, queue archival, agent closeout, and startup continuity.
+### Deferred (requires specific conditions)
 
-### Deferred (after lifecycle hardening)
-
-1. **Second-repo operator acceptance** (brief manual check on a real separate repository)
-2. **Physical multi-device pilot** (hardware-blocked until two devices available)
+1. **Second-Repository Operator Acceptance** — brief manual check on a real separate repository. Record pass/fail; fix only if blocked.
+2. **Physical Multi-Device Pilot** — requires two devices + Ollama. See `docs/05-integrations/multi-device-pilot.md`.
 
 ## Stop Conditions
 
 - Do not claim hardware-proven until pilot runs on physical devices
 - Do not modify approved benchmark evidence
 - Embedding-based retrieval remains out of scope
+- Do not begin a new milestone without an explicitly supplied objective

@@ -1,5 +1,61 @@
 # Decision Log
 
+## 2026-07-22 — Development Control Plane Phase 1 (Implemented)
+
+### Context
+
+Development status was spread across files, agents, conversations, and local working state. No single agent-neutral system existed for coordinating development work across OpenCode, Cursor, Claude, Codex, and other agents.
+
+### Decision
+
+- Create `development/` directory as the canonical location for development control plane records
+- Implement 4 JSON schemas: project-state, milestone, session, validation-profile — all draft-2020-12 with `https://locaily.local/schemas/` IDs
+- Create `development/project-state.json` as the canonical pointer to current development status
+- Implement `npm run dev:status` with human-readable and `--json` output modes, inspecting git state, project state, milestones, sessions, legacy state, and detecting contradictions
+- Rewrite root `AGENTS.md` as agent-neutral development protocol — vendor-specific files point here
+- Create compatibility mapping between the 9-state objective lifecycle and development control plane
+- All existing test suites pass unchanged
+
+### Why
+
+Agents need a shared operating system for development, not vendor-specific state. The development control plane provides one answer to: what are we building, what state is it in, what is allowed right now, and what happens when we stop.
+
+### Consequences
+
+- 4 schemas with 25 validation tests
+- `dev:status` detects contradictions (e.g., project-state says idle but legacy run-state says running)
+- AGENTS.md reduced from 398 lines of mixed product/protocol to ~120 lines of pure protocol
+- Phase 2 entry point documented: `dev:milestone:start`, `dev:checkpoint`, `dev:pause`, `dev:validate`, `dev:milestone:complete`
+- Existing objective lifecycle remains authoritative for `.opencode/agents/` state
+- Development control plane is authoritative for `development/` state
+
+### Status
+
+Implemented and verified (2026-07-22).
+
+---
+
+## 2026-07-22 — Milestone Completion Delivery Workflow (Implemented)
+
+### Context
+
+When a milestone completes locally (via the sequencer/supervisor loop), there is no automated path from "milestone manifest finalized" to "PR open with CI running."
+
+### Decision
+
+- Implement `scripts/deliver-milestone.js` with three phases: dry-run, execute, PR
+- Branch naming convention: `milestone/<slug>`
+- Conventional-commit messages
+- Draft PR via `gh` CLI with structured description
+- Existing `ci.yml` validates the PR — no new CI workflow needed
+- No automatic merge, release, or tagging in v1
+
+### Status
+
+Implemented and verified (2026-07-22).
+
+---
+
 ## 2026-07-20 — Objective Lifecycle Hardening and Mandatory Closeout
 
 ### Context

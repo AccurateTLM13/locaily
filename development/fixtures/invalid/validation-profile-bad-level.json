@@ -1,0 +1,9 @@
+{
+  "schema": "locaily.development.validation_profile.v1",
+  "id": "test-profile",
+  "name": "Test",
+  "level": "invalid-level",
+  "required": [],
+  "optional": [],
+  "manualChecks": []
+}

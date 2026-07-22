@@ -1,0 +1,52 @@
+{
+  "schema": "locaily.development.validation_profile.v1",
+  "id": "development-control-plane",
+  "name": "Development Control Plane Validation",
+  "level": "standard",
+  "description": "Validates the development control plane infrastructure: schemas, state files, lifecycle commands, and existing test suites.",
+  "required": [
+    {
+      "id": "schema-validation",
+      "command": "node scripts/test-development-schemas.js",
+      "description": "All development schemas pass validation"
+    },
+    {
+      "id": "lifecycle-integrity",
+      "command": "node scripts/objective-lifecycle.js check",
+      "description": "Objective lifecycle integrity check passes"
+    },
+    {
+      "id": "controller-tests",
+      "command": "node scripts/test-controller-invariants.js",
+      "description": "Controller invariants tests pass"
+    },
+    {
+      "id": "lifecycle-tests",
+      "command": "node scripts/test-lifecycle.js",
+      "description": "Lifecycle tests pass"
+    },
+    {
+      "id": "dev-status-json",
+      "command": "node scripts/dev-status.js --json",
+      "description": "dev:status produces valid JSON output"
+    }
+  ],
+  "optional": [
+    {
+      "id": "contract-test",
+      "command": "node scripts/contract-test.js",
+      "description": "Contract tests pass"
+    },
+    {
+      "id": "full-test-suite",
+      "command": "npm run test:full",
+      "description": "Full offline test suite"
+    }
+  ],
+  "manualChecks": [
+    {
+      "id": "roadmap-opens",
+      "description": "Roadmap and project-state files are readable by agents"
+    }
+  ]
+}

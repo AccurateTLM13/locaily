@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-delivery.schema.json",
+  "title": "Development Delivery Record",
+  "description": "Records a delivery attempt for a milestone. Immutable per attempt, updated on retry.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "milestoneId",
+    "status",
+    "branch",
+    "commit",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locaily.development.delivery.v1",
+      "description": "Schema identifier."
+    },
+    "milestoneId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Milestone being delivered."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "pushed", "push-failed", "delivered", "pr-failed"],
+      "description": "Current delivery status."
+    },
+    "branch": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Branch being delivered."
+    },
+    "commit": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Commit SHA being delivered."
+    },
+    "pushedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When push succeeded."
+    },
+    "pushSuccess": {
+      "type": ["boolean", "null"],
+      "description": "Whether push succeeded."
+    },
+    "pushError": {
+      "type": ["string", "null"],
+      "description": "Push error message if failed."
+    },
+    "remoteBranch": {
+      "type": ["string", "null"],
+      "description": "Remote branch name after push."
+    },
+    "prNumber": {
+      "type": ["integer", "null"],
+      "description": "GitHub PR number."
+    },
+    "prUrl": {
+      "type": ["string", "null"],
+      "description": "GitHub PR URL."
+    },
+    "prCreated": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When PR was created."
+    },
+    "prError": {
+      "type": ["string", "null"],
+      "description": "PR creation error if failed."
+    },
+    "attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "commit": { "type": "string" },
+          "branch": { "type": "string" },
+          "success": { "type": "boolean" },
+          "error": { "type": ["string", "null"] },
+          "prNumber": { "type": ["integer", "null"] },
+          "prUrl": { "type": ["string", "null"] }
+        },
+        "required": ["timestamp", "success"],
+        "additionalProperties": false
+      },
+      "description": "All delivery attempts."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When delivery record was created."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When delivery record was last updated."
+    }
+  }
+}

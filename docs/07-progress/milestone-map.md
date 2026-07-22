@@ -2,7 +2,7 @@
 
 Layered planning, not a six-month prophecy.
 
-**Updated:** 2026-07-11
+**Updated:** 2026-07-22
 
 ## Milestone 1A - Track System Explicit
 
@@ -74,39 +74,51 @@ Layered planning, not a six-month prophecy.
 - Published evidence, model cards, and reports for intent-classification track
 - Basic-tool-use track with Tool Eval Bench scenarios
 
-## Next Milestone
+---
 
-**Status:** Not yet selected
+## Milestone 6 - Operator Control Plane
 
-The next major milestone has not yet been canonically selected. Follow-on candidates (broader model coverage, additional tracks, hardware profiling, prompt regression) are recognized but not approved scope.
+**Status:** Complete (2026-07-12)
+
+- Operator Console UI (`companion/operator/`)
+- Durable Job Store API (`POST /jobs`, `GET /jobs`, mutations)
+- Background Worker Polling Loop
+- Job cancel/retry/review mutation endpoints
+- 34 + 64 + 50 + 85 = 233 tests
 
 ---
 
-## Follow-On Hardening - Lighthouse Path / Step Fallbacks
+## Milestone 10 - Locaily v1 Packaging
 
-**Status:** Step-input legacy fallbacks removed (2026-06-30); remaining items deferred — not yet scoped.
+**Status:** Complete (2026-07-22, archived via lifecycle mechanism)
 
-- Confirm canonical Lighthouse path (tool vs track vs workflow orchestration)
-- Extend parity checks across `/tasks/run`, `/tracks/run`, and `/workflows/run` — parity test covers workflow + HTTP track/workflow paths
-- Improve `workflow-orchestrator` audit summaries without leaking raw task input/output
-
----
-
-## Later - Model Swap / Model Garage Runtime Policy
-
-**Status:** Proposed architecture only
-
-- `docs/01-architecture/model-swap-manager.md` is design context, not an M5 runtime promise
-- No automatic model swapping until a dedicated milestone opens it
+- Documentation alignment, state migration scaffolding, operator walkthrough
+- Relay Node pairing walkthrough
+- Release positioning and deferred-work documentation
 
 ---
 
-## Later - Simple Dependency Graph
+## Milestone 12 - Track Learning Evidence Loop
 
-**Status:** Research gate
+**Status:** Complete (2026-07-18)
 
-- Topological runner for explicit `depends_on` in track files
-- Still no LLM-generated graphs
+- Canonical track-run record schema, builder, store, runtime emission
+- Disagreement classification, drift detection, per-track learning state
+- Retry comparisons, correction records
+- All 14 completion conditions met
+
+---
+
+## Security Policy Foundation
+
+**Status:** Complete (2026-07-22)
+
+- Execution-security documentation (`docs/security/`)
+- Threat model, execution policy, approval rules, capability boundaries
+- Machine-readable policy definitions (`policies/`)
+- NOPE evaluation brief
+
+Policy documented; centralized enforcement not yet complete.
 
 ---
 
@@ -139,6 +151,85 @@ The next major milestone has not yet been canonically selected. Follow-on candid
 
 **Completion note:** [milestone-5-multi-device-workflow-coordination.md](./milestone-5-multi-device-workflow-coordination.md)
 **Acceptance:** `scripts/test-multi-device-e2e.cjs` (22/22) — three Local Brain instances, distributed run across two relay nodes, local fallback after a node is killed; `scripts/test-relay-placement.cjs` (13/13).
+
+---
+
+## Next Milestone
+
+**Status:** Not yet selected
+
+The next major milestone has not yet been canonically selected. The assessment identifies these candidates in priority order:
+
+### Immediate (operator-facing proof)
+
+1. **Second-Repository Operator Acceptance** — brief manual walkthrough on a real second repository
+2. **Clean-Machine v1 Acceptance** — clone-to-cleanup path for non-developer users
+
+### Product proof
+
+3. **Lighthouse Handoff Product Bridge** — extension + Local Brain end-to-end
+4. **Workflow Pack Contract and Starter SDK** — complete distributable workflow units
+5. **Automatic Task Intake and Track Selection** — classifier-based workflow routing
+
+### Before broader distributed claims
+
+6. **Relay Trust and Secure Pairing (M09A)** — authentication, signed requests, capability allowlists
+7. **Physical Multi-Device Pilot (M09B)** — two-device validation (held pending hardware)
+
+Selection requires an explicit operator decision.
+
+---
+
+## Later Milestones (candidates, not yet scoped)
+
+### Central Execution Gate Enforcement
+
+**Status:** Design docs and schemas complete. Implementation not yet scoped.
+
+- Every side effect passes through one policy evaluator
+- Design artifacts: `docs/security/`, `policies/`
+
+### Orchestrator Governance and Step Budgets
+
+**Status:** Candidate. Not yet scoped.
+
+- Maximum steps, retries, runtime, cost, parallelism
+- Stop conditions, stuck detection, approval checkpoints
+
+### Model Specialization and Adapter Lab
+
+**Status:** Research candidate. Not yet scoped.
+
+- Purpose-built models or adapters for specific Locaily roles
+- Compare base vs prompted specialist vs adapter vs deterministic
+
+---
+
+## Follow-On Hardening - Lighthouse Path / Step Fallbacks
+
+**Status:** Step-input legacy fallbacks removed (2026-06-30); remaining items deferred — not yet scoped.
+
+- Confirm canonical Lighthouse path (tool vs track vs workflow orchestration)
+- Extend parity checks across `/tasks/run`, `/tracks/run`, and `/workflows/run` — parity test covers workflow + HTTP track/workflow paths
+- Improve `workflow-orchestrator` audit summaries without leaking raw task input/output
+
+---
+
+## Later - Model Swap / Model Garage Runtime Policy
+
+**Status:** Proposed architecture only
+
+- `docs/01-architecture/model-swap-manager.md` is design context, not a runtime promise
+- No automatic model swapping until a dedicated milestone opens it
+
+---
+
+## Partially Implemented (not future research)
+
+The following are listed as future research in some documents but are **already partially implemented**:
+
+- **DAG planning and execution** — `companion/core/dag-executor.js` + `companion/core/dag-graph.js` implement topological sort, cycle detection, parallel step execution, fan-in/fan-out. Not yet used as default runner.
+- **Relay Node distributed execution** — `companion/relay/` implements protocol, registry, connector, router with cross-node routing and local fallback. Physical validation pending (M09 held).
 
 ---
 

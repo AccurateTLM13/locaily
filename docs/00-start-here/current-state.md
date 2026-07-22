@@ -2,7 +2,7 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-07-20 (Objective lifecycle hardening and mandatory work closeout complete)
+**Updated:** 2026-07-22 (Documentation alignment pass — roadmap, sprint, milestone map, security foundation)
 
 ## What Works
 
@@ -62,6 +62,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Qualification dashboard** - `GET /qualifications/dashboard` with per-model, per-track, per-role breakdown
 - **All 4 new tracks in shadow enforcement** - collecting routing evidence for future enforcement
 - **Operator Console UI** - `companion/operator/index.html` served at `GET /operator`. Confirmation dialog cancel/Escape correctly aborts destructive job actions. Enqueue form sends `executionType` to production `/jobs`. 34 tests in `scripts/test-operator-console.js`; 11 confirm/outcome regression tests in `scripts/test-operator-confirm.js`.
+- **Security Policy Foundation** - execution-security documentation (`docs/security/README.md`, `THREAT-MODEL.md`, `EXECUTION-POLICY.md`, `APPROVAL-RULES.md`, `CAPABILITY-BOUNDARIES.md`, `NOPE-EVALUATION.md`) and machine-readable policy definitions (`policies/default-execution-policy.json`, `action-request.schema.json`, `policy-decision.schema.json`). Policy documented; centralized enforcement not yet complete.
 
 ## What Is Partial
 
@@ -82,12 +83,17 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 
 ## What Is Not Built Yet
 
-- **Automatic track classification** - no classifier selects workflow + track *(M3 follow-on)*
+- **Automatic track classification** - no classifier selects workflow + track *(follow-on candidate)*
 - **Automatic model swapping / Model Garage auto-switching** - proposed only
+- **Clean-machine install-and-run path** - no validated clone-to-cleanup flow for non-developer users
+- **End-to-end Lighthouse Handoff product bridge** - extension discovers Local Brain, CORS, report comparison, export
+- **Workflow Pack contract** - complete distributable unit (tracks + tools + prompts + schemas + fixtures)
+- **Relay Node trust boundary** - no authentication, pairing, or signed requests (M09A candidate)
+- **Central execution gate** - policy documented but not enforced at runtime
 
 ## Lifecycle Infrastructure
 
-**Complete as of 2026-07-20:** Objective lifecycle hardening and mandatory work closeout.
+**Complete as of 2026-07-22.** Objective lifecycle hardening, mandatory work closeout, and Development Control Plane Phase 1.
 
 - **Lifecycle manager**: `scripts/objective-lifecycle.js` — 9 states with validated transitions, terminal-state enforcement, stable objective identity via JSON meta files, transactional archive with encoding normalization, and integrity check (`node scripts/objective-lifecycle.js check`)
 - **Integrity checking**: Detects duplicate slugs, colliding numeric prefixes, encoding corruption (UTF-16 LE BOM, UTF-8 BOM, mojibake), stale active-objective references, and stale milestone records
@@ -97,6 +103,18 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Agent instructions**: AGENTS.md, supervisor POLICY.md, worker POLICY.md, and build-slice-protocol.md updated with lifecycle and closeout policies
 - **Cleanup performed**: Fixed UTF-16 LE BOM encoding in completed M7/M8 files; removed duplicate tracked queue entries; reset stale run-state and milestone records; added meta files for all lifecycle directories; resolved prefix collision in held objectives
 - **Tests**: `scripts/test-lifecycle.js` — 21/21 covering state machine, duplicate detection, encoding checks, transactional archive, and startup continuity
+
+## Development Control Plane
+
+**Phase 1 complete as of 2026-07-22.** Agent-neutral development coordination layer.
+
+- **JSON schemas**: `development/schemas/project-state.schema.json`, `milestone.schema.json`, `session.schema.json`, `validation-profile.schema.json` — all draft-2020-12, validated
+- **Canonical project state**: `development/project-state.json` — machine-readable pointer to current development status
+- **Universal status command**: `npm run dev:status` — inspects git state, project state, milestones, sessions, legacy state, and detects contradictions; `--json` for machine output
+- **Agent-neutral AGENTS.md**: rewritten as single source of truth for all coding agents; vendor-specific files point here
+- **Compatibility mapping**: `docs/07-progress/development-control-plane-compatibility.md` — defines how the 9-state objective lifecycle and development control plane coexist
+- **Schema validation tests**: `scripts/test-development-schemas.js` — 25/25 tests covering schema structure, content, fixtures, and cross-references
+- **Tests**: `scripts/test-development-schemas.js` — 25/25
 
 ## Canonical Track Run Records
 
@@ -157,9 +175,9 @@ The North Star is now documented as a local capability network: decompose work i
 
 | Layer | Focus |
 |---|---|
-| **Now** | Lifecycle hardening complete; brief second-repo operator acceptance |
-| **Next** | Physical multi-device pilot (infra ready; hardware execution pending) |
-| **Later** | Locaily v1 packaging / clean-machine acceptance; embedding-based retrieval |
+| **Now** | Between build cycles; no active objective. Security Policy Foundation complete. Second-repo operator acceptance ready to resume. |
+| **Next** | Clean-Machine v1 Acceptance; Lighthouse Handoff Product Bridge (candidates, not yet selected) |
+| **Later** | Physical Multi-Device Pilot (M09 held); Workflow Pack; Orchestrator Governance; Model Specialization |
 | **Archive** | Old companion-only architecture, pre-track planning docs |
 
 LFM2.5-1.2B-Thinking is now the first enforced qualified model capability for a companion server runtime track (`website_audit.lighthouse_handoff`, role `priority_helper`). Runtime execution uses `runtimeModelName` from the qualification record; policy and evidence keep the stable capability id `lfm25-1p2b-thinking-local`. Enforcement is still per-track only; no global enforcement is enabled.

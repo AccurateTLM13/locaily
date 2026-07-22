@@ -1,0 +1,18 @@
+{
+  "schema": "locaily.development.project_state.v1",
+  "project": "locaily",
+  "currentMilestone": null,
+  "activeSession": null,
+  "status": "idle",
+  "defaultBranch": "main",
+  "activeBranch": null,
+  "lastCompletedMilestone": "milestone-completion-delivery-workflow",
+  "nextRecommendedAction": "Select next milestone from sprint candidates",
+  "blockers": [],
+  "warnings": [],
+  "updatedAt": "2026-07-22T15:00:00.000Z",
+  "updatedBy": {
+    "type": "human",
+    "name": "TLM13"
+  }
+}
