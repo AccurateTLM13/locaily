@@ -7,8 +7,18 @@
   "priority": "high",
   "purpose": "Generated development dashboard: roadmap.html, roadmap-data.json, status-summary.md, next-agent-handoff.md. Area→Initiative→Milestone hierarchy. Staleness checks.",
   "scope": {
-    "included": ["generate-development-dashboard.js", "roadmap.json", "Generated HTML/MD/JSON", "Staleness checks", "Subsystem maturity tracking"],
-    "excluded": ["Agent adapters", "Merge automation", "Session handoff generator"]
+    "included": [
+      "generate-development-dashboard.js",
+      "roadmap.json",
+      "Generated HTML/MD/JSON",
+      "Staleness checks",
+      "Subsystem maturity tracking"
+    ],
+    "excluded": [
+      "Agent adapters",
+      "Merge automation",
+      "Session handoff generator"
+    ]
   },
   "acceptanceCriteria": [
     {
@@ -71,13 +81,15 @@
     }
   ],
   "validationProfile": "builtin-quick",
-  "dependencies": ["dcp-phase2c"],
+  "dependencies": [
+    "dcp-phase2c"
+  ],
   "blockers": [],
   "lifecycleRef": null,
-  "latestValidationId": null,
-  "preparedCommit": "fa7acd8b2c1f9a9a4cc67b98a61a1d9b21f4cb0a",
+  "latestValidationId": "validation-20260722T220118-fe259c2d",
+  "preparedCommit": "c17e182481f62998770770c8fd749cd7a178852e",
   "preparedBranch": "feat/development-memory-second-project-proof",
-  "preparedAt": "2026-07-22T21:54:25.419Z",
+  "preparedAt": "2026-07-22T21:59:42.318Z",
   "completionBranch": "feat/development-memory-second-project-proof",
   "completionHead": "cc48cb337779ceef1258ffba7166e7c9fb69d3ac",
   "createdAt": "2026-07-22T21:30:00.000Z",

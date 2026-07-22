@@ -317,7 +317,7 @@ function loadDefaultProfile() {
 }
 
 function getCompletionPolicy(milestone) {
-  const profile = milestone.validationProfile ? loadProfile(milestone.validationProfile) : loadDefaultProfile();
+  const profile = (milestone.validationProfile ? loadProfile(milestone.validationProfile) : null) || loadDefaultProfile();
   return (profile && profile.completionPolicy) || {
     requireCleanTree: true,
     requireCloseout: true,
@@ -721,11 +721,7 @@ function cmdValidate(args) {
     process.exit(1);
   }
 
-  const profile = milestone.validationProfile ? loadProfile(milestone.validationProfile) : loadDefaultProfile();
-  if (!profile) {
-    console.error(`Error: Validation profile '${milestone.validationProfile}' not found.`);
-    process.exit(1);
-  }
+  const profile = (milestone.validationProfile ? loadProfile(milestone.validationProfile) : null) || loadDefaultProfile();
 
   const branch = getCurrentBranch();
   const head = getCurrentHead();
@@ -1028,12 +1024,23 @@ function cmdComplete(args) {
 
   // Gate 7: Acceptance criteria have evidence (if any are defined)
   if (milestone.acceptanceCriteria && milestone.acceptanceCriteria.length > 0) {
-    const evidence = loadAcceptanceEvidence(milestone.id);
-    const evidenceMap = new Map((evidence.criteria || []).map(e => [e.criterion, e]));
     for (const criterion of milestone.acceptanceCriteria) {
-      const e = evidenceMap.get(criterion);
-      if (!e || !e.satisfied) {
+      if (typeof criterion === "string") {
+        // Plain string criterion — no evidence structure, treat as unsatisfied
         addError("CRITERIA_UNSATISFIED", `Acceptance criterion not satisfied: "${criterion}"`);
+      } else if (criterion.status === "satisfied") {
+        // Structured criterion with evidence — check it has evidence
+        if (!criterion.evidence || criterion.evidence.length === 0) {
+          addError("CRITERIA_UNSATISFIED", `Criterion '${criterion.id}' is marked satisfied but has no evidence`);
+        }
+      } else if (criterion.status === "waived") {
+        // Waived — check reason exists
+        if (!criterion.waivedReason) {
+          addError("CRITERIA_UNSATISFIED", `Criterion '${criterion.id}' is marked waived but has no waivedReason`);
+        }
+      } else {
+        // Pending or unknown status
+        addError("CRITERIA_UNSATISFIED", `Acceptance criterion '${criterion.id || criterion}' not satisfied (status: ${criterion.status || 'unknown'})`);
       }
     }
   }
