@@ -1,6 +1,6 @@
 {
   "schema": "locaily.development.dashboard.v1",
-  "generatedAt": "2026-07-22T22:02:37.165Z",
+  "generatedAt": "2026-07-22T23:30:01.711Z",
   "projectState": {
     "schema": "locaily.development.project_state.v1",
     "project": "locaily",
@@ -13,7 +13,7 @@
     "nextRecommendedAction": "Deliver milestone 'dcp-phase3a' (deliver-milestone.js --slug dcp-phase3a --all)",
     "blockers": [],
     "warnings": [],
-    "updatedAt": "2026-07-22T22:02:19.860Z",
+    "updatedAt": "2026-07-22T23:29:27.206Z",
     "updatedBy": {
       "type": "agent",
       "name": "dev-lifecycle",
@@ -22,7 +22,7 @@
   },
   "git": {
     "branch": "feat/development-memory-second-project-proof",
-    "head": "967a0a8",
+    "head": "2267ada",
     "dirty": true
   },
   "subsystemMaturity": [
@@ -233,7 +233,7 @@
     "ready-for-delivery": [
       {
         "id": "dcp-phase3a",
-        "title": "Development Control Plane Phase 3A — Dashboard",
+        "title": "Development Control Plane Phase 3A - Dashboard",
         "type": "infrastructure",
         "priority": "high"
       }
@@ -330,9 +330,39 @@
       "completedAt": "2026-07-22T22:02:18.490Z",
       "requiredPassed": 5,
       "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260722T232808-79bec8c6",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "feat/development-memory-second-project-proof",
+      "completedAt": "2026-07-22T23:28:09.532Z",
+      "requiredPassed": 5,
+      "requiredFailed": 0
     }
   ],
   "recentActivity": [
+    {
+      "type": "validation",
+      "id": "validation-20260722T232808-79bec8c6",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "timestamp": "2026-07-22T23:28:09.532Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20260722-002",
+      "milestoneId": "dcp-phase3a",
+      "timestamp": "2026-07-22T23:28:05.981Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20260722-002",
+      "milestoneId": "dcp-phase3a",
+      "status": "closed",
+      "timestamp": "2026-07-22T22:50:00.000Z"
+    },
     {
       "type": "session",
       "id": "session-20260722-001",
@@ -401,8 +431,8 @@
     "totalMilestones": 15,
     "active": 0,
     "completed": 11,
-    "totalSessions": 1,
-    "totalValidations": 2,
+    "totalSessions": 2,
+    "totalValidations": 3,
     "totalDeliveries": 0
   }
 }

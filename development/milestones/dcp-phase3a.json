@@ -57,7 +57,7 @@
   "schema": "locaily.development.milestone.v1",
   "type": "infrastructure",
   "purpose": "Generated development dashboard with roadmap, status summary, handoff, staleness checks.",
-  "status": "ready-for-delivery",
+  "status": "active",
   "dependencies": [
     "dcp-phase2c"
   ],
@@ -75,7 +75,7 @@
   },
   "priority": "high",
   "createdAt": "2026-07-22T21:30:00.000Z",
-  "startedAt": "2026-07-22T21:30:00.000Z",
+  "startedAt": "2026-07-22T23:37:56.073Z",
   "preparedCommit": "2267ada617fb0a278d9fc962ee911a6af9ab77b0",
   "preparedBranch": "feat/development-memory-second-project-proof",
   "preparedAt": "2026-07-22T23:28:07.566Z",
