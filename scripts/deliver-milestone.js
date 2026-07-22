@@ -189,10 +189,15 @@ function preflight(slug) {
     errors.push({ code: "PREPARED_COMMIT_MISMATCH", message: `Current HEAD ${currentHead?.slice(0, 8)} != prepared commit ${milestone.preparedCommit?.slice(0, 8)}` });
   }
 
-  // 5. Clean working tree
+  // 5. Clean working tree (exclude development/ and .opencode/ — control plane state)
   const status = (git(["status", "--porcelain"]) || { stdout: "" }).stdout || "";
-  if (status.trim()) {
-    errors.push({ code: "DIRTY_TREE", message: "Working tree is not clean" });
+  const excludedPrefixes = ["development/", ".opencode/"];
+  const sourceChanges = status.split(/\r?\n/).filter(Boolean).filter(line => {
+    const file = line.slice(3);
+    return !excludedPrefixes.some(p => file.startsWith(p));
+  });
+  if (sourceChanges.length > 0) {
+    errors.push({ code: "DIRTY_TREE", message: "Working tree has uncommitted source changes" });
   }
 
   // 6. Validation passed and fingerprint matches

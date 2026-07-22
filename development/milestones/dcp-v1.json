@@ -1,11 +1,11 @@
 {
   "schema": "locaily.development.milestone.v1",
   "id": "dcp-v1",
-  "title": "DCP V1",
+  "title": "Development Control Plane V1",
   "status": "active",
   "type": "feature",
   "priority": "medium",
-  "purpose": "Agent-neutral dev coordination",
+  "purpose": "Agent-neutral development coordination layer",
   "scope": {
     "included": [],
     "excluded": []
@@ -15,8 +15,8 @@
   "dependencies": [],
   "blockers": [],
   "lifecycleRef": null,
-  "createdAt": "2026-07-22T21:23:44.537Z",
-  "startedAt": "2026-07-22T21:23:44.537Z",
+  "createdAt": "2026-07-22T21:24:30.777Z",
+  "startedAt": "2026-07-22T21:24:30.778Z",
   "completedAt": null,
   "mergedAt": null
 }
