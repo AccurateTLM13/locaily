@@ -24,6 +24,7 @@ const readline = require("node:readline");
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 const DEVELOPMENT_DIR = path.join(PROJECT_ROOT, "development");
 const MILESTONES_DIR = path.join(DEVELOPMENT_DIR, "milestones");
+const SESSIONS_DIR = path.join(DEVELOPMENT_DIR, "sessions");
 const VALIDATION_RESULTS_DIR = path.join(DEVELOPMENT_DIR, "validation-results");
 const DELIVERY_DIR = path.join(DEVELOPMENT_DIR, "delivery");
 const CLOSEOUT_PATH = path.join(PROJECT_ROOT, "docs", "07-progress", "work-closeout.json");

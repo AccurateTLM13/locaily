@@ -953,11 +953,24 @@ function cmdComplete(args) {
   // Gate 4: Validation matches current branch, HEAD, and working-tree fingerprint
   const currentFingerprint = computeGitFingerprint();
   if (latestValidation && latestValidation.status === "passed") {
-    if (isFingerprintStale(latestValidation, currentFingerprint)) {
+    if (latestValidation.gitState.branch !== currentFingerprint.branch) {
       addError("VALIDATION_STALE",
-        `Validation fingerprint mismatch: branch='${latestValidation.gitState.branch}' vs '${currentFingerprint.branch}', ` +
-        `HEAD=${latestValidation.gitState.headCommit.slice(0, 8)} vs ${currentFingerprint.headCommit.slice(0, 8)}, ` +
-        `fingerprint=${latestValidation.gitState.fingerprint} vs ${currentFingerprint.fingerprint}`);
+        `Validation branch '${latestValidation.gitState.branch}' != current branch '${currentFingerprint.branch}'`);
+    }
+    // Content fingerprint must match (HEAD may differ if prepare created a commit)
+    if (latestValidation.gitState.fingerprint !== currentFingerprint.fingerprint) {
+      addError("VALIDATION_STALE",
+        `Validation fingerprint ${latestValidation.gitState.fingerprint} != current ${currentFingerprint.fingerprint}`);
+    }
+    // HEAD check: warn if different, but don't block if fingerprint matches
+    if (latestValidation.gitState.headCommit !== currentFingerprint.headCommit) {
+      if (latestValidation.gitState.fingerprint === currentFingerprint.fingerprint) {
+        addWarning("HEAD_CHANGED_AFTER_VALIDATE",
+          `HEAD changed after validation (${latestValidation.gitState.headCommit?.slice(0, 8)} → ${currentFingerprint.headCommit?.slice(0, 8)}) but content fingerprint matches`);
+      } else {
+        addError("VALIDATION_STALE",
+          `Validation HEAD ${latestValidation.gitState.headCommit?.slice(0, 8)} != current ${currentFingerprint.headCommit?.slice(0, 8)}`);
+      }
     }
   }
 
