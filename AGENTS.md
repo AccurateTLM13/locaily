@@ -25,12 +25,20 @@ npm run dev:milestone:start     # Start an approved milestone
 npm run dev:checkpoint          # Record progress
 npm run dev:session:close       # Close implementation session
 npm run dev:prepare             # Stage, commit, record prepared SHA
-npm run dev:validate            # Run validation profile
+npm run dev:validate            # Run validation profile (against committed HEAD)
 npm run dev:milestone:complete  # Gate check before delivery
 npm run dev:pause               # Safely pause work
 npm run dev:block               # Record a blocker
 npm run dev:resume              # Resume paused work
 ```
+
+## Required Lifecycle
+
+```
+start → checkpoint → session:close → prepare → validate → complete → ready-for-delivery
+```
+
+`prepare` commits all changes. `validate` runs against the committed HEAD with a clean tree. `complete` verifies the validation fingerprint matches.
 
 ## Before Stopping Work
 
