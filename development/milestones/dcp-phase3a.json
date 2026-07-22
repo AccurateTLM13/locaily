@@ -1,0 +1,36 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "dcp-phase3a",
+  "title": "Development Control Plane Phase 3A — Dashboard",
+  "status": "active",
+  "type": "infrastructure",
+  "priority": "high",
+  "purpose": "Generated development dashboard: roadmap.html, roadmap-data.json, status-summary.md, next-agent-handoff.md. Area→Initiative→Milestone hierarchy. Staleness checks.",
+  "scope": {
+    "included": ["generate-development-dashboard.js", "roadmap.json", "Generated HTML/MD/JSON", "Staleness checks", "Subsystem maturity tracking"],
+    "excluded": ["Agent adapters", "Merge automation", "Session handoff generator"]
+  },
+  "acceptanceCriteria": [
+    "Dashboard shows current project state, subsystem maturity, milestone board",
+    "Validation scoreboard from real records",
+    "Staleness checks detect missing references, stale validation, orphaned state",
+    "Next-agent handoff generated from canonical state"
+  ],
+  "validationProfile": "builtin-quick",
+  "dependencies": ["dcp-phase2c"],
+  "blockers": [],
+  "lifecycleRef": null,
+  "latestValidationId": null,
+  "preparedCommit": "cc48cb337779ceef1258ffba7166e7c9fb69d3ac",
+  "preparedBranch": "feat/development-memory-second-project-proof",
+  "preparedAt": "2026-07-22T21:24:33.000Z",
+  "completionBranch": "feat/development-memory-second-project-proof",
+  "completionHead": "cc48cb337779ceef1258ffba7166e7c9fb69d3ac",
+  "createdAt": "2026-07-22T21:30:00.000Z",
+  "startedAt": "2026-07-22T21:30:00.000Z",
+  "completedAt": null,
+  "mergedAt": null,
+  "deliveredAt": null,
+  "prNumber": null,
+  "prUrl": null
+}

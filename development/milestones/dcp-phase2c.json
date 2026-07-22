@@ -1,0 +1,36 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "dcp-phase2c",
+  "title": "Development Control Plane Phase 2C",
+  "status": "completed",
+  "type": "infrastructure",
+  "priority": "critical",
+  "purpose": "dev:prepare for commit preparation, deliver-milestone.js rewrite to consume canonical records, delivery attempt records.",
+  "scope": {
+    "included": ["dev:prepare", "deliver-milestone.js rewrite", "Delivery records", "Preflight checks"],
+    "excluded": ["Dashboard", "Agent adapters", "Merge automation"]
+  },
+  "acceptanceCriteria": [
+    "dev:prepare stages, commits, records prepared SHA",
+    "deliver-milestone.js consumes milestone/validation/closeout records",
+    "Delivery records track push/PR attempts",
+    "31 Phase 2C tests passing"
+  ],
+  "validationProfile": "builtin-quick",
+  "dependencies": ["dcp-phase2b"],
+  "blockers": [],
+  "lifecycleRef": null,
+  "latestValidationId": null,
+  "preparedCommit": null,
+  "preparedBranch": null,
+  "preparedAt": null,
+  "completionBranch": null,
+  "completionHead": null,
+  "createdAt": "2026-07-22T19:45:00.000Z",
+  "startedAt": "2026-07-22T19:45:00.000Z",
+  "completedAt": "2026-07-22T21:30:00.000Z",
+  "mergedAt": null,
+  "deliveredAt": null,
+  "prNumber": null,
+  "prUrl": null
+}

@@ -1,0 +1,24 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "dcp-phase3b",
+  "title": "Development Control Plane Phase 3B — Session Handoff",
+  "status": "planned",
+  "type": "infrastructure",
+  "priority": "medium",
+  "purpose": "Structured session handoff generator. Replace manual next-agent-brief with generated handoff from canonical state.",
+  "scope": {
+    "included": ["Session handoff generator", "Structured handoff format"],
+    "excluded": ["Agent adapters", "Merge automation"]
+  },
+  "acceptanceCriteria": [
+    "Handoff generated from milestone, session, validation, delivery records",
+    "No manual maintenance of handoff documents"
+  ],
+  "validationProfile": "builtin-quick",
+  "dependencies": ["dcp-phase3a"],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-07-22T22:30:00.000Z",
+  "startedAt": null,
+  "completedAt": null
+}

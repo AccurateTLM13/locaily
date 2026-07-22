@@ -1,29 +1,34 @@
 {
-  "work_id": "development-control-plane-phase2c",
+  "work_id": "development-control-plane-phase3a",
   "objective_id": "development-control-plane-v1",
   "status": "complete",
-  "closed_at": "2026-07-22T21:30:00.000Z",
-  "original_goal": "Phase 2C: Implement dev:prepare for commit preparation, rewrite deliver-milestone.js to consume canonical records, add delivery attempt records, ensure immutable commit throughout validation→delivery pipeline.",
+  "closed_at": "2026-07-22T22:30:00.000Z",
+  "original_goal": "Phase 3A: Run real E2E delivery, fix friction, implement generated development dashboard with roadmap, subsystem maturity, validation scoreboard, staleness checks, and agent handoff.",
   "completed": [
-    "Implemented dev:prepare: validates session closed, non-default branch, stages scoped files, commits, records preparedCommit/preparedBranch/preparedAt on milestone, verifies clean tree",
-    "Rewrote deliver-milestone.js: consumes milestone, validation, and closeout records; preflight checks branch/HEAD/fingerprint/clean tree/blockers/closeout/remaining work",
-    "Added delivery attempt records (development/delivery/<slug>.json): tracks push success/failure, PR success/failure, attempts history",
-    "Added delivery schema: development/schemas/delivery.schema.json",
-    "Implemented idempotency: already-pushed commit treated as success, existing PR reused",
-    "Implemented failure safety: push/PR failures do not advance milestone state",
-    "Correct lifecycle: start → checkpoint → session:close → prepare → validate → complete → ready-for-delivery → push → draft PR",
-    "31 Phase 2C tests passing",
-    "All existing tests pass (Phase 2B 44/44, reconciliation 14/14, schemas 27/27, lifecycle 23/23, controller 11/11)"
+    "Ran real E2E delivery: start → checkpoint → session:close → prepare → validate → complete → dry-run",
+    "Fixed friction: prepare scope too strict (added policies/, .opencode/), fingerprint includes treeHash (removed), deliver-milestone.js missing SESSIONS_DIR, dev:prepare commit message shell splitting (use --file)",
+    "Corrected lifecycle flow: prepare → validate → complete (validate against committed HEAD)",
+    "Created roadmap.json with Area → Initiative → Milestone hierarchy",
+    "Created generate-development-dashboard.js script",
+    "Generated roadmap.html (self-contained static HTML dashboard)",
+    "Generated roadmap-data.json (machine-readable dashboard data)",
+    "Generated status-summary.md (human-readable status)",
+    "Generated next-agent-handoff.md (agent handoff document)",
+    "Dashboard shows: project state, subsystem maturity, milestone board, validation scoreboard, blockers, activity, staleness warnings",
+    "Staleness checks: active milestone without session, paused without handoff, delivered without PR, completed with blockers, stale validation, missing references, stale generated files",
+    "Added npm run dev:dashboard script",
+    "All existing tests pass (Phase 2C 31/31, Phase 2B 44/44, reconciliation 14/14, schemas 27/27, lifecycle 23/23, controller 11/11)"
   ],
   "remaining": [
-    "Phase 3: HTML roadmap generator, session handoff generator, staleness monitor",
-    "Phase 4: Agent-specific adapters (Cursor, Claude, Codex)"
+    "Phase 3B: Session handoff generator (structured, not just markdown)",
+    "Phase 3C: Agent-specific adapters (Cursor, Claude, Codex)",
+    "Phase 4: Merge detection, post-merge closeout"
   ],
-  "next_required_action": "Phase 3: HTML roadmap generator from canonical JSON state.",
+  "next_required_action": "Phase 3B or 3C. Dashboard is generated and functional.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
   "working_branch": "feat/development-memory-second-project-proof",
-  "last_commit": "7b93e74",
+  "last_commit": "cc48cb3",
   "validation": {
     "passed": [
       "node scripts/test-development-phase2c.js — 31/31",
@@ -31,7 +36,8 @@
       "node scripts/test-development-reconciliation.js — 14/14",
       "node scripts/test-development-schemas.js — 27/27",
       "node scripts/test-lifecycle.js — 23/23",
-      "node scripts/test-controller-invariants.js — 11/11"
+      "node scripts/test-controller-invariants.js — 11/11",
+      "node scripts/generate-development-dashboard.js — PASS"
     ],
     "failed": [],
     "not_run": []

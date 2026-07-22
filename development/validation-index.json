@@ -1,0 +1,9 @@
+{
+  "latestByMilestone": {
+    "e2e-test": "validation-20260722T212759-6b468012",
+    "refuse-test": "validation-20260722T212803-78043828",
+    "open-session-test": "validation-20260722T212806-d449f74c",
+    "blocker-test": "validation-20260722T212810-ba1e3a8e",
+    "format-test": "validation-20260722T212815-c02d4cea"
+  }
+}

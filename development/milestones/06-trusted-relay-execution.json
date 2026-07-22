@@ -1,0 +1,29 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "06-trusted-relay-execution",
+  "title": "M6: Trusted Relay Execution",
+  "status": "completed",
+  "type": "feature",
+  "priority": "high",
+  "purpose": "Node pairing, authentication, capability allowlists, minimal-context envelopes, planned-vs-actual placement, relay fallback reasons.",
+  "scope": {
+    "included": ["Relay protocol", "Authentication", "Capability allowlists", "Placement records"],
+    "excluded": ["Physical multi-device pilot"]
+  },
+  "acceptanceCriteria": [
+    "Relay nodes authenticate via pairing",
+    "Capability allowlists enforced",
+    "Placement records track planned vs actual"
+  ],
+  "validationProfile": "builtin-quick",
+  "dependencies": [],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-07-11T00:00:00.000Z",
+  "startedAt": "2026-07-11T00:00:00.000Z",
+  "completedAt": "2026-07-14T01:45:00.000Z",
+  "mergedAt": null,
+  "deliveredAt": null,
+  "prNumber": null,
+  "prUrl": null
+}

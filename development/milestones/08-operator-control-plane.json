@@ -1,0 +1,30 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "08-operator-control-plane",
+  "title": "M8: Operator Control Plane",
+  "status": "completed",
+  "type": "feature",
+  "priority": "high",
+  "purpose": "Operator console UI, durable job store, background worker, job mutation endpoints.",
+  "scope": {
+    "included": ["Operator console", "Job store", "Background worker", "Cancel/retry/review endpoints"],
+    "excluded": ["Relay trust", "Physical pilot"]
+  },
+  "acceptanceCriteria": [
+    "Operator console serves at GET /operator",
+    "Job store persists across restarts",
+    "Background worker processes jobs",
+    "Mutation endpoints handle cancel/retry/review"
+  ],
+  "validationProfile": "builtin-quick",
+  "dependencies": [],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-07-12T00:00:00.000Z",
+  "startedAt": "2026-07-12T00:00:00.000Z",
+  "completedAt": "2026-07-12T23:59:00.000Z",
+  "mergedAt": null,
+  "deliveredAt": null,
+  "prNumber": null,
+  "prUrl": null
+}

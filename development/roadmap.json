@@ -1,0 +1,242 @@
+{
+  "schema": "locaily.development.roadmap.v1",
+  "project": "locaily",
+  "updatedAt": "2026-07-22T22:00:00.000Z",
+  "areas": [
+    {
+      "id": "local-brain",
+      "title": "Local Brain",
+      "description": "Core coordinator and runtime server",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "api-stability",
+          "title": "API Stability and Contracts",
+          "description": "Stable HTTP API, envelope contracts, and endpoint documentation",
+          "maturity": "operational",
+          "milestoneIds": []
+        },
+        {
+          "id": "crew-orchestration",
+          "title": "The Crew Orchestration",
+          "description": "Track runner, workflow orchestration, step input mapping",
+          "maturity": "operational",
+          "milestoneIds": []
+        }
+      ]
+    },
+    {
+      "id": "track-engine",
+      "title": "Track Engine",
+      "description": "Reusable execution contracts and track system",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "track-runner",
+          "title": "Track Runner",
+          "description": "Pipeline and DAG execution modes",
+          "maturity": "operational",
+          "milestoneIds": []
+        },
+        {
+          "id": "track-planner",
+          "title": "Track Planner",
+          "description": "Model-backed plan decomposition",
+          "maturity": "tested",
+          "milestoneIds": []
+        }
+      ]
+    },
+    {
+      "id": "benchmark-lab",
+      "title": "Benchmark Lab",
+      "description": "Evaluation and qualification subsystem",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "evaluation-engine",
+          "title": "Evaluation Engine",
+          "description": "Run, review, compare, promote, qualification pipeline",
+          "maturity": "operational",
+          "milestoneIds": []
+        },
+        {
+          "id": "model-qualification",
+          "title": "Model Qualification",
+          "description": "Qualification records, evidence, capability registry",
+          "maturity": "operational",
+          "milestoneIds": []
+        }
+      ]
+    },
+    {
+      "id": "relay-nodes",
+      "title": "Relay Nodes",
+      "description": "Nearby-device capability layer",
+      "maturity": "tested",
+      "initiatives": [
+        {
+          "id": "relay-protocol",
+          "title": "Relay Protocol",
+          "description": "Registry, connector, router, step execution",
+          "maturity": "tested",
+          "milestoneIds": ["06-trusted-relay-execution"]
+        },
+        {
+          "id": "multi-device-coordination",
+          "title": "Multi-Device Coordination",
+          "description": "Placement planning, distributed execution, fallback",
+          "maturity": "simulation-validated",
+          "milestoneIds": ["09-physical-multi-device-pilot"]
+        },
+        {
+          "id": "relay-trust",
+          "title": "Relay Trust and Pairing",
+          "description": "Authentication, signed requests, capability allowlists",
+          "maturity": "designed",
+          "milestoneIds": ["09a-relay-trust"]
+        }
+      ]
+    },
+    {
+      "id": "memory-bridge",
+      "title": "Memory Bridge",
+      "description": "Controlled local context integration",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "memory-v0v1",
+          "title": "Memory Bridge v0/v1",
+          "description": "Context packs, writeback, search",
+          "maturity": "operational",
+          "milestoneIds": []
+        },
+        {
+          "id": "development-memory",
+          "title": "Development Memory Loop",
+          "description": "DM1-DM10: events, sessions, candidates, review, maintainer, retrieval",
+          "maturity": "simulation-validated",
+          "milestoneIds": ["dm10-multi-project-template"]
+        }
+      ]
+    },
+    {
+      "id": "qualification-routing",
+      "title": "Qualification and Routing",
+      "description": "Model qualification, shadow routing, enforcement",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "qualification-consumption",
+          "title": "Qualification Consumption",
+          "description": "Six-state resolver, capability registry, evidence linker",
+          "maturity": "operational",
+          "milestoneIds": []
+        },
+        {
+          "id": "enforcement-policy",
+          "title": "Enforcement Policy",
+          "description": "Shadow routing, enforcement states, pilot validation",
+          "maturity": "operational",
+          "milestoneIds": []
+        }
+      ]
+    },
+    {
+      "id": "operator-experience",
+      "title": "Operator Experience",
+      "description": "Console UI, validation, job management",
+      "maturity": "implemented",
+      "initiatives": [
+        {
+          "id": "operator-console",
+          "title": "Operator Console",
+          "description": "Dashboard, jobs, relay nodes, enqueue",
+          "maturity": "implemented",
+          "milestoneIds": ["08-operator-control-plane"]
+        },
+        {
+          "id": "job-management",
+          "title": "Job Management",
+          "description": "Durable job store, background worker, mutations",
+          "maturity": "operational",
+          "milestoneIds": ["08-operator-control-plane"]
+        }
+      ]
+    },
+    {
+      "id": "evidence-quality",
+      "title": "Evidence and Quality",
+      "description": "Track run records, human reviews, learning loop",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "track-run-records",
+          "title": "Canonical Track Run Records",
+          "description": "Schema, builder, runtime emission, evidence store",
+          "maturity": "operational",
+          "milestoneIds": ["10-track-learning-evidence-loop"]
+        },
+        {
+          "id": "human-review",
+          "title": "Human Quality Review",
+          "description": "Review records, quality summary, gate packets",
+          "maturity": "operational",
+          "milestoneIds": []
+        }
+      ]
+    },
+    {
+      "id": "development-control-plane",
+      "title": "Development Control Plane",
+      "description": "Agent-neutral development coordination",
+      "maturity": "implemented",
+      "initiatives": [
+        {
+          "id": "lifecycle-infrastructure",
+          "title": "Lifecycle Infrastructure",
+          "description": "Objective lifecycle, integrity checks, work closeout",
+          "maturity": "operational",
+          "milestoneIds": ["objective-lifecycle-hardening"]
+        },
+        {
+          "id": "control-plane-core",
+          "title": "Control Plane Core",
+          "description": "Schemas, project-state, dev:status, dev:lifecycle commands",
+          "maturity": "tested",
+          "milestoneIds": ["development-control-plane-v1", "dcp-v1"]
+        },
+        {
+          "id": "delivery-pipeline",
+          "title": "Delivery Pipeline",
+          "description": "dev:prepare, deliver-milestone.js, validation integration",
+          "maturity": "tested",
+          "milestoneIds": ["milestone-completion-delivery-workflow"]
+        }
+      ]
+    },
+    {
+      "id": "packaging-release",
+      "title": "Packaging and Release",
+      "description": "Installation, documentation, release process",
+      "maturity": "implemented",
+      "initiatives": [
+        {
+          "id": "v1-packaging",
+          "title": "Locaily v1 Packaging",
+          "description": "Documentation alignment, operator walkthrough, state migration",
+          "maturity": "implemented",
+          "milestoneIds": ["10-locaily-v1-packaging"]
+        }
+      ]
+    }
+  ],
+  "milestoneDependencies": {
+    "09-physical-multi-device-pilot": ["06-trusted-relay-execution"],
+    "09a-relay-trust": [],
+    "10-locaily-v1-packaging": ["09-physical-multi-device-pilot"],
+    "development-control-plane-v1": [],
+    "dcp-v1": [],
+    "milestone-completion-delivery-workflow": ["development-control-plane-v1"]
+  }
+}
