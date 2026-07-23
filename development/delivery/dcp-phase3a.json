@@ -1,17 +1,17 @@
 {
   "schema": "locaily.development.delivery.v1",
   "milestoneId": "dcp-phase3a",
-  "status": "pushed",
+  "status": "pr-failed",
   "branch": "feat/development-memory-second-project-proof",
-  "commit": "45a7d524152d9c509fc3278a6e39bcffd65b094a",
-  "pushedAt": "2026-07-23T01:54:56.823Z",
+  "commit": "2db52275bbc627e085aa44887865f27f78349637",
+  "pushedAt": "2026-07-23T01:56:23.110Z",
   "pushSuccess": true,
   "pushError": null,
   "remoteBranch": "feat/development-memory-second-project-proof",
   "prNumber": null,
   "prUrl": null,
   "prCreated": null,
-  "prError": null,
+  "prError": "unknown arguments [\"complete\" \"dcp-phase3a\" \"Milestone:\" \"dcp-phase3a\"]; please quote all values that have spaces\n\nUsage:  gh pr create [flags]\n\nFlags:\n  -a, --assignee login       Assign people by their login. Use \"@me\" to self-assign.\n  -B, --base branch          The branch into which you want your code merged\n  -b, --body string          Body for the pull request\n  -F, --body-file file       Read body text from file (use \"-\" to read from standard input)\n  -d, --draft                Mark pull ",
   "attempts": [
     {
       "timestamp": "2026-07-22T23:40:05.359Z",
@@ -26,8 +26,22 @@
       "branch": "feat/development-memory-second-project-proof",
       "success": true,
       "error": null
+    },
+    {
+      "timestamp": "2026-07-23T01:56:21.509Z",
+      "commit": "2db52275bbc627e085aa44887865f27f78349637",
+      "branch": "feat/development-memory-second-project-proof",
+      "success": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-07-23T01:56:24.549Z",
+      "success": false,
+      "error": "unknown arguments [\"complete\" \"dcp-phase3a\" \"Milestone:\" \"dcp-phase3a\"]; please quote all values that have spaces\n\nUsage:  gh pr create [flags]\n\nFlags:\n  -a, --assignee login       Assign people by their login. Use \"@me\" to self-assign.\n  -B, --base branch          The branch into which you want your code merged\n  -b, --body string          Body for the pull request\n  -F, --body-file file       Read body text from file (use \"-\" to read from standard input)\n  -d, --draft                Mark pull ",
+      "prNumber": null,
+      "prUrl": null
     }
   ],
   "createdAt": "2026-07-22T23:40:05.358Z",
-  "updatedAt": "2026-07-23T01:54:56.823Z"
+  "updatedAt": "2026-07-23T01:56:24.676Z"
 }
