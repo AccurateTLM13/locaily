@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Locaily Action Request",
+  "type": "object",
+  "required": [
+    "action",
+    "target",
+    "requestedBy",
+    "reason"
+  ],
+  "properties": {
+    "action": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string"
+    },
+    "requestedBy": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "projectId": {
+      "type": "string"
+    },
+    "nodeId": {
+      "type": "string"
+    },
+    "riskLevel": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

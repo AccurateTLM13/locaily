@@ -139,8 +139,9 @@ Full detail: [docs/01-architecture/memory-bridge.md](docs/01-architecture/memory
 
 **Relay Nodes** extend Locaily beyond one machine by allowing trusted nearby
 devices to advertise usable capabilities through connectors. A Relay Node
-does not need an AI model. Protocol, discovery, authentication, and deployment
-details live in the Relay Node documentation.
+does not need an AI model. Protocol, discovery, and deployment details live
+in the Relay Node documentation. Trust boundary (authentication, pairing)
+is documented in `docs/security/CAPABILITY-BOUNDARIES.md` and planned as M09A.
 
 Full detail: [docs/01-architecture/nearby-node.md](docs/01-architecture/nearby-node.md)
 
@@ -174,6 +175,7 @@ can be built by composing tracks, tool packs, and validators.
 - Evidence over intuition: routing, purchases, qualification, and track revisions should be supported by observed results
 - Graceful degradation: queue, retry, reduce scope, or escalate rather than fail opaquely
 - Human authority remains explicit: high-impact writeback, publishing, and destructive actions require approval
+- Models propose, Locaily decides: no agent action executes without passing through the execution gate (policy documented; enforcement planned)
 
 ## Getting Started
 
@@ -225,6 +227,7 @@ and active work, see:
 | Track system | [docs/02-track-system/README.md](docs/02-track-system/README.md) |
 | API contract | [docs/01-architecture/api-contract.md](docs/01-architecture/api-contract.md) |
 | Roadmap | [docs/05-product/roadmap.md](docs/05-product/roadmap.md) |
+| Security design | [docs/security/README.md](docs/security/README.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 ## Key Integrations

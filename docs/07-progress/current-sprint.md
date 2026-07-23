@@ -1,66 +1,65 @@
 # Current Sprint
 
-**Updated:** 2026-07-04
+**Updated:** 2026-07-22
 
 ## Status
 
-The prior sprint (Benchmark Lab Milestone 1) is complete and operator-ready.
+Between major build cycles. No objective is currently active.
 
-The next sprint has not yet been canonically selected. The active build slice documented in [active-build-slice.md](./active-build-slice.md) describes the current focus (Canonical Track Run Records) but is not a formally scoped sprint without an explicitly supplied objective.
+The repository is safe to begin new work. Lifecycle integrity passes; continuity check resolves cleanly.
 
-## Completed Objective
+## Recently Completed
 
-Deliver an operator-ready local evaluation subsystem: CLI commands for run, review, compare, promote, matrix, probe, diagnose, report, model-card, qualification, and checksum-verify; 14 schemas; mock + Ollama + ToolEvalRuntime adapters; execution-router with native/policy-routed/runtime-constrained modes; model capability probing; evidence promotion workflow; checksum verification (canonical_text_v1/byte_exact); qualification-record generation; read-only `/benchmark/status` endpoint; Local Brain consuming compact qualification data without importing engine internals.
+- **Development Control Plane Phase 2B** — profile-driven validation and milestone completion gates. dev:validate runs strict status checks first, then profile commands, records immutable validation results. dev:milestone:complete enforces 8 gates (blockers, contradictions, validation, stale validation, open session, acceptance criteria, remaining work, closeout). Stale-validation protection based on branch+HEAD+dirty state. Contradiction severity model: info→exit 0, warning→exit 0, error→exit 1, critical→exit 2 (strict: warning→exit 1). 30 Phase 2B tests passing. Full E2E: start→validate→pause→complete→ready-for-delivery.
+- **Development Control Plane Phase 1.5 + 2A** — state reconciliation and lifecycle commands. Fixed legacy run-state contradiction, added contradiction severity levels, dev:lifecycle.js with start/checkpoint/pause/block/resume, 14 reconciliation tests. Cross-session handoff proven.
+- **Development Control Plane Phase 1** — canonical project-state.json, 4 JSON schemas (project-state, milestone, session, validation-profile), fixtures, 25 schema validation tests, dev:status command (human-readable + JSON), agent-neutral AGENTS.md, compatibility mapping. All existing tests pass.
+- **Security Policy Foundation** — execution-security documentation and machine-readable policy schemas added (`docs/security/`, `policies/`). Policy documented; centralized enforcement not yet complete.
+- **M10 — Locaily v1 Packaging** — documentation alignment, state migration scaffolding, operator walkthrough, relay pairing docs, release positioning. Archived to completed via lifecycle mechanism.
+- **M12 — Track Learning Evidence Loop** — disagreement classification, drift detection, per-track learning state, retry comparisons. All 14 conditions met.
+- **Objective Lifecycle Hardening** — stable objective IDs, mandatory closeout, continuity gate, queue archival, encoding normalization.
+- **M09 — Physical Multi-Device Pilot** — held (second physical device unavailable). Infrastructure and relay protocol implemented and tested in simulation.
 
-### Completed Acceptance Criteria
+## Approved Next Work
 
-1. Qualification record schema defined and validated.
-2. Two Locaily-specific benchmark suites registered (intent-classification, basic-tool-use).
-3. Mock adapter produces deterministic fixture runs.
-4. Ollama adapter runs live model against suites.
-5. Raw local results persisted under `benchmark-lab/results/raw/`.
-6. Draft summaries generated after each run.
-7. Promotion writes compact summary, approved evidence, and checksum records.
-8. Qualification record generated from promoted evidence.
-9. Model card generated from promoted evidence.
-10. Report generated from promoted evidence.
-11. Checksums verify across canonical_text_v1 and byte_exact modes.
-12. `/benchmark/status` reports qualification and checksum counts without running benchmarks.
-13. Local Brain consumes qualification records without importing `benchmark-lab/engine/` modules.
-14. Tool Eval Bench compatibility slice with 8 scenarios, PARTIAL verdict support.
-15. Model capability probing with cached results and suite requirement checking.
-16. Execution modes (native, policy-routed, runtime-constrained) implemented and tested.
+The following items are approved for consideration as the next objective. They are not yet started. Selection requires an explicit user decision.
 
-### Unresolved Follow-On Candidates
+### Immediate candidates (operator-facing proof)
 
-These items are recognized as valuable extensions but are **not yet approved scope**:
+1. **Second-Repository Operator Acceptance** — brief manual walkthrough on a real second repository to validate the Development Memory Loop outside simulation. Record pass/fail; fix only if blocked. Prerequisite for physical pilot claims.
+2. **Clean-Machine v1 Acceptance** — clone, install, start, run a workflow, inspect evidence, stop/restart, preserve state, upgrade/migrate, remove cleanly. A non-developer can follow one guide and complete one useful workflow without manually repairing configuration.
 
-- Broader model qualification coverage across additional Ollama models
-- Additional Benchmark Lab tracks beyond intent-classification and basic-tool-use
-- Hardware profiling and qualification records for multiple hardware profiles
-- Deeper live qualification evidence for prompt regression, output variance, and cross-track generalization
-- Structured output (Category O) and error recovery (Category E) evaluation scenarios
-- Automatic qualification-based model swapping / Model Garage runtime policy
+### Product proof candidates
 
-**Warning:** These candidates are not yet scoped, approved, or scheduled. Do not begin implementation without an explicitly supplied objective.
+3. **Lighthouse Handoff Product Bridge** — extension discovers Local Brain, explicit CORS policy, connection status, deterministic mode, local AI enhancement mode, failure fallback, report comparison, real PageSpeed payload handling, export to coding-agent-ready Markdown, installer/setup path covering both repositories.
+4. **Workflow Pack Contract and Starter SDK** — contributor can install or create a complete workflow pack (tracks, tools, prompts, schemas, fixtures, permissions, qualification requirements) without modifying Local Brain core code.
 
-## Active Build Slice (Current Focus)
+### Infrastructure candidates
 
-Canonical Track Run Records — the first Track Learning Evidence Loop slice:
+5. **Milestone Completion Delivery Workflow** — local script (`deliver-milestone.js`) that reads milestone manifest + closeout + build slice, generates a dry-run delivery summary, creates a scoped `milestone/<slug>` branch with conventional-commit message, and opens a draft PR via `gh` CLI. CI validates via existing `ci.yml`. No automatic merge, release, or tagging in v1. Design and acceptance conditions at [milestone-completion-delivery-workflow.md](./milestone-completion-delivery-workflow.md). **Implemented** — dry-run, execute, PR, and `--all` modes verified. See `npm run deliver-milestone`.
 
-- Define a canonical track-run record schema
-- Emit valid summary-safe records after successful and failed track executions
-- Record track version, steps, workers, validation results, retries, timing, and routing context
-- Support optional human correction records
-- Prove Lighthouse Handoff and DealSniper produce valid evidence records
-- Preserve `/tasks/run`, `/tracks/run`, and `/workflows/run` response envelopes
+### Selection criteria
 
-See [active-build-slice.md](./active-build-slice.md) for full scope, exclusions, and acceptance criteria.
+- The next objective must be explicitly selected by the operator
+- No automatic progression to the next milestone
+- Each candidate is independently viable
+
+## Deferred
+
+- **M09A — Relay Trust and Secure Pairing** — node identity, pairing ceremony, authentication, signed requests, capability allowlists, node revocation. Should precede or become the first half of M09.
+- **M09B — Physical Multi-Device Pilot** — requires two devices + Ollama + operator. Infrastructure ready; physical validation pending.
+- **Central Execution Gate Enforcement** — every model, agent, tool, workflow, and Relay Node side effect passes through one policy evaluator. Design docs exist; implementation not yet scoped.
+- **Automatic Task Intake and Track Selection** — deterministic intent hints → small classifier → candidate workflow/track → contract check → operator confirmation when ambiguous.
+
+## Later Candidates (not yet scoped)
+
+- Orchestrator Governance and Step Budgets
+- Model Specialization and Adapter Lab
+- Embedding-based Memory Retrieval
+- Community Workflow Marketplace
 
 ## Out of Scope
 
 - Automatic model swapping / Model Garage auto-switching
-- Relay Node routing
-- DAG runner / LLM-generated plans
+- DAG planning or free-form Track generation as separate features (both partially implemented)
 - Public benchmark marketing beyond committed evidence
-- Broader Benchmark Lab qualification coverage without an explicit task
+- Broader qualification coverage without an explicit task

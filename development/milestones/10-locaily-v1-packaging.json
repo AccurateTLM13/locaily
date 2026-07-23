@@ -1,0 +1,29 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "10-locaily-v1-packaging",
+  "title": "M10: Locaily v1 Packaging",
+  "status": "completed",
+  "type": "documentation",
+  "priority": "medium",
+  "purpose": "Documentation alignment, state migration scaffolding, operator walkthrough, relay pairing docs, release positioning.",
+  "scope": {
+    "included": ["Documentation", "Migration script", "Operator guide", "Release notes"],
+    "excluded": ["Physical pilot", "Relay trust"]
+  },
+  "acceptanceCriteria": [
+    "Documentation aligned with current state",
+    "Migration script functional",
+    "Operator guide complete"
+  ],
+  "validationProfile": "builtin-quick",
+  "dependencies": [],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-07-20T00:00:00.000Z",
+  "startedAt": "2026-07-20T00:00:00.000Z",
+  "completedAt": "2026-07-20T23:59:00.000Z",
+  "mergedAt": null,
+  "deliveredAt": null,
+  "prNumber": null,
+  "prUrl": null
+}

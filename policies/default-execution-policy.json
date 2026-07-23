@@ -1,0 +1,18 @@
+{
+  "version": "0.1.0",
+  "status": "design-only",
+  "defaultDecision": "deny",
+  "actions": {
+    "filesystem.read.workspace": "allow",
+    "filesystem.write.workspace": "allow",
+    "filesystem.delete": "require_approval",
+    "shell.execute.approved": "require_approval",
+    "shell.execute.arbitrary": "deny",
+    "network.local": "require_approval",
+    "network.external": "require_approval",
+    "credentials.read": "deny",
+    "nearbyNode.invoke": "require_approval",
+    "audit.disable": "deny",
+    "policy.modify.runtime": "deny"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "milestoneId": "dcp-phase3a",
+  "criteria": [
+    {
+      "criterion": "Dashboard shows project state, subsystem maturity, milestone board",
+      "satisfied": true,
+      "evidence": [
+        {"type": "generated-artifact", "reference": "development/generated/roadmap.html"},
+        {"type": "generated-artifact", "reference": "development/generated/roadmap-data.json"}
+      ]
+    },
+    {
+      "criterion": "Validation scoreboard from real records",
+      "satisfied": true,
+      "evidence": [
+        {"type": "generated-artifact", "reference": "development/generated/roadmap-data.json:validationScoreboard"}
+      ]
+    },
+    {
+      "criterion": "Staleness checks detect issues",
+      "satisfied": true,
+      "evidence": [
+        {"type": "code-reference", "reference": "scripts/generate-development-dashboard.js:checkStaleness"}
+      ]
+    },
+    {
+      "criterion": "Next-agent handoff generated from canonical state",
+      "satisfied": true,
+      "evidence": [
+        {"type": "generated-artifact", "reference": "development/generated/next-agent-handoff.md"}
+      ]
+    }
+  ],
+  "acknowledgedWarnings": []
+}

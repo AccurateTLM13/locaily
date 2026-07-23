@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-validation-profile.schema.json",
+  "title": "Development Validation Profile",
+  "description": "Defines the required validation steps for a milestone or phase of work. Profiles drive the dev:validate command.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "name",
+    "required",
+    "level"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locaily.development.validation_profile.v1",
+      "description": "Schema identifier."
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Unique profile identifier."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable profile name."
+    },
+    "level": {
+      "type": "string",
+      "enum": ["quick", "standard", "full", "release"],
+      "description": "Validation level (quick = offline-only, full = includes server, release = gate for delivery)."
+    },
+    "required": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "command": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "timeout": { "type": "integer", "minimum": 1000, "default": 120000 }
+        },
+        "required": ["id", "command"],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "description": "Tests that must pass."
+    },
+    "optional": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "command": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "timeout": { "type": "integer", "minimum": 1000, "default": 120000 }
+        },
+        "required": ["id", "command"],
+        "additionalProperties": false
+      },
+      "description": "Tests that should pass but are not blocking."
+    },
+    "manualChecks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 }
+        },
+        "required": ["id", "description"],
+        "additionalProperties": false
+      },
+      "description": "Checks that require human verification."
+    },
+    "description": {
+      "type": "string",
+      "description": "When to use this profile."
+    },
+    "completionPolicy": {
+      "type": "object",
+      "description": "Completion gate policy. Controls what dev:milestone:complete checks.",
+      "properties": {
+        "requireCleanTree": {
+          "type": "boolean",
+          "default": true,
+          "description": "Require clean working tree at completion (or same dirty state as validation)."
+        },
+        "requireCloseout": {
+          "type": "boolean",
+          "default": true,
+          "description": "Require work-closeout.json with status 'complete'."
+        },
+        "requireEmptyRemainingWork": {
+          "type": "boolean",
+          "default": true,
+          "description": "Require remaining work to be empty or formally deferred."
+        },
+        "requireManualChecksComplete": {
+          "type": "boolean",
+          "default": true,
+          "description": "Require all manual checks to be acknowledged."
+        },
+        "allowedChangedPathsAfterValidation": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Path prefixes allowed to change after validation (e.g. 'development/generated/')."
+        },
+        "validationMaxAgeMinutes": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 120,
+          "description": "Maximum age of validation in minutes before it expires."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

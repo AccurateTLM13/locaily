@@ -1,0 +1,61 @@
+{
+  "schema": "locaily.development.delivery.v1",
+  "milestoneId": "dcp-phase3a",
+  "status": "pr-failed",
+  "branch": "feat/development-memory-second-project-proof",
+  "commit": "68ef7d7c4a90fc3755431279520a15c181cee297",
+  "pushedAt": "2026-07-23T01:57:22.997Z",
+  "pushSuccess": true,
+  "pushError": null,
+  "remoteBranch": "feat/development-memory-second-project-proof",
+  "prNumber": null,
+  "prUrl": null,
+  "prCreated": null,
+  "prError": "could not add label: 'milestone' not found",
+  "attempts": [
+    {
+      "timestamp": "2026-07-22T23:40:05.359Z",
+      "commit": "4d58b893179ceb58fc008d7978a6f045083548d6",
+      "branch": "feat/development-memory-second-project-proof",
+      "success": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-07-23T01:54:55.050Z",
+      "commit": "45a7d524152d9c509fc3278a6e39bcffd65b094a",
+      "branch": "feat/development-memory-second-project-proof",
+      "success": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-07-23T01:56:21.509Z",
+      "commit": "2db52275bbc627e085aa44887865f27f78349637",
+      "branch": "feat/development-memory-second-project-proof",
+      "success": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-07-23T01:56:24.549Z",
+      "success": false,
+      "error": "unknown arguments [\"complete\" \"dcp-phase3a\" \"Milestone:\" \"dcp-phase3a\"]; please quote all values that have spaces\n\nUsage:  gh pr create [flags]\n\nFlags:\n  -a, --assignee login       Assign people by their login. Use \"@me\" to self-assign.\n  -B, --base branch          The branch into which you want your code merged\n  -b, --body string          Body for the pull request\n  -F, --body-file file       Read body text from file (use \"-\" to read from standard input)\n  -d, --draft                Mark pull ",
+      "prNumber": null,
+      "prUrl": null
+    },
+    {
+      "timestamp": "2026-07-23T01:57:21.484Z",
+      "commit": "68ef7d7c4a90fc3755431279520a15c181cee297",
+      "branch": "feat/development-memory-second-project-proof",
+      "success": true,
+      "error": null
+    },
+    {
+      "timestamp": "2026-07-23T01:57:24.379Z",
+      "success": false,
+      "error": "could not add label: 'milestone' not found",
+      "prNumber": null,
+      "prUrl": null
+    }
+  ],
+  "createdAt": "2026-07-22T23:40:05.358Z",
+  "updatedAt": "2026-07-23T01:57:25.464Z"
+}

@@ -1,0 +1,474 @@
+{
+  "schema": "locaily.development.dashboard.v1",
+  "generatedAt": "2026-07-22T23:40:29.626Z",
+  "projectState": {
+    "schema": "locaily.development.project_state.v1",
+    "project": "locaily",
+    "currentMilestone": null,
+    "activeSession": null,
+    "status": "ready-for-delivery",
+    "defaultBranch": "main",
+    "activeBranch": "feat/development-memory-second-project-proof",
+    "lastCompletedMilestone": "dcp-phase3a",
+    "nextRecommendedAction": "Deliver milestone 'dcp-phase3a' (deliver-milestone.js --slug dcp-phase3a --all)",
+    "blockers": [],
+    "warnings": [],
+    "updatedAt": "2026-07-22T23:38:01.354Z",
+    "updatedBy": {
+      "type": "agent",
+      "name": "dev-lifecycle",
+      "platform": "system"
+    }
+  },
+  "git": {
+    "branch": "feat/development-memory-second-project-proof",
+    "head": "4d58b89",
+    "dirty": true
+  },
+  "subsystemMaturity": [
+    {
+      "id": "local-brain",
+      "title": "Local Brain",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "api-stability",
+          "title": "API Stability and Contracts",
+          "maturity": "operational"
+        },
+        {
+          "id": "crew-orchestration",
+          "title": "The Crew Orchestration",
+          "maturity": "operational"
+        }
+      ]
+    },
+    {
+      "id": "track-engine",
+      "title": "Track Engine",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "track-runner",
+          "title": "Track Runner",
+          "maturity": "operational"
+        },
+        {
+          "id": "track-planner",
+          "title": "Track Planner",
+          "maturity": "tested"
+        }
+      ]
+    },
+    {
+      "id": "benchmark-lab",
+      "title": "Benchmark Lab",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "evaluation-engine",
+          "title": "Evaluation Engine",
+          "maturity": "operational"
+        },
+        {
+          "id": "model-qualification",
+          "title": "Model Qualification",
+          "maturity": "operational"
+        }
+      ]
+    },
+    {
+      "id": "relay-nodes",
+      "title": "Relay Nodes",
+      "maturity": "tested",
+      "initiatives": [
+        {
+          "id": "relay-protocol",
+          "title": "Relay Protocol",
+          "maturity": "tested"
+        },
+        {
+          "id": "multi-device-coordination",
+          "title": "Multi-Device Coordination",
+          "maturity": "simulation-validated"
+        },
+        {
+          "id": "relay-trust",
+          "title": "Relay Trust and Pairing",
+          "maturity": "designed"
+        }
+      ]
+    },
+    {
+      "id": "memory-bridge",
+      "title": "Memory Bridge",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "memory-v0v1",
+          "title": "Memory Bridge v0/v1",
+          "maturity": "operational"
+        },
+        {
+          "id": "development-memory",
+          "title": "Development Memory Loop",
+          "maturity": "simulation-validated"
+        }
+      ]
+    },
+    {
+      "id": "qualification-routing",
+      "title": "Qualification and Routing",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "qualification-consumption",
+          "title": "Qualification Consumption",
+          "maturity": "operational"
+        },
+        {
+          "id": "enforcement-policy",
+          "title": "Enforcement Policy",
+          "maturity": "operational"
+        }
+      ]
+    },
+    {
+      "id": "operator-experience",
+      "title": "Operator Experience",
+      "maturity": "implemented",
+      "initiatives": [
+        {
+          "id": "operator-console",
+          "title": "Operator Console",
+          "maturity": "implemented"
+        },
+        {
+          "id": "job-management",
+          "title": "Job Management",
+          "maturity": "operational"
+        }
+      ]
+    },
+    {
+      "id": "evidence-quality",
+      "title": "Evidence and Quality",
+      "maturity": "operational",
+      "initiatives": [
+        {
+          "id": "track-run-records",
+          "title": "Canonical Track Run Records",
+          "maturity": "operational"
+        },
+        {
+          "id": "human-review",
+          "title": "Human Quality Review",
+          "maturity": "operational"
+        }
+      ]
+    },
+    {
+      "id": "development-control-plane",
+      "title": "Development Control Plane",
+      "maturity": "implemented",
+      "initiatives": [
+        {
+          "id": "lifecycle-infrastructure",
+          "title": "Lifecycle Infrastructure",
+          "maturity": "operational"
+        },
+        {
+          "id": "control-plane-core",
+          "title": "Control Plane Core",
+          "maturity": "tested"
+        },
+        {
+          "id": "delivery-pipeline",
+          "title": "Delivery Pipeline",
+          "maturity": "tested"
+        }
+      ]
+    },
+    {
+      "id": "packaging-release",
+      "title": "Packaging and Release",
+      "maturity": "implemented",
+      "initiatives": [
+        {
+          "id": "v1-packaging",
+          "title": "Locaily v1 Packaging",
+          "maturity": "implemented"
+        }
+      ]
+    }
+  ],
+  "milestoneBoard": {
+    "idea": [],
+    "planned": [
+      {
+        "id": "dcp-phase3b",
+        "title": "Development Control Plane Phase 3B — Session Handoff",
+        "type": "infrastructure",
+        "priority": "medium"
+      },
+      {
+        "id": "dcp-phase4",
+        "title": "Development Control Plane Phase 4 — Agent Adapters",
+        "type": "infrastructure",
+        "priority": "medium"
+      }
+    ],
+    "ready": [],
+    "active": [],
+    "paused": [],
+    "blocked": [
+      {
+        "id": "09-physical-multi-device-pilot",
+        "title": "M09: Physical Multi-Device Pilot",
+        "type": "validation",
+        "priority": "high"
+      }
+    ],
+    "validating": [],
+    "ready-for-delivery": [
+      {
+        "id": "dcp-phase3a",
+        "title": "Development Control Plane Phase 3A - Dashboard",
+        "type": "infrastructure",
+        "priority": "high"
+      }
+    ],
+    "delivered": [],
+    "merged": [],
+    "completed": [
+      {
+        "id": "06-trusted-relay-execution",
+        "title": "M6: Trusted Relay Execution",
+        "type": "feature",
+        "priority": "high"
+      },
+      {
+        "id": "08-operator-control-plane",
+        "title": "M8: Operator Control Plane",
+        "type": "feature",
+        "priority": "high"
+      },
+      {
+        "id": "10-locaily-v1-packaging",
+        "title": "M10: Locaily v1 Packaging",
+        "type": "documentation",
+        "priority": "medium"
+      },
+      {
+        "id": "10-track-learning-evidence-loop",
+        "title": "M12: Track Learning Evidence Loop",
+        "type": "feature",
+        "priority": "high"
+      },
+      {
+        "id": "dcp-phase1.5-2a",
+        "title": "Development Control Plane Phase 1.5 + 2A",
+        "type": "infrastructure",
+        "priority": "critical"
+      },
+      {
+        "id": "dcp-phase1",
+        "title": "Development Control Plane Phase 1",
+        "type": "infrastructure",
+        "priority": "critical"
+      },
+      {
+        "id": "dcp-phase2b",
+        "title": "Development Control Plane Phase 2B",
+        "type": "infrastructure",
+        "priority": "critical"
+      },
+      {
+        "id": "dcp-phase2c",
+        "title": "Development Control Plane Phase 2C",
+        "type": "infrastructure",
+        "priority": "critical"
+      },
+      {
+        "id": "dm10-multi-project-template",
+        "title": "DM10: Multi-Project Local Brain Template",
+        "type": "feature",
+        "priority": "medium"
+      },
+      {
+        "id": "milestone-completion-delivery-workflow",
+        "title": "Milestone Completion Delivery Workflow",
+        "type": "infrastructure",
+        "priority": "high"
+      },
+      {
+        "id": "objective-lifecycle-hardening",
+        "title": "Objective Lifecycle Hardening",
+        "type": "governance",
+        "priority": "critical"
+      }
+    ],
+    "cancelled": []
+  },
+  "validationScoreboard": [
+    {
+      "id": "validation-20260722T220118-fe259c2d",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "feat/development-memory-second-project-proof",
+      "completedAt": "2026-07-22T22:01:19.367Z",
+      "requiredPassed": 5,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260722T220217-8f60710f",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "feat/development-memory-second-project-proof",
+      "completedAt": "2026-07-22T22:02:18.490Z",
+      "requiredPassed": 5,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260722T232808-79bec8c6",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "feat/development-memory-second-project-proof",
+      "completedAt": "2026-07-22T23:28:09.532Z",
+      "requiredPassed": 5,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260722T233758-e5c6318c",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "feat/development-memory-second-project-proof",
+      "completedAt": "2026-07-22T23:38:00.124Z",
+      "requiredPassed": 5,
+      "requiredFailed": 0
+    }
+  ],
+  "recentActivity": [
+    {
+      "type": "delivery",
+      "id": "dcp-phase3a",
+      "status": "pushed",
+      "timestamp": "2026-07-22T23:40:07.331Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20260722T233758-e5c6318c",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "timestamp": "2026-07-22T23:38:00.124Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20260722-003",
+      "milestoneId": "dcp-phase3a",
+      "timestamp": "2026-07-22T23:37:56.564Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20260722-003",
+      "milestoneId": "dcp-phase3a",
+      "status": "closed",
+      "timestamp": "2026-07-22T23:37:56.075Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20260722T232808-79bec8c6",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "timestamp": "2026-07-22T23:28:09.532Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20260722-002",
+      "milestoneId": "dcp-phase3a",
+      "timestamp": "2026-07-22T23:28:05.981Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20260722-002",
+      "milestoneId": "dcp-phase3a",
+      "status": "closed",
+      "timestamp": "2026-07-22T22:50:00.000Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20260722-001",
+      "milestoneId": "dcp-phase3a",
+      "status": "closed",
+      "timestamp": "2026-07-22T22:30:00.000Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20260722T220217-8f60710f",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "timestamp": "2026-07-22T22:02:18.490Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20260722T220118-fe259c2d",
+      "milestoneId": "dcp-phase3a",
+      "status": "passed",
+      "timestamp": "2026-07-22T22:01:19.367Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20260722-001",
+      "milestoneId": "dcp-phase3a",
+      "timestamp": "2026-07-22T21:54:22.132Z"
+    }
+  ],
+  "nextMilestone": {
+    "reason": "next_planned",
+    "milestone": {
+      "schema": "locaily.development.milestone.v1",
+      "id": "dcp-phase3b",
+      "title": "Development Control Plane Phase 3B — Session Handoff",
+      "status": "planned",
+      "type": "infrastructure",
+      "priority": "medium",
+      "purpose": "Structured session handoff generator. Replace manual next-agent-brief with generated handoff from canonical state.",
+      "scope": {
+        "included": [
+          "Session handoff generator",
+          "Structured handoff format"
+        ],
+        "excluded": [
+          "Agent adapters",
+          "Merge automation"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Handoff generated from milestone, session, validation, delivery records",
+        "No manual maintenance of handoff documents"
+      ],
+      "validationProfile": "builtin-quick",
+      "dependencies": [
+        "dcp-phase3a"
+      ],
+      "blockers": [],
+      "lifecycleRef": null,
+      "createdAt": "2026-07-22T22:30:00.000Z",
+      "startedAt": null,
+      "completedAt": null
+    }
+  },
+  "staleness": [],
+  "stats": {
+    "totalMilestones": 15,
+    "active": 0,
+    "completed": 11,
+    "totalSessions": 3,
+    "totalValidations": 4,
+    "totalDeliveries": 1
+  }
+}

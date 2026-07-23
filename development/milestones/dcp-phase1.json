@@ -1,0 +1,35 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "dcp-phase1",
+  "title": "Development Control Plane Phase 1",
+  "status": "completed",
+  "type": "infrastructure",
+  "priority": "critical",
+  "purpose": "Create canonical project-state.json, 4 JSON schemas, dev:status command, agent-neutral AGENTS.md, compatibility mapping.",
+  "scope": {
+    "included": ["Schemas", "project-state.json", "dev:status", "AGENTS.md rewrite", "compatibility mapping"],
+    "excluded": ["Dashboard", "Agent adapters", "Merge automation"]
+  },
+  "acceptanceCriteria": [
+    "4 schemas validated with 25+ tests",
+    "dev:status produces human-readable and JSON output",
+    "AGENTS.md is agent-neutral single source of truth"
+  ],
+  "validationProfile": "builtin-quick",
+  "dependencies": [],
+  "blockers": [],
+  "lifecycleRef": null,
+  "latestValidationId": null,
+  "preparedCommit": null,
+  "preparedBranch": null,
+  "preparedAt": null,
+  "completionBranch": null,
+  "completionHead": null,
+  "createdAt": "2026-07-22T12:00:00.000Z",
+  "startedAt": "2026-07-22T12:00:00.000Z",
+  "completedAt": "2026-07-22T16:00:00.000Z",
+  "mergedAt": null,
+  "deliveredAt": null,
+  "prNumber": null,
+  "prUrl": null
+}

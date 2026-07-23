@@ -1,0 +1,30 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "dm10-multi-project-template",
+  "title": "DM10: Multi-Project Local Brain Template",
+  "status": "completed",
+  "type": "feature",
+  "priority": "medium",
+  "purpose": "Make Development Memory Loop reusable across registered projects with isolated storage.",
+  "scope": {
+    "included": ["Project registry", "Path resolution", "Vault generator", "Multi-project tests"],
+    "excluded": ["Embeddings", "Review console UI"]
+  },
+  "acceptanceCriteria": [
+    "Project registry with schema-valid records",
+    "Namespaced storage for new projects",
+    "Legacy locaily project isolated",
+    "6/6 multi-project tests passing"
+  ],
+  "validationProfile": "builtin-quick",
+  "dependencies": [],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-07-18T00:00:00.000Z",
+  "startedAt": "2026-07-18T00:00:00.000Z",
+  "completedAt": "2026-07-18T23:59:00.000Z",
+  "mergedAt": null,
+  "deliveredAt": null,
+  "prNumber": null,
+  "prUrl": null
+}

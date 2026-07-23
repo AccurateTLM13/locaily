@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-validation-result.schema.json",
+  "title": "Development Validation Result",
+  "description": "Immutable record of a validation run. Created by dev:validate, consumed by dev:milestone:complete.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "milestoneId",
+    "profileId",
+    "status",
+    "gitState",
+    "startedAt",
+    "completedAt",
+    "results"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locaily.development.validation_result.v1",
+      "description": "Schema identifier."
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^validation-[0-9]{8}T[0-9]{6}",
+      "description": "Validation result identifier (timestamp-based)."
+    },
+    "milestoneId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Milestone that was validated."
+    },
+    "profileId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Validation profile that was run."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["passed", "failed", "error"],
+      "description": "Overall validation status."
+    },
+    "gitState": {
+      "type": "object",
+      "description": "Git state fingerprint at validation time.",
+      "properties": {
+        "branch": { "type": "string", "minLength": 1 },
+        "headCommit": { "type": "string", "minLength": 1 },
+        "treeHash": { "type": "string" },
+        "fingerprint": { "type": "string", "minLength": 1, "pattern": "^sha256:" },
+        "changedFiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string" },
+              "state": { "type": "string" }
+            },
+            "required": ["path", "state"],
+            "additionalProperties": false
+          }
+        },
+        "computedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["branch", "headCommit", "fingerprint", "changedFiles"],
+      "additionalProperties": false
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when validation started."
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when validation completed."
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "command": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "enum": ["passed", "failed", "timeout", "error"] },
+          "exitCode": { "type": "integer" },
+          "durationMs": { "type": "integer", "minimum": 0 },
+          "stdout": { "type": "string" },
+          "stderr": { "type": "string" },
+          "summary": { "type": "string" }
+        },
+        "required": ["id", "command", "status", "exitCode", "durationMs"],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "description": "Per-command results."
+    },
+    "manualChecks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "acknowledged": { "type": "boolean" },
+          "acknowledgedBy": { "type": "string" },
+          "acknowledgedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "description", "acknowledged"],
+        "additionalProperties": false
+      },
+      "description": "Manual checks and their acknowledgement status."
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Non-blocking warnings."
+    },
+    "error": {
+      "type": ["string", "null"],
+      "description": "Error message if validation itself failed."
+    }
+  }
+}

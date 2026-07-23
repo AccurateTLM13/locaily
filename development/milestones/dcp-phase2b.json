@@ -1,0 +1,35 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "dcp-phase2b",
+  "title": "Development Control Plane Phase 2B",
+  "status": "completed",
+  "type": "infrastructure",
+  "priority": "critical",
+  "purpose": "Profile-driven validation, milestone completion gates, stale-validation protection, completion policy, session close command.",
+  "scope": {
+    "included": ["dev:validate", "dev:milestone:complete", "Validation result schema", "Completion gates", "Stale-validation protection"],
+    "excluded": ["Dashboard", "Agent adapters", "Merge automation"]
+  },
+  "acceptanceCriteria": [
+    "dev:validate records immutable validation results with fingerprint",
+    "dev:milestone:complete enforces 8+ gates",
+    "44 Phase 2B tests passing"
+  ],
+  "validationProfile": "builtin-quick",
+  "dependencies": ["dcp-phase1.5-2a"],
+  "blockers": [],
+  "lifecycleRef": null,
+  "latestValidationId": null,
+  "preparedCommit": null,
+  "preparedBranch": null,
+  "preparedAt": null,
+  "completionBranch": null,
+  "completionHead": null,
+  "createdAt": "2026-07-22T17:45:00.000Z",
+  "startedAt": "2026-07-22T17:45:00.000Z",
+  "completedAt": "2026-07-22T19:45:00.000Z",
+  "mergedAt": null,
+  "deliveredAt": null,
+  "prNumber": null,
+  "prUrl": null
+}

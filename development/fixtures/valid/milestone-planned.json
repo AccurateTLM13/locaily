@@ -1,0 +1,38 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "development-control-plane-v1",
+  "title": "Development Control Plane V1",
+  "status": "planned",
+  "type": "governance",
+  "priority": "critical",
+  "purpose": "Create one agent-neutral system for planning, executing, pausing, validating, and delivering Locaily development milestones.",
+  "problem": "Development status is spread across files, agents, conversations, and local working state.",
+  "scope": {
+    "included": [
+      "Canonical project state",
+      "Milestone lifecycle",
+      "Session lifecycle",
+      "Agent handoff contract",
+      "Generated roadmap dashboard",
+      "Integration with deliver-milestone.js"
+    ],
+    "excluded": [
+      "Locaily product features",
+      "Major folder reorganization",
+      "Runtime API changes",
+      "Memory subsystem expansion"
+    ]
+  },
+  "acceptanceCriteria": [
+    "Any supported coding agent can determine current project state from repository files",
+    "An agent can start, resume, pause, complete, and deliver a milestone using documented commands",
+    "Pause records contain enough detail for another agent to resume",
+    "Milestone delivery refuses work that has not passed its required validation profile"
+  ],
+  "validationProfile": "development-control-plane",
+  "dependencies": [],
+  "blockers": [],
+  "createdAt": "2026-07-22T12:00:00.000Z",
+  "startedAt": null,
+  "completedAt": null
+}

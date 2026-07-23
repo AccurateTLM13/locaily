@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-20 (Objective lifecycle hardening — see [maintenance-objective-lifecycle-closeout.md](./maintenance-objective-lifecycle-closeout.md))
+**Updated:** 2026-07-22 (Documentation alignment pass — see [current-sprint.md](./current-sprint.md))
 
 ## Read First
 
@@ -248,21 +248,53 @@ Real URL validation set:
 
 ## Current Task
 
-**Development Memory E2E proof is complete (2026-07-18).** The full DM1–DM10 loop is proven on a non-Locaily namespaced project (`pilot-workspace`) in simulation.
+**No objective is currently active.** The repository is between build cycles.
 
-### E2E proof coverage
-- Register → vault → capture → session → candidates → review → retrieval
-- Locaily legacy storage isolation verified
-- Regression: `npm run test:development-memory-e2e` (4/4)
-- Operator doc: [development-memory-e2e-proof.md](../04-validation/development-memory-e2e-proof.md)
+Lifecycle integrity passes; continuity check resolves cleanly. The queue is locked via `QUEUE_LOCK.json`.
 
-**Proven in simulation** (automated E2E on `pilot-workspace` namespace). A **brief real second-repo operator acceptance check** is still required before the physical multi-device pilot — see sequence below.
-
-### Remaining acceptance (before physical pilot)
-
-Manual walkthrough on an actual second repository: register → small dev task → capture → close session → review → approve → later task confirms memory in context pack. Document result; no new features unless a blocker appears.
+See [current-sprint.md](./current-sprint.md) for approved next-work candidates and selection criteria.
 
 ## Completed Since Last Update
+
+- **Development Control Plane Phase 2B** — completed 2026-07-22
+  - `dev:validate` — runs strict status checks first, then profile commands, records immutable validation results with branch/HEAD/dirty state
+  - `dev:milestone:complete` — enforces 8 gates: no blockers, no error/critical contradictions, validation passed, validation not stale, session closed, acceptance criteria satisfied, remaining work empty, closeout exists
+  - Validation result schema: `development/schemas/validation-result.schema.json`
+  - Stale-validation protection: `isValidationStale()` checks branch+HEAD+dirty
+  - Contradiction severity model: info→exit 0, warning→exit 0, error→exit 1, critical→exit 2 (strict: warning→exit 1)
+  - 30 Phase 2B tests: `scripts/test-development-phase2b.js`
+  - Full E2E flow proven: start→validate→pause→complete→ready-for-delivery
+  - Refusal cases tested: failed command, stale HEAD, dirty changes, blocker, unsatisfied criterion, open session, contradictory state
+
+- **Development Control Plane Phase 1.5 + 2A** — completed 2026-07-22
+  - Fixed legacy run-state contradiction (running → idle)
+  - Added contradiction severity levels (info/warning/error) to dev:status
+  - Added `--strict` mode (exit 1 for warnings)
+  - Created `scripts/dev-lifecycle.js` with: start, checkpoint, pause, block, resume
+  - Documented transition ownership: `docs/07-progress/development-control-plane-transitions.md`
+  - Clarified milestone completion semantics: ready-for-delivery → delivered → merged → completed
+  - 14 reconciliation tests: `scripts/test-development-reconciliation.js`
+  - Cross-session handoff proven: agent A starts/checkpoints/pauses, agent B resumes from structured state
+  - npm scripts: `dev:milestone:start`, `dev:checkpoint`, `dev:pause`, `dev:block`, `dev:resume`
+
+- **Development Control Plane Phase 1** — completed 2026-07-22
+  - 4 JSON schemas: `development/schemas/project-state.schema.json`, `milestone.schema.json`, `session.schema.json`, `validation-profile.schema.json`
+  - Valid + invalid fixtures: `development/fixtures/valid/`, `development/fixtures/invalid/`
+  - Schema validation tests: `scripts/test-development-schemas.js` (25/25)
+  - Canonical project state: `development/project-state.json`
+  - Universal status command: `npm run dev:status` (human-readable + `--json`)
+  - Agent-neutral AGENTS.md rewritten as single source of truth
+  - Compatibility mapping: `docs/07-progress/development-control-plane-compatibility.md`
+  - Phase 2 entry point: `dev:milestone:start`, `dev:checkpoint`, `dev:pause`, `dev:validate`, `dev:milestone:complete`
+
+- **Milestone Completion Delivery Workflow** — completed 2026-07-22
+  - `scripts/deliver-milestone.js` — three-phase delivery: dry-run, branch/commit, draft PR
+  - Reads milestone manifest, work closeout, and build slice
+  - Branch convention: `milestone/<slug>`
+  - Conventional-commit messages
+  - Draft PR via `gh` CLI with structured description
+  - `npm run deliver-milestone` added to package.json
+  - Design doc: `docs/07-progress/milestone-completion-delivery-workflow.md`
 
 - **Development Memory E2E Proof (second project)** — completed 2026-07-18
   - `scripts/test-development-memory-e2e-second-project.js` — 4/4
@@ -324,18 +356,20 @@ Manual walkthrough on an actual second repository: register → small dev task �
 
 ## Next Task
 
-**Objective Lifecycle Hardening and Work-Closeout — [maintenance-objective-lifecycle-closeout.md](./maintenance-objective-lifecycle-closeout.md)**
+**No active objective.** The next work must be explicitly selected by the operator.
 
-Inspect and harden the objective lifecycle, queue archival process, agent closeout process, and startup continuity behavior. Recent inspection found 7 distinct anomalies in the queue directory structure (stale tracked duplicates, untracked ghost planning files, three-way objective fragmentation, numbering collisions, stale active objective, encoding defects, never-actioned queued objectives).
+See [current-sprint.md](./current-sprint.md) for the approved candidate sequence:
 
-The full scope and completion conditions are detailed in the closeout brief.
+1. Second-Repository Operator Acceptance (deferred, ready to resume)
+2. Clean-Machine v1 Acceptance (candidate)
+3. Lighthouse Handoff Product Bridge (candidate)
 
-### Deferred (after lifecycle hardening)
+### Deferred (requires specific conditions)
 
-1. **Second-repo operator acceptance** — real repository, CLI/API workflow in [development-memory-e2e-proof.md](../04-validation/development-memory-e2e-proof.md). Record pass/fail; fix only if blocked.
-2. **Physical multi-device pilot** — requires two devices + Ollama. See `docs/05-integrations/multi-device-pilot.md`.
-3. Live Ollama qualification — provider required
-4. Clean-machine packaging acceptance — manual gate (`scripts/acceptance-test.ps1`)
+1. **Second-Repository Operator Acceptance** — real repository, CLI/API workflow. Record pass/fail; fix only if blocked.
+2. **Physical Multi-Device Pilot (M09)** — requires two devices + Ollama. See `docs/05-integrations/multi-device-pilot.md`. M09 is held; re-entry requires two test devices and an operator.
+3. **Relay Trust and Secure Pairing (M09A)** — should precede physical pilot. Authentication, signed requests, capability allowlists.
+4. **Central Execution Gate Enforcement** — design docs and schemas complete (`docs/security/`, `policies/`). Implementation not yet scoped.
 
 **Do not:**
 - Remove linear track runner
@@ -353,7 +387,7 @@ M2 follow-on candidates remain: qualify recommender roles (a11y_recommender, bud
 - Broaden claims from narrow benchmark evidence
 - Implement a follow-on milestone or qualification-coverage expansion without an explicitly supplied objective
 - Implement automatic model swapping / Model Garage auto-switching
-- Claim DAG support or automatic track classification exists (both are implemented; do not overclaim distributed consensus)
+- Claim DAG support or automatic track classification exists as unimplemented features (both are partially implemented; do not overclaim distributed consensus)
 - Remove legacy `step-input.js` fallbacks until Lighthouse parity work resumes — **done 2026-06-30**
 - Break existing Local Brain endpoints or response envelopes
 - Import `benchmark-lab/engine/` modules from the Local Brain companion or any code under `companion/`
@@ -363,8 +397,10 @@ M2 follow-on candidates remain: qualify recommender roles (a11y_recommender, bud
 - Modify the qualification-resolver, capability-registry, evidence-linker, shadow-routing, enforcement-policy, enforcement-policy-store, enforcement-policy-audit, or shadow-evidence-review modules unless extending them for enforcement
 - Modify the policy schema (`companion/schemas/internal/enforcement-policy.schema.json`) or audit event schema (`companion/schemas/internal/enforcement-policy-audit-event.schema.json`) without updating all consumers
 - Hardcode absolute filesystem paths in enforcement API responses
-- Use relay nodes outside trusted development networks without completing M6 trust boundary requirements
+- Use relay nodes outside trusted development networks without completing M09A trust boundary requirements
 - Assume planned placement equals actual execution without explicit placement evidence records
+- Claim a clean install-and-run path exists until Clean-Machine v1 Acceptance milestone completes
+- Treat the security documentation as proof of runtime enforcement — policy is documented, not enforced
 
 ## Architecture Reminder
 

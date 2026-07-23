@@ -1,0 +1,7 @@
+{
+  "schema": "locaily.development.project_state.v1",
+  "project": "locaily",
+  "status": "invalid-status-value",
+  "defaultBranch": "main",
+  "updatedAt": "2026-07-22T12:00:00.000Z"
+}

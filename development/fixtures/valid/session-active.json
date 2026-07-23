@@ -1,0 +1,35 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260722-001",
+  "milestoneId": "development-control-plane-v1",
+  "agent": {
+    "platform": "opencode",
+    "model": "mimo-v2.5"
+  },
+  "status": "active",
+  "objective": "Implement JSON schemas, project-state.json, dev:status, and agent-neutral AGENTS.md",
+  "branch": "work/development-control-plane-v1",
+  "startingCommit": "abc123def456",
+  "plannedFiles": [
+    "development/schemas/project-state.schema.json",
+    "development/schemas/milestone.schema.json",
+    "development/schemas/session.schema.json",
+    "development/schemas/validation-profile.schema.json",
+    "development/project-state.json",
+    "scripts/dev-status.js",
+    "AGENTS.md"
+  ],
+  "completedWork": [],
+  "remainingWork": [
+    "Create schemas",
+    "Create fixtures and tests",
+    "Create dev:status script",
+    "Rewrite AGENTS.md",
+    "Migrate current state"
+  ],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [],
+  "startedAt": "2026-07-22T12:00:00.000Z",
+  "closedAt": null
+}

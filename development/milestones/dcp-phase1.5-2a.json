@@ -1,0 +1,35 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "dcp-phase1.5-2a",
+  "title": "Development Control Plane Phase 1.5 + 2A",
+  "status": "completed",
+  "type": "infrastructure",
+  "priority": "critical",
+  "purpose": "State reconciliation, contradiction severity levels, lifecycle commands (start, checkpoint, pause, block, resume), cross-session handoff.",
+  "scope": {
+    "included": ["Contradiction detection", "Severity levels", "dev:lifecycle.js commands", "Cross-session handoff"],
+    "excluded": ["Validation", "Completion gates", "Dashboard"]
+  },
+  "acceptanceCriteria": [
+    "Legacy contradictions resolved",
+    "dev:status supports --strict mode",
+    "Cross-session handoff proven"
+  ],
+  "validationProfile": "builtin-quick",
+  "dependencies": ["dcp-phase1"],
+  "blockers": [],
+  "lifecycleRef": null,
+  "latestValidationId": null,
+  "preparedCommit": null,
+  "preparedBranch": null,
+  "preparedAt": null,
+  "completionBranch": null,
+  "completionHead": null,
+  "createdAt": "2026-07-22T16:00:00.000Z",
+  "startedAt": "2026-07-22T16:00:00.000Z",
+  "completedAt": "2026-07-22T17:45:00.000Z",
+  "mergedAt": null,
+  "deliveredAt": null,
+  "prNumber": null,
+  "prUrl": null
+}

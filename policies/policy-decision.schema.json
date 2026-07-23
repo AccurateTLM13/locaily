@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Locaily Policy Decision",
+  "type": "object",
+  "required": [
+    "decision",
+    "reason"
+  ],
+  "properties": {
+    "decision": {
+      "enum": [
+        "allow",
+        "deny",
+        "require_approval",
+        "constrain"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "constraints": {
+      "type": "object"
+    },
+    "policyVersion": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

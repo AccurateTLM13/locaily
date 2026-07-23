@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-project-state.schema.json",
+  "title": "Development Project State",
+  "description": "Canonical pointer to the current development state of the Locaily project. Small, frequently updated, machine-readable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "project",
+    "status",
+    "defaultBranch",
+    "updatedAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locaily.development.project_state.v1",
+      "description": "Schema identifier."
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Project slug."
+    },
+    "currentMilestone": {
+      "type": ["string", "null"],
+      "description": "ID of the active milestone, or null if none."
+    },
+    "activeSession": {
+      "type": ["string", "null"],
+      "description": "ID of the active development session, or null."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "idle",
+        "planning",
+        "active",
+        "paused",
+        "blocked",
+        "validating",
+        "ready-for-delivery",
+        "delivered"
+      ],
+      "description": "Current project development status."
+    },
+    "defaultBranch": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Default branch name (e.g. main)."
+    },
+    "activeBranch": {
+      "type": ["string", "null"],
+      "description": "Current working branch, or null if on default."
+    },
+    "lastCompletedMilestone": {
+      "type": ["string", "null"],
+      "description": "ID of the most recently completed milestone."
+    },
+    "nextRecommendedAction": {
+      "type": ["string", "null"],
+      "description": "Human-readable next step."
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Active blocker descriptions."
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Current warnings (stale state, dirty tree, etc.)."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp of last update."
+    },
+    "updatedBy": {
+      "type": "object",
+      "description": "Who last updated this record.",
+      "properties": {
+        "type": { "type": "string", "enum": ["human", "agent", "system"] },
+        "name": { "type": "string" },
+        "platform": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

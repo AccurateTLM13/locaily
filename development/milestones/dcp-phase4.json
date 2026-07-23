@@ -1,0 +1,24 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "dcp-phase4",
+  "title": "Development Control Plane Phase 4 — Agent Adapters",
+  "status": "planned",
+  "type": "infrastructure",
+  "priority": "medium",
+  "purpose": "Agent-specific instruction files (Cursor, Claude, Codex) pointing to root AGENTS.md. Cross-agent handoff validation.",
+  "scope": {
+    "included": ["Cursor rules", "Claude instructions", "Codex instructions", "Cross-agent validation"],
+    "excluded": ["Merge automation", "Release automation"]
+  },
+  "acceptanceCriteria": [
+    "Vendor-specific files exist and point to root AGENTS.md",
+    "Two different agents can resume work from structured state"
+  ],
+  "validationProfile": "builtin-quick",
+  "dependencies": ["dcp-phase3b"],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-07-22T22:30:00.000Z",
+  "startedAt": null,
+  "completedAt": null
+}

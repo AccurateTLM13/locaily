@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/development-session.schema.json",
+  "title": "Development Session",
+  "description": "Records a bounded period of development work on a milestone. Sessions are the atomic unit of agent handoff.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "milestoneId",
+    "status",
+    "objective",
+    "branch",
+    "startingCommit",
+    "startedAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locaily.development.session.v1",
+      "description": "Schema identifier."
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^session-[0-9]{8}-[0-9]+$",
+      "description": "Session identifier (date-sequence format)."
+    },
+    "milestoneId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Milestone this session belongs to."
+    },
+    "agent": {
+      "type": "object",
+      "description": "Agent that ran this session.",
+      "properties": {
+        "platform": { "type": "string", "description": "Agent platform (e.g. opencode, cursor, codex, claude)." },
+        "model": { "type": "string", "description": "Model used, if known." }
+      },
+      "additionalProperties": false
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "paused", "closed", "interrupted"],
+      "description": "Session status."
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1,
+      "description": "What this session aims to accomplish."
+    },
+    "branch": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Git branch for this session."
+    },
+    "startingCommit": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Git HEAD at session start."
+    },
+    "plannedFiles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Files planned to be changed."
+    },
+    "completedWork": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Work completed during this session."
+    },
+    "remainingWork": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Work remaining when session ended."
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Blockers discovered during session."
+    },
+    "validationRunIds": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "References to validation result records."
+    },
+    "checks": {
+      "type": "array",
+      "description": "Checkpoint records within the session.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "message": { "type": "string" },
+          "filesChanged": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["timestamp", "message"],
+        "additionalProperties": false
+      }
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 session start timestamp."
+    },
+    "closedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO-8601 session close timestamp."
+    },
+    "closingCommit": {
+      "type": ["string", "null"],
+      "description": "Git HEAD at session close."
+    },
+    "dirtyFiles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Uncommitted files at session close."
+    },
+    "risks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Known risks when resuming."
+    },
+    "nextRecommendedAction": {
+      "type": ["string", "null"],
+      "description": "Exact next step for the resuming agent."
+    }
+  }
+}

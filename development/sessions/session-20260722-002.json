@@ -1,0 +1,36 @@
+{
+  "id": "session-20260722-002",
+  "branch": "feat/development-memory-second-project-proof",
+  "agent": {
+    "model": "mimo-v2.5",
+    "platform": "opencode"
+  },
+  "startedAt": "2026-07-22T22:50:00.000Z",
+  "plannedFiles": [],
+  "completedWork": [
+    "Dashboard generator",
+    "Roadmap",
+    "Bootstrap migration",
+    "Phase 3A complete: dashboard generator, roadmap, status summary, handoff, bootstrap migration, consistency checks."
+  ],
+  "remainingWork": [],
+  "schema": "locaily.development.session.v1",
+  "startingCommit": "cc48cb337779ceef1258ffba7166e7c9fb69d3ac",
+  "status": "closed",
+  "closedAt": "2026-07-22T23:28:05.981Z",
+  "milestoneId": "dcp-phase3a",
+  "blockers": [],
+  "objective": "Complete Phase 3A lifecycle",
+  "closingCommit": "967a0a81a6df731075ed8960e6797eb6d8b47b44",
+  "dirtyFiles": [
+    "development/generated/next-agent-handoff.md",
+    "development/generated/roadmap-data.json",
+    "development/generated/roadmap.html",
+    "development/generated/status-summary.md",
+    "development/milestones/dcp-phase3a.json",
+    "development/project-state.json",
+    "development/validation-index.json",
+    "development/sessions/session-20260722-002.json",
+    "development/validation-results/validation-20260722T220217-8f60710f.json"
+  ]
+}
