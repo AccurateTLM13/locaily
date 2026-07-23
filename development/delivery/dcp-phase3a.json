@@ -1,0 +1,26 @@
+{
+  "schema": "locaily.development.delivery.v1",
+  "milestoneId": "dcp-phase3a",
+  "status": "pushed",
+  "branch": "feat/development-memory-second-project-proof",
+  "commit": "4d58b893179ceb58fc008d7978a6f045083548d6",
+  "pushedAt": "2026-07-22T23:40:07.331Z",
+  "pushSuccess": true,
+  "pushError": null,
+  "remoteBranch": "feat/development-memory-second-project-proof",
+  "prNumber": null,
+  "prUrl": null,
+  "prCreated": null,
+  "prError": null,
+  "attempts": [
+    {
+      "timestamp": "2026-07-22T23:40:05.359Z",
+      "commit": "4d58b893179ceb58fc008d7978a6f045083548d6",
+      "branch": "feat/development-memory-second-project-proof",
+      "success": true,
+      "error": null
+    }
+  ],
+  "createdAt": "2026-07-22T23:40:05.358Z",
+  "updatedAt": "2026-07-22T23:40:07.331Z"
+}

@@ -1,43 +1,35 @@
 {
-  "work_id": "development-control-plane-phase3a",
-  "objective_id": "development-control-plane-v1",
+  "work_id": "development-control-plane-phase3a-delivery",
+  "objective_id": "dcp-phase3a",
   "status": "complete",
-  "closed_at": "2026-07-22T22:30:00.000Z",
-  "original_goal": "Phase 3A: Run real E2E delivery, fix friction, implement generated development dashboard with roadmap, subsystem maturity, validation scoreboard, staleness checks, and agent handoff.",
+  "closed_at": "2026-07-22T23:45:00.000Z",
+  "original_goal": "Deliver dcp-phase3a through the full lifecycle: session:close → prepare → validate → complete → push. Fix branch ownership warning classification.",
   "completed": [
-    "Ran real E2E delivery: start → checkpoint → session:close → prepare → validate → complete → dry-run",
-    "Fixed friction: prepare scope too strict (added policies/, .opencode/), fingerprint includes treeHash (removed), deliver-milestone.js missing SESSIONS_DIR, dev:prepare commit message shell splitting (use --file)",
-    "Corrected lifecycle flow: prepare → validate → complete (validate against committed HEAD)",
-    "Created roadmap.json with Area → Initiative → Milestone hierarchy",
-    "Created generate-development-dashboard.js script",
-    "Generated roadmap.html (self-contained static HTML dashboard)",
-    "Generated roadmap-data.json (machine-readable dashboard data)",
-    "Generated status-summary.md (human-readable status)",
-    "Generated next-agent-handoff.md (agent handoff document)",
-    "Dashboard shows: project state, subsystem maturity, milestone board, validation scoreboard, blockers, activity, staleness warnings",
-    "Staleness checks: active milestone without session, paused without handoff, delivered without PR, completed with blockers, stale validation, missing references, stale generated files",
-    "Added npm run dev:dashboard script",
-    "All existing tests pass (Phase 2C 31/31, Phase 2B 44/44, reconciliation 14/14, schemas 27/27, lifecycle 23/23, controller 11/11)"
+    "Fixed listJson bug in dev-status.js (returned file names instead of parsed objects)",
+    "Classified non-default branch as info when milestone owns it, warning when no milestone owns it",
+    "Re-ran lifecycle: session:close → prepare → validate → complete",
+    "Pushed commit 4d58b893 to origin/feat/development-memory-second-project-proof",
+    "Delivery record created at development/delivery/dcp-phase3a.json",
+    "Dashboard regenerated showing delivery status",
+    "dcp-phase3b scope refined per user guidance"
   ],
   "remaining": [
-    "Phase 3B: Session handoff generator (structured, not just markdown)",
-    "Phase 3C: Agent-specific adapters (Cursor, Claude, Codex)",
-    "Phase 4: Merge detection, post-merge closeout"
+    "Create PR via gh CLI (requires authentication)",
+    "Phase 3B: Handoff and roadmap integrity",
+    "Phase 4: Agent adapters"
   ],
-  "next_required_action": "Phase 3B or 3C. Dashboard is generated and functional.",
+  "next_required_action": "Authenticate gh CLI and create draft PR for dcp-phase3a. Then review dcp-phase3b scope.",
   "blockers": [],
-  "safe_to_start_unrelated_work": true,
+  "safe_to_start_unrelated_work": false,
   "working_branch": "feat/development-memory-second-project-proof",
-  "last_commit": "cc48cb3",
+  "last_commit": "4d58b893",
   "validation": {
     "passed": [
-      "node scripts/test-development-phase2c.js — 31/31",
-      "node scripts/test-development-phase2b.js — 44/44",
-      "node scripts/test-development-reconciliation.js — 14/14",
-      "node scripts/test-development-schemas.js — 27/27",
-      "node scripts/test-lifecycle.js — 23/23",
-      "node scripts/test-controller-invariants.js — 11/11",
-      "node scripts/generate-development-dashboard.js — PASS"
+      "node scripts/dev-status.js — exit 0, no warnings",
+      "node scripts/dev-status.js --strict — exit 0",
+      "node scripts/generate-development-dashboard.js — PASS",
+      "deliver-milestone.js --slug dcp-phase3a --dry-run — PASS",
+      "deliver-milestone.js --slug dcp-phase3a --execute — PUSHED"
     ],
     "failed": [],
     "not_run": []

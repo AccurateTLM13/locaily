@@ -1,0 +1,38 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260723-001",
+  "milestoneId": "dcp-phase3a",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": "Dashboard",
+  "branch": "feat/development-memory-second-project-proof",
+  "startingCommit": "4d58b893179ceb58fc008d7978a6f045083548d6",
+  "plannedFiles": [],
+  "completedWork": [
+    "Fresh validation for PR"
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [],
+  "startedAt": "2026-07-23T01:54:38.422Z",
+  "closedAt": "2026-07-23T01:54:38.878Z",
+  "closingCommit": "4d58b893179ceb58fc008d7978a6f045083548d6",
+  "dirtyFiles": [
+    "development/generated/next-agent-handoff.md",
+    "development/generated/roadmap-data.json",
+    "development/generated/roadmap.html",
+    "development/generated/status-summary.md",
+    "development/milestones/dcp-phase3a.json",
+    "development/milestones/dcp-phase3b.json",
+    "development/project-state.json",
+    "development/validation-index.json",
+    "docs/07-progress/work-closeout.json",
+    "development/delivery/dcp-phase3a.json",
+    "development/sessions/session-20260723-001.json",
+    "development/validation-results/validation-20260722T233758-e5c6318c.json"
+  ]
+}

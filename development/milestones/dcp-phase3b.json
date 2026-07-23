@@ -1,24 +1,36 @@
 {
   "schema": "locaily.development.milestone.v1",
   "id": "dcp-phase3b",
-  "title": "Development Control Plane Phase 3B — Session Handoff",
+  "title": "Development Control Plane Phase 3B — Handoff and Roadmap Integrity",
   "status": "planned",
   "type": "infrastructure",
   "priority": "medium",
-  "purpose": "Structured session handoff generator. Replace manual next-agent-brief with generated handoff from canonical state.",
+  "purpose": "Refine generated handoff with resume commands and checkpoints. Surface human decisions separately. Detect roadmap drift. Deprecate manually maintained files. Add merge/post-merge lifecycle planning.",
   "scope": {
-    "included": ["Session handoff generator", "Structured handoff format"],
-    "excluded": ["Agent adapters", "Merge automation"]
+    "included": [
+      "Handoff with exact resume commands",
+      "Latest checkpoint and session summary in handoff",
+      "Human-required decisions surfaced separately",
+      "Milestone dependency visualization",
+      "Roadmap-to-record drift detection",
+      "Merge and post-merge lifecycle planning"
+    ],
+    "excluded": [
+      "Agent adapters",
+      "Automatic merge"
+    ]
   },
   "acceptanceCriteria": [
-    "Handoff generated from milestone, session, validation, delivery records",
-    "No manual maintenance of handoff documents"
+    "Handoff includes exact resumed command and latest checkpoint",
+    "Human decisions surfaced as dedicated section",
+    "Roadmap drift detected by generator",
+    "Merge lifecycle documented and implemented"
   ],
   "validationProfile": "builtin-quick",
   "dependencies": ["dcp-phase3a"],
   "blockers": [],
   "lifecycleRef": null,
-  "createdAt": "2026-07-22T22:30:00.000Z",
+  "createdAt": "2026-07-22T23:40:00.000Z",
   "startedAt": null,
   "completedAt": null
 }
