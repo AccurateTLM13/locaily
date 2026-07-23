@@ -1,0 +1,32 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260723-004",
+  "milestoneId": "dcp-phase3a",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": "Dashboard",
+  "branch": "feat/development-memory-second-project-proof",
+  "startingCommit": "fa20747f087fc1eaa4f0565a5e6f58c391c57863",
+  "plannedFiles": [],
+  "completedWork": [
+    "label fix"
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [],
+  "startedAt": "2026-07-23T01:57:39.985Z",
+  "closedAt": "2026-07-23T01:57:40.413Z",
+  "closingCommit": "fa20747f087fc1eaa4f0565a5e6f58c391c57863",
+  "dirtyFiles": [
+    "development/delivery/dcp-phase3a.json",
+    "development/milestones/dcp-phase3a.json",
+    "development/project-state.json",
+    "development/validation-index.json",
+    "development/sessions/session-20260723-004.json",
+    "development/validation-results/validation-20260723T015718-6bf3ea2f.json"
+  ]
+}
