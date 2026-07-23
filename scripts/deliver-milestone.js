@@ -60,11 +60,11 @@ function gitOk(args) {
 }
 
 function gh(args) {
+  // Don't use shell mode on Windows for gh - it causes argument splitting issues
   return spawnSync("gh", args, {
     cwd: PROJECT_ROOT,
     encoding: "utf8",
     maxBuffer: 1024 * 1024,
-    shell: process.platform === "win32",
   });
 }
 
