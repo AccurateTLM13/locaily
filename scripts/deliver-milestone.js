@@ -511,7 +511,6 @@ function cmdPR(slug) {
     "--body", body,
     "--base", "main",
     "--head", branch,
-    "--label", "milestone",
   ]);
 
   if (prResult.status !== 0) {
