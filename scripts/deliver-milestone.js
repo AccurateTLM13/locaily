@@ -455,9 +455,10 @@ function cmdPR(slug) {
     return;
   }
 
-  // Check gh CLI
+  // Check gh CLI - look for "Logged in" in output, not exit code (second account failure is ok)
   const ghAuth = gh(["auth", "status"]);
-  if (ghAuth.status !== 0) {
+  const authOutput = (ghAuth.stdout || "") + (ghAuth.stderr || "");
+  if (!authOutput.includes("Logged in")) {
     console.error("Error: gh CLI not authenticated. Run: gh auth login");
     process.exit(1);
   }
