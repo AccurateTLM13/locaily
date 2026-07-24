@@ -222,6 +222,45 @@ function detectContradictions(projectState, gitState, legacyState, milestones, s
     }
   }
 
+  // --- Roadmap drift detection ---
+  const roadmap = readJson(path.join(DEVELOPMENT_DIR, "roadmap.json"), null);
+  if (roadmap && roadmap.areas) {
+    // Collect milestone IDs referenced in roadmap
+    const roadmapMilestoneIds = new Set();
+    for (const area of roadmap.areas) {
+      for (const init of (area.initiatives || [])) {
+        for (const mid of (init.milestoneIds || [])) {
+          roadmapMilestoneIds.add(mid);
+        }
+      }
+    }
+
+    // Collect all milestone record IDs
+    const allMilestoneIds = new Set();
+    for (const file of listJson(MILESTONES_DIR)) {
+      const m = readJson(path.join(MILESTONES_DIR, file), null);
+      if (m) allMilestoneIds.add(m.id);
+    }
+
+    // Milestones in records but not in roadmap
+    for (const mid of allMilestoneIds) {
+      if (!roadmapMilestoneIds.has(mid) && !mid.startsWith("dcp-")) {
+        add("info", "DRIFT_RECORD_NOT_IN_ROADMAP",
+          `Milestone '${mid}' exists in records but is not referenced in roadmap.json`,
+          "Add milestone to roadmap.json or document why it is not tracked");
+      }
+    }
+
+    // Milestones in roadmap but not in records
+    for (const mid of roadmapMilestoneIds) {
+      if (!allMilestoneIds.has(mid)) {
+        add("info", "DRIFT_ROADMAP_NOT_IN_RECORDS",
+          `Roadmap references milestone '${mid}' but no milestone record exists`,
+          "Create milestone record or remove from roadmap.json");
+      }
+    }
+  }
+
   // --- Non-default branch classification ---
   if (!gitState.isDefault) {
     // Check if current branch matches any milestone's prepared or completion branch

@@ -209,9 +209,9 @@
         {
           "id": "delivery-pipeline",
           "title": "Delivery Pipeline",
-          "description": "dev:prepare, deliver-milestone.js, validation integration",
+          "description": "dev:prepare, deliver-milestone.js, validation integration, merge lifecycle",
           "maturity": "tested",
-          "milestoneIds": ["milestone-completion-delivery-workflow"]
+          "milestoneIds": ["milestone-completion-delivery-workflow", "dcp-phase3a", "dcp-phase3b"]
         }
       ]
     },
@@ -237,6 +237,8 @@
     "10-locaily-v1-packaging": ["09-physical-multi-device-pilot"],
     "development-control-plane-v1": [],
     "dcp-v1": [],
+    "dcp-phase3a": ["dcp-v1"],
+    "dcp-phase3b": ["dcp-phase3a"],
     "milestone-completion-delivery-workflow": ["development-control-plane-v1"]
   }
 }

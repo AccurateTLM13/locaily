@@ -2,268 +2,358 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Locaily Development Dashboard</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
-  h1 { font-size: 1.5rem; margin-bottom: 8px; color: #f8fafc; }
-  h2 { font-size: 1.1rem; margin: 20px 0 10px; color: #94a3b8; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
-  h3 { font-size: 0.95rem; margin: 12px 0 6px; color: #cbd5e1; }
-  .meta { font-size: 0.8rem; color: #64748b; margin-bottom: 16px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 20px; }
-  .card { background: #1e293b; border-radius: 8px; padding: 16px; border: 1px solid #334155; }
-  .card h3 { margin-top: 0; }
-  .stat { font-size: 2rem; font-weight: bold; color: #f8fafc; }
-  .stat-label { font-size: 0.8rem; color: #64748b; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; margin: 2px; }
-  .maturity-badge { color: white; }
-  .status-badge { color: white; }
-  .board { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
-  .board-col { background: #0f172a; border-radius: 6px; padding: 8px; }
-  .board-col h4 { font-size: 0.75rem; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
-  .board-item { background: #1e293b; padding: 6px 8px; border-radius: 4px; margin-bottom: 4px; font-size: 0.8rem; border-left: 3px solid #334155; }
-  .warning { padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; }
-  .warning-error { background: #450a0a; border: 1px solid #7f1d1d; }
-  .warning-warning { background: #451a03; border: 1px solid #78350f; }
-  .warning-info { background: #0c4a6e; border: 1px solid #075985; }
-  .activity-item { padding: 6px 0; border-bottom: 1px solid #1e293b; font-size: 0.85rem; }
-  .activity-time { color: #64748b; font-size: 0.75rem; }
-  .next-action { background: #0f766e; border: 1px solid #115e59; border-radius: 8px; padding: 16px; margin-top: 16px; }
-  .next-action h3 { color: #5eead4; margin-top: 0; }
+  :root{
+    --bg:#0a0e16;
+    --panel:#111826;
+    --panel-2:#161f30;
+    --border:#232d40;
+    --border-soft:#1b2333;
+    --text:#e8ecf3;
+    --text-dim:#8b95a8;
+    --text-faint:#5c6579;
+    --green:#34d399; --green-bg:#0f2a22; --green-text:#6ee7b7;
+    --blue:#60a5fa; --blue-bg:#101f33; --blue-text:#93c5fd;
+    --indigo:#a78bfa; --indigo-bg:#1e1a33; --indigo-text:#c4b5fd;
+    --amber:#fbbf24; --amber-bg:#2a2210; --amber-text:#fcd34d;
+    --slate:#94a3b8; --slate-bg:#1a2130; --slate-text:#cbd5e1;
+    --red:#f87171; --red-bg:#2a1414; --red-text:#fca5a5;
+    --teal:#2dd4bf; --teal-bg:#0e2624; --teal-text:#5eead4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    font-size:14px; line-height:1.5; padding:28px 32px 60px;
+  }
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  h1{font-size:22px; font-weight:600; margin:0 0 4px;}
+  h2{font-size:15px; font-weight:600; margin:0 0 12px; color:var(--text);}
+  .meta{color:var(--text-faint); font-size:12.5px; margin-bottom:22px;}
+  .meta span{color:var(--text-dim);}
+
+  .kpi-row{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px;}
+  .kpi{background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:16px 18px;}
+  .kpi .num{font-size:26px; font-weight:700; line-height:1;}
+  .kpi .lbl{color:var(--text-dim); font-size:12px; margin-top:6px;}
+  .kpi.total .num{color:var(--text);}
+  .kpi.active .num{color:var(--slate);}
+  .kpi.done .num{color:var(--green);}
+  .kpi.valid .num{color:var(--blue);}
+  .progress-track{grid-column:1/-1; background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:14px 18px;}
+  .progress-top{display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); margin-bottom:8px;}
+  .progress-bar{height:6px; background:var(--panel-2); border-radius:4px; overflow:hidden;}
+  .progress-fill{height:100%; background:linear-gradient(90deg,var(--teal),var(--green)); border-radius:4px;}
+
+  section{margin-bottom:30px;}
+
+  .sub-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px;}
+  .sub-card{background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; gap:10px;}
+  .sub-head{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .sub-name{font-weight:600; font-size:13.5px;}
+  .chip-row{display:flex; flex-wrap:wrap; gap:6px;}
+  .chip{font-size:11px; padding:3px 8px; border-radius:999px; border:1px solid var(--border-soft); color:var(--text-dim); background:var(--panel-2); white-space:nowrap;}
+
+  .badge{font-size:11px; font-weight:600; padding:3px 9px; border-radius:5px; white-space:nowrap;}
+  .b-operational{background:var(--green-bg); color:var(--green-text);}
+  .b-tested{background:var(--blue-bg); color:var(--blue-text);}
+  .b-implemented{background:var(--indigo-bg); color:var(--indigo-text);}
+  .b-simulation-validated{background:var(--amber-bg); color:var(--amber-text);}
+  .b-designed{background:var(--slate-bg); color:var(--slate-text);}
+
+  .layout{display:grid; grid-template-columns:2.1fr 1fr; gap:24px; align-items:start;}
+  .col-right{display:flex; flex-direction:column; gap:22px;}
+
+  .recommend{background:var(--teal-bg); border:1px solid #14403a; border-radius:10px; padding:16px 18px;}
+  .recommend .tag{color:var(--teal); font-size:11.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; margin-bottom:6px;}
+  .recommend .title{font-weight:600; font-size:14px;}
+  .recommend .sub{color:var(--text-dim); font-size:12.5px; margin-top:2px;}
+
+  .card{background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:16px 18px;}
+  .no-blockers{color:var(--green); font-size:13px; display:flex; align-items:center; gap:8px;}
+  .dot{width:7px; height:7px; border-radius:50%; background:currentColor; flex:0 0 auto;}
+
+  .val-summary-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--border-soft);}
+  .val-summary-row:last-child{border-bottom:none;}
+  .val-left{display:flex; flex-direction:column; gap:3px;}
+  .val-id{font-weight:600; font-size:13.5px;}
+  .val-profile{color:var(--text-faint); font-size:11.5px;}
+  .val-right{text-align:right; display:flex; flex-direction:column; gap:3px; align-items:flex-end;}
+  .val-score{font-size:13px; font-weight:600; color:var(--green);}
+  .val-date{font-size:11px; color:var(--text-faint);}
+  .val-note{margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-soft); font-size:11.5px; color:var(--text-faint); display:flex; gap:7px;}
+
+  .board{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  .col-head{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+  .col-title{font-size:12px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; color:var(--text-dim);}
+  .col-count{font-size:11px; color:var(--text-faint); background:var(--panel-2); border-radius:999px; padding:1px 7px;}
+  .stack{display:flex; flex-direction:column; gap:8px;}
+  .m-card{background:var(--panel); border:1px solid var(--border-soft); border-left:3px solid var(--slate); border-radius:6px; padding:9px 11px;}
+  .m-id{font-size:12.5px; font-weight:600; font-family:ui-monospace,monospace;}
+  .m-desc{font-size:11.5px; color:var(--text-dim); margin-top:2px;}
+  .col-planned .m-card{border-left-color:var(--slate);}
+  .col-active .m-card{border-left-color:var(--blue);}
+  .col-blocked .m-card{border-left-color:var(--red);}
+  .col-ready .m-card{border-left-color:var(--teal);}
+  .col-done .m-card{border-left-color:var(--green);}
+  .col-done .stack{max-height:230px; overflow:hidden; position:relative; transition:max-height .25s ease;}
+  .col-done .stack.expanded{max-height:2000px;}
+  .col-done .stack.collapsed::after{content:""; position:absolute; bottom:0; left:0; right:0; height:40px; background:linear-gradient(180deg, rgba(10,14,22,0), var(--bg));}
+  .show-more{margin-top:8px; background:none; border:1px solid var(--border-soft); color:var(--text-dim); font-size:11.5px; padding:5px 10px; border-radius:6px; cursor:pointer; width:100%;}
+  .show-more:hover{border-color:var(--border); color:var(--text);}
+  .empty-col{font-size:11.5px; color:var(--text-faint); padding:8px 0;}
+
+  .day-label{font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.04em; margin:0 0 8px;}
+  .timeline{max-height:340px; overflow-y:auto; padding-right:4px;}
+  .t-row{display:grid; grid-template-columns:78px 1fr auto; gap:10px; align-items:center; padding:6px 0; border-bottom:1px solid var(--border-soft); font-size:12px;}
+  .t-row:last-child{border-bottom:none;}
+  .t-tag{font-size:10.5px; font-weight:600; padding:2px 7px; border-radius:4px; text-align:center;}
+  .t-delivery{background:var(--teal-bg); color:var(--teal-text);}
+  .t-validation{background:var(--blue-bg); color:var(--blue-text);}
+  .t-session{background:var(--slate-bg); color:var(--slate-text);}
+  .t-session-closed{background:var(--panel-2); color:var(--text-faint);}
+  .t-pr-created{background:var(--indigo-bg); color:var(--indigo-text);}
+  .t-id{color:var(--text-dim); font-family:ui-monospace,monospace; font-size:11.5px;}
+  .t-time{color:var(--text-faint); font-size:11px; text-align:right;}
+
+  @media (max-width:980px){
+    .layout{grid-template-columns:1fr;}
+    .board{grid-template-columns:repeat(2,1fr);}
+  }
 </style>
 </head>
 <body>
-<h1>Locaily Development Dashboard</h1>
-<div class="meta">Generated: 2026-07-22T23:40:29.626Z | Branch: feat/development-memory-second-project-proof | HEAD: 4d58b89</div>
 
-<div class="grid">
-  <div class="card">
-    <div class="stat">15</div>
-    <div class="stat-label">Total Milestones</div>
-  </div>
-  <div class="card">
-    <div class="stat" style="color: #22c55e">0</div>
-    <div class="stat-label">Active</div>
-  </div>
-  <div class="card">
-    <div class="stat" style="color: #3b82f6">11</div>
-    <div class="stat-label">Completed</div>
-  </div>
-  <div class="card">
-    <div class="stat">4</div>
-    <div class="stat-label">Validations</div>
-  </div>
-</div>
+  <h1>Locaily development dashboard</h1>
+  <div class="meta">Generated <span>2026-07-23 23:50:03 UTC</span> &middot; Branch <span class="mono">feat/development-memory-second-project-proof</span> &middot; HEAD <span class="mono">e72c2ed</span></div>
 
-<h2>Subsystem Maturity</h2>
-<div class="grid">
-  <div class="card">
-    <h3>Local Brain</h3>
-    <span class="badge maturity-badge" style="background: #22c55e">operational</span>
-    <div style="margin-top: 6px; font-size: 0.85rem;">API Stability and Contracts <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
-    <div style="margin-top: 6px; font-size: 0.85rem;">The Crew Orchestration <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
+  <div class="kpi-row">
+    <div class="kpi total"><div class="num">15</div><div class="lbl">Total milestones</div></div>
+    <div class="kpi active"><div class="num">1</div><div class="lbl">Active</div></div>
+    <div class="kpi done"><div class="num">11</div><div class="lbl">Completed</div></div>
+    <div class="kpi valid"><div class="num">8</div><div class="lbl">Validation runs</div></div>
+    <div class="progress-track">
+      <div class="progress-top"><span>Overall progress</span><span>11 of 15 milestones complete &middot; 73%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:73%"></div></div>
+    </div>
   </div>
-  <div class="card">
-    <h3>Track Engine</h3>
-    <span class="badge maturity-badge" style="background: #22c55e">operational</span>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Track Runner <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Track Planner <span class="badge maturity-badge" style="background: #34d399; font-size: 0.7rem;">tested</span></div>
-  </div>
-  <div class="card">
-    <h3>Benchmark Lab</h3>
-    <span class="badge maturity-badge" style="background: #22c55e">operational</span>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Evaluation Engine <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Model Qualification <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
-  </div>
-  <div class="card">
-    <h3>Relay Nodes</h3>
-    <span class="badge maturity-badge" style="background: #34d399">tested</span>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Relay Protocol <span class="badge maturity-badge" style="background: #34d399; font-size: 0.7rem;">tested</span></div>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Multi-Device Coordination <span class="badge maturity-badge" style="background: #fbbf24; font-size: 0.7rem;">simulation-validated</span></div>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Relay Trust and Pairing <span class="badge maturity-badge" style="background: #a78bfa; font-size: 0.7rem;">designed</span></div>
-  </div>
-  <div class="card">
-    <h3>Memory Bridge</h3>
-    <span class="badge maturity-badge" style="background: #22c55e">operational</span>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Memory Bridge v0/v1 <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Development Memory Loop <span class="badge maturity-badge" style="background: #fbbf24; font-size: 0.7rem;">simulation-validated</span></div>
-  </div>
-  <div class="card">
-    <h3>Qualification and Routing</h3>
-    <span class="badge maturity-badge" style="background: #22c55e">operational</span>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Qualification Consumption <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Enforcement Policy <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
-  </div>
-  <div class="card">
-    <h3>Operator Experience</h3>
-    <span class="badge maturity-badge" style="background: #60a5fa">implemented</span>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Operator Console <span class="badge maturity-badge" style="background: #60a5fa; font-size: 0.7rem;">implemented</span></div>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Job Management <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
-  </div>
-  <div class="card">
-    <h3>Evidence and Quality</h3>
-    <span class="badge maturity-badge" style="background: #22c55e">operational</span>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Canonical Track Run Records <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Human Quality Review <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
-  </div>
-  <div class="card">
-    <h3>Development Control Plane</h3>
-    <span class="badge maturity-badge" style="background: #60a5fa">implemented</span>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Lifecycle Infrastructure <span class="badge maturity-badge" style="background: #22c55e; font-size: 0.7rem;">operational</span></div>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Control Plane Core <span class="badge maturity-badge" style="background: #34d399; font-size: 0.7rem;">tested</span></div>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Delivery Pipeline <span class="badge maturity-badge" style="background: #34d399; font-size: 0.7rem;">tested</span></div>
-  </div>
-  <div class="card">
-    <h3>Packaging and Release</h3>
-    <span class="badge maturity-badge" style="background: #60a5fa">implemented</span>
-    <div style="margin-top: 6px; font-size: 0.85rem;">Locaily v1 Packaging <span class="badge maturity-badge" style="background: #60a5fa; font-size: 0.7rem;">implemented</span></div>
-  </div>
-</div>
 
-<h2>Milestone Board</h2>
-<div class="board">
-  <div class="board-col">
-    <h4>planned (2)</h4>
-    <div class="board-item" style="border-left-color: #a78bfa">dcp-phase3b<br><span style="color: #64748b; font-size: 0.75rem;">Development Control Plane Phase 3B — Session Handoff</span></div>
-    <div class="board-item" style="border-left-color: #a78bfa">dcp-phase4<br><span style="color: #64748b; font-size: 0.75rem;">Development Control Plane Phase 4 — Agent Adapters</span></div>
-  </div>
-  <div class="board-col">
-    <h4>blocked (1)</h4>
-    <div class="board-item" style="border-left-color: #ef4444">09-physical-multi-device-pilot<br><span style="color: #64748b; font-size: 0.75rem;">M09: Physical Multi-Device Pilot</span></div>
-  </div>
-  <div class="board-col">
-    <h4>ready-for-delivery (1)</h4>
-    <div class="board-item" style="border-left-color: #10b981">dcp-phase3a<br><span style="color: #64748b; font-size: 0.75rem;">Development Control Plane Phase 3A - Dashboard</span></div>
-  </div>
-  <div class="board-col">
-    <h4>completed (11)</h4>
-    <div class="board-item" style="border-left-color: #22c55e">06-trusted-relay-execution<br><span style="color: #64748b; font-size: 0.75rem;">M6: Trusted Relay Execution</span></div>
-    <div class="board-item" style="border-left-color: #22c55e">08-operator-control-plane<br><span style="color: #64748b; font-size: 0.75rem;">M8: Operator Control Plane</span></div>
-    <div class="board-item" style="border-left-color: #22c55e">10-locaily-v1-packaging<br><span style="color: #64748b; font-size: 0.75rem;">M10: Locaily v1 Packaging</span></div>
-    <div class="board-item" style="border-left-color: #22c55e">10-track-learning-evidence-loop<br><span style="color: #64748b; font-size: 0.75rem;">M12: Track Learning Evidence Loop</span></div>
-    <div class="board-item" style="border-left-color: #22c55e">dcp-phase1.5-2a<br><span style="color: #64748b; font-size: 0.75rem;">Development Control Plane Phase 1.5 + 2A</span></div>
-    <div class="board-item" style="border-left-color: #22c55e">dcp-phase1<br><span style="color: #64748b; font-size: 0.75rem;">Development Control Plane Phase 1</span></div>
-    <div class="board-item" style="border-left-color: #22c55e">dcp-phase2b<br><span style="color: #64748b; font-size: 0.75rem;">Development Control Plane Phase 2B</span></div>
-    <div class="board-item" style="border-left-color: #22c55e">dcp-phase2c<br><span style="color: #64748b; font-size: 0.75rem;">Development Control Plane Phase 2C</span></div>
-    <div class="board-item" style="border-left-color: #22c55e">dm10-multi-project-template<br><span style="color: #64748b; font-size: 0.75rem;">DM10: Multi-Project Local Brain Template</span></div>
-    <div class="board-item" style="border-left-color: #22c55e">milestone-completion-delivery-workflow<br><span style="color: #64748b; font-size: 0.75rem;">Milestone Completion Delivery Workflow</span></div>
-    <div class="board-item" style="border-left-color: #22c55e">objective-lifecycle-hardening<br><span style="color: #64748b; font-size: 0.75rem;">Objective Lifecycle Hardening</span></div>
-  </div>
-</div>
+  <section>
+    <h2>Subsystem maturity</h2>
+    <div class="sub-grid">
+      <div class="sub-card">
+        <div class="sub-head"><span class="sub-name">Local Brain</span><span class="badge b-operational">operational</span></div>
+        <div class="chip-row"><span class="chip">API Stability and Contracts</span><span class="chip">The Crew Orchestration</span></div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-head"><span class="sub-name">Track Engine</span><span class="badge b-operational">operational</span></div>
+        <div class="chip-row"><span class="chip">Track Runner</span><span class="chip">Track Planner &middot; tested</span></div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-head"><span class="sub-name">Benchmark Lab</span><span class="badge b-operational">operational</span></div>
+        <div class="chip-row"><span class="chip">Evaluation Engine</span><span class="chip">Model Qualification</span></div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-head"><span class="sub-name">Relay Nodes</span><span class="badge b-tested">tested</span></div>
+        <div class="chip-row"><span class="chip">Relay Protocol</span><span class="chip">Multi-Device Coordination &middot; simulation-validated</span><span class="chip">Relay Trust and Pairing &middot; designed</span></div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-head"><span class="sub-name">Memory Bridge</span><span class="badge b-operational">operational</span></div>
+        <div class="chip-row"><span class="chip">Memory Bridge v0/v1</span><span class="chip">Development Memory Loop &middot; simulation-validated</span></div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-head"><span class="sub-name">Qualification and Routing</span><span class="badge b-operational">operational</span></div>
+        <div class="chip-row"><span class="chip">Qualification Consumption</span><span class="chip">Enforcement Policy</span></div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-head"><span class="sub-name">Operator Experience</span><span class="badge b-implemented">implemented</span></div>
+        <div class="chip-row"><span class="chip">Operator Console</span><span class="chip">Job Management &middot; operational</span></div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-head"><span class="sub-name">Evidence and Quality</span><span class="badge b-operational">operational</span></div>
+        <div class="chip-row"><span class="chip">Canonical Track Run Records</span><span class="chip">Human Quality Review</span></div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-head"><span class="sub-name">Development Control Plane</span><span class="badge b-implemented">implemented</span></div>
+        <div class="chip-row"><span class="chip">Lifecycle Infrastructure &middot; operational</span><span class="chip">Control Plane Core &middot; tested</span><span class="chip">Delivery Pipeline &middot; tested</span></div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-head"><span class="sub-name">Packaging and Release</span><span class="badge b-implemented">implemented</span></div>
+        <div class="chip-row"><span class="chip">Locaily v1 Packaging</span></div>
+      </div>
+    </div>
+  </section>
 
-<h2>Validation Scoreboard</h2>
-<div class="card">
-<table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
-    <tr style="border-bottom: 1px solid #334155; color: #94a3b8;">
-      <th style="text-align: left; padding: 4px;">Milestone</th>
-      <th style="text-align: left; padding: 4px;">Status</th>
-      <th style="text-align: left; padding: 4px;">Profile</th>
-      <th style="text-align: left; padding: 4px;">Passed</th>
-      <th style="text-align: left; padding: 4px;">Date</th>
-    </tr>
-    <tr style="border-bottom: 1px solid #1e293b;">
-      <td style="padding: 4px;">dcp-phase3a</td>
-      <td style="padding: 4px;"><span class="badge" style="background: #166534; color: white;">passed</span></td>
-      <td style="padding: 4px;">builtin-quick</td>
-      <td style="padding: 4px;">5/5</td>
-      <td style="padding: 4px; color: #64748b;">7/22/2026</td>
-    </tr>
-    <tr style="border-bottom: 1px solid #1e293b;">
-      <td style="padding: 4px;">dcp-phase3a</td>
-      <td style="padding: 4px;"><span class="badge" style="background: #166534; color: white;">passed</span></td>
-      <td style="padding: 4px;">builtin-quick</td>
-      <td style="padding: 4px;">5/5</td>
-      <td style="padding: 4px; color: #64748b;">7/22/2026</td>
-    </tr>
-    <tr style="border-bottom: 1px solid #1e293b;">
-      <td style="padding: 4px;">dcp-phase3a</td>
-      <td style="padding: 4px;"><span class="badge" style="background: #166534; color: white;">passed</span></td>
-      <td style="padding: 4px;">builtin-quick</td>
-      <td style="padding: 4px;">5/5</td>
-      <td style="padding: 4px; color: #64748b;">7/22/2026</td>
-    </tr>
-    <tr style="border-bottom: 1px solid #1e293b;">
-      <td style="padding: 4px;">dcp-phase3a</td>
-      <td style="padding: 4px;"><span class="badge" style="background: #166534; color: white;">passed</span></td>
-      <td style="padding: 4px;">builtin-quick</td>
-      <td style="padding: 4px;">5/5</td>
-      <td style="padding: 4px; color: #64748b;">7/22/2026</td>
-    </tr>
-  </table>
-</div>
+  <div class="layout">
+    <div class="col-left">
+      <section>
+        <h2>Milestone board</h2>
+        <div class="board">
 
-<h2>Blockers and Human Decisions</h2>
-<div class="card">
-<div style="color: #22c55e;">No blocking issues</div>
-</div>
+          <div class="col-planned">
+            <div class="col-head"><span class="col-title">Planned</span><span class="col-count">1</span></div>
+            <div class="stack">
+              <div class="m-card"><div class="m-id">dcp-phase4</div><div class="m-desc">Development Control Plane Phase 4 — Agent Adapters</div></div>
+            </div>
+          </div>
 
-<h2>Recent Activity</h2>
-<div class="card">
-<div class="activity-item">
-    <span class="badge" style="background: #334155;">delivery</span>
-    dcp-phase3a
-    <span class="activity-time">7/22/2026, 6:40:07 PM</span>
-  </div>
-<div class="activity-item">
-    <span class="badge" style="background: #334155;">validation</span>
-    dcp-phase3a
-    <span class="activity-time">7/22/2026, 6:38:00 PM</span>
-  </div>
-<div class="activity-item">
-    <span class="badge" style="background: #334155;">session-closed</span>
-    dcp-phase3a
-    <span class="activity-time">7/22/2026, 6:37:56 PM</span>
-  </div>
-<div class="activity-item">
-    <span class="badge" style="background: #334155;">session</span>
-    dcp-phase3a
-    <span class="activity-time">7/22/2026, 6:37:56 PM</span>
-  </div>
-<div class="activity-item">
-    <span class="badge" style="background: #334155;">validation</span>
-    dcp-phase3a
-    <span class="activity-time">7/22/2026, 6:28:09 PM</span>
-  </div>
-<div class="activity-item">
-    <span class="badge" style="background: #334155;">session-closed</span>
-    dcp-phase3a
-    <span class="activity-time">7/22/2026, 6:28:05 PM</span>
-  </div>
-<div class="activity-item">
-    <span class="badge" style="background: #334155;">session</span>
-    dcp-phase3a
-    <span class="activity-time">7/22/2026, 5:50:00 PM</span>
-  </div>
-<div class="activity-item">
-    <span class="badge" style="background: #334155;">session</span>
-    dcp-phase3a
-    <span class="activity-time">7/22/2026, 5:30:00 PM</span>
-  </div>
-<div class="activity-item">
-    <span class="badge" style="background: #334155;">validation</span>
-    dcp-phase3a
-    <span class="activity-time">7/22/2026, 5:02:18 PM</span>
-  </div>
-<div class="activity-item">
-    <span class="badge" style="background: #334155;">validation</span>
-    dcp-phase3a
-    <span class="activity-time">7/22/2026, 5:01:19 PM</span>
-  </div>
-<div class="activity-item">
-    <span class="badge" style="background: #334155;">session-closed</span>
-    dcp-phase3a
-    <span class="activity-time">7/22/2026, 4:54:22 PM</span>
-  </div>
-</div>
+          <div class="col-active">
+            <div class="col-head"><span class="col-title">Active</span><span class="col-count">1</span></div>
+            <div class="stack">
+              <div class="m-card"><div class="m-id">dcp-phase3b</div><div class="m-desc">Development Control Plane Phase 3B — Handoff and Roadmap Integrity</div></div>
+            </div>
+          </div>
 
+          <div class="col-blocked">
+            <div class="col-head"><span class="col-title">Blocked</span><span class="col-count">1</span></div>
+            <div class="stack">
+              <div class="m-card"><div class="m-id">09-physical-multi-device-pilot</div><div class="m-desc">M09: Physical Multi-Device Pilot</div></div>
+            </div>
+          </div>
 
-<div class="next-action">
-  <h3>Recommended Next</h3>
-  <div>next_planned: <strong>dcp-phase3b</strong> — Development Control Plane Phase 3B — Session Handoff</div>
-</div>
+          <div class="col-ready">
+            <div class="col-head"><span class="col-title">Ready for delivery</span><span class="col-count">1</span></div>
+            <div class="stack">
+              <div class="m-card"><div class="m-id">dcp-phase3a</div><div class="m-desc">Development Control Plane Phase 3A - Dashboard</div></div>
+            </div>
+          </div>
 
+          <div class="col-done">
+            <div class="col-head"><span class="col-title">Completed</span><span class="col-count">11</span></div>
+            <div class="stack collapsed" id="doneStack">
+              <div class="m-card"><div class="m-id">06-trusted-relay-execution</div><div class="m-desc">M6: Trusted Relay Execution</div></div>
+              <div class="m-card"><div class="m-id">08-operator-control-plane</div><div class="m-desc">M8: Operator Control Plane</div></div>
+              <div class="m-card"><div class="m-id">10-locaily-v1-packaging</div><div class="m-desc">M10: Locaily v1 Packaging</div></div>
+              <div class="m-card"><div class="m-id">10-track-learning-evidence-loop</div><div class="m-desc">M12: Track Learning Evidence Loop</div></div>
+              <div class="m-card"><div class="m-id">dcp-phase1.5-2a</div><div class="m-desc">Development Control Plane Phase 1.5 + 2A</div></div>
+              <div class="m-card"><div class="m-id">dcp-phase1</div><div class="m-desc">Development Control Plane Phase 1</div></div>
+              <div class="m-card"><div class="m-id">dcp-phase2b</div><div class="m-desc">Development Control Plane Phase 2B</div></div>
+              <div class="m-card"><div class="m-id">dcp-phase2c</div><div class="m-desc">Development Control Plane Phase 2C</div></div>
+              <div class="m-card"><div class="m-id">dm10-multi-project-template</div><div class="m-desc">DM10: Multi-Project Local Brain Template</div></div>
+              <div class="m-card"><div class="m-id">milestone-completion-delivery-workflow</div><div class="m-desc">Milestone Completion Delivery Workflow</div></div>
+              <div class="m-card"><div class="m-id">objective-lifecycle-hardening</div><div class="m-desc">Objective Lifecycle Hardening</div></div>
+            </div>
+            <button class="show-more" id="toggleDone">Show all 11</button>
+          </div>
 
+        </div>
+      </section>
+    </div>
+
+    <div class="col-right">
+
+      <div class="recommend">
+        <div class="tag">Recommended next</div>
+        <div class="title">dcp-phase3b</div>
+        <div class="sub">Development Control Plane Phase 3B — Handoff and Roadmap Integrity</div>
+      </div>
+
+      <section class="card">
+        <h2 style="margin-bottom:10px;">Blockers &amp; human decisions</h2>
+        <div class="no-blockers"><span class="dot"></span>No blocking issues</div>
+        <div class="warning warning-warning">Milestone 'dcp-phase3b' is active but has no active session</div>
+      </section>
+
+      <section class="card">
+        <h2 style="margin-bottom:2px;">Validation scoreboard</h2>
+        <div class="val-summary-row">
+          <div class="val-left">
+            <span class="val-id mono">dcp-phase3a</span>
+            <span class="val-profile">builtin-quick</span>
+          </div>
+          <div class="val-right">
+            <span class="val-score">5 / 5 checks passed</span>
+            <span class="val-date">Wed, Jul 22, 2026</span>
+          </div>
+        </div>
+        <div class="val-summary-row">
+          <div class="val-left">
+            <span class="val-id mono">dcp-phase3a</span>
+            <span class="val-profile">builtin-quick</span>
+          </div>
+          <div class="val-right">
+            <span class="val-score">5 / 5 checks passed</span>
+            <span class="val-date">Wed, Jul 22, 2026</span>
+          </div>
+        </div>
+        <div class="val-summary-row">
+          <div class="val-left">
+            <span class="val-id mono">dcp-phase3a</span>
+            <span class="val-profile">builtin-quick</span>
+          </div>
+          <div class="val-right">
+            <span class="val-score">5 / 5 checks passed</span>
+            <span class="val-date">Wed, Jul 22, 2026</span>
+          </div>
+        </div>
+        <div class="val-summary-row">
+          <div class="val-left">
+            <span class="val-id mono">dcp-phase3a</span>
+            <span class="val-profile">builtin-quick</span>
+          </div>
+          <div class="val-right">
+            <span class="val-score">5 / 5 checks passed</span>
+            <span class="val-date">Wed, Jul 22, 2026</span>
+          </div>
+        </div>
+        <div class="val-summary-row">
+          <div class="val-left">
+            <span class="val-id mono">dcp-phase3a</span>
+            <span class="val-profile">builtin-quick</span>
+          </div>
+          <div class="val-right">
+            <span class="val-score">5 / 5 checks passed</span>
+            <span class="val-date">Wed, Jul 22, 2026</span>
+          </div>
+        </div>
+        <div class="val-note">All 8 validation runs are for <span class="mono">&nbsp;dcp-phase3a&nbsp;</span> with identical scores — worth checking coverage across milestones.</div>
+      </section>
+
+      <section class="card">
+        <h2>Recent activity</h2>
+        <div class="day-label">Today</div>
+        <div class="timeline">
+          <div class="t-row"><span class="t-tag t-session-closed">session-closed</span><span class="t-id">dcp-phase3b</span><span class="t-time">6:49 PM</span></div>
+          <div class="t-row"><span class="t-tag t-session">session</span><span class="t-id">dcp-phase3b</span><span class="t-time">6:44 PM</span></div>
+          <div class="t-row"><span class="t-tag t-pr-created">pr-created</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:57 PM</span></div>
+          <div class="t-row"><span class="t-tag t-delivery">delivery</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:57 PM</span></div>
+          <div class="t-row"><span class="t-tag t-validation">validation</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:57 PM</span></div>
+          <div class="t-row"><span class="t-tag t-session-closed">session-closed</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:57 PM</span></div>
+          <div class="t-row"><span class="t-tag t-session">session</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:57 PM</span></div>
+          <div class="t-row"><span class="t-tag t-validation">validation</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:57 PM</span></div>
+          <div class="t-row"><span class="t-tag t-session-closed">session-closed</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:57 PM</span></div>
+          <div class="t-row"><span class="t-tag t-session">session</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:57 PM</span></div>
+          <div class="t-row"><span class="t-tag t-validation">validation</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:56 PM</span></div>
+          <div class="t-row"><span class="t-tag t-session-closed">session-closed</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:56 PM</span></div>
+          <div class="t-row"><span class="t-tag t-session">session</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:56 PM</span></div>
+          <div class="t-row"><span class="t-tag t-validation">validation</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:54 PM</span></div>
+          <div class="t-row"><span class="t-tag t-session-closed">session-closed</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:54 PM</span></div>
+          <div class="t-row"><span class="t-tag t-session">session</span><span class="t-id">dcp-phase3a</span><span class="t-time">8:54 PM</span></div>
+        </div>
+        <div class="day-label">Tue, Jul 21, 2026</div>
+        <div class="timeline">
+          <div class="t-row"><span class="t-tag t-validation">validation</span><span class="t-id">dcp-phase3a</span><span class="t-time">6:38 PM</span></div>
+          <div class="t-row"><span class="t-tag t-session-closed">session-closed</span><span class="t-id">dcp-phase3a</span><span class="t-time">6:37 PM</span></div>
+          <div class="t-row"><span class="t-tag t-session">session</span><span class="t-id">dcp-phase3a</span><span class="t-time">6:37 PM</span></div>
+          <div class="t-row"><span class="t-tag t-validation">validation</span><span class="t-id">dcp-phase3a</span><span class="t-time">6:28 PM</span></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+<script>
+  const stack = document.getElementById('doneStack');
+  const btn = document.getElementById('toggleDone');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const expanded = stack.classList.toggle('expanded');
+      stack.classList.toggle('collapsed', !expanded);
+      btn.textContent = expanded ? 'Show less' : 'Show all 11';
+    });
+  }
+</script>
 
 </body>
 </html>
