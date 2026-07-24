@@ -2,7 +2,8 @@
   "schema": "locaily.development.milestone.v1",
   "id": "dcp-phase3b",
   "title": "Development Control Plane Phase 3B — Handoff and Roadmap Integrity",
-  "status": "planned",
+  "status": "ready-for-delivery",
+  "latestValidationId": "validation-20260724T043853-88c51817",
   "type": "infrastructure",
   "priority": "medium",
   "purpose": "Refine generated handoff with resume commands and checkpoints. Surface human decisions separately. Detect roadmap drift. Deprecate manually maintained files. Add merge/post-merge lifecycle planning.",
@@ -27,10 +28,17 @@
     "Merge lifecycle documented and implemented"
   ],
   "validationProfile": "builtin-quick",
-  "dependencies": ["dcp-phase3a"],
+  "dependencies": [
+    "dcp-phase3a"
+  ],
   "blockers": [],
   "lifecycleRef": null,
   "createdAt": "2026-07-22T23:40:00.000Z",
-  "startedAt": null,
-  "completedAt": null
+  "startedAt": "2026-07-23T23:44:23.609Z",
+  "completedAt": "2026-07-24T01:53:00.000Z",
+  "preparedCommit": "e40c206",
+  "preparedBranch": "feat/development-memory-second-project-proof",
+  "completionBranch": "feat/development-memory-second-project-proof",
+  "completionHead": "e40c206",
+  "latestValidationId": "validation-20260724T043853-88c51817"
 }

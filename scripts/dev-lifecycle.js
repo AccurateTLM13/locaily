@@ -6,6 +6,7 @@
  * Phase 2A: start, checkpoint, pause, block, resume.
  * Phase 2B: validate, complete, session:close.
  * Phase 2C: prepare.
+ * Phase 3: merge.
  *
  * Usage:
  *   node scripts/dev-lifecycle.js start --slug <id> --title "Title" --purpose "Why"
@@ -16,6 +17,7 @@
  *   node scripts/dev-lifecycle.js validate
  *   node scripts/dev-lifecycle.js complete
  *   node scripts/dev-lifecycle.js prepare
+ *   node scripts/dev-lifecycle.js merge --slug <id> [--pr <number>] [--commit <sha>]
  *   node scripts/dev-lifecycle.js session:close --summary "What was accomplished"
  *   node scripts/dev-lifecycle.js status
  */
@@ -1342,6 +1344,103 @@ function cmdSessionClose(args) {
   }, null, 2));
 }
 
+// ---- Phase 3: merge ----
+
+function cmdMerge(args) {
+  const slug = extractArg(args, "--slug");
+  const prNumber = extractArg(args, "--pr");
+  const mergeCommit = extractArg(args, "--commit");
+
+  if (!slug) {
+    console.error("Usage: dev-lifecycle.js merge --slug <id> [--pr <number>] [--commit <sha>]");
+    process.exit(1);
+  }
+
+  const milestone = readMilestone(slug);
+  if (!milestone) {
+    console.error(`Error: Milestone '${slug}' not found.`);
+    process.exit(1);
+  }
+
+  // Allow delivered or ready-for-delivery status
+  if (milestone.status !== "delivered" && milestone.status !== "ready-for-delivery") {
+    console.error(`Error: Milestone '${slug}' has status '${milestone.status}'. Must be 'delivered' or 'ready-for-delivery' to merge.`);
+    process.exit(1);
+  }
+
+  // Auto-detect merge commit from git if not provided
+  let detectedCommit = mergeCommit;
+  if (!detectedCommit) {
+    // Try to find merge commit from PR
+    if (prNumber) {
+      const mergeSha = git(["log", "--all", "--oneline", "--grep", `Merge pull request #${prNumber}`, "--format=%H"]);
+      if (mergeSha) {
+        detectedCommit = mergeSha.split("\n")[0];
+      }
+    }
+    // Fallback: check if we're on main and HEAD is ahead of completion branch
+    if (!detectedCommit) {
+      const branch = getCurrentBranch();
+      const defaultBranch = git(["rev-parse", "--verify", "main"]) ? "main" : "master";
+      if (branch === defaultBranch) {
+        detectedCommit = getCurrentHead();
+      }
+    }
+  }
+
+  if (!detectedCommit) {
+    console.error("Error: Could not detect merge commit. Provide --commit <sha> or ensure you're on the default branch after merge.");
+    process.exit(1);
+  }
+
+  // Transition milestone to merged
+  milestone.status = "merged";
+  milestone.mergedAt = now();
+  milestone.mergedCommit = detectedCommit;
+  if (prNumber) milestone.prNumber = parseInt(prNumber, 10);
+  writeMilestone(milestone);
+
+  // Update project state
+  const ps = readProjectState();
+  if (ps) {
+    ps.currentMilestone = null;
+    ps.activeSession = null;
+    ps.status = "idle";
+    ps.lastCompletedMilestone = slug;
+    ps.mergedMilestone = slug;
+    ps.mergedAt = now();
+    ps.mergedCommit = detectedCommit;
+    ps.nextRecommendedAction = `Milestone '${slug}' merged. Run dev:dashboard to refresh.`;
+    ps.updatedBy = { type: "agent", name: "dev-lifecycle", platform: "system" };
+    writeProjectState(ps);
+  }
+
+  // Regenerate dashboard
+  try {
+    const dashResult = spawnSync("node", [path.join(PROJECT_ROOT, "scripts", "generate-development-dashboard.js")], {
+      cwd: PROJECT_ROOT,
+      encoding: "utf8",
+      shell: process.platform === "win32",
+      timeout: 30000,
+    });
+    if (dashResult.status !== 0) {
+      console.error(`Warning: Dashboard regeneration failed: ${(dashResult.stderr || "").trim()}`);
+    }
+  } catch (err) {
+    console.error(`Warning: Dashboard regeneration error: ${err.message}`);
+  }
+
+  console.log(JSON.stringify({
+    ok: true,
+    milestoneId: slug,
+    status: "merged",
+    mergedAt: milestone.mergedAt,
+    mergedCommit: detectedCommit,
+    prNumber: prNumber ? parseInt(prNumber, 10) : null,
+    nextAction: `Milestone '${slug}' is now merged. Post-merge closeout complete.`,
+  }, null, 2));
+}
+
 function cmdStatus() {
   const ps = readProjectState();
   const activeMilestone = findActiveMilestone();
@@ -1374,7 +1473,7 @@ function main() {
 
   if (!command || command === "help") {
     console.log(`
-Development Lifecycle Commands (Phase 2A + 2B + 2C)
+Development Lifecycle Commands (Phase 2A + 2B + 2C + 3)
 
 Usage: node scripts/dev-lifecycle.js <command> [options]
 
@@ -1388,6 +1487,7 @@ Commands:
   prepare    [--acknowledge-unrelated "reason"]
   validate   [--profile <id>]
   complete
+  merge      --slug <id> [--pr <number>] [--commit <sha>]
   status
 `);
     process.exit(0);
@@ -1403,6 +1503,7 @@ Commands:
     case "prepare": cmdPrepare(args.slice(1)); break;
     case "validate": cmdValidate(args.slice(1)); break;
     case "complete": cmdComplete(args.slice(1)); break;
+    case "merge": cmdMerge(args.slice(1)); break;
     case "status": cmdStatus(); break;
     default:
       console.error(`Unknown command: ${command}`);

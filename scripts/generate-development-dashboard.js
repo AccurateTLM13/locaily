@@ -293,9 +293,158 @@ function getNextMilestone(state) {
   return null;
 }
 
+// ---- drift detection ----
+
+function detectDrift(state) {
+  const drift = [];
+
+  if (!state.roadmap || !state.roadmap.areas) return drift;
+
+  // Collect all milestone IDs referenced in roadmap
+  const roadmapMilestoneIds = new Set();
+  for (const area of state.roadmap.areas) {
+    for (const init of (area.initiatives || [])) {
+      for (const mid of (init.milestoneIds || [])) {
+        roadmapMilestoneIds.add(mid);
+      }
+    }
+  }
+
+  // Collect all milestone IDs from records
+  const recordMilestoneIds = new Set(state.milestones.map(m => m.id));
+
+  // Milestones in records but not in roadmap
+  for (const mid of recordMilestoneIds) {
+    if (!roadmapMilestoneIds.has(mid) && !mid.startsWith("dcp-")) {
+      drift.push({
+        type: "record-not-in-roadmap",
+        severity: "warning",
+        milestoneId: mid,
+        message: `Milestone '${mid}' exists in records but is not referenced in roadmap.json`,
+      });
+    }
+  }
+
+  // Milestones in roadmap but not in records
+  for (const mid of roadmapMilestoneIds) {
+    if (!recordMilestoneIds.has(mid)) {
+      drift.push({
+        type: "roadmap-not-in-records",
+        severity: "info",
+        milestoneId: mid,
+        message: `Roadmap references milestone '${mid}' but no milestone record exists`,
+      });
+    }
+  }
+
+  // Maturity drift: completed milestones whose area maturity is still "designed" or lower
+  const completedIds = new Set(
+    state.milestones.filter(m => m.status === "completed" || m.status === "merged").map(m => m.id)
+  );
+  for (const area of state.roadmap.areas) {
+    for (const init of (area.initiatives || [])) {
+      const initiativeMilestones = (init.milestoneIds || []).filter(mid => completedIds.has(mid));
+      if (initiativeMilestones.length > 0 && init.maturity === "designed") {
+        drift.push({
+          type: "maturity-lag",
+          severity: "warning",
+          areaId: area.id,
+          initiativeId: init.id,
+          message: `Initiative '${init.title}' has completed milestone(s) but maturity is still 'designed'`,
+        });
+      }
+    }
+  }
+
+  return drift;
+}
+
+// ---- milestone dependency graph ----
+
+function getMilestoneDependencyGraph(state) {
+  const deps = (state.roadmap && state.roadmap.milestoneDependencies) || {};
+  const nodes = [];
+  const edges = [];
+
+  for (const m of state.milestones) {
+    nodes.push({
+      id: m.id,
+      status: m.status,
+      title: m.title,
+      type: m.type,
+    });
+    const myDeps = deps[m.id] || [];
+    for (const depId of myDeps) {
+      edges.push({ from: depId, to: m.id });
+    }
+  }
+
+  return { nodes, edges };
+}
+
+// ---- human decisions ----
+
+function getHumanDecisions(state) {
+  const decisions = [];
+
+  // Milestones with blockers requiring human action
+  for (const m of state.milestones) {
+    if (m.blockers && m.blockers.length > 0) {
+      for (const b of m.blockers) {
+        if (b.type === "human-action" || b.type === "decision-required") {
+          decisions.push({
+            type: "blocker",
+            milestoneId: m.id,
+            description: b.description || b.reason || "Human decision required",
+            blockerType: b.type,
+            createdAt: b.createdAt,
+          });
+        }
+      }
+    }
+  }
+
+  // Paused milestones (operator chose to pause)
+  for (const m of state.milestones) {
+    if (m.status === "paused") {
+      const lastSession = state.sessions
+        .filter(s => s.milestoneId === m.id)
+        .sort((a, b) => (b.closedAt || "").localeCompare(a.closedAt || ""))[0];
+      if (lastSession && lastSession.risks && lastSession.risks.length > 0) {
+        decisions.push({
+          type: "paused",
+          milestoneId: m.id,
+          description: lastSession.risks[0],
+          blockerType: "operator-pause",
+          createdAt: lastSession.closedAt,
+        });
+      }
+    }
+  }
+
+  // Blocked milestones
+  for (const m of state.milestones) {
+    if (m.status === "blocked") {
+      decisions.push({
+        type: "blocked",
+        milestoneId: m.id,
+        description: `Milestone is blocked. ${m.blockers?.length || 0} blocker(s).`,
+        blockerType: "blocked",
+        createdAt: m.updatedAt,
+      });
+    }
+  }
+
+  return decisions;
+}
+
 // ---- generate roadmap-data.json ----
 
 function generateRoadmapData(state) {
+  const drift = detectDrift(state);
+  const depGraph = getMilestoneDependencyGraph(state);
+  const humanDecisions = getHumanDecisions(state);
+
   return {
     schema: "locaily.development.dashboard.v1",
     generatedAt: state.generatedAt,
@@ -307,6 +456,9 @@ function generateRoadmapData(state) {
     recentActivity: getRecentActivity(state),
     nextMilestone: getNextMilestone(state),
     staleness: checkStaleness(state),
+    drift,
+    milestoneDependencyGraph: depGraph,
+    humanDecisions,
     stats: {
       totalMilestones: state.milestones.length,
       active: state.milestones.filter(m => m.status === "active").length,
@@ -314,6 +466,8 @@ function generateRoadmapData(state) {
       totalSessions: state.sessions.length,
       totalValidations: state.validations.length,
       totalDeliveries: state.deliveries.length,
+      driftCount: drift.length,
+      humanDecisionCount: humanDecisions.length,
     },
   };
 }
@@ -370,6 +524,26 @@ function generateStatusSummary(data) {
     lines.push("");
   }
 
+  // Drift warnings
+  if (data.drift && data.drift.length > 0) {
+    lines.push("## Roadmap Drift");
+    lines.push("");
+    for (const d of data.drift) {
+      lines.push(`- [${d.severity.toUpperCase()}] ${d.message}`);
+    }
+    lines.push("");
+  }
+
+  // Human decisions
+  if (data.humanDecisions && data.humanDecisions.length > 0) {
+    lines.push("## Human Decisions Required");
+    lines.push("");
+    for (const d of data.humanDecisions) {
+      lines.push(`- **[${d.type}]** ${d.milestoneId}: ${d.description}`);
+    }
+    lines.push("");
+  }
+
   // Next milestone
   if (data.nextMilestone) {
     lines.push("## Recommended Next");
@@ -403,23 +577,105 @@ function generateAgentHandoff(data) {
   }
   lines.push("");
 
-  lines.push("## Commands");
+  // Exact resume commands
+  lines.push("## Resume Commands");
   lines.push("");
   lines.push("```bash");
-  lines.push("npm run dev:status              # Current project state");
-  lines.push("npm run dev:milestone:start     # Start an approved milestone");
-  lines.push("npm run dev:checkpoint          # Record progress");
-  lines.push("npm run dev:session:close       # Close implementation session");
-  lines.push("npm run dev:prepare             # Stage, commit, record prepared SHA");
-  lines.push("npm run dev:validate            # Run validation profile");
-  lines.push("npm run dev:milestone:complete  # Gate check before delivery");
+  lines.push("npm run dev:status                          # Current project state");
+  if (data.projectState && data.projectState.status === "active" && data.projectState.currentMilestone) {
+    lines.push(`# Resume active milestone '${data.projectState.currentMilestone}':`);
+    lines.push("npm run dev:resume                          # Resume paused work");
+    lines.push("npm run dev:checkpoint --message \"...\"      # Record progress");
+  } else if (data.projectState && data.projectState.status === "paused" && data.projectState.currentMilestone) {
+    lines.push(`# Resume paused milestone '${data.projectState.currentMilestone}':`);
+    lines.push("npm run dev:resume                          # Resume paused milestone");
+  } else if (data.nextMilestone) {
+    lines.push(`# Start next milestone '${data.nextMilestone.milestone.id}':`);
+    lines.push(`npm run dev:milestone:start --slug ${data.nextMilestone.milestone.id} --title "${data.nextMilestone.milestone.title || ""}" --purpose "Continue development"`);
+  } else {
+    lines.push("npm run dev:milestone:start                 # Start an approved milestone");
+  }
+  lines.push("npm run dev:session:close --summary \"...\"   # Close implementation session");
+  lines.push("npm run dev:prepare                         # Stage, commit, record prepared SHA");
+  lines.push("npm run dev:validate                        # Run validation profile");
+  lines.push("npm run dev:milestone:complete              # Gate check before delivery");
   lines.push("```");
   lines.push("");
 
+  // Latest checkpoint and session summary
+  if (data._activeSession) {
+    const session = data._activeSession;
+    lines.push("## Active Session Summary");
+    lines.push("");
+    lines.push(`- **Session:** ${session.id}`);
+    lines.push(`- **Milestone:** ${session.milestoneId}`);
+    lines.push(`- **Started:** ${session.startedAt}`);
+    lines.push(`- **Branch:** ${session.branch}`);
+    if (session.completedWork && session.completedWork.length > 0) {
+      lines.push("");
+      lines.push("### Completed Work");
+      for (const item of session.completedWork) {
+        lines.push(`- ${item}`);
+      }
+    }
+    if (session.remainingWork && session.remainingWork.length > 0) {
+      lines.push("");
+      lines.push("### Remaining Work");
+      for (const item of session.remainingWork) {
+        lines.push(`- ${typeof item === "string" ? item : item.description || JSON.stringify(item)}`);
+      }
+    }
+    if (session.checks && session.checks.length > 0) {
+      const latest = session.checks[session.checks.length - 1];
+      lines.push("");
+      lines.push("### Latest Checkpoint");
+      lines.push(`- **Time:** ${latest.timestamp}`);
+      lines.push(`- **Message:** ${latest.message}`);
+    }
+    lines.push("");
+  } else if (data._lastPausedSession) {
+    const session = data._lastPausedSession;
+    lines.push("## Last Paused Session");
+    lines.push("");
+    lines.push(`- **Session:** ${session.id}`);
+    lines.push(`- **Milestone:** ${session.milestoneId}`);
+    lines.push(`- **Closed:** ${session.closedAt}`);
+    if (session.completedWork && session.completedWork.length > 0) {
+      lines.push("");
+      lines.push("### Completed Work");
+      for (const item of session.completedWork) {
+        lines.push(`- ${item}`);
+      }
+    }
+    if (session.remainingWork && session.remainingWork.length > 0) {
+      lines.push("");
+      lines.push("### Remaining Work");
+      for (const item of session.remainingWork) {
+        lines.push(`- ${typeof item === "string" ? item : item.description || JSON.stringify(item)}`);
+      }
+    }
+    if (session.nextRecommendedAction) {
+      lines.push("");
+      lines.push(`**Next:** ${session.nextRecommendedAction}`);
+    }
+    lines.push("");
+  }
+
+  // Human-required decisions
+  if (data.humanDecisions && data.humanDecisions.length > 0) {
+    lines.push("## Human Decisions Required");
+    lines.push("");
+    for (const d of data.humanDecisions) {
+      lines.push(`- **[${d.type}]** ${d.milestoneId}: ${d.description}`);
+    }
+    lines.push("");
+  }
+
+  // Lifecycle
   lines.push("## Lifecycle");
   lines.push("");
   lines.push("```text");
-  lines.push("start → checkpoint → session:close → prepare → validate → complete → ready-for-delivery");
+  lines.push("start → checkpoint → session:close → prepare → validate → complete → ready-for-delivery → delivered → merged → completed");
   lines.push("```");
   lines.push("");
 
@@ -430,12 +686,38 @@ function generateAgentHandoff(data) {
     lines.push("");
   }
 
+  // Drift warnings
+  if (data.drift && data.drift.length > 0) {
+    lines.push("## Roadmap Drift");
+    lines.push("");
+    for (const d of data.drift) {
+      lines.push(`- [${d.severity.toUpperCase()}] ${d.message}`);
+    }
+    lines.push("");
+  }
+
   if (data.staleness.length > 0) {
     lines.push("## Warnings");
     lines.push("");
     for (const w of data.staleness) {
       lines.push(`- [${w.severity.toUpperCase()}] ${w.message}`);
     }
+    lines.push("");
+  }
+
+  // Milestone dependency graph
+  if (data.milestoneDependencyGraph && data.milestoneDependencyGraph.edges.length > 0) {
+    lines.push("## Milestone Dependencies");
+    lines.push("");
+    lines.push("```text");
+    for (const edge of data.milestoneDependencyGraph.edges) {
+      const fromNode = data.milestoneDependencyGraph.nodes.find(n => n.id === edge.from);
+      const toNode = data.milestoneDependencyGraph.nodes.find(n => n.id === edge.to);
+      const fromStatus = fromNode ? ` [${fromNode.status}]` : "";
+      const toStatus = toNode ? ` [${toNode.status}]` : "";
+      lines.push(`${edge.from}${fromStatus} → ${edge.to}${toStatus}`);
+    }
+    lines.push("```");
     lines.push("");
   }
 
@@ -452,156 +734,359 @@ function generateAgentHandoff(data) {
 // ---- generate roadmap.html ----
 
 function generateRoadmapHtml(data) {
-  const maturityColors = {
-    "idea": "#94a3b8",
-    "designed": "#a78bfa",
-    "implemented": "#60a5fa",
-    "tested": "#34d399",
-    "simulation-validated": "#fbbf24",
-    "physically-validated": "#f59e0b",
-    "human-accepted": "#10b981",
-    "operational": "#22c55e",
-    "blocked": "#ef4444",
-    "deprecated": "#6b7280",
+  const total = data.stats.totalMilestones;
+  const completedCount = data.stats.completed;
+  const activeCount = data.stats.active;
+  const validCount = data.stats.totalValidations;
+  const progress = total > 0 ? Math.round(completedCount / total * 100) : 0;
+
+  function getBoardItems() {
+    const cols = { planned: [], active: [], blocked: [], ready: [], completed: [] };
+    for (const [status, items] of Object.entries(data.milestoneBoard)) {
+      for (const m of items) {
+        if (status === "idea" || status === "planned" || status === "ready") cols.planned.push(m);
+        else if (status === "active") cols.active.push(m);
+        else if (status === "blocked" || status === "paused") cols.blocked.push(m);
+        else if (status === "validating" || status === "ready-for-delivery" || status === "delivered") cols.ready.push(m);
+        else if (status === "completed" || status === "merged") cols.completed.push(m);
+      }
+    }
+    return cols;
+  }
+  const board = getBoardItems();
+
+  function formatTime(ts) {
+    try {
+      const d = new Date(ts);
+      return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    } catch { return ""; }
+  }
+  function formatDate(ts) {
+    try {
+      const d = new Date(ts);
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    } catch { return ""; }
+  }
+  function formatShortDate(ts) {
+    try {
+      const d = new Date(ts);
+      const today = new Date();
+      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+      if (d.toDateString() === today.toDateString()) return "Today";
+      if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    } catch { return ""; }
+  }
+  function formatFullDate(ts) {
+    try {
+      const d = new Date(ts);
+      return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    } catch { return ""; }
+  }
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const activityByDay = {};
+  for (const a of data.recentActivity) {
+    const key = (a.timestamp || "").slice(0, 10);
+    if (!activityByDay[key]) activityByDay[key] = [];
+    if (activityByDay[key].length < 30) activityByDay[key].push(a);
+  }
+  const sortedDays = Object.keys(activityByDay).sort().reverse().slice(0, 3);
+
+  const maturityBadge = {
+    "operational": "b-operational",
+    "tested": "b-tested",
+    "implemented": "b-implemented",
+    "simulation-validated": "b-simulation-validated",
+    "designed": "b-designed",
+    "idea": "b-designed",
+    "blocked": "b-blocked",
+    "physically-validated": "b-tested",
+    "human-accepted": "b-operational",
+    "deprecated": "b-implemented",
   };
 
-  const statusColors = {
-    "idea": "#94a3b8", "planned": "#a78bfa", "ready": "#60a5fa",
-    "active": "#22c55e", "paused": "#fbbf24", "blocked": "#ef4444",
-    "validating": "#f59e0b", "ready-for-delivery": "#10b981",
-    "delivered": "#3b82f6", "merged": "#8b5cf6", "completed": "#22c55e",
-    "cancelled": "#6b7280",
-  };
+  const errors = data.staleness.filter(w => w.severity === "error");
+  const warnings = data.staleness.filter(w => w.severity !== "error");
 
-  const maturityList = ["idea", "designed", "implemented", "tested", "simulation-validated", "physically-validated", "human-accepted", "operational", "blocked", "deprecated"];
-  const statusList = ["idea", "planned", "ready", "active", "paused", "blocked", "validating", "ready-for-delivery", "delivered", "merged", "completed", "cancelled"];
-
-  const html = `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Locaily Development Dashboard</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; }
-  h1 { font-size: 1.5rem; margin-bottom: 8px; color: #f8fafc; }
-  h2 { font-size: 1.1rem; margin: 20px 0 10px; color: #94a3b8; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
-  h3 { font-size: 0.95rem; margin: 12px 0 6px; color: #cbd5e1; }
-  .meta { font-size: 0.8rem; color: #64748b; margin-bottom: 16px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 20px; }
-  .card { background: #1e293b; border-radius: 8px; padding: 16px; border: 1px solid #334155; }
-  .card h3 { margin-top: 0; }
-  .stat { font-size: 2rem; font-weight: bold; color: #f8fafc; }
-  .stat-label { font-size: 0.8rem; color: #64748b; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; margin: 2px; }
-  .maturity-badge { color: white; }
-  .status-badge { color: white; }
-  .board { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
-  .board-col { background: #0f172a; border-radius: 6px; padding: 8px; }
-  .board-col h4 { font-size: 0.75rem; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
-  .board-item { background: #1e293b; padding: 6px 8px; border-radius: 4px; margin-bottom: 4px; font-size: 0.8rem; border-left: 3px solid #334155; }
-  .warning { padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; }
-  .warning-error { background: #450a0a; border: 1px solid #7f1d1d; }
-  .warning-warning { background: #451a03; border: 1px solid #78350f; }
-  .warning-info { background: #0c4a6e; border: 1px solid #075985; }
-  .activity-item { padding: 6px 0; border-bottom: 1px solid #1e293b; font-size: 0.85rem; }
-  .activity-time { color: #64748b; font-size: 0.75rem; }
-  .next-action { background: #0f766e; border: 1px solid #115e59; border-radius: 8px; padding: 16px; margin-top: 16px; }
-  .next-action h3 { color: #5eead4; margin-top: 0; }
+  :root{
+    --bg:#0a0e16;
+    --panel:#111826;
+    --panel-2:#161f30;
+    --border:#232d40;
+    --border-soft:#1b2333;
+    --text:#e8ecf3;
+    --text-dim:#8b95a8;
+    --text-faint:#5c6579;
+    --green:#34d399; --green-bg:#0f2a22; --green-text:#6ee7b7;
+    --blue:#60a5fa; --blue-bg:#101f33; --blue-text:#93c5fd;
+    --indigo:#a78bfa; --indigo-bg:#1e1a33; --indigo-text:#c4b5fd;
+    --amber:#fbbf24; --amber-bg:#2a2210; --amber-text:#fcd34d;
+    --slate:#94a3b8; --slate-bg:#1a2130; --slate-text:#cbd5e1;
+    --red:#f87171; --red-bg:#2a1414; --red-text:#fca5a5;
+    --teal:#2dd4bf; --teal-bg:#0e2624; --teal-text:#5eead4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    font-size:14px; line-height:1.5; padding:28px 32px 60px;
+  }
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  h1{font-size:22px; font-weight:600; margin:0 0 4px;}
+  h2{font-size:15px; font-weight:600; margin:0 0 12px; color:var(--text);}
+  .meta{color:var(--text-faint); font-size:12.5px; margin-bottom:22px;}
+  .meta span{color:var(--text-dim);}
+
+  .kpi-row{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px;}
+  .kpi{background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:16px 18px;}
+  .kpi .num{font-size:26px; font-weight:700; line-height:1;}
+  .kpi .lbl{color:var(--text-dim); font-size:12px; margin-top:6px;}
+  .kpi.total .num{color:var(--text);}
+  .kpi.active .num{color:var(--slate);}
+  .kpi.done .num{color:var(--green);}
+  .kpi.valid .num{color:var(--blue);}
+  .progress-track{grid-column:1/-1; background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:14px 18px;}
+  .progress-top{display:flex; justify-content:space-between; font-size:12.5px; color:var(--text-dim); margin-bottom:8px;}
+  .progress-bar{height:6px; background:var(--panel-2); border-radius:4px; overflow:hidden;}
+  .progress-fill{height:100%; background:linear-gradient(90deg,var(--teal),var(--green)); border-radius:4px;}
+
+  section{margin-bottom:30px;}
+
+  .sub-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px;}
+  .sub-card{background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; gap:10px;}
+  .sub-head{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .sub-name{font-weight:600; font-size:13.5px;}
+  .chip-row{display:flex; flex-wrap:wrap; gap:6px;}
+  .chip{font-size:11px; padding:3px 8px; border-radius:999px; border:1px solid var(--border-soft); color:var(--text-dim); background:var(--panel-2); white-space:nowrap;}
+
+  .badge{font-size:11px; font-weight:600; padding:3px 9px; border-radius:5px; white-space:nowrap;}
+  .b-operational{background:var(--green-bg); color:var(--green-text);}
+  .b-tested{background:var(--blue-bg); color:var(--blue-text);}
+  .b-implemented{background:var(--indigo-bg); color:var(--indigo-text);}
+  .b-simulation-validated{background:var(--amber-bg); color:var(--amber-text);}
+  .b-designed{background:var(--slate-bg); color:var(--slate-text);}
+
+  .layout{display:grid; grid-template-columns:2.1fr 1fr; gap:24px; align-items:start;}
+  .col-right{display:flex; flex-direction:column; gap:22px;}
+
+  .recommend{background:var(--teal-bg); border:1px solid #14403a; border-radius:10px; padding:16px 18px;}
+  .recommend .tag{color:var(--teal); font-size:11.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; margin-bottom:6px;}
+  .recommend .title{font-weight:600; font-size:14px;}
+  .recommend .sub{color:var(--text-dim); font-size:12.5px; margin-top:2px;}
+
+  .card{background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:16px 18px;}
+  .no-blockers{color:var(--green); font-size:13px; display:flex; align-items:center; gap:8px;}
+  .dot{width:7px; height:7px; border-radius:50%; background:currentColor; flex:0 0 auto;}
+
+  .val-summary-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--border-soft);}
+  .val-summary-row:last-child{border-bottom:none;}
+  .val-left{display:flex; flex-direction:column; gap:3px;}
+  .val-id{font-weight:600; font-size:13.5px;}
+  .val-profile{color:var(--text-faint); font-size:11.5px;}
+  .val-right{text-align:right; display:flex; flex-direction:column; gap:3px; align-items:flex-end;}
+  .val-score{font-size:13px; font-weight:600; color:var(--green);}
+  .val-date{font-size:11px; color:var(--text-faint);}
+  .val-note{margin-top:10px; padding-top:10px; border-top:1px dashed var(--border-soft); font-size:11.5px; color:var(--text-faint); display:flex; gap:7px;}
+
+  .board{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  .col-head{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+  .col-title{font-size:12px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; color:var(--text-dim);}
+  .col-count{font-size:11px; color:var(--text-faint); background:var(--panel-2); border-radius:999px; padding:1px 7px;}
+  .stack{display:flex; flex-direction:column; gap:8px;}
+  .m-card{background:var(--panel); border:1px solid var(--border-soft); border-left:3px solid var(--slate); border-radius:6px; padding:9px 11px;}
+  .m-id{font-size:12.5px; font-weight:600; font-family:ui-monospace,monospace;}
+  .m-desc{font-size:11.5px; color:var(--text-dim); margin-top:2px;}
+  .col-planned .m-card{border-left-color:var(--slate);}
+  .col-active .m-card{border-left-color:var(--blue);}
+  .col-blocked .m-card{border-left-color:var(--red);}
+  .col-ready .m-card{border-left-color:var(--teal);}
+  .col-done .m-card{border-left-color:var(--green);}
+  .col-done .stack{max-height:230px; overflow:hidden; position:relative; transition:max-height .25s ease;}
+  .col-done .stack.expanded{max-height:2000px;}
+  .col-done .stack.collapsed::after{content:""; position:absolute; bottom:0; left:0; right:0; height:40px; background:linear-gradient(180deg, rgba(10,14,22,0), var(--bg));}
+  .show-more{margin-top:8px; background:none; border:1px solid var(--border-soft); color:var(--text-dim); font-size:11.5px; padding:5px 10px; border-radius:6px; cursor:pointer; width:100%;}
+  .show-more:hover{border-color:var(--border); color:var(--text);}
+  .empty-col{font-size:11.5px; color:var(--text-faint); padding:8px 0;}
+
+  .day-label{font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.04em; margin:0 0 8px;}
+  .timeline{max-height:340px; overflow-y:auto; padding-right:4px;}
+  .t-row{display:grid; grid-template-columns:78px 1fr auto; gap:10px; align-items:center; padding:6px 0; border-bottom:1px solid var(--border-soft); font-size:12px;}
+  .t-row:last-child{border-bottom:none;}
+  .t-tag{font-size:10.5px; font-weight:600; padding:2px 7px; border-radius:4px; text-align:center;}
+  .t-delivery{background:var(--teal-bg); color:var(--teal-text);}
+  .t-validation{background:var(--blue-bg); color:var(--blue-text);}
+  .t-session{background:var(--slate-bg); color:var(--slate-text);}
+  .t-session-closed{background:var(--panel-2); color:var(--text-faint);}
+  .t-pr-created{background:var(--indigo-bg); color:var(--indigo-text);}
+  .t-id{color:var(--text-dim); font-family:ui-monospace,monospace; font-size:11.5px;}
+  .t-time{color:var(--text-faint); font-size:11px; text-align:right;}
+
+  @media (max-width:980px){
+    .layout{grid-template-columns:1fr;}
+    .board{grid-template-columns:repeat(2,1fr);}
+  }
 </style>
 </head>
 <body>
-<h1>Locaily Development Dashboard</h1>
-<div class="meta">Generated: ${data.generatedAt} | Branch: ${data.git.branch} | HEAD: ${data.git.head}</div>
 
-<div class="grid">
-  <div class="card">
-    <div class="stat">${data.stats.totalMilestones}</div>
-    <div class="stat-label">Total Milestones</div>
+  <h1>Locaily development dashboard</h1>
+  <div class="meta">Generated <span>${new Date(data.generatedAt).toISOString().replace("T", " ").slice(0, 19)} UTC</span> &middot; Branch <span class="mono">${data.git.branch || "unknown"}</span> &middot; HEAD <span class="mono">${data.git.head || "unknown"}</span></div>
+
+  <div class="kpi-row">
+    <div class="kpi total"><div class="num">${total}</div><div class="lbl">Total milestones</div></div>
+    <div class="kpi active"><div class="num">${activeCount}</div><div class="lbl">Active</div></div>
+    <div class="kpi done"><div class="num">${completedCount}</div><div class="lbl">Completed</div></div>
+    <div class="kpi valid"><div class="num">${validCount}</div><div class="lbl">Validation runs</div></div>
+    <div class="progress-track">
+      <div class="progress-top"><span>Overall progress</span><span>${completedCount} of ${total} milestones complete &middot; ${progress}%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+    </div>
   </div>
-  <div class="card">
-    <div class="stat" style="color: #22c55e">${data.stats.active}</div>
-    <div class="stat-label">Active</div>
+
+  <section>
+    <h2>Subsystem maturity</h2>
+    <div class="sub-grid">
+${data.subsystemMaturity.map(area => {
+  const areaClass = maturityBadge[area.maturity] || "b-designed";
+  const chips = area.initiatives.map(init => {
+    const label = init.maturity && init.maturity !== area.maturity
+      ? init.title + " &middot; " + init.maturity
+      : init.title;
+    return label;
+  });
+  return `      <div class="sub-card">
+        <div class="sub-head"><span class="sub-name">${area.title}</span><span class="badge ${areaClass}">${area.maturity}</span></div>
+        <div class="chip-row">${chips.map(c => `<span class="chip">${c}</span>`).join("")}</div>
+      </div>`;
+}).join("\n")}
+    </div>
+  </section>
+
+  <div class="layout">
+    <div class="col-left">
+      <section>
+        <h2>Milestone board</h2>
+        <div class="board">
+
+          <div class="col-planned">
+            <div class="col-head"><span class="col-title">Planned</span><span class="col-count">${board.planned.length}</span></div>
+            <div class="stack">
+${board.planned.length === 0 ? '              <div class="empty-col">No planned milestones</div>' :
+  board.planned.map(m => `              <div class="m-card"><div class="m-id">${m.id}</div><div class="m-desc">${m.title || ""}</div></div>`).join("\n")}
+            </div>
+          </div>
+
+${board.active.length > 0 ? `          <div class="col-active">
+            <div class="col-head"><span class="col-title">Active</span><span class="col-count">${board.active.length}</span></div>
+            <div class="stack">
+${board.active.map(m => `              <div class="m-card"><div class="m-id">${m.id}</div><div class="m-desc">${m.title || ""}</div></div>`).join("\n")}
+            </div>
+          </div>
+` : ""}
+          <div class="col-blocked">
+            <div class="col-head"><span class="col-title">Blocked</span><span class="col-count">${board.blocked.length}</span></div>
+            <div class="stack">
+${board.blocked.length === 0 ? '              <div class="empty-col">No blocked milestones</div>' :
+  board.blocked.map(m => `              <div class="m-card"><div class="m-id">${m.id}</div><div class="m-desc">${m.title || ""}</div></div>`).join("\n")}
+            </div>
+          </div>
+
+          <div class="col-ready">
+            <div class="col-head"><span class="col-title">Ready for delivery</span><span class="col-count">${board.ready.length}</span></div>
+            <div class="stack">
+${board.ready.length === 0 ? '              <div class="empty-col">No milestones ready</div>' :
+  board.ready.map(m => `              <div class="m-card"><div class="m-id">${m.id}</div><div class="m-desc">${m.title || ""}</div></div>`).join("\n")}
+            </div>
+          </div>
+
+          <div class="col-done">
+            <div class="col-head"><span class="col-title">Completed</span><span class="col-count">${board.completed.length}</span></div>
+            <div class="stack collapsed" id="doneStack">
+${board.completed.length === 0 ? '              <div class="empty-col">No completed milestones</div>' :
+  board.completed.map(m => `              <div class="m-card"><div class="m-id">${m.id}</div><div class="m-desc">${m.title || ""}</div></div>`).join("\n")}
+            </div>
+${board.completed.length > 5 ? `            <button class="show-more" id="toggleDone">Show all ${board.completed.length}</button>` : ""}
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <div class="col-right">
+
+${data.nextMilestone ? `      <div class="recommend">
+        <div class="tag">Recommended next</div>
+        <div class="title">${data.nextMilestone.milestone.id}</div>
+        <div class="sub">${data.nextMilestone.milestone.title || ""}</div>
+      </div>
+` : ""}
+      <section class="card">
+        <h2 style="margin-bottom:10px;">Blockers &amp; human decisions</h2>
+${errors.length === 0 ? '        <div class="no-blockers"><span class="dot"></span>No blocking issues</div>' :
+  errors.map(w => `        <div class="warning warning-error">${w.message}</div>`).join("\n")}
+${warnings.length > 0 ? warnings.map(w => `        <div class="warning warning-${w.severity}">${w.message}</div>`).join("\n") : ""}
+      </section>
+
+      <section class="card">
+        <h2 style="margin-bottom:2px;">Validation scoreboard</h2>
+${data.validationScoreboard.length === 0 ? '        <div style="color:var(--text-faint);">No validations recorded</div>' :
+  data.validationScoreboard.slice(-5).reverse().map(v => {
+    const totalChecks = v.requiredPassed + v.requiredFailed;
+    return `        <div class="val-summary-row">
+          <div class="val-left">
+            <span class="val-id mono">${v.milestoneId}</span>
+            <span class="val-profile">${v.profileId}</span>
+          </div>
+          <div class="val-right">
+            <span class="val-score">${v.requiredPassed} / ${totalChecks} checks passed</span>
+            <span class="val-date">${v.completedAt ? formatFullDate(v.completedAt) : "unknown"}</span>
+          </div>
+        </div>`;
+  }).join("\n")
+}
+${data.validationScoreboard.length > 0 && data.validationScoreboard.every(v => v.milestoneId === data.validationScoreboard[0].milestoneId) && data.validationScoreboard.length >= 3 ? `        <div class="val-note">All ${data.validationScoreboard.length} validation runs are for <span class="mono">&nbsp;${data.validationScoreboard[0].milestoneId}&nbsp;</span> with identical scores — worth checking coverage across milestones.</div>` : ""}
+      </section>
+
+      <section class="card">
+        <h2>Recent activity</h2>
+${sortedDays.length === 0 ? '        <div style="color:var(--text-faint);">No recent activity</div>' :
+  sortedDays.map(day => {
+    const dayLabel = day === todayKey ? "Today" : formatFullDate(day);
+    return `        <div class="day-label">${dayLabel}</div>
+        <div class="timeline">
+${activityByDay[day].map(a => {
+  const tagClass = "t-" + a.type;
+  return `          <div class="t-row"><span class="t-tag ${tagClass}">${a.type}</span><span class="t-id">${a.milestoneId || a.id || ""}</span><span class="t-time">${formatTime(a.timestamp)}</span></div>`;
+}).join("\n")}
+        </div>`;
+  }).join("\n")
+}
+      </section>
+
+    </div>
   </div>
-  <div class="card">
-    <div class="stat" style="color: #3b82f6">${data.stats.completed}</div>
-    <div class="stat-label">Completed</div>
-  </div>
-  <div class="card">
-    <div class="stat">${data.stats.totalValidations}</div>
-    <div class="stat-label">Validations</div>
-  </div>
-</div>
 
-<h2>Subsystem Maturity</h2>
-<div class="grid">
-${data.subsystemMaturity.map(area => `  <div class="card">
-    <h3>${area.title}</h3>
-    <span class="badge maturity-badge" style="background: ${maturityColors[area.maturity] || '#6b7280'}">${area.maturity}</span>
-    ${area.initiatives.map(init => `<div style="margin-top: 6px; font-size: 0.85rem;">${init.title} <span class="badge maturity-badge" style="background: ${maturityColors[init.maturity] || '#6b7280'}; font-size: 0.7rem;">${init.maturity}</span></div>`).join("\n    ")}
-  </div>`).join("\n")}
-</div>
-
-<h2>Milestone Board</h2>
-<div class="board">
-${statusList.filter(s => data.milestoneBoard[s] && data.milestoneBoard[s].length > 0).map(status => `  <div class="board-col">
-    <h4>${status} (${data.milestoneBoard[status].length})</h4>
-    ${data.milestoneBoard[status].map(m => `<div class="board-item" style="border-left-color: ${statusColors[status] || '#334155'}">${m.id}<br><span style="color: #64748b; font-size: 0.75rem;">${m.title || ''}</span></div>`).join("\n    ")}
-  </div>`).join("\n")}
-</div>
-
-<h2>Validation Scoreboard</h2>
-<div class="card">
-${data.validationScoreboard.length === 0 ? '<div style="color: #64748b;">No validations recorded</div>' :
-  `<table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
-    <tr style="border-bottom: 1px solid #334155; color: #94a3b8;">
-      <th style="text-align: left; padding: 4px;">Milestone</th>
-      <th style="text-align: left; padding: 4px;">Status</th>
-      <th style="text-align: left; padding: 4px;">Profile</th>
-      <th style="text-align: left; padding: 4px;">Passed</th>
-      <th style="text-align: left; padding: 4px;">Date</th>
-    </tr>
-    ${data.validationScoreboard.map(v => `<tr style="border-bottom: 1px solid #1e293b;">
-      <td style="padding: 4px;">${v.milestoneId}</td>
-      <td style="padding: 4px;"><span class="badge" style="background: ${v.status === 'passed' ? '#166534' : '#991b1b'}; color: white;">${v.status}</span></td>
-      <td style="padding: 4px;">${v.profileId}</td>
-      <td style="padding: 4px;">${v.requiredPassed}/${v.requiredPassed + v.requiredFailed}</td>
-      <td style="padding: 4px; color: #64748b;">${v.completedAt ? new Date(v.completedAt).toLocaleDateString() : 'unknown'}</td>
-    </tr>`).join("\n    ")}
-  </table>`}
-</div>
-
-<h2>Blockers and Human Decisions</h2>
-<div class="card">
-${data.staleness.filter(w => w.severity === 'error').length === 0 ? '<div style="color: #22c55e;">No blocking issues</div>' :
-  data.staleness.filter(w => w.severity === 'error').map(w => `<div class="warning warning-error">${w.message}</div>`).join("\n")}
-</div>
-
-<h2>Recent Activity</h2>
-<div class="card">
-${data.recentActivity.length === 0 ? '<div style="color: #64748b;">No recent activity</div>' :
-  data.recentActivity.map(a => `<div class="activity-item">
-    <span class="badge" style="background: #334155;">${a.type}</span>
-    ${a.milestoneId || a.id || ''}
-    <span class="activity-time">${a.timestamp ? new Date(a.timestamp).toLocaleString() : ''}</span>
-  </div>`).join("\n")}
-</div>
-
-${data.nextMilestone ? `
-<div class="next-action">
-  <h3>Recommended Next</h3>
-  <div>${data.nextMilestone.reason}: <strong>${data.nextMilestone.milestone.id}</strong> — ${data.nextMilestone.milestone.title || ''}</div>
-</div>` : ''}
-
-${data.staleness.filter(w => w.severity !== 'error').length > 0 ? `
-<h2>Warnings</h2>
-${data.staleness.filter(w => w.severity !== 'error').map(w => `<div class="warning warning-${w.severity}">${w.message}</div>`).join("\n")}` : ''}
+${board.completed.length > 5 ? `<script>
+  const stack = document.getElementById('doneStack');
+  const btn = document.getElementById('toggleDone');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const expanded = stack.classList.toggle('expanded');
+      stack.classList.toggle('collapsed', !expanded);
+      btn.textContent = expanded ? 'Show less' : 'Show all ${board.completed.length}';
+    });
+  }
+</script>` : ""}
 
 </body>
 </html>`;
-
-  return html;
 }
 
 // ---- main ----
@@ -611,6 +1096,14 @@ function main() {
 
   const state = loadState();
   const data = generateRoadmapData(state);
+
+  // Attach session data for handoff enrichment
+  const activeSession = state.sessions.find(s => s.status === "active") || null;
+  const lastPausedSession = !activeSession
+    ? state.sessions.filter(s => s.status === "paused").sort((a, b) => (b.closedAt || "").localeCompare(a.closedAt || ""))[0] || null
+    : null;
+  data._activeSession = activeSession;
+  data._lastPausedSession = lastPausedSession;
 
   // Ensure generated directory exists
   fs.mkdirSync(GENERATED_DIR, { recursive: true });
