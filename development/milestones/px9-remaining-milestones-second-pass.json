@@ -1,0 +1,81 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "px9-remaining-milestones-second-pass",
+  "title": "PX Remaining Milestones Second Pass — Evidence Execution and Canonical Fixes",
+  "status": "active",
+  "type": "remediation",
+  "priority": "critical",
+  "purpose": "Resolve all findings from the PX5–PX7 independent audit: execute PX6 validation evidence (tester protocol dry-run, second workflow, relay pilot blocker), fix PX7 canonical status and broken screenshot placeholder, tighten PX5 dependency check, and add PX milestones to roadmap",
+  "problem": "PX5–PX7 audit revealed: (1) PX6 marked completed but no tester has run the protocol, no relay pilot executed, no second workflow used with evidence; (2) PX7 milestone JSON status is 'planned' but criteria are 'satisfied'; (3) PX5 dependency check is cosmetic; (4) roadmap has no PX milestones listed",
+  "scope": {
+    "included": [
+      "PX6: Execute internal dry-run of tester protocol (demo workflow) and record evidence with metric tracking",
+      "PX6: Execute accessibility second workflow on real URL via API and record Track Run Record evidence",
+      "PX6: Document relay pilot blocker with explicit evidence (no second physical device available)",
+      "PX6: Revert milestone status from 'completed' to 'active' until execution evidence exists",
+      "PX6: Update validation-evidence-index.md with all new evidence and execution results",
+      "PX7: Update milestone JSON status from 'planned' to 'completed' with completedAt timestamp",
+      "PX7: Fix broken README screenshot placeholder reference (remove broken image link or create placeholder directory)",
+      "PX5: Tighten accept-clean-machine.ps1 dependency check to verify a known installed dependency file",
+      "PX1: Add PX milestone references (px1-px9) to roadmap.json under Product Experience area"
+    ],
+    "excluded": [
+      "External tester recruitment (requires human testers, not in scope)",
+      "Physical two-device relay pilot execution (requires second physical device)",
+      "Full distributable package (zip/exe)",
+      "macOS/Linux install scripts",
+      "Backup/restore script for PX5",
+      "New product features beyond audit remediation"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "ac-px6-tester-dry-run",
+      "description": "Internal dry-run of tester protocol completed with recorded metrics (time, completion, feedback)"
+    },
+    {
+      "id": "ac-px6-second-workflow",
+      "description": "Accessibility second workflow executed on real URL with Track Run Record evidence published"
+    },
+    {
+      "id": "ac-px6-relay-blocker",
+      "description": "Relay pilot blocker documented with explicit evidence in validation-evidence-index"
+    },
+    {
+      "id": "ac-px6-status",
+      "description": "PX6 milestone status reverted to 'active' with updated purpose reflecting current state"
+    },
+    {
+      "id": "ac-px7-status",
+      "description": "PX7 milestone JSON status changed to 'completed' with completedAt timestamp set"
+    },
+    {
+      "id": "ac-px7-screenshot",
+      "description": "README no longer has broken screenshot image link (placeholder removed or fixed)"
+    },
+    {
+      "id": "ac-px5-deps",
+      "description": "accept-clean-machine.ps1 dependency check verifies a known installed dependency file exists"
+    },
+    {
+      "id": "ac-px1-roadmap",
+      "description": "Roadmap.json includes PX milestone references for px1 through px9 under Product Experience area"
+    },
+    {
+      "id": "ac-validation",
+      "description": "npm run dev:status passes without ERROR-level contradictions; all existing tests still pass"
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [
+    "px5-tester-package",
+    "px6-external-validation-program",
+    "px7-organic-discovery-loop"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-07-26T00:00:00.000Z",
+  "startedAt": "2026-07-26T00:00:00.000Z",
+  "completedAt": null,
+  "mergedAt": null
+}

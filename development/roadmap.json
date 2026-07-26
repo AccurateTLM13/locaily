@@ -265,7 +265,7 @@
           "id": "truth-surfaces",
           "title": "Canonical Truth Surfaces",
           "description": "One version of reality across docs, versions, and status generators",
-          "maturity": "designed",
+          "maturity": "operational",
           "milestoneIds": [
             "px1-canonical-product-status"
           ]
@@ -274,7 +274,7 @@
           "id": "lan-security",
           "title": "LAN Security Hard Gate",
           "description": "Fail-closed non-loopback startup and relay auth enforcement",
-          "maturity": "designed",
+          "maturity": "operational",
           "milestoneIds": [
             "px2-lan-security-hard-gate"
           ]
@@ -283,7 +283,7 @@
           "id": "golden-path",
           "title": "Golden Path Run Inspector",
           "description": "One polished demo path proving capability routing and evidence",
-          "maturity": "designed",
+          "maturity": "operational",
           "milestoneIds": [
             "px3-golden-path-run-inspector"
           ]
@@ -292,7 +292,7 @@
           "id": "unified-shell",
           "title": "Unified Application Shell",
           "description": "Merge console and operator into one progressive shell",
-          "maturity": "designed",
+          "maturity": "operational",
           "milestoneIds": [
             "px4-unified-locaily-shell"
           ]
@@ -301,7 +301,7 @@
           "id": "tester-package",
           "title": "Tester Package",
           "description": "Windows-first guided setup and clean-machine acceptance",
-          "maturity": "designed",
+          "maturity": "operational",
           "milestoneIds": [
             "px5-tester-package"
           ]
@@ -310,7 +310,7 @@
           "id": "external-validation",
           "title": "External Validation Program",
           "description": "Five testers, two-device relay pilot, second real workflow",
-          "maturity": "designed",
+          "maturity": "active",
           "milestoneIds": [
             "px6-external-validation-program"
           ]
@@ -319,9 +319,27 @@
           "id": "organic-discovery",
           "title": "Organic Discovery Loop",
           "description": "Intent pages, evidence content, tutorials, GitHub landing",
-          "maturity": "designed",
+          "maturity": "completed",
           "milestoneIds": [
             "px7-organic-discovery-loop"
+          ]
+        },
+        {
+          "id": "audit-second-pass",
+          "title": "PX Audit Second Pass",
+          "description": "Resolve PX1-PX4 audit findings: documentation, routing metadata, shell structured UI",
+          "maturity": "implemented",
+          "milestoneIds": [
+            "px8-audit-second-pass"
+          ]
+        },
+        {
+          "id": "remaining-milestones-second-pass",
+          "title": "PX Remaining Milestones Second Pass",
+          "description": "PX6 evidence execution, PX7/PX5/PX1 canonical fixes",
+          "maturity": "active",
+          "milestoneIds": [
+            "px9-remaining-milestones-second-pass"
           ]
         }
       ]
@@ -365,6 +383,16 @@
     "px7-organic-discovery-loop": [
       "px1-canonical-product-status",
       "px3-golden-path-run-inspector"
+    ],
+    "px8-audit-second-pass": [
+      "px1-canonical-product-status",
+      "px3-golden-path-run-inspector",
+      "px4-unified-locaily-shell"
+    ],
+    "px9-remaining-milestones-second-pass": [
+      "px5-tester-package",
+      "px6-external-validation-program",
+      "px7-organic-discovery-loop"
     ]
   }
 }

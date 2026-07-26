@@ -63,6 +63,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **All 4 new tracks in shadow enforcement** - collecting routing evidence for future enforcement
 - **Operator Console UI** - `companion/operator/index.html` served at `GET /operator`. Confirmation dialog cancel/Escape correctly aborts destructive job actions. Enqueue form sends `executionType` to production `/jobs`. 34 tests in `scripts/test-operator-console.js`; 11 confirm/outcome regression tests in `scripts/test-operator-confirm.js`.
 - **Security Policy Foundation** - execution-security documentation (`docs/security/README.md`, `THREAT-MODEL.md`, `EXECUTION-POLICY.md`, `APPROVAL-RULES.md`, `CAPABILITY-BOUNDARIES.md`, `NOPE-EVALUATION.md`) and machine-readable policy definitions (`policies/default-execution-policy.json`, `action-request.schema.json`, `policy-decision.schema.json`). Policy documented; execution policy (filesystem, shell, network) not yet enforced at runtime.
+- **LAN Security Hard Gate** - non-loopback binding requires `RELAY_TOKEN`, `LAN_MODE=1`, `RELAY_ALLOWLIST`, and `RELAY_CAPABILITY_ALLOWLIST`; server refuses startup otherwise. All relay endpoints enforce Bearer token authentication when `RELAY_TOKEN` is configured. 20/20 security gate tests pass.
 
 ## What Is Partial
 
@@ -77,7 +78,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Console validation** - local validation UI exists; not a finished product surface
 - **Fallback ladder** - partial (`retry_same_model_once`); no full escalation handler
 - **Step input mapping** - declarative `input_map` on all track steps; legacy step-id fallbacks removed from `step-input.js`
-- **Relay trust boundary** — no authentication, pairing, or signed requests between orchestrator and relay nodes; current design is trusted-development-network only
+- **Relay trust boundary** — API-level Bearer token authentication exists (all relay endpoints require auth when `RELAY_TOKEN` is set); node-to-node trust boundary (pairing, signed requests, credential rotation) remains unimplemented — current design is trusted-development-network only for inter-node trust
 - **Planned vs. actual placement** — placement plan shows intended execution, but silent fallback to local execution does not update the placement record
 - **`local_first` capability source** — treats unknown capabilities as locally capable unless caller provides explicit `localCapableRoles`
 
@@ -89,7 +90,6 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **End-to-end Lighthouse Handoff product bridge** - extension discovers Local Brain, CORS, report comparison, export
 - **Workflow Pack contract** - complete distributable unit (tracks + tools + prompts + schemas + fixtures)
 - **Relay Node trust boundary** - no authentication, pairing, or signed requests (M09A candidate)
-- **LAN Security Hard Gate** - non-loopback binding requires `RELAY_TOKEN`, `LAN_MODE=1`, `RELAY_ALLOWLIST`, and `RELAY_CAPABILITY_ALLOWLIST`; server refuses startup otherwise. All relay endpoints enforce Bearer token authentication when `RELAY_TOKEN` is configured.
 - **Central execution gate** - policy documented but not enforced at runtime (applies to filesystem, shell, network actions — separate from LAN security)
 
 ## Lifecycle Infrastructure

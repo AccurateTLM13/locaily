@@ -13,8 +13,10 @@ This index catalogs all published validation evidence for Locaily milestones.
 | px3 Golden Path Run Inspector | [test-golden-path.cjs](../../scripts/test-golden-path.cjs) (19/19) | Passing |
 | px4 Unified Shell | [test-unified-shell.cjs](../../scripts/test-unified-shell.cjs) (17/17) | Passing |
 | px5 Tester Package | [accept-clean-machine.ps1](../../scripts/accept-clean-machine.ps1) (13/13) | Passing |
-| px6 External Validation | [relay-pilot-runbook.md](./relay-pilot-runbook.md), [second-workflow-evidence.md](./second-workflow-evidence.md) | Runbook ready |
+| px6 External Validation | [px6-execution-evidence.md](./px6-execution-evidence.md), [relay-pilot-runbook.md](./relay-pilot-runbook.md), [second-workflow-evidence.md](./second-workflow-evidence.md) | Evidence execution (dry-run, a11y workflow completed); relay pilot blocked (single device) |
 | px7 Organic Discovery | README, intent pages, tutorials | Published |
+| px8 Audit Second Pass | [test-unified-shell.cjs](../../scripts/test-unified-shell.cjs) (17/17), [test-golden-path.cjs](../../scripts/test-golden-path.cjs) (19/19) | Passing |
+| px9 Remaining Milestones | [px6-execution-evidence.md](./px6-execution-evidence.md) | Active |
 
 ## M Series — Milestone Evidence
 

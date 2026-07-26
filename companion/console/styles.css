@@ -817,6 +817,13 @@ input {
   color: var(--muted);
 }
 
+.inspector-step__routing {
+  margin: 4px 0 0 28px;
+  font-size: var(--text-xs);
+  color: var(--locaily-green);
+  font-style: italic;
+}
+
 .inspector-step__detail {
   margin: 4px 0 0 28px;
   font-size: var(--text-xs);

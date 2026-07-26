@@ -386,6 +386,13 @@ function renderInspector(run) {
       card.append(meta);
     }
 
+    if (step.routingReason) {
+      const routing = document.createElement("div");
+      routing.className = "inspector-step__routing";
+      routing.textContent = `\u2192 ${step.routingReason}`;
+      card.append(routing);
+    }
+
     if (step.message || step.error) {
       const detail = document.createElement("div");
       detail.className = "inspector-step__detail";

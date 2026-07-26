@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "px7-organic-discovery-loop",
   "title": "Organic Discovery and Evidence Content Loop",
-  "status": "planned",
+  "status": "completed",
   "type": "documentation",
   "priority": "medium",
   "purpose": "Improve organic discovery with search-intent pages, public Benchmark Lab evidence pages, outcome tutorials, GitHub landing polish, and an evidence-backed content loop.",
@@ -57,7 +57,7 @@
   "blockers": [],
   "lifecycleRef": null,
   "createdAt": "2026-07-25T03:53:40.372Z",
-  "startedAt": null,
-  "completedAt": null,
+  "startedAt": "2026-07-25T03:53:40.372Z",
+  "completedAt": "2026-07-26T00:00:00.000Z",
   "mergedAt": null
 }

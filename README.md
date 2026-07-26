@@ -9,7 +9,7 @@
 > **Local-first AI coordination stack.** One coordinator, many capabilities.
 > Run a demo in 5 minutes — no cloud, no API keys, no Ollama required.
 
-![Demo screenshot placeholder — insert GIF or screenshot of the Home screen with the Run Example Workflow button](docs/05-product/images/demo-screenshot-placeholder.png)
+<!-- Demo screenshot placeholder — add a GIF or screenshot of the Home screen with the Run Example Workflow button -->
 
 A local-first AI coordination stack. One coordinator, many capabilities.
 

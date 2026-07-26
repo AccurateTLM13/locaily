@@ -61,9 +61,10 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
       const mode = runSnapshot.mode;
       const url = runSnapshot.url;
       const model = runSnapshot.model || null;
+      const isDemo = mode === "demo";
 
       currentStep = "preflight";
-      await startStep(runId, currentStep);
+      await startStep(runId, currentStep, { routingReason: "System readiness check (deterministic)" });
       const status = await getStatusSnapshot(model);
       const providerModel = status.model && status.model.name ? status.model.name : null;
       const preflightWarnings = validatePreflight(status, mode, model);
@@ -71,8 +72,7 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
       await finishStep(runId, currentStep, preflightWarnings.length > 0 ? "warning" : "passed", "System check complete.");
 
       currentStep = "pagespeed_capture";
-      await startStep(runId, currentStep);
-      const isDemo = mode === "demo";
+      await startStep(runId, currentStep, { routingReason: isDemo ? "Uses built-in demo fixture (no PageSpeed API)" : "PageSpeed API or pasted report" });
       const pageSpeed = isDemo
         ? { raw: DEMO_FIXTURE.raw, slim: { ...DEMO_FIXTURE, raw: undefined } }
         : runSnapshot.pastedReport
@@ -94,7 +94,7 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
       );
 
       currentStep = "slim_input";
-      await startStep(runId, currentStep);
+      await startStep(runId, currentStep, { routingReason: "Extract slim input from raw PageSpeed (deterministic transform)" });
       const slimArtifact = await runStore.writeJsonArtifact(runId, "lighthouse-slim", pageSpeed.slim);
       await runStore.updateRun(runId, (run) => {
         run.artifacts.slimInput = slimArtifact;
@@ -103,7 +103,7 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
       await finishStep(runId, currentStep, "passed", "Slim Lighthouse input saved.");
 
       currentStep = "analyze_report";
-      await startStep(runId, currentStep);
+      await startStep(runId, currentStep, { routingReason: model ? `Routed to model: ${model}` : "Deterministic analyze path (no model override)" });
       const analyzeEnvelope = await runAnalyzeReport(pageSpeed.slim, mode, model);
       const analyzeArtifact = await runStore.writeJsonArtifact(runId, "analyze-report", analyzeEnvelope.body);
       await runStore.updateRun(runId, (run) => {
@@ -114,7 +114,7 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
       await finishStep(runId, currentStep, "passed", "Analyze report completed.");
 
       currentStep = "model_provenance";
-      await startStep(runId, currentStep);
+      await startStep(runId, currentStep, { routingReason: "Record which model executed analyze (provenance audit)" });
       const analyzeProvenance = buildModelProvenance({
         requestedModel: model,
         analyzeEnvelope,
@@ -151,7 +151,7 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
       );
 
       currentStep = "compose_handoff";
-      await startStep(runId, currentStep);
+      await startStep(runId, currentStep, { routingReason: isDemo ? "Deterministic compose (demo mode)" : "Orchestrated compose step" });
       const composeInput = buildComposeInput(pageSpeed.slim, analyzeEnvelope.body.result);
       const composeEnvelope = await runComposeHandoff(composeInput, mode);
       const composeArtifact = await runStore.writeJsonArtifact(runId, "compose-handoff", composeEnvelope.body);
@@ -165,7 +165,7 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
       await finishStep(runId, currentStep, memoryWarnings.timeline.length > 0 ? "warning" : "passed", "Handoff composed.");
 
       currentStep = "schema_validation";
-      await startStep(runId, currentStep);
+      await startStep(runId, currentStep, { routingReason: "Validate against lighthouse-handoff schema (deterministic rule)" });
       const schemaEvidence = await validateHandoffSchema(composeEnvelope.body.result);
       const verifyEnvelope = await runVerifyHandoff(composeEnvelope.body.result);
       assertEnvelopeOk(verifyEnvelope, "verify-handoff");
@@ -178,7 +178,7 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
       }
 
       currentStep = "metric_preservation";
-      await startStep(runId, currentStep);
+      await startStep(runId, currentStep, { routingReason: "Check metric preservation between PageSpeed and handoff (deterministic rule)" });
       const metricEvidence = checkMetricPreservation(composeEnvelope.body.result, pageSpeed.slim);
       await finishStep(runId, currentStep, metricEvidence.preserved ? "passed" : "failed", metricEvidence.message);
 
@@ -187,7 +187,7 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
       }
 
       currentStep = "privacy_audit";
-      await startStep(runId, currentStep);
+      await startStep(runId, currentStep, { routingReason: "Audit for private memory in payload (deterministic rule)" });
       const privacyEvidence = await checkPrivacyAudit(listAuditEvents);
       await finishStep(runId, currentStep, privacyEvidence.ok ? "passed" : "failed", privacyEvidence.message);
 
@@ -196,7 +196,7 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
       }
 
       currentStep = "artifact_save";
-      await startStep(runId, currentStep);
+      await startStep(runId, currentStep, { routingReason: "Save artifacts and finalize run (deterministic)" });
       const handoffMarkdown = composeEnvelope.body.result.markdown || "";
       const finalSummary = buildFinalSummary({
         runId,
@@ -347,18 +347,20 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
     }
   }
 
-  async function startStep(runId, stepId) {
+  async function startStep(runId, stepId, extra = {}) {
     await runStore.setStep(runId, stepId, {
       status: "running",
       message: null,
-      error: null
+      error: null,
+      ...extra
     });
   }
 
-  async function finishStep(runId, stepId, status, message) {
+  async function finishStep(runId, stepId, status, message, extra = {}) {
     await runStore.setStep(runId, stepId, {
       status,
-      message
+      message,
+      ...extra
     });
   }
 

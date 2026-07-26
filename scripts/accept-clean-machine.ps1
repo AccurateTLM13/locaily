@@ -34,11 +34,14 @@ if ($nodeCmd) {
 # 2. Check npm install
 Write-Host "[2] Checking dependencies..."
 $nm = Join-Path $testRoot "node_modules"
-$hasDeps = (Test-Path (Join-Path $nm ".package-lock.json")) -or (Test-Path $nm)
+$hasLock = Test-Path (Join-Path $nm ".package-lock.json")
+$knownDep = Test-Path (Join-Path (Join-Path $nm "consola") "package.json")
+$hasDeps = $hasLock -and $knownDep
 if (-not $hasDeps) {
-  Write-Host "  Dependencies not installed. Run install-windows.ps1 first." -ForegroundColor Yellow
+  Write-Host "  Dependencies not installed or incomplete. Run install-windows.ps1 first." -ForegroundColor Yellow
+  Check "node_modules fully installed" $false
 } else {
-  Check "node_modules exists" $hasDeps
+  Check "node_modules fully installed" $true
 }
 
 # 3. Check config

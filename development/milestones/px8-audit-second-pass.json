@@ -1,0 +1,86 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "px8-audit-second-pass",
+  "title": "PX Audit Second Pass — Documentation Corrections, Run Inspector Enrichment, and Shell Structured UI",
+  "status": "completed",
+  "type": "remediation",
+  "priority": "critical",
+  "purpose": "Resolve all findings from the PX1–PX4 independent audit: fix canonical status contradictions, enrich Run Inspector routing metadata, and replace shell placeholder JSON dumps with structured section renderers",
+  "problem": "The PX1–PX4 independent audit revealed: (1) current-state.md still lists LAN Security Hard Gate as not built when PX2 implemented it, (2) dev:status ERROR about project-state active/idle consistency not caught, (3) Run Inspector missing routing/qualification reason fields, (4) shell is a navigation wrapper over raw JSON previews with 8/11 sections using placeholder renderers and no Run Inspector drill-down",
+  "scope": {
+    "included": [
+      "Fix current-state.md: move LAN Security Hard Gate from 'What Is Not Built Yet' to 'What Works'",
+      "Fix current-state.md: clarify relay trust boundary line to distinguish API-level auth from node-to-node trust",
+      "Fix dev:status drift detection to cover project-state active/idle consistency",
+      "Add routing/qualification reason metadata to console run step records",
+      "Replace shell renderPlaceholder() for Runs, Workflows, Nodes, Evidence, Reviews with structured renderers",
+      "Integrate Run Inspector drill-down into shell's Runs section",
+      "Enhance shell demo result with evidence preview and export action",
+      "Implement Settings section in shell",
+      "Unify status indicator styling between shell and console",
+      "Add keyboard navigation support to shell nav links"
+    ],
+    "excluded": [
+      "New product features or workflows beyond audit remediation",
+      "Rewriting the Benchmark Lab UI",
+      "Physical multi-device pilot execution",
+      "New memory capture pipelines",
+      "Mobile-native app",
+      "Reopening accepted PX2 (LAN Security Hard Gate) scope"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "ac-px1-current-state",
+      "description": "current-state.md no longer lists LAN Security Hard Gate under 'What Is Not Built Yet'; it appears under 'What Works' with correct context"
+    },
+    {
+      "id": "ac-px1-relay-clarify",
+      "description": "current-state.md relay trust boundary line distinguishes API-level Bearer auth (built) from node-to-node trust boundary (not built)"
+    },
+    {
+      "id": "ac-px1-drift-detection",
+      "description": "dev:status detects and ERRORs when project-state status is 'active' but no milestone has status 'active'"
+    },
+    {
+      "id": "ac-px3-routing-metadata",
+      "description": "Console run step records include routing/qualification reason fields where applicable"
+    },
+    {
+      "id": "ac-px4-structured-runs",
+      "description": "Shell Runs section shows structured Run Inspector with drill-down to individual run details"
+    },
+    {
+      "id": "ac-px4-structured-sections",
+      "description": "Shell Workflows, Nodes, Evidence, and Reviews sections show structured data instead of raw JSON placeholders"
+    },
+    {
+      "id": "ac-px4-demo-enhanced",
+      "description": "Shell demo result shows evidence preview and provides export action"
+    },
+    {
+      "id": "ac-px4-settings",
+      "description": "Shell Settings section renders meaningful UI content"
+    },
+    {
+      "id": "ac-px4-status-unified",
+      "description": "Shell and console use consistent status indicator styling"
+    },
+    {
+      "id": "ac-validation",
+      "description": "npm run dev:status passes without ERROR-level contradictions introduced by this work; all existing shell and golden path tests still pass"
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [
+    "px1-canonical-product-status",
+    "px3-golden-path-run-inspector",
+    "px4-unified-locaily-shell"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-07-26T00:00:00.000Z",
+  "startedAt": "2026-07-26T00:00:00.000Z",
+  "completedAt": null,
+  "mergedAt": null
+}
