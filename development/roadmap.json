@@ -213,7 +213,7 @@
       "id": "development-control-plane",
       "title": "Development Control Plane",
       "description": "Agent-neutral development coordination",
-      "maturity": "implemented",
+      "maturity": "active",
       "initiatives": [
         {
           "id": "lifecycle-infrastructure",
@@ -243,6 +243,15 @@
             "milestone-completion-delivery-workflow",
             "dcp-phase3a",
             "dcp-phase3b"
+          ]
+        },
+        {
+          "id": "canonical-safe-runner",
+          "title": "Canonical Queue and Safe Runner",
+          "description": "Connect development milestones to the bounded supervisor and worker loop without automatic delivery",
+          "maturity": "active",
+          "milestoneIds": [
+            "dev-loop-01-canonical-queue-safe-runner"
           ]
         }
       ]
@@ -319,7 +328,7 @@
           "id": "external-validation",
           "title": "External Validation Program",
           "description": "Five testers, two-device relay pilot, second real workflow",
-          "maturity": "active",
+          "maturity": "blocked",
           "milestoneIds": [
             "px6-external-validation-program"
           ]
@@ -346,7 +355,7 @@
           "id": "remaining-milestones-second-pass",
           "title": "PX Remaining Milestones Second Pass",
           "description": "PX6 evidence execution, PX7/PX5/PX1 canonical fixes",
-          "maturity": "active",
+          "maturity": "completed",
           "milestoneIds": [
             "px9-remaining-milestones-second-pass"
           ]
@@ -403,6 +412,9 @@
       "px6-external-validation-program",
       "px7-organic-discovery-loop"
     ],
-    "ctk-01-capability-trigger-kernel": []
+    "ctk-01-capability-trigger-kernel": [],
+    "dev-loop-01-canonical-queue-safe-runner": [
+      "ctk-01-capability-trigger-kernel"
+    ]
   }
 }

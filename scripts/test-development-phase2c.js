@@ -9,8 +9,10 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
+const { installDevelopmentStateGuard } = require("./test-development-state-guard");
 
 const PROJECT_ROOT = path.resolve(__dirname, "..");
+installDevelopmentStateGuard(PROJECT_ROOT, ["docs/07-progress/work-closeout.json"]);
 const DEVELOPMENT_DIR = path.join(PROJECT_ROOT, "development");
 const MILESTONES_DIR = path.join(DEVELOPMENT_DIR, "milestones");
 const SESSIONS_DIR = path.join(DEVELOPMENT_DIR, "sessions");

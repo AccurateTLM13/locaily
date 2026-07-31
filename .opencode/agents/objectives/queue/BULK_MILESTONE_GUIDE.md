@@ -1,24 +1,24 @@
 # Locaily Bulk Milestone Queue Guide
 
-## Drop Location
+## Canonical Queue
 
-Place milestone files in:
-
-```text
-.opencode/agents/objectives/queue/
-```
-
-The sequencer processes Markdown files alphabetically. Use a zero-padded numeric prefix:
+Milestones are canonical only under:
 
 ```text
-06-trusted-relay-execution.md
-07-durable-background-execution.md
-08-operator-control-plane.md
-09-physical-multi-device-pilot.md
-10-locaily-v1-packaging.md
+development/milestones/*.json
 ```
 
-Do not place general notes or non-objective Markdown files in the queue unless the sequencer explicitly ignores them. Keep `TEMPLATE.md` outside the executable queue or update the sequencer to skip it.
+Set a reviewed milestone to `ready`, with completed dependencies and no
+blockers, then inspect or run it with:
+
+```powershell
+npm.cmd run dev:loop -- --dry-run
+npm.cmd run dev:loop
+```
+
+This directory is a legacy compatibility/archive surface. Markdown files here
+are not consumed by `dev:loop` and must not be used to represent current
+milestone state.
 
 ## Recommended Size
 
@@ -57,11 +57,12 @@ Each milestone should answer:
 
 ## Suggested Queue Process
 
-1. Add one milestone first and run the sequencer.
-2. Inspect the archived objective, branch, commits, test output, and supervisor review.
-3. Fix controller or objective-format problems before loading the remaining files.
-4. Load the remaining milestones in numeric order.
-5. Require the sequencer to stop on failed or hand-back objectives unless explicitly configured otherwise.
+1. Add or review one JSON milestone under `development/milestones/`.
+2. Mark it `ready` only after approval, dependencies, and blockers are resolved.
+3. Run `npm.cmd run dev:loop -- --dry-run` and verify the selected ID.
+4. Run `npm.cmd run dev:loop`.
+5. Inspect the preserved branch, session, closeout, validation, and supervisor review.
+6. Resolve the completion approval or stop condition before running later work.
 
 ## Recommended Controller Safeguards
 

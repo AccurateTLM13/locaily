@@ -19,7 +19,7 @@ invoking a coding-agent CLI (opencode by default).
 | `supervisor/` | Supervisor agent instructions (`SYSTEM.md`, `POLICY.md`, `PROMPT.md`) |
 | `worker/` | Worker agent instructions |
 | `objectives/active-objective.md` | The larger goal + completion conditions |
-| `objectives/queue/` | Future objectives waiting to become active |
+| `objectives/queue/` | Legacy Markdown queue retained for compatibility; not canonical |
 | `tasks/active-task.md` | The single task the worker is working on right now |
 | `tasks/completed/`, `tasks/failed/` | Archived task records |
 | `state/run-state.json` | Machine-readable loop state (iteration, status, blocker) |
@@ -38,8 +38,15 @@ invoking a coding-agent CLI (opencode by default).
 ## Run it
 
 ```powershell
-node .opencode/agents/controller/supervisor.js
+npm.cmd run dev:loop -- --dry-run
+npm.cmd run dev:loop
 ```
+
+The canonical queue is `development/milestones/*.json`. Only `active` or
+explicitly `ready` milestones with completed dependencies and no blockers are
+runnable. The controller materializes the selected JSON milestone into
+`active-objective.md`, runs the existing supervisor/worker loop on a dedicated
+branch, and stops before push or merge.
 
 State flows through **files**, not CLI stdout: the agents read/write the files
 under `state/`, `tasks/`, and `objectives/`; the controller reads those files to

@@ -1,12 +1,12 @@
 # Current Sprint
 
-**Updated:** 2026-07-31 (CTK-01 completion audit)
+**Updated:** 2026-07-31 (DEV-LOOP-01 completion)
 
 ## Status
 
-CTK-01 Capability Trigger Kernel is ready for delivery review. Its implementation, acceptance suite, full offline suite, and delivery lifecycle gates are green on the isolated CTK-only branch.
+DEV-LOOP-01 is implementation-complete on `codex/dev-loop-01`. Canonical queue selection, safe Git behavior, stop contracts, lifecycle evidence, and the complete offline repository suite pass.
 
-Do not begin another milestone until CTK-01 is reviewed. CTK-02 remains planned and inactive. DBVT SEO Audit integration is excluded.
+CTK-01 is locally merged into this branch's base but is not public. Do not begin another milestone until DEV-LOOP-01 is reviewed. CTK-02 remains inactive and DBVT SEO Audit integration is excluded.
 
 ## Recently Completed
 

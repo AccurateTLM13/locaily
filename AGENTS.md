@@ -10,7 +10,7 @@ This file is the single source of truth for agent behavior. Do not duplicate it.
 
 1. Run `npm run dev:status` to see current project state.
 2. Read `development/project-state.json` for the canonical pointer.
-3. If a milestone is active, read its manifest in `development/milestones/active/`.
+3. If a milestone is active, read its manifest at `development/milestones/<id>.json`.
 4. Do not begin unscoped work.
 5. Do not create a second active milestone without explicit approval.
 6. Work only within the approved scope of the current milestone.
@@ -21,6 +21,7 @@ This file is the single source of truth for agent behavior. Do not duplicate it.
 npm run dev:status              # Current project state (human-readable)
 npm run dev:status -- --json    # Machine-readable JSON output
 npm run dev:status -- --strict  # Exit 1 for warnings (CI mode)
+npm run dev:loop                # Run one eligible canonical milestone to a stop boundary
 npm run dev:milestone:start     # Start an approved milestone
 npm run dev:checkpoint          # Record progress
 npm run dev:session:close       # Close implementation session
@@ -31,6 +32,11 @@ npm run dev:pause               # Safely pause work
 npm run dev:block               # Record a blocker
 npm run dev:resume              # Resume paused work
 ```
+
+`dev:loop` reads only `development/milestones/*.json`. It selects an active
+milestone or an explicitly `ready` milestone with completed dependencies and no
+blockers. It stops with preserved evidence on failure, held work, blocker,
+hand-back, completion, or delivery approval. It never pushes or merges.
 
 ## Required Lifecycle
 

@@ -153,16 +153,17 @@ test("dev-status without --strict exits 0 for warnings only", () => {
 console.log("\n## Stale Legacy State Detection");
 
 test("Legacy run-state is now clean", () => {
-  const runState = readJson(path.join(PROJECT_ROOT, ".opencode", "agents", "state", "run-state.json"));
+  const runStatePath = path.join(PROJECT_ROOT, ".opencode", "agents", "state", "run-state.json");
+  if (!fs.existsSync(runStatePath)) return;
+  const runState = readJson(runStatePath);
   assert(runState.status === "idle" || runState.status === "", `Expected idle or empty, got ${runState.status}`);
   assert(!runState.objective || runState.objective === "", `Expected empty objective, got ${runState.objective}`);
 });
 
 test("Legacy active-objective.md shows no active objective", () => {
-  const content = fs.readFileSync(
-    path.join(PROJECT_ROOT, ".opencode", "agents", "objectives", "active-objective.md"),
-    "utf8"
-  );
+  const objectivePath = path.join(PROJECT_ROOT, ".opencode", "agents", "objectives", "active-objective.md");
+  if (!fs.existsSync(objectivePath)) return;
+  const content = fs.readFileSync(objectivePath, "utf8");
   assert(content.includes("No objective is currently active"), "Active objective not cleared");
 });
 

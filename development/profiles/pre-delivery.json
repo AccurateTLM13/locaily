@@ -26,6 +26,11 @@
       "description": "Controller invariant tests pass"
     },
     {
+      "id": "dev-loop-tests",
+      "command": "node scripts/test-dev-loop.js",
+      "description": "Canonical queue and safe runner tests pass"
+    },
+    {
       "id": "contract-tests",
       "command": "node scripts/contract-test.js",
       "description": "Contract helper tests pass"

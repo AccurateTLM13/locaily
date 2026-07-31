@@ -2,12 +2,14 @@
 
 Active impediments. Remove items when resolved; log resolution in [progress-log.md](./progress-log.md).
 
-**Updated:** 2026-07-31 (CTK-01 completion audit)
+**Updated:** 2026-07-31 (DEV-LOOP-01 completion)
 
 ## Open
 
 | Blocker | Impact | Mitigation |
 |---|---|---|
+| External publication of local CTK-01/DEV-LOOP-01 branches is not approved | Public `main` cannot yet verify either implementation | Review the local branches and explicitly approve push/PR/merge |
+| PX6 requires external testers and a second physical device | External-validation milestone cannot complete in the coding runner | Supply tester results and authenticated two-device pilot hardware |
 | Extension ↔ Local Brain HTTP bridge not implemented | L4 validation blocked | Spec: [../03-workflows/lighthouse-handoff-extension-integration.md](../03-workflows/lighthouse-handoff-extension-integration.md) |
 | No persistent job status API (`GET /jobs/{id}/status`) | Clients cannot poll long track runs | In-memory jobs exist today; persistence is future work |
 

@@ -1,0 +1,124 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "dev-loop-01-canonical-queue-safe-runner",
+  "title": "DEV-LOOP-01 Canonical Queue and Safe Runner Integration",
+  "status": "active",
+  "type": "infrastructure",
+  "priority": "critical",
+  "purpose": "Connect the existing development control plane to the existing supervisor/worker loop so approved milestone work can run safely from one canonical queue.",
+  "problem": "The legacy sequencer reads Markdown objectives from .opencode while active milestones live under development/, performs destructive cleanup, and continues after failed work.",
+  "scope": {
+    "included": [
+      "Use development/milestones JSON records as the canonical runnable queue",
+      "Select only explicitly active or ready milestones with satisfied dependencies and no blockers",
+      "Render the selected milestone into the existing supervisor objective contract",
+      "Remove destructive tracked-file cleanup and stale-branch deletion",
+      "Stop on failure, blocker, held work, hand-back, or approval-required delivery",
+      "Preserve dedicated branches, lifecycle state, closeout, validation, and provenance",
+      "Add npm run dev:loop with dry-run and test coverage",
+      "Update existing operator, status, handoff, and closeout documentation",
+      ".opencode/agents/controller/",
+      ".opencode/agents/README.md"
+    ],
+    "excluded": [
+      "Creating a new worker or supervisor architecture",
+      "Activating or implementing CTK-02",
+      "Implementing DBVT SEO Audit integration",
+      "Automatic pushing, pull-request creation, or merging",
+      "Public-network exposure or changes to Local Brain authority boundaries",
+      "New top-level architecture layers or milestone packages"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "dev-loop-canonical-queue",
+      "description": "The runner discovers eligible work only from development/milestones and never activates planned, blocked, dependency-blocked, CTK-02, or DBVT work.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/test-dev-loop.js",
+          "note": "Canonical selection, planned and blocked exclusion, dependency gates, and actual dry-run selection passed."
+        }
+      ]
+    },
+    {
+      "id": "dev-loop-safe-git",
+      "description": "The runner contains no tracked-file reset or forced stale-branch deletion and refuses unsafe dirty or conflicting branch state without discarding work.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/test-dev-loop.js",
+          "note": "Tracked reset, forced branch deletion, recursive removal, dirty-tree refusal, and publication boundaries passed."
+        },
+        {
+          "type": "manual-verification",
+          "reference": "npm.cmd run dev:loop",
+          "note": "Dirty-worktree preflight stopped without changing or discarding files."
+        }
+      ]
+    },
+    {
+      "id": "dev-loop-stop-contract",
+      "description": "Failed, blocked, held, hand-back, budget-exhausted, and approval-required outcomes stop the queue before later milestones run.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/test-dev-loop.js",
+          "note": "Failure, held, paused, budget, hand-back, and delivery-approval stop outcomes passed."
+        }
+      ]
+    },
+    {
+      "id": "dev-loop-evidence",
+      "description": "A completed run preserves the dedicated branch, session, checkpoint, closeout, validation, acceptance evidence, and provenance needed for review.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/test-dev-loop.js",
+          "note": "Dedicated branch, closeout, review, prepare, validate, completion, and control-plane evidence commit sequence passed."
+        },
+        {
+          "type": "test",
+          "reference": "node scripts/test-development-begin-end.js",
+          "note": "34 lifecycle, review, issue, brief, and closeout tests passed with canonical-state restoration."
+        },
+        {
+          "type": "test",
+          "reference": "node scripts/test-development-phase2b.js && node scripts/test-development-phase2c.js",
+          "note": "46 validation/completion tests and 32 preparation/delivery tests passed."
+        }
+      ]
+    },
+    {
+      "id": "dev-loop-command",
+      "description": "npm run dev:loop provides a safe operator command and the complete relevant repository validation suite passes.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "npm.cmd run test:full",
+          "note": "Complete offline repository suite passed with DEV-LOOP regression coverage included."
+        },
+        {
+          "type": "manual-verification",
+          "reference": "npm.cmd run dev:loop -- --dry-run",
+          "note": "Command selected DEV-LOOP-01 from canonical development state and reported no automatic delivery."
+        }
+      ]
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [
+    "ctk-01-capability-trigger-kernel"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-07-31T02:45:08.144Z",
+  "startedAt": "2026-07-31T02:46:02.420Z",
+  "completedAt": null,
+  "mergedAt": null
+}

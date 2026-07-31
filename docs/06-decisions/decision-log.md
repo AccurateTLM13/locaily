@@ -1740,3 +1740,36 @@ Confirmed for CTK-01
 - Model and human handler ports remain unavailable; there is no implicit fallback.
 - CTK-02 remains inactive and DBVT SEO Audit integration remains out of scope.
 - See `docs/01-architecture/capability-trigger-kernel.md`.
+
+---
+
+## 2026-07-30 - Canonical development queue and safe runner
+
+### Decision
+
+Use `development/milestones/*.json` as the only canonical queue for unattended
+development work. `npm run dev:loop` may select one active milestone or one
+explicitly ready milestone whose dependencies are complete and blockers are
+empty, then feed that milestone into the existing sequencer, supervisor, and
+worker contracts.
+
+The runner preserves a dedicated worker branch and stops on failure, held work,
+blocker, hand-back, completion, or delivery approval. It does not automatically
+push, open a pull request, or merge.
+
+### Why
+
+The legacy Markdown queue had drifted from the development control plane and
+contained destructive cleanup and continue-after-failure behavior. Connecting
+the existing systems removes split-brain queue state without creating another
+worker or changing Locaily's product architecture.
+
+### Status
+
+Confirmed for DEV-LOOP-01
+
+### Notes
+
+- Legacy `.opencode/agents/objectives/queue/` files remain historical or manual compatibility inputs.
+- Tracked-file reset and forced stale-worker-branch deletion are prohibited.
+- CTK-02 and DBVT SEO Audit remain inactive and outside this milestone.

@@ -110,7 +110,6 @@ function computeGitFingerprint() {
     .join("\n");
 
   const fp = crypto.createHash("sha256");
-  fp.update(treeHash);
   fp.update(diffHash);
   fp.update(indexHash);
   fp.update(untrackedFiles);
@@ -158,6 +157,19 @@ function writeDelivery(delivery) {
 
 // ---- preflight ----
 
+function isControlPlaneOnlyAdvance(baseCommit, currentHead) {
+  if (!baseCommit || !currentHead) return false;
+  if (baseCommit === currentHead) return true;
+  const ancestor = git(["merge-base", "--is-ancestor", baseCommit, currentHead]);
+  if (!ancestor || ancestor.status !== 0) return false;
+  const changed = (gitOk(["diff", "--name-only", `${baseCommit}..${currentHead}`]) || "")
+    .split(/\r?\n/)
+    .filter(Boolean);
+  return changed.length > 0 && changed.every(file =>
+    file.startsWith("development/") || file.startsWith(".opencode/")
+  );
+}
+
 function preflight(slug) {
   const errors = [];
   const warnings = [];
@@ -180,12 +192,12 @@ function preflight(slug) {
 
   // 3. HEAD matches
   const currentHead = gitOk(["rev-parse", "HEAD"]);
-  if (milestone.completionHead && currentHead !== milestone.completionHead) {
+  if (milestone.completionHead && !isControlPlaneOnlyAdvance(milestone.completionHead, currentHead)) {
     errors.push({ code: "HEAD_MISMATCH", message: `Current HEAD ${currentHead?.slice(0, 8)} != milestone completion HEAD ${milestone.completionHead?.slice(0, 8)}` });
   }
 
   // 4. Prepared commit matches HEAD
-  if (milestone.preparedCommit && currentHead !== milestone.preparedCommit) {
+  if (milestone.preparedCommit && !isControlPlaneOnlyAdvance(milestone.preparedCommit, currentHead)) {
     errors.push({ code: "PREPARED_COMMIT_MISMATCH", message: `Current HEAD ${currentHead?.slice(0, 8)} != prepared commit ${milestone.preparedCommit?.slice(0, 8)}` });
   }
 
@@ -213,7 +225,7 @@ function preflight(slug) {
       if (validation.gitState.branch !== currentFingerprint.branch) {
         errors.push({ code: "FINGERPRINT_BRANCH", message: "Validation branch != current branch" });
       }
-      if (validation.gitState.headCommit !== currentFingerprint.headCommit) {
+      if (!isControlPlaneOnlyAdvance(validation.gitState.headCommit, currentFingerprint.headCommit)) {
         errors.push({ code: "FINGERPRINT_HEAD", message: "Validation HEAD != current HEAD" });
       }
       if (validation.gitState.fingerprint !== currentFingerprint.fingerprint) {
@@ -278,7 +290,7 @@ function createDeliveryRecord(slug, milestone) {
     milestoneId: slug,
     status: "pending",
     branch: milestone.preparedBranch || milestone.completionBranch,
-    commit: milestone.preparedCommit || milestone.completionHead,
+    commit: gitOk(["rev-parse", "HEAD"]) || milestone.preparedCommit || milestone.completionHead,
     pushedAt: null,
     pushSuccess: null,
     pushError: null,

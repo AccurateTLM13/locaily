@@ -2,15 +2,18 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-07-31 (CTK-01 completion audit)
+**Updated:** 2026-07-31 (DEV-LOOP-01 completion)
 
 ## Current Milestone
 
-CTK-01 Capability Trigger Kernel is ready for delivery review on `codex/ctk-01-completion`. Its runtime acceptance suite passes 20/20, the full offline repository suite passes, and the `pre-delivery` validation profile passed as `validation-20260731T012502-3e424fff`. CTK-02 is not active, and DBVT SEO Audit integration is not implemented.
+DEV-LOOP-01 Canonical Queue and Safe Runner Integration is implementation-complete on `codex/dev-loop-01`; its canonical lifecycle record carries the final delivery-gate state. `development/milestones/*.json` is the canonical unattended queue; `npm run dev:loop` selects one eligible milestone, runs the existing bounded supervisor/worker loop, preserves evidence, and stops before remote delivery.
+
+CTK-01 is locally reconciled with current `origin/main` in merge commit `cfd9c4d`, but remote publication remains unapproved. PX6 is blocked on external testers and physical hardware. CTK-02 is not active, and DBVT SEO Audit integration is not implemented.
 
 ## What Works
 
 - **Capability Trigger Kernel (CTK-01)** - trusted local events select a versioned installed capability, produce a deterministic plan, run declared local handlers, validate output, and persist append-only provenance without network or cloud fallback.
+- **Canonical safe development runner (DEV-LOOP-01)** - `npm run dev:loop` consumes only schema-valid active/ready milestones from `development/`, refuses unsafe dirty or conflicting state, runs the existing supervisor/worker contracts on dedicated branches, and stops on completion, blocker, held work, failure, or approval.
 - **Local Brain server** - `companion/server.js` on `127.0.0.1:31313`
 - **`POST /tasks/run`** - canonical single-tool entry (plus legacy `/analyze`)
 - **`POST /tracks/run`** and **`GET /tracks`** - Crew track runner

@@ -1,18 +1,18 @@
 # Active Build Slice
 
-**Updated:** 2026-07-31 (CTK-01 completion audit)
+**Updated:** 2026-07-31 (DEV-LOOP-01 completion)
 
 ## Current Slice
 
-**CTK-01 Capability Trigger Kernel is ready for delivery review.** Its bounded runtime implementation is complete on the isolated `codex/ctk-01-completion` branch. The 20-case CTK acceptance suite, the complete offline repository suite, and the `pre-delivery` validation profile pass.
+**DEV-LOOP-01 Canonical Queue and Safe Runner Integration is complete on `codex/dev-loop-01`.** The runner consumes canonical development milestones, reuses the existing sequencer/supervisor/worker loop, preserves dedicated branches and evidence, and stops before delivery approval.
 
-No CTK-01 implementation blocker remains. CTK-02 remains planned and inactive. DBVT SEO Audit integration is out of scope.
+No implementation blocker remains. Remote publication is a separate approval boundary. CTK-02 remains inactive and DBVT SEO Audit integration is out of scope.
 
 ## Most Recently Completed Slice
 
-**PX6 External Validation Program**
+**CTK-01 Capability Trigger Kernel**
 
-The last completed milestone recorded by the development control plane is `px6-external-validation-program`.
+CTK-01 is locally reconciled into DEV-LOOP-01's base as merge commit `cfd9c4d`; it has not been pushed to public `main`.
 
 ### Previous Slice
 
@@ -28,7 +28,7 @@ Defined in [maintenance-objective-lifecycle-closeout.md](./maintenance-objective
 
 ## Next Slice
 
-Do not select or activate a next slice until CTK-01 is reviewed.
+Do not activate another slice until DEV-LOOP-01 is reviewed and the publication decision is made.
 
 ### Deferred (requires specific conditions)
 
@@ -41,4 +41,4 @@ Do not select or activate a next slice until CTK-01 is reviewed.
 - Do not modify approved benchmark evidence
 - Embedding-based retrieval remains out of scope
 - Do not begin a new milestone without an explicitly supplied objective
-- Do not activate CTK-02 or implement DBVT SEO Audit integration during CTK-01 closeout
+- Do not activate CTK-02 or implement DBVT SEO Audit integration during DEV-LOOP-01 closeout

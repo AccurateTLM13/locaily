@@ -1,0 +1,34 @@
+{
+  "id": "review-dev-loop-01-canonical-queue-safe-runner-20260731T032012",
+  "milestoneId": "dev-loop-01-canonical-queue-safe-runner",
+  "status": "warning",
+  "branch": "codex/dev-loop-01",
+  "headCommit": "cfd9c4db98dd6481aa6f8e9b05f79c5ae69d3a91",
+  "findings": [
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: scripts/deliver-milestone.js",
+      "file": "scripts/deliver-milestone.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: scripts/dev-begin.js",
+      "file": "scripts/dev-begin.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: scripts/dev-end.js",
+      "file": "scripts/dev-end.js"
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "errors": 0,
+    "warnings": 3,
+    "info": 0
+  },
+  "reviewedAt": "2026-07-31T03:20:12.665Z"
+}

@@ -1263,3 +1263,35 @@ Second-repo operator acceptance, then physical multi-device pilot.
 ### Next
 
 Review CTK-01 on `codex/ctk-01-completion`. Do not activate CTK-02.
+
+---
+
+## 2026-07-31 - DEV-LOOP-01 canonical queue and safe runner
+
+### Changed
+
+- Made `development/milestones/*.json` the canonical unattended milestone queue.
+- Added `npm run dev:loop`, which selects one eligible active or ready milestone and reuses the existing sequencer, supervisor, and worker contracts.
+- Removed tracked-file reset, forced branch deletion, failed-work restoration, and continue-after-failure behavior from the sequencer.
+- Added dirty-tree and conflicting-branch refusal, explicit terminal outcomes, lifecycle closeout, validation, and control-plane evidence preservation.
+- Guarded state-mutating development tests so canonical repository state is restored after sequential test execution.
+- Kept CTK-02 inactive and DBVT SEO Audit integration out of scope.
+
+### Evidence
+
+- `node scripts/test-dev-loop.js` - 18/18 passed.
+- `node scripts/test-development-begin-end.js` - 34/34 passed.
+- `node scripts/test-development-reconciliation.js` - 14/14 passed.
+- `node scripts/test-development-phase2b.js` - 46/46 passed.
+- `node scripts/test-development-phase2c.js` - 32/32 passed.
+- `node scripts/test-development-schemas.js` - 29/29 passed.
+- `node scripts/test-lifecycle.js` - 23/23 passed.
+- `node scripts/test-controller-invariants.js` - 11/11 passed.
+- `node scripts/test-capability-trigger-kernel.js` - 20/20 passed.
+- `npm.cmd run test:full` - complete offline suite passed.
+- `npm.cmd run dev:loop -- --dry-run` - selected DEV-LOOP-01 from canonical development state.
+- `npm.cmd run dev:loop` - refused the dirty worktree without changing or discarding files.
+
+### Next
+
+Review the local CTK-01 reconciliation and DEV-LOOP-01 branch. Remote push, pull request creation, and merge remain an explicit approval boundary.

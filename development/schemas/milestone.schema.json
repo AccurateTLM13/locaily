@@ -58,7 +58,8 @@
         "bugfix",
         "governance",
         "validation",
-        "documentation"
+        "documentation",
+        "remediation"
       ],
       "description": "Category of work."
     },
@@ -177,6 +178,46 @@
       "type": ["string", "null"],
       "format": "date-time",
       "description": "ISO-8601 timestamp when PR was merged."
+    },
+    "preparedCommit": {
+      "type": "string",
+      "minLength": 7,
+      "description": "Commit prepared for validation."
+    },
+    "preparedBranch": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Branch containing the prepared commit."
+    },
+    "preparedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when the milestone was prepared."
+    },
+    "latestValidationId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Most recent validation result for this milestone."
+    },
+    "completionBranch": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Branch that passed the completion gate."
+    },
+    "completionHead": {
+      "type": "string",
+      "minLength": 7,
+      "description": "HEAD that passed the completion gate."
+    },
+    "mergedCommit": {
+      "type": "string",
+      "minLength": 7,
+      "description": "Commit recorded by the merge lifecycle command."
+    },
+    "prNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Pull request number recorded by the merge lifecycle command."
     }
   }
 }

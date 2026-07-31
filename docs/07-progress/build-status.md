@@ -1,6 +1,6 @@
 # Build Status
 
-**Updated:** 2026-07-31 (CTK-01 completion audit)
+**Updated:** 2026-07-31 (DEV-LOOP-01 completion)
 
 ## Current Stage
 
@@ -12,7 +12,8 @@ North Star direction is now documented as a local capability network: route trac
 
 | Milestone | Status |
 |---|---|
-| **CTK-01 - Capability Trigger Kernel** | Ready for delivery review - implementation, acceptance suite, and delivery gates pass |
+| **DEV-LOOP-01 - Canonical Queue and Safe Runner** | Implementation complete locally; canonical lifecycle record is authoritative; remote publication remains |
+| **CTK-01 - Capability Trigger Kernel** | Complete and locally merged into DEV-LOOP-01 base; not published to public main |
 | **1A - Track system explicit (docs)** | Complete |
 | **1B - Declarative track input mapping (tools)** | Complete |
 | **2 - Second workflow track** | Complete |
@@ -61,6 +62,7 @@ North Star direction is now documented as a local capability network: route trac
 - Memory Bridge v1: structured search (`/memory/search`) + writeback-apply (`/memory/writeback/apply`, opt-in)
 - Development Memory Loop DM1–DM10: event store, capture adapters, sessions, candidates, review inbox, maintainer, context-pack retrieval, background capture processor, multi-project registry (`/memory/projects/*`, `npm run memory:*`, `npm run test:development-memory`)
 - Current verification suite passes; see the latest progress log or CI evidence for counts
+- Canonical development runner (`npm run dev:loop`) with dependency/blocker gates, dedicated branches, explicit stop outcomes, and no automatic delivery
 - Windows launch helpers
 
 ## Partial

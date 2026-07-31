@@ -1,0 +1,85 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260731-001",
+  "milestoneId": "dev-loop-01-canonical-queue-safe-runner",
+  "agent": {
+    "platform": "codex",
+    "model": "gpt-5"
+  },
+  "status": "closed",
+  "objective": "Connect the existing development control plane to the existing supervisor/worker loop so approved milestone work can run safely from one canonical queue.",
+  "branch": "codex/dev-loop-01",
+  "startingCommit": "cfd9c4db98dd6481aa6f8e9b05f79c5ae69d3a91",
+  "plannedFiles": [
+    ".opencode/agents/controller/sequencer.js",
+    "scripts/dev-loop.js",
+    "scripts/test-dev-loop.js",
+    "package.json",
+    "development/",
+    "docs/"
+  ],
+  "completedWork": [
+    "Implemented canonical milestone selection, safe sequencer handoff, stop boundaries, lifecycle finalization, guarded state-mutating tests, and dev:loop coverage; full repository suite passed.",
+    "Aligned delivery fingerprints and control-plane-only completion commits with the validated source commit.",
+    "DEV-LOOP-01 implementation and evidence complete; deterministic review has zero errors and only covered-test filename warnings.",
+    "Completed DEV-LOOP-01 canonical queue and safe runner integration with lifecycle, regression, documentation, and delivery evidence."
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-07-31T03:11:21.118Z",
+      "message": "Implemented canonical milestone selection, safe sequencer handoff, stop boundaries, lifecycle finalization, guarded state-mutating tests, and dev:loop coverage; full repository suite passed.",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    },
+    {
+      "timestamp": "2026-07-31T03:20:26.668Z",
+      "message": "DEV-LOOP-01 implementation and evidence complete; deterministic review has zero errors and only covered-test filename warnings.",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-07-31T02:46:02.422Z",
+  "closedAt": "2026-07-31T03:20:35.992Z",
+  "closingCommit": "cfd9c4db98dd6481aa6f8e9b05f79c5ae69d3a91",
+  "dirtyFiles": [
+    ".opencode/agents/README.md",
+    ".opencode/agents/controller/sequencer.js",
+    ".opencode/agents/objectives/queue/BULK_MILESTONE_GUIDE.md",
+    "AGENTS.md",
+    "development/milestones/ctk-01-capability-trigger-kernel.json",
+    "development/milestones/px6-external-validation-program.json",
+    "development/profiles/pre-delivery.json",
+    "development/project-state.json",
+    "development/roadmap.json",
+    "development/schemas/milestone.schema.json",
+    "development/schemas/project-state.schema.json",
+    "docs/00-start-here/current-state.md",
+    "docs/06-decisions/decision-log.md",
+    "docs/07-progress/active-build-slice.md",
+    "docs/07-progress/blockers.md",
+    "docs/07-progress/build-status.md",
+    "docs/07-progress/current-sprint.md",
+    "docs/07-progress/next-agent-brief.md",
+    "docs/07-progress/progress-log.md",
+    "docs/07-progress/work-closeout.json",
+    "package.json",
+    "scripts/deliver-milestone.js",
+    "scripts/dev-begin.js",
+    "scripts/dev-end.js",
+    "scripts/test-development-begin-end.js",
+    "scripts/test-development-phase2b.js",
+    "scripts/test-development-phase2c.js",
+    "scripts/test-development-reconciliation.js",
+    "development/milestones/dev-loop-01-canonical-queue-safe-runner.json",
+    "development/reviews/review-dev-loop-01-canonical-queue-safe-runner-20260731T032012.json",
+    "development/sessions/session-20260731-001.json",
+    "scripts/dev-loop.js",
+    "scripts/test-dev-loop.js",
+    "scripts/test-development-state-guard.js"
+  ]
+}

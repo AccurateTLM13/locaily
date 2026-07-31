@@ -1,59 +1,59 @@
 {
-  "work_id": "ctk-01-capability-trigger-kernel-20260730",
-  "objective_id": "ctk-01-capability-trigger-kernel",
+  "work_id": "dev-loop-01-canonical-queue-safe-runner-20260730",
+  "objective_id": "dev-loop-01-canonical-queue-safe-runner",
   "status": "complete",
   "closed_at": "2026-07-30",
-  "original_goal": "Implement CTK-01 as the minimum working event-to-capability vertical slice on one local node boundary with deterministic execution, explicit rejection paths, complete provenance, durable run records, and no cloud fallback.",
+  "original_goal": "Repair and connect the existing development control plane and supervisor/worker loop so approved milestones run from one canonical queue without destructive cleanup or unsafe progression.",
   "completed": [
-    "Mapped the existing Local Brain, Crew tracks, workflow plans, schemas, validators, policies, Track Run Records, Relay Nodes, and runtime execution boundaries before editing.",
-    "Implemented event, capability manifest, local node, execution plan, output, and run-record contracts under companion/schemas/capability-kernel/.",
-    "Extended the shared result validator for maxLength, pattern, date-time, maxItems, and uniqueItems contract keywords.",
-    "Implemented the filesystem-backed installed capability registry, exact trigger matching, deterministic DAG plan generation, source trust, policy and approval gates, version and handler checks, local deterministic executor, declared retries, output validation, state transitions, redaction, and append-only provenance store.",
-    "Added the status-handoff@0.1.0 capability, one local node configuration, and the project.status.changed fixture.",
-    "Added the standalone scripts/ctk-run.js entry point and scripts/test-capability-trigger-kernel.js acceptance suite.",
-    "Added architecture/reuse notes, unresolved decisions, limitations, and operator run instructions.",
-    "Recorded the CTK architecture boundary decision in docs/06-decisions/decision-log.md.",
-    "Generated and inspected a live sanitized run record at data/evidence/capability-kernel/runs.jsonl.",
-    "Isolated the CTK-01 implementation on codex/ctk-01-completion so unrelated shell/server changes and all CTK-02 files remain outside the delivery commit.",
-    "Re-audited every CTK-01 acceptance criterion and reran the complete relevant repository suite.",
-    "Fixed the minimum development-control defects that prevented prepare and validation from operating in a linked worktree with auditable manual-check acknowledgements and npm profile commands."
+    "Locally reconciled CTK-01 with current origin/main as merge commit cfd9c4d without touching the dirty user main worktree.",
+    "Recorded PX9 as merged, CTK-01 as merged locally, and PX6 as blocked on external participants and physical hardware.",
+    "Added npm run dev:loop using development/milestones JSON as the only canonical unattended queue.",
+    "Restricted automatic selection to one active or explicitly ready, schema-valid, dependency-complete, blocker-free milestone.",
+    "Rendered the canonical milestone into the existing supervisor objective contract without creating another worker.",
+    "Removed tracked git reset, forced stale-worker-branch deletion, failed-work restoration, and continue-after-failure behavior.",
+    "Preserved runtime pointers by archiving them before replacement and retained worker branches for hand-back.",
+    "Added dirty-tree refusal, safe local runner-branch creation, explicit stop outcomes, and no automatic push, PR, or merge.",
+    "Integrated checkpoint, closeout, deterministic review, prepare, validation, completion, and committed control-plane evidence.",
+    "Aligned delivery fingerprints and allowed only control-plane-only commits after the validated source commit.",
+    "Guarded state-mutating development tests so they restore canonical repository files after every run.",
+    "Updated canonical schemas, roadmap, agent guidance, decision record, status, handoff, and closeout documentation."
   ],
   "remaining": [],
-  "deferred_outside_ctk_01": [
-    "Production Local Brain entry point.",
-    "Multi-process JSONL locking or a transactional evidence backend."
+  "deferred_outside_dev_loop_01": [
+    "CTK-02 node roles and Capability Capsules.",
+    "DBVT SEO Audit integration.",
+    "Automatic remote push, pull-request creation, or merge.",
+    "PX6 external tester execution and physical two-device relay pilot."
   ],
-  "next_required_action": "Review CTK-01 on codex/ctk-01-completion.",
+  "next_required_action": "Review and publish codex/dev-loop-01 after external repository publication is explicitly approved.",
   "blockers": [],
   "safe_to_start_unrelated_work": false,
-  "working_branch": "codex/ctk-01-completion",
+  "working_branch": "codex/dev-loop-01",
   "last_commit": null,
   "validation": {
     "passed": [
-      "node scripts/test-capability-trigger-kernel.js - 20/20 passed on 2026-07-31.",
-      "node scripts/ctk-run.js - live fixture completed with full provenance and durable output.",
-      "npm.cmd run test:full - complete offline repository suite passed on 2026-07-31.",
-      "npm.cmd run dev:validate - validation-20260731T012502-3e424fff passed with 6 required checks, 1 optional full-suite check, and 2 acknowledged manual checks.",
-      "npm.cmd run dev:milestone:complete - CTK-01 reached ready-for-delivery with no warnings.",
-      "node scripts/test-lifecycle.js - 23/23 passed on 2026-07-31.",
-      "node scripts/test-development-schemas.js - 29/29 passed on 2026-07-31.",
-      "node scripts/test-controller-invariants.js - 11/11 passed on 2026-07-31.",
-      "npm.cmd run test:console-runs - 8/8 passed on 2026-07-31.",
-      "npm.cmd run test:track-records - 18/18 passed.",
-      "npm.cmd run test:relay - 53/53 passed.",
-      "npm.cmd run test:dag - graph 14/14, executor 9/9, and workflow DAG cases passed.",
+      "node scripts/test-dev-loop.js - 18/18 passed.",
+      "node scripts/test-development-begin-end.js - 34/34 passed.",
+      "node scripts/test-development-reconciliation.js - 14/14 passed.",
+      "node scripts/test-development-phase2b.js - 46/46 passed.",
+      "node scripts/test-development-phase2c.js - 32/32 passed.",
+      "node scripts/test-development-schemas.js - 29/29 passed.",
+      "node scripts/test-lifecycle.js - 23/23 passed.",
+      "node scripts/test-controller-invariants.js - 11/11 passed.",
+      "node scripts/test-capability-trigger-kernel.js - 20/20 passed.",
       "node scripts/contract-test.js - passed.",
-      "node --check - 11 changed JavaScript files passed.",
-      "git diff --check - passed.",
-      "All added JSON contracts, fixtures, milestone, and session records parsed successfully."
+      "npm.cmd run test:full - complete offline repository suite passed.",
+      "npm.cmd run dev:loop -- --dry-run - selected DEV-LOOP-01 from canonical state.",
+      "npm.cmd run dev:loop - dirty-tree preflight refused without changing or discarding files.",
+      "git diff --check - passed."
     ],
     "failed": [],
     "failed_then_resolved": [
-      "validation-20260731T012126-adab70b6 - failed because the profile re-ran strict status during the transient validating state and invoked npm through Node; both control-plane defects were fixed before retry.",
-      "validation-20260731T012351-67f4276c - required checks passed, but the optional full-suite spawn returned an unhandled process error and was incorrectly labeled passed; the runner was corrected and this record was superseded."
+      "Parallel execution of legacy development-control tests exposed shared-state deletion; the tests now snapshot and restore canonical development state and pass sequentially."
     ],
     "not_run": [
-      "Browser UI verification - out of CTK-01 scope; no UI or server route changed."
+      "Live external coding-agent CLI execution - not required to validate controller integration and would recursively execute the milestone currently being implemented.",
+      "Remote publication - approval boundary rejected push despite local merge authorization."
     ]
   },
   "recommended_next_agent": "reviewer"

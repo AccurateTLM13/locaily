@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 // .opencode/agents/controller/sequencer.js
-// Drives the supervisor/worker loop across multiple queued objectives.
-// Reads .md files from objectives/queue/, processes each sequentially,
-// archives them to completed/ or failed/ based on outcome.
+// Drives the existing supervisor/worker loop for canonical development
+// milestones. Legacy Markdown queue support remains for manual compatibility,
+// but `npm run dev:loop` selects work only from development/milestones/.
 //
-// Usage: node .opencode/agents/controller/sequencer.js
+// Usage:
+//   node .opencode/agents/controller/sequencer.js --milestone <id> --stay-on-worker
+//   node .opencode/agents/controller/sequencer.js # legacy Markdown queue
 
 const { spawnSync } = require("node:child_process");
 const fs = require("node:fs");
@@ -20,6 +22,7 @@ const CONFIG_PATH = path.join(HERE, "config.json");
 const SUPERVISOR_PATH = path.join(HERE, "supervisor.js");
 const INVARIANTS_PATH = path.join(HERE, "invariants.js");
 const HISTORY_DIR = path.join(AGENTS_DIR, "history");
+const DEVELOPMENT_MILESTONES_DIR = path.join(PROJECT_ROOT, "development", "milestones");
 
 const SEQUENCER_BRANCH = "agents/sequencer/base";
 
@@ -74,15 +77,14 @@ function currentBranch() {
   return r.status === 0 ? (r.stdout || "").trim() : null;
 }
 
-function checkout(branch, create = false, force = false) {
+function checkout(branch, create = false) {
   const args = create ? ["checkout", "-b", branch] : ["checkout", branch];
-  if (force) args.push("--force");
-  const r = git(args, { shell: process.platform === "win32" });
+  const r = git(args);
   return r.status === 0;
 }
 
 function branchExists(branch) {
-  const r = git(["rev-parse", "--verify", branch], { shell: process.platform === "win32" });
+  const r = git(["rev-parse", "--verify", branch]);
   return r.status === 0;
 }
 
@@ -90,45 +92,99 @@ function ensureDir(p) {
   fs.mkdirSync(p, { recursive: true });
 }
 
-function removeIfExists(p) {
-  try {
-    const stat = fs.statSync(p);
-    if (stat.isDirectory()) fs.rmSync(p, { recursive: true, force: true });
-    else fs.unlinkSync(p);
-  } catch {}
-}
-
-function restoreFromFailed() {
-  const failedDir = path.join(QUEUE_DIR, "failed");
-  if (!fs.existsSync(failedDir)) return;
-  for (const f of fs.readdirSync(failedDir)) {
-    const src = path.join(failedDir, f);
-    if (!fs.statSync(src).isFile()) continue;
-    const dst = path.join(QUEUE_DIR, f);
-    console.error(`[sequencer] restoring ${f} from failed/`);
-    try { fs.renameSync(src, dst); } catch (e) { fs.copyFileSync(src, dst); fs.unlinkSync(src); }
-  }
-  removeIfExists(failedDir);
+function archiveRuntimeFile(filePath, label) {
+  if (!fs.existsSync(filePath)) return;
+  ensureDir(HISTORY_DIR);
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const destination = path.join(HISTORY_DIR, `${stamp}-${label}`);
+  fs.copyFileSync(filePath, destination);
+  fs.unlinkSync(filePath);
 }
 
 function cleanRuntimeArtifacts() {
   const agentsDir = AGENTS_DIR;
-  // Remove stale objective and task files (regenerated per milestone)
-  removeIfExists(OBJECTIVE_PATH);
-  removeIfExists(path.join(agentsDir, "tasks", "active-task.md"));
-  // Remove abort-history noise from prior failed runs
-  if (fs.existsSync(HISTORY_DIR)) {
-    for (const f of fs.readdirSync(HISTORY_DIR)) {
-      if (f.includes("abort")) removeIfExists(path.join(HISTORY_DIR, f));
-    }
-  }
+  // Runtime pointers are regenerated per milestone. History, failed work,
+  // tracked source, and branches are never deleted here.
+  archiveRuntimeFile(OBJECTIVE_PATH, "replaced-active-objective.md");
+  archiveRuntimeFile(path.join(agentsDir, "tasks", "active-task.md"), "replaced-active-task.md");
   // Do NOT delete failed/ — it holds archived milestones that must persist
-  // across iterations. If a previous milestone failed, it stays in failed/
-  // until restoreFromFailed() moves it back to queue/ on the next sequencer run.
+  // across iterations.
+}
+
+function parseArgs(argv) {
+  const milestoneIndex = argv.indexOf("--milestone");
+  return {
+    milestoneId: milestoneIndex >= 0 ? argv[milestoneIndex + 1] : null,
+    stayOnWorker: argv.includes("--stay-on-worker"),
+  };
+}
+
+function renderDevelopmentObjective(milestone) {
+  const lines = [
+    `# ${milestone.title}`,
+    "",
+    `Objective ID: ${milestone.id}`,
+    "",
+    milestone.purpose,
+  ];
+  if (milestone.problem) lines.push("", "## Problem", "", milestone.problem);
+  lines.push("", "## Included Scope", "");
+  for (const item of milestone.scope?.included || []) lines.push(`- ${item}`);
+  lines.push("", "## Excluded Scope", "");
+  for (const item of milestone.scope?.excluded || []) lines.push(`- ${item}`);
+  lines.push("", "## Acceptance Criteria", "");
+  for (const criterion of milestone.acceptanceCriteria || []) {
+    lines.push(`- ${typeof criterion === "string" ? criterion : criterion.description}`);
+  }
+  lines.push(
+    "",
+    "## Stop and Hand Back",
+    "",
+    "- Stop on any milestone blocker, failed or held work, missing dependency, or approval requirement.",
+    "- Do not push, merge, or broaden scope without explicit approval.",
+    "- Preserve the worker branch, run state, reviews, tests, and provenance for inspection.",
+    ""
+  );
+  return lines.join("\n");
+}
+
+function collectDevelopmentEntries(milestoneId) {
+  if (!milestoneId || !/^[a-z0-9][a-z0-9-]*$/.test(milestoneId)) {
+    throw new Error("A valid --milestone <id> is required for canonical development mode.");
+  }
+  const sourcePath = path.join(DEVELOPMENT_MILESTONES_DIR, `${milestoneId}.json`);
+  const milestone = readJson(sourcePath, null);
+  if (!milestone) throw new Error(`Canonical milestone '${milestoneId}' was not found.`);
+  if (milestone.status !== "active") {
+    throw new Error(`Canonical milestone '${milestoneId}' must be active, found '${milestone.status}'.`);
+  }
+  if ((milestone.blockers || []).length > 0) {
+    throw new Error(`Canonical milestone '${milestoneId}' has unresolved blockers.`);
+  }
+  return [{
+    file: `${milestoneId}.json`,
+    objectiveSlug: milestoneId,
+    sourcePath,
+    content: renderDevelopmentObjective(milestone),
+    canonical: true,
+  }];
+}
+
+function collectLegacyEntries() {
+  return fs.readdirSync(QUEUE_DIR)
+    .filter(f => f.endsWith(".md") && !f.startsWith("BULK_") && f !== ".gitkeep" && f !== "TEMPLATE.md")
+    .sort()
+    .map(file => ({
+      file,
+      objectiveSlug: file.replace(/\.md$/i, ""),
+      sourcePath: path.join(QUEUE_DIR, file),
+      content: null,
+      canonical: false,
+    }));
 }
 
 function ensureBaseBranch(protectedBranches, startBranch) {
-  const isTransient = startBranch.startsWith("agents/worker/") || startBranch.startsWith("agents/sequencer/");
+  const isTransient = startBranch.startsWith("agents/worker/");
   const needsBase = protectedBranches.includes(startBranch) || isTransient;
 
   if (!needsBase) return startBranch; // user feature branch, use as-is
@@ -147,11 +203,13 @@ function ensureBaseBranch(protectedBranches, startBranch) {
   return SEQUENCER_BRANCH;
 }
 
-function main() {
-  return runSequencer();
+async function main() {
+  const results = await runSequencer(parseArgs(process.argv.slice(2)));
+  if (results.some(result => result.status !== "complete")) process.exitCode = 2;
+  return results;
 }
 
-async function runSequencer() {
+async function runSequencer(options = {}) {
   const cfg = readJson(CONFIG_PATH, {});
   const protectedBranches = (cfg.git && cfg.git.protected_branches) || ["main", "master"];
 
@@ -175,21 +233,18 @@ async function runSequencer() {
   const failedDir = path.join(QUEUE_DIR, "failed");
   ensureDir(completedDir);
   ensureDir(failedDir);
-  restoreFromFailed();
-
-  // Collect queue entries (sorted, exclude .gitkeep and non-objective files)
-  const all = fs.readdirSync(QUEUE_DIR)
-    .filter(f => f.endsWith(".md") && !f.startsWith("BULK_") && f !== ".gitkeep" && f !== "TEMPLATE.md")
-    .sort();
-  if (all.length === 0) {
+  const entries = options.milestoneId
+    ? collectDevelopmentEntries(options.milestoneId)
+    : collectLegacyEntries();
+  if (entries.length === 0) {
     console.error("[sequencer] no objectives in queue/ — nothing to do");
     if (currentBranch() !== trueStartBranch) checkout(trueStartBranch);
-    return;
+    return [];
   }
-  console.error(`[sequencer] found ${all.length} queued objectives:\n  ${all.join("\n  ")}`);
+  console.error(`[sequencer] found ${entries.length} objective(s):\n  ${entries.map(entry => entry.file).join("\n  ")}`);
 
   // ---- queue completeness preflight ----
-  if (invariants) {
+  if (invariants && !options.milestoneId) {
     const qc = invariants.validateQueueCompleteness(QUEUE_DIR);
     if (!qc.valid) {
       console.error(`[sequencer] QUEUE INCOMPLETE — refusing to run.`);
@@ -202,9 +257,8 @@ async function runSequencer() {
 
   const results = [];
 
-  for (const file of all) {
-    const sourcePath = path.join(QUEUE_DIR, file);
-    const objectiveSlug = file.replace(/\.md$/i, "");
+  for (const entry of entries) {
+    const { file, sourcePath, objectiveSlug } = entry;
 
     console.error(`\n${"=".repeat(60)}`);
     console.error(`[sequencer] starting objective: ${file}`);
@@ -213,7 +267,7 @@ async function runSequencer() {
     const onBranch = currentBranch();
     if (onBranch !== baseBranch) {
       console.error(`[sequencer] resetting to ${baseBranch} (currently on ${onBranch})`);
-      if (!checkout(baseBranch, false, true)) {
+      if (!checkout(baseBranch)) {
         console.error(`[sequencer] cannot checkout ${baseBranch} — aborting`);
         results.push({ file, status: "failed", reason: "checkout_failed" });
         break;
@@ -227,23 +281,28 @@ async function runSequencer() {
       continue;
     }
 
-    // Reset tracked files, discard worker's uncommitted changes
-    git(["checkout", "--", "."], { shell: process.platform === "win32" });
-
-    // Clean runtime artifacts from prior runs
-    cleanRuntimeArtifacts();
-
-    // Remove stale worker branch from prior failed run
+    // Existing worker branches contain inspectable work. Never delete them.
     const cfg2 = readJson(CONFIG_PATH, {});
     const prefix = (cfg2.git && cfg2.git.worker_branch_prefix) || "agents/worker";
     const workerBranchName = `${prefix}/${objectiveSlug}`;
     if (branchExists(workerBranchName)) {
-      console.error(`[sequencer] removing stale worker branch ${workerBranchName}`);
-      git(["branch", "-D", workerBranchName], { shell: process.platform === "win32" });
+      console.error(`[sequencer] worker branch '${workerBranchName}' already exists; hand-back required.`);
+      results.push({ file, status: "held", reason: "worker_branch_exists", blocker: workerBranchName });
+      break;
     }
 
-    // Copy queue file to active-objective.md
-    const content = fs.readFileSync(sourcePath, "utf8");
+    const priorState = readJson(STATE_PATH, null);
+    if (priorState && priorState.status === "running") {
+      console.error(`[sequencer] prior run '${priorState.run_id || "unknown"}' is still active; hand-back required.`);
+      results.push({ file, status: "held", reason: "active_run_exists", blocker: priorState.run_id || null });
+      break;
+    }
+
+    // Clean only replaceable runtime pointers after safety preflight passes.
+    cleanRuntimeArtifacts();
+
+    // Materialize the canonical milestone or legacy objective for the supervisor.
+    const content = entry.content || fs.readFileSync(sourcePath, "utf8");
     fs.writeFileSync(OBJECTIVE_PATH, content);
 
     // Reset run state for this milestone
@@ -352,6 +411,7 @@ async function runSequencer() {
     }
 
     // Archive queue file. Non-fatal — a failed archive must not crash the sequencer.
+    if (!entry.canonical) {
     const destDir = complete ? completedDir : failedDir;
     const destPath = path.join(destDir, file);
     ensureDir(destDir);
@@ -368,12 +428,15 @@ async function runSequencer() {
       console.error(`[sequencer] archive failed for ${file}: ${e.message} — continuing`);
     }
 
+    }
+
     results.push({
       file,
       status: complete ? "complete" : finalState.status || "failed",
       blocker: finalState.blocker || null,
       iteration: finalState.iteration
     });
+    if (!complete) break;
   }
 
   // Summary
@@ -386,14 +449,25 @@ async function runSequencer() {
 
   // Return to original starting branch
   const finalBranch = currentBranch();
-  if (finalBranch !== trueStartBranch) {
+  if (!options.stayOnWorker && finalBranch !== trueStartBranch) {
     console.error(`[sequencer] returning to ${trueStartBranch}...`);
     checkout(trueStartBranch);
   }
   console.error(`\n[sequencer] done — returned to branch: ${trueStartBranch}`);
+  return results;
 }
 
-main().catch((error) => {
-  console.error(error.message || error);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.message || error);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  collectDevelopmentEntries,
+  collectLegacyEntries,
+  parseArgs,
+  renderDevelopmentObjective,
+  runSequencer,
+};

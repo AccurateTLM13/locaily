@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "px6-external-validation-program",
   "title": "External Validation Program",
-  "status": "active",
+  "status": "blocked",
   "type": "validation",
   "priority": "high",
   "purpose": "Prove Locaily externally with three programs: five unassisted developer testers on Lighthouse Handoff, authenticated two-device Relay pilot, and one second real workflow used for actual work.",
@@ -26,12 +26,12 @@
     {
       "id": "ac-five-testers",
       "description": "Protocol + materials exist; at least dry-run internally; results template ready for 5 external testers",
-      "status": "in_progress"
+      "status": "pending"
     },
     {
       "id": "ac-relay-pilot",
       "description": "Authenticated two-device pilot completed or blocked with explicit evidence and residual risks",
-      "status": "blocked"
+      "status": "pending"
     },
     {
       "id": "ac-second-workflow",
@@ -49,7 +49,16 @@
     "px2-lan-security-hard-gate",
     "px5-tester-package"
   ],
-  "blockers": [],
+  "blockers": [
+    {
+      "id": "px6-external-participants-and-hardware",
+      "type": "hardware",
+      "description": "Completion requires unassisted external testers and an authenticated second physical device; neither is available to the local coding runner.",
+      "owner": "project owner",
+      "resolutionCondition": "Provide external tester results and access to a second physical device for the authenticated relay pilot.",
+      "createdAt": "2026-07-31T02:45:08.144Z"
+    }
+  ],
   "lifecycleRef": null,
   "createdAt": "2026-07-25T03:53:40.372Z",
   "startedAt": "2026-07-26T00:00:00.000Z",

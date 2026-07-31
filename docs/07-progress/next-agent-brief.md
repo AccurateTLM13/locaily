@@ -2,13 +2,13 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-31 (CTK-01 completion audit)
+**Updated:** 2026-07-31 (DEV-LOOP-01 completion)
 
 ## Read First
 
 1. [../00-start-here/current-state.md](../00-start-here/current-state.md)
 2. [active-build-slice.md](./active-build-slice.md)
-3. [../01-architecture/capability-trigger-kernel.md](../01-architecture/capability-trigger-kernel.md) *(active objective)*
+3. [../01-architecture/capability-trigger-kernel.md](../01-architecture/capability-trigger-kernel.md) *(completed prerequisite)*
 4. [../01-architecture/development-memory-loop.md](../01-architecture/development-memory-loop.md) *(Development Memory Loop DM1–DM10 complete)*
 5. [../02-planning/development-memory-roadmap.md](../02-planning/development-memory-roadmap.md)
 6. [build-status.md](./build-status.md)
@@ -18,14 +18,14 @@ Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
 Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../08-agents/agent-context.md)
 
-## Current CTK-01 Handoff
+## Current DEV-LOOP-01 Handoff
 
-- CTK-01 is ready for delivery review.
-- The CTK acceptance suite passes 20/20, `npm.cmd run test:full` passes, and the `pre-delivery` profile passed as `validation-20260731T012502-3e424fff`.
-- The implementation is isolated on `codex/ctk-01-completion` so the unrelated dirty `main` worktree is not included.
-- No implementation blocker remains; the next action is review.
-- CTK-02 must remain planned and inactive.
-- DBVT SEO Audit integration is outside CTK-01 scope.
+- DEV-LOOP-01 is complete locally on `codex/dev-loop-01`; use `npm.cmd run dev:loop -- --dry-run` to inspect canonical selection.
+- The runner reads only `development/milestones/*.json`, reuses the existing bounded supervisor/worker loop, and never pushes or merges.
+- Failure, held, blocker, hand-back, completion, and approval outcomes stop before later work.
+- CTK-01 is included through local merge commit `cfd9c4d`; public `main` still lacks it until publication is approved.
+- PX6 is blocked on external testers and a second physical device.
+- CTK-02 and DBVT SEO Audit must remain inactive.
 
 ## Important: Benchmark Lab Status
 

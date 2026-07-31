@@ -57,6 +57,19 @@
       "type": ["string", "null"],
       "description": "ID of the most recently completed milestone."
     },
+    "mergedMilestone": {
+      "type": ["string", "null"],
+      "description": "ID of the most recently merged milestone."
+    },
+    "mergedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO-8601 timestamp for the most recent milestone merge."
+    },
+    "mergedCommit": {
+      "type": ["string", "null"],
+      "description": "Commit recorded for the most recent milestone merge."
+    },
     "nextRecommendedAction": {
       "type": ["string", "null"],
       "description": "Human-readable next step."
