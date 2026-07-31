@@ -1,0 +1,118 @@
+{
+  "schema": "locaily.development.validation_result.v1",
+  "id": "validation-20260731T012351-67f4276c",
+  "milestoneId": "ctk-01-capability-trigger-kernel",
+  "profileId": "pre-delivery",
+  "status": "passed",
+  "gitState": {
+    "branch": "codex/ctk-01-completion",
+    "headCommit": "09aba0ee81e0a3b35d76197e52eb452cfc6cf213",
+    "fingerprint": "sha256:e3b0c44298fc1c14",
+    "changedFiles": [
+      {
+        "path": "evelopment/milestones/ctk-01-capability-trigger-kernel.json",
+        "state": "M"
+      }
+    ],
+    "computedAt": "2026-07-31T01:23:51.768Z"
+  },
+  "startedAt": "2026-07-31T01:23:51.769Z",
+  "completedAt": "2026-07-31T01:23:53.755Z",
+  "results": [
+    {
+      "id": "strict-status",
+      "command": "node scripts/dev-status.js --strict --json",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 0,
+      "stdout": "",
+      "stderr": "",
+      "summary": "No error/critical contradictions",
+      "required": true
+    },
+    {
+      "id": "dev-status-strict",
+      "command": "node scripts/dev-status.js --strict",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 610,
+      "stdout": "=== Locaily Development Status ===\n\nProject:        locaily\nStatus:         active\nDefault branch: main\nCurrent branch: codex/ctk-01-completion\nHEAD:           09aba0e\n\n--- Working Tree ---\n  Modified:  2 file(s)\n    development/milestones/ctk-01-capability-trigger-kernel.json\n    development/project-state.json\n\n--- Milestones ---\n  No active, paused, blocked, or ready-for-delivery milestones.\n  Planned: 1 | Ready: 0 | Completed: 6\n\n--- Sessions ---\n  No active or paused sessions.\n  Total: 4\n\n--",
+      "stderr": "",
+      "summary": "  [i] [INFO",
+      "required": true
+    },
+    {
+      "id": "schema-tests",
+      "command": "node scripts/test-development-schemas.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 79,
+      "stdout": "\n## Schema Structure\n  PASS  Schema brief.schema.json has required fields\n  PASS  Schema delivery.schema.json has required fields\n  PASS  Schema issue.schema.json has required fields\n  PASS  Schema milestone.schema.json has required fields\n  PASS  Schema project-state.schema.json has required fields\n  PASS  Schema session.schema.json has required fields\n  PASS  Schema validation-profile.schema.json has required fields\n  PASS  Schema validation-result.schema.json has required fields\n\n## Schema Co",
+      "stderr": "",
+      "summary": "## Results: 29 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "lifecycle-tests",
+      "command": "node scripts/test-lifecycle.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 110,
+      "stdout": "\n## State Machine\n  PASS  STATES are frozen\n  PASS  isTerminal identifies terminal states\n  PASS  isValidTransition enforces legal transitions\n  PASS  Terminal states have no outgoing transitions\n\n## Objective Meta\n  PASS  createObjectiveMeta produces default meta\n  PASS  createObjectiveMeta accepts overrides\n\n## Objective Parsing\n  PASS  parseObjectiveId extracts prefix and slug\n  PASS  parseObjectiveId handles no prefix\n\n## Duplicate Detection\n  PASS  detectDuplicates finds slug duplicates\n  P",
+      "stderr": "",
+      "summary": "## Results: 23 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "controller-tests",
+      "command": "node scripts/test-controller-invariants.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 228,
+      "stdout": "\nTests: 11 passed, 0 failed\n",
+      "stderr": "",
+      "summary": "Tests: 11 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "contract-tests",
+      "command": "node scripts/contract-test.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 257,
+      "stdout": "Contract helpers passed.\n",
+      "stderr": "",
+      "summary": "Contract helpers passed.",
+      "required": true
+    },
+    {
+      "id": "full-suite",
+      "command": "npm run test:full",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 1,
+      "stdout": "",
+      "stderr": "",
+      "summary": "",
+      "required": false
+    }
+  ],
+  "manualChecks": [
+    {
+      "id": "review-gate",
+      "description": "Code review must pass (agent-review.js)",
+      "acknowledged": true,
+      "acknowledgedBy": "codex",
+      "acknowledgedAt": "2026-07-31T01:23:53.755Z"
+    },
+    {
+      "id": "closeout-verified",
+      "description": "Closeout record correctly describes completed work",
+      "acknowledged": true,
+      "acknowledgedBy": "codex",
+      "acknowledgedAt": "2026-07-31T01:23:53.755Z"
+    }
+  ],
+  "warnings": [],
+  "error": null
+}

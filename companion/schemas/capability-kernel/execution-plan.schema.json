@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/capability-kernel/execution-plan.v1.json",
+  "title": "Locaily Capability Execution Plan",
+  "description": "A deterministic plan derived from an event, node policy, and immutable capability manifest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "node_id",
+    "event_id",
+    "event_hash",
+    "capability_id",
+    "capability_version",
+    "manifest_hash",
+    "node_config_hash",
+    "policy_hash",
+    "steps",
+    "plan_hash"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "node_id": { "type": "string", "minLength": 1 },
+    "event_id": { "type": "string", "minLength": 1 },
+    "event_hash": { "type": "string", "minLength": 1 },
+    "capability_id": { "type": "string", "minLength": 1 },
+    "capability_version": { "type": "string", "minLength": 1 },
+    "manifest_hash": { "type": "string", "minLength": 1 },
+    "node_config_hash": { "type": "string", "minLength": 1 },
+    "policy_hash": { "type": "string", "minLength": 1 },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sequence",
+          "track_id",
+          "handler_type",
+          "handler_id",
+          "depends_on",
+          "input_schema",
+          "output_schema",
+          "timeout_ms",
+          "retry"
+        ],
+        "properties": {
+          "sequence": { "type": "integer", "minimum": 1 },
+          "track_id": { "type": "string" },
+          "handler_type": { "type": "string" },
+          "handler_id": { "type": "string" },
+          "depends_on": {
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true
+          },
+          "input_schema": { "type": "string" },
+          "output_schema": { "type": "string" },
+          "timeout_ms": { "type": "integer", "minimum": 1 },
+          "retry": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["max_attempts", "retryable_codes"],
+            "properties": {
+              "max_attempts": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "retryable_codes": {
+                "type": "array",
+                "items": { "type": "string" },
+                "uniqueItems": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "plan_hash": { "type": "string", "minLength": 1 }
+  }
+}

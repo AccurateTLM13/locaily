@@ -1,0 +1,132 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "ctk-01-capability-trigger-kernel",
+  "title": "CTK-01 Capability Trigger Kernel",
+  "status": "ready-for-delivery",
+  "type": "infrastructure",
+  "priority": "high",
+  "purpose": "Prove one trusted contextual event can select, plan, execute, validate, and durably record one versioned local capability on one NearbyNode boundary.",
+  "problem": "Locaily has tracks, tools, validation, evidence, and relay primitives, but lacks the deterministic event-to-capability runtime contract connecting them.",
+  "scope": {
+    "included": [
+      "One configured local NearbyNode execution boundary",
+      "Event, capability manifest, execution plan, output, and run record contracts",
+      "Filesystem capability registry and exact trigger matching",
+      "Policy, eligibility, approval, handler availability, and version checks",
+      "Deterministic rule/script/tool executor with a disabled model port",
+      "Append-only durable run records with complete provenance",
+      "Status-handoff capability and project.status.changed fixture",
+      "Standalone CLI, acceptance tests, architecture notes, and run documentation"
+    ],
+    "excluded": [
+      "Production UI or companion server endpoint",
+      "Distributed node scheduling or remote relay execution",
+      "Model benchmarking, model selection, or cloud fallback",
+      "Automatic capability discovery, generation, promotion, or self-modification",
+      "Lighthouse Handoff or DBVT SEO Audit product integration"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "ctk-valid",
+      "description": "A trusted project.status.changed fixture completes status-handoff with valid output, legal transitions, hashes, and a durable run record.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/test-capability-trigger-kernel.js",
+          "note": "Valid activation, transitions, hashes, output validation, and record persistence passed."
+        },
+        {
+          "type": "generated-artifact",
+          "reference": "data/evidence/capability-kernel/runs.jsonl",
+          "note": "Live reference fixture run completed and persisted."
+        }
+      ]
+    },
+    {
+      "id": "ctk-rejections",
+      "description": "Malformed, untrusted, irrelevant, unknown, incompatible, unavailable, policy-blocked, and approval-required paths stop explicitly before unauthorized execution.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/test-capability-trigger-kernel.js",
+          "note": "All required rejection, ignore, approval, and failure paths passed with zero unauthorized handler calls."
+        }
+      ]
+    },
+    {
+      "id": "ctk-determinism",
+      "description": "Identical event and manifest inputs produce the same plan hash and duplicate submission cannot execute twice.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/test-capability-trigger-kernel.js",
+          "note": "Deterministic plan hash and duplicate idempotency checks passed."
+        }
+      ]
+    },
+    {
+      "id": "ctk-provenance",
+      "description": "Accepted and failed executions persist reproducible event, node, policy, manifest, plan, attempts, validations, output, and terminal-state evidence without secrets.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/test-capability-trigger-kernel.js",
+          "note": "Run-record schema, completed and failed persistence, version provenance, and secret redaction passed."
+        }
+      ]
+    },
+    {
+      "id": "ctk-local-only",
+      "description": "The reference slice performs no network or cloud fallback calls.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/test-capability-trigger-kernel.js",
+          "note": "Network spy observed zero calls and the recorded policy disables network and cloud fallback."
+        }
+      ]
+    },
+    {
+      "id": "ctk-verification",
+      "description": "CTK acceptance coverage and relevant repository validation commands pass.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "npm.cmd run test:full",
+          "note": "Full offline repository suite passed after the shared validator change."
+        },
+        {
+          "type": "test",
+          "reference": "node scripts/test-lifecycle.js",
+          "note": "23 lifecycle tests passed."
+        },
+        {
+          "type": "test",
+          "reference": "npm.cmd run test:console-runs",
+          "note": "8 console run persistence tests passed."
+        }
+      ]
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-07-30T21:30:00.000Z",
+  "startedAt": "2026-07-30T21:28:06.464Z",
+  "completedAt": "2026-07-31T01:29:42.128Z",
+  "mergedAt": null,
+  "preparedCommit": "08147a54552beecea45e3d2b135465f21d387375",
+  "preparedBranch": "codex/ctk-01-completion",
+  "preparedAt": "2026-07-31T01:28:37.330Z",
+  "latestValidationId": "validation-20260731T012502-3e424fff",
+  "completionBranch": "codex/ctk-01-completion",
+  "completionHead": "08147a54552beecea45e3d2b135465f21d387375"
+}

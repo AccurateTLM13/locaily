@@ -1714,3 +1714,29 @@ Confirmed.
 Confirmed / Experimental / Revisit Later
 ### Notes
 ```
+
+---
+
+## 2026-07-30 - Capability-centered contextual trigger runtime
+
+### Decision
+
+Introduce CTK-01 as a bounded, deterministic event-to-capability runtime. The Local Brain boundary owns installed manifest state, local policy, and durable run evidence; configured local handlers own execution. Capability manifests, not event payload text, models, or agents, authorize runtime work.
+
+Keep installed runtime capability manifests separate from the existing model-qualification capability registry. Reuse the core validator, DAG ordering, tool-registry adapter, and append-only evidence conventions. Do not route the reference slice through relay HTTP, a model provider, or cloud fallback.
+
+### Why
+
+Locaily already has tracks, tool packs, validation, Track Run Records, policy primitives, and Relay Nodes, but none provides the complete contextual event to manifest to deterministic plan to local execution to validated run-record contract. CTK-01 proves that contract without redesigning the broader architecture.
+
+### Status
+
+Confirmed for CTK-01
+
+### Notes
+
+- The reference capability is synthetic `status-handoff@0.1.0`.
+- Exact trigger types, equality conditions, configured source identities, and a local-only policy bound the proof.
+- Model and human handler ports remain unavailable; there is no implicit fallback.
+- CTK-02 remains inactive and DBVT SEO Audit integration remains out of scope.
+- See `docs/01-architecture/capability-trigger-kernel.md`.

@@ -2,13 +2,13 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-22 (Documentation alignment pass — see [current-sprint.md](./current-sprint.md))
+**Updated:** 2026-07-31 (CTK-01 completion audit)
 
 ## Read First
 
 1. [../00-start-here/current-state.md](../00-start-here/current-state.md)
 2. [active-build-slice.md](./active-build-slice.md)
-3. [maintenance-objective-lifecycle-closeout.md](./maintenance-objective-lifecycle-closeout.md) *(active objective)*
+3. [../01-architecture/capability-trigger-kernel.md](../01-architecture/capability-trigger-kernel.md) *(active objective)*
 4. [../01-architecture/development-memory-loop.md](../01-architecture/development-memory-loop.md) *(Development Memory Loop DM1–DM10 complete)*
 5. [../02-planning/development-memory-roadmap.md](../02-planning/development-memory-roadmap.md)
 6. [build-status.md](./build-status.md)
@@ -17,6 +17,15 @@ Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 9. [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md)
 
 Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../08-agents/agent-context.md)
+
+## Current CTK-01 Handoff
+
+- CTK-01 is ready for delivery review.
+- The CTK acceptance suite passes 20/20, `npm.cmd run test:full` passes, and the `pre-delivery` profile passed as `validation-20260731T012502-3e424fff`.
+- The implementation is isolated on `codex/ctk-01-completion` so the unrelated dirty `main` worktree is not included.
+- No implementation blocker remains; the next action is review.
+- CTK-02 must remain planned and inactive.
+- DBVT SEO Audit integration is outside CTK-01 scope.
 
 ## Important: Benchmark Lab Status
 

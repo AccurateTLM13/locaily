@@ -72,6 +72,13 @@ function extractArg(args, name) {
   return args[idx + 1];
 }
 
+function extractCsvArg(args, name) {
+  const value = extractArg(args, name);
+  return value
+    ? value.split(",").map(item => item.trim()).filter(Boolean)
+    : [];
+}
+
 function hasFlag(args, name) {
   return args.includes(name);
 }
@@ -732,6 +739,21 @@ function cmdValidate(args) {
   }
 
   const profile = (milestone.validationProfile ? loadProfile(milestone.validationProfile) : null) || loadDefaultProfile();
+  const acknowledgedManualCheckIds = new Set(extractCsvArg(args, "--acknowledge-manual"));
+  const acknowledgedBy = extractArg(args, "--acknowledged-by");
+  const knownManualCheckIds = new Set((profile.manualChecks || []).map(check => check.id));
+  const unknownAcknowledgements = [...acknowledgedManualCheckIds]
+    .filter(id => !knownManualCheckIds.has(id));
+
+  if (unknownAcknowledgements.length > 0) {
+    console.error(`Error: Unknown manual check(s): ${unknownAcknowledgements.join(", ")}`);
+    process.exit(1);
+  }
+
+  if (acknowledgedManualCheckIds.size > 0 && !acknowledgedBy) {
+    console.error("Error: --acknowledged-by is required when acknowledging manual checks.");
+    process.exit(1);
+  }
 
   const branch = getCurrentBranch();
   const head = getCurrentHead();
@@ -792,17 +814,25 @@ function cmdValidate(args) {
   // Run optional commands (don't affect overall status)
   for (const check of (profile.optional || [])) {
     const checkResult = runValidationCommand(check);
+    checkResult.required = false;
     results.push(checkResult);
   }
 
   const completedAt = now();
 
   // Build manual checks
-  const manualChecks = (profile.manualChecks || []).map(mc => ({
-    id: mc.id,
-    description: mc.description,
-    acknowledged: false,
-  }));
+  const manualChecks = (profile.manualChecks || []).map(mc => {
+    const acknowledged = acknowledgedManualCheckIds.has(mc.id);
+    return {
+      id: mc.id,
+      description: mc.description,
+      acknowledged,
+      ...(acknowledged ? {
+        acknowledgedBy,
+        acknowledgedAt: completedAt,
+      } : {}),
+    };
+  });
 
   // Build validation result
   const validationResult = {
@@ -862,22 +892,34 @@ function runValidationCommand(check) {
   const startMs = Date.now();
 
   try {
-    const result = spawnSync("node", check.command.replace(/^node\s+/, "").split(/\s+/), {
+    const parts = check.command.trim().split(/\s+/);
+    const requestedCommand = parts.shift();
+    const command = requestedCommand === "node"
+      ? process.execPath
+      : (
+          requestedCommand === "npm" && process.platform === "win32"
+            ? "npm.cmd"
+            : requestedCommand
+        );
+    const result = spawnSync(command, parts, {
       cwd: PROJECT_ROOT,
       encoding: "utf8",
       maxBuffer: 1024 * 1024,
-      shell: process.platform === "win32",
+      shell: process.platform === "win32" && requestedCommand === "npm",
       timeout,
     });
 
     const durationMs = Date.now() - startMs;
-    const exitCode = result.status || 0;
+    const exitCode = Number.isInteger(result.status) ? result.status : -1;
     const stdout = (result.stdout || "").slice(0, 2000);
     const stderr = (result.stderr || "").slice(0, 2000);
 
     let status = "passed";
-    if (exitCode !== 0) status = "failed";
-    if (result.error && result.error.code === "ETIMEDOUT") status = "timeout";
+    if (result.error) {
+      status = result.error.code === "ETIMEDOUT" ? "timeout" : "error";
+    } else if (exitCode !== 0) {
+      status = "failed";
+    }
 
     // Extract summary from last line of stdout
     const lines = stdout.trim().split(/\r?\n/);
@@ -1260,7 +1302,10 @@ function cmdPrepare(args) {
   const commitMsg = bodyLines.length > 0 ? `${subject}\n\n${bodyLines.join("\n")}` : subject;
 
   // Write commit message to temp file to avoid shell splitting
-  const commitMsgPath = path.join(PROJECT_ROOT, ".git", "COMMIT_MSG_TEMP");
+  const gitMessagePath = git(["rev-parse", "--git-path", "COMMIT_MSG_TEMP"]);
+  const commitMsgPath = gitMessagePath
+    ? path.resolve(PROJECT_ROOT, gitMessagePath)
+    : path.join(PROJECT_ROOT, ".git", "COMMIT_MSG_TEMP");
   fs.writeFileSync(commitMsgPath, commitMsg, "utf8");
 
   const commitResult = gitResult(["commit", "--file", commitMsgPath]);
@@ -1503,7 +1548,7 @@ Commands:
   resume
   session:close --summary "What was accomplished"
   prepare    [--acknowledge-unrelated "reason"]
-  validate   [--profile <id>]
+  validate   [--profile <id>] [--acknowledge-manual <id,id>] [--acknowledged-by <name>]
   complete
   merge      --slug <id> [--pr <number>] [--commit <sha>]
   status

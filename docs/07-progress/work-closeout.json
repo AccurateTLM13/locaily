@@ -1,41 +1,60 @@
 {
-  "work_id": "hybrid-begin-end-automation",
-  "objective_id": "dcp-phase3b",
+  "work_id": "ctk-01-capability-trigger-kernel-20260730",
+  "objective_id": "ctk-01-capability-trigger-kernel",
   "status": "complete",
-  "closed_at": "2026-07-23T23:55:00.000Z",
-  "original_goal": "Implement hybrid begin/end task automation: wrapper scripts (dev-begin, dev-end), deterministic code review gate (agent-review), pre-delivery validation profile, and AGENTS.md auto-protocol.",
+  "closed_at": "2026-07-30",
+  "original_goal": "Implement CTK-01 as the minimum working event-to-capability vertical slice on one local node boundary with deterministic execution, explicit rejection paths, complete provenance, durable run records, and no cloud fallback.",
   "completed": [
-    "scripts/dev-begin.js — starts or resumes milestone work with full context output",
-    "scripts/dev-end.js — orchestrated closeout pipeline: status, session close, prepare, validate, review, complete, deliver, PR",
-    "scripts/agent-review.js — deterministic gate: secrets, binaries, scope, missing tests, forbidden files, generated file drift",
-    "development/profiles/pre-delivery.json — structured validation profile for release gate",
-    "AGENTS.md updated with Auto-Begin and Auto-End protocol sections",
-    "npm scripts: dev:begin, dev:end, dev:review",
-    "22 new tests (test-development-begin-end.js) covering all three scripts and profile",
-    "All 172 tests passing across all suites"
+    "Mapped the existing Local Brain, Crew tracks, workflow plans, schemas, validators, policies, Track Run Records, Relay Nodes, and runtime execution boundaries before editing.",
+    "Implemented event, capability manifest, local node, execution plan, output, and run-record contracts under companion/schemas/capability-kernel/.",
+    "Extended the shared result validator for maxLength, pattern, date-time, maxItems, and uniqueItems contract keywords.",
+    "Implemented the filesystem-backed installed capability registry, exact trigger matching, deterministic DAG plan generation, source trust, policy and approval gates, version and handler checks, local deterministic executor, declared retries, output validation, state transitions, redaction, and append-only provenance store.",
+    "Added the status-handoff@0.1.0 capability, one local node configuration, and the project.status.changed fixture.",
+    "Added the standalone scripts/ctk-run.js entry point and scripts/test-capability-trigger-kernel.js acceptance suite.",
+    "Added architecture/reuse notes, unresolved decisions, limitations, and operator run instructions.",
+    "Recorded the CTK architecture boundary decision in docs/06-decisions/decision-log.md.",
+    "Generated and inspected a live sanitized run record at data/evidence/capability-kernel/runs.jsonl.",
+    "Isolated the CTK-01 implementation on codex/ctk-01-completion so unrelated shell/server changes and all CTK-02 files remain outside the delivery commit.",
+    "Re-audited every CTK-01 acceptance criterion and reran the complete relevant repository suite.",
+    "Fixed the minimum development-control defects that prevented prepare and validation from operating in a linked worktree with auditable manual-check acknowledgements and npm profile commands."
   ],
-  "remaining": [
-    "Git hook installer (Phase E of plan)",
-    "OpenCode plugin for slash commands (Phase F — optional)",
-    "Begin dcp-phase3b scope implementation (handoff refinement, roadmap integrity)"
+  "remaining": [],
+  "deferred_outside_ctk_01": [
+    "Production Local Brain entry point.",
+    "Multi-process JSONL locking or a transactional evidence backend."
   ],
-  "next_required_action": "Install git hooks and/or start dcp-phase3b scope implementation.",
+  "next_required_action": "Review CTK-01 on codex/ctk-01-completion.",
   "blockers": [],
-  "safe_to_start_unrelated_work": true,
-  "working_branch": "feat/development-memory-second-project-proof",
+  "safe_to_start_unrelated_work": false,
+  "working_branch": "codex/ctk-01-completion",
   "last_commit": null,
   "validation": {
     "passed": [
-      "node scripts/test-development-begin-end.js — 22/22",
-      "node scripts/test-development-schemas.js — 27/27",
-      "node scripts/test-development-phase2b.js — 44/44",
-      "node scripts/test-development-phase2c.js — 31/31",
-      "node scripts/test-development-reconciliation.js — 14/14",
-      "node scripts/test-lifecycle.js — 23/23",
-      "node scripts/test-controller-invariants.js — 11/11"
+      "node scripts/test-capability-trigger-kernel.js - 20/20 passed on 2026-07-31.",
+      "node scripts/ctk-run.js - live fixture completed with full provenance and durable output.",
+      "npm.cmd run test:full - complete offline repository suite passed on 2026-07-31.",
+      "npm.cmd run dev:validate - validation-20260731T012502-3e424fff passed with 6 required checks, 1 optional full-suite check, and 2 acknowledged manual checks.",
+      "npm.cmd run dev:milestone:complete - CTK-01 reached ready-for-delivery with no warnings.",
+      "node scripts/test-lifecycle.js - 23/23 passed on 2026-07-31.",
+      "node scripts/test-development-schemas.js - 29/29 passed on 2026-07-31.",
+      "node scripts/test-controller-invariants.js - 11/11 passed on 2026-07-31.",
+      "npm.cmd run test:console-runs - 8/8 passed on 2026-07-31.",
+      "npm.cmd run test:track-records - 18/18 passed.",
+      "npm.cmd run test:relay - 53/53 passed.",
+      "npm.cmd run test:dag - graph 14/14, executor 9/9, and workflow DAG cases passed.",
+      "node scripts/contract-test.js - passed.",
+      "node --check - 11 changed JavaScript files passed.",
+      "git diff --check - passed.",
+      "All added JSON contracts, fixtures, milestone, and session records parsed successfully."
     ],
     "failed": [],
-    "not_run": []
+    "failed_then_resolved": [
+      "validation-20260731T012126-adab70b6 - failed because the profile re-ran strict status during the transient validating state and invoked npm through Node; both control-plane defects were fixed before retry.",
+      "validation-20260731T012351-67f4276c - required checks passed, but the optional full-suite spawn returned an unhandled process error and was incorrectly labeled passed; the runner was corrected and this record was superseded."
+    ],
+    "not_run": [
+      "Browser UI verification - out of CTK-01 scope; no UI or server route changed."
+    ]
   },
-  "recommended_next_agent": "human"
+  "recommended_next_agent": "reviewer"
 }

@@ -1,6 +1,6 @@
 # Build Status
 
-**Updated:** 2026-07-18 (Development Memory Loop DM1–DM10 complete — events through multi-project template)
+**Updated:** 2026-07-31 (CTK-01 completion audit)
 
 ## Current Stage
 
@@ -12,6 +12,7 @@ North Star direction is now documented as a local capability network: route trac
 
 | Milestone | Status |
 |---|---|
+| **CTK-01 - Capability Trigger Kernel** | Ready for delivery review - implementation, acceptance suite, and delivery gates pass |
 | **1A - Track system explicit (docs)** | Complete |
 | **1B - Declarative track input mapping (tools)** | Complete |
 | **2 - Second workflow track** | Complete |
@@ -90,7 +91,7 @@ North Star direction is now documented as a local capability network: route trac
 
 ## Current Priority
 
-**Now:** Full Lighthouse Handoff product loop is complete — 4 roles (priority_helper, developer_task_writer, guardrail_writer, testing_checklist_writer) qualified; 3 enforced. Track has 10 steps. Full assembled artifact quality gate with `--artifact full-handoff` mode. No global broadening.
+**Now:** Review CTK-01 on the isolated CTK-only branch. Runtime acceptance is 20/20, the full offline repository suite passes, and validation `validation-20260731T012502-3e424fff` passed. Do not activate CTK-02 or implement DBVT SEO Audit integration.
 
 **Next:** Decide next action after explicit direction. Multi-model track expansion, DealSniper workflow build-out, and live qualification depth remain follow-on candidates.
 

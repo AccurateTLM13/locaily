@@ -1,7 +1,7 @@
 {
   "schema": "locaily.development.roadmap.v1",
   "project": "locaily",
-  "updatedAt": "2026-07-25T03:54:17.218Z",
+  "updatedAt": "2026-07-31T00:00:00.000Z",
   "areas": [
     {
       "id": "local-brain",
@@ -75,6 +75,15 @@
       "description": "Nearby-device capability layer",
       "maturity": "tested",
       "initiatives": [
+        {
+          "id": "capability-trigger-kernel",
+          "title": "Capability Trigger Kernel",
+          "description": "Deterministic local event-to-capability execution and provenance",
+          "maturity": "tested",
+          "milestoneIds": [
+            "ctk-01-capability-trigger-kernel"
+          ]
+        },
         {
           "id": "relay-protocol",
           "title": "Relay Protocol",
@@ -393,6 +402,7 @@
       "px5-tester-package",
       "px6-external-validation-program",
       "px7-organic-discovery-loop"
-    ]
+    ],
+    "ctk-01-capability-trigger-kernel": []
   }
 }

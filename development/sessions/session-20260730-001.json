@@ -1,0 +1,91 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260730-001",
+  "milestoneId": "ctk-01-capability-trigger-kernel",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": "Prove one trusted contextual event can select, plan, execute, validate, and durably record one versioned local capability on one NearbyNode boundary.",
+  "branch": "main",
+  "startingCommit": "62d3a79da4cad4278b15d5e7d54b5c2b0e9df421",
+  "plannedFiles": [],
+  "completedWork": [
+    "Implemented CTK-01 kernel, contracts, local capability fixture, CLI, and 20-case acceptance suite",
+    "CTK-01 implementation and full offline validation complete",
+    "Implemented and verified CTK-01 Capability Trigger Kernel"
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-07-30T21:38:25.156Z",
+      "message": "Implemented CTK-01 kernel, contracts, local capability fixture, CLI, and 20-case acceptance suite",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    },
+    {
+      "timestamp": "2026-07-30T21:44:11.406Z",
+      "message": "CTK-01 implementation and full offline validation complete",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-07-30T21:28:06.467Z",
+  "closedAt": "2026-07-30T21:44:11.947Z",
+  "closingCommit": "62d3a79da4cad4278b15d5e7d54b5c2b0e9df421",
+  "dirtyFiles": [
+    "companion/console/run-store.js",
+    "companion/core/result-validator.js",
+    "companion/server.js",
+    "companion/shell/app.js",
+    "companion/shell/index.html",
+    "companion/shell/styles.css",
+    "development/project-state.json",
+    "docs/00-start-here/current-state.md",
+    "docs/06-decisions/decision-log.md",
+    "docs/07-progress/active-build-slice.md",
+    "docs/07-progress/progress-log.md",
+    "docs/07-progress/work-closeout.json",
+    "package.json",
+    "companion/capabilities/status-handoff/capability.json",
+    "companion/capabilities/status-handoff/fixtures/project-status-changed.event.json",
+    "companion/capability-kernel/canonical.js",
+    "companion/capability-kernel/capability-registry.js",
+    "companion/capability-kernel/config/local-node.json",
+    "companion/capability-kernel/contracts.js",
+    "companion/capability-kernel/handlers.js",
+    "companion/capability-kernel/index.js",
+    "companion/capability-kernel/kernel.js",
+    "companion/capability-kernel/planner.js",
+    "companion/capability-kernel/provenance-store.js",
+    "companion/schemas/capability-kernel/capability-manifest.schema.json",
+    "companion/schemas/capability-kernel/event-envelope.schema.json",
+    "companion/schemas/capability-kernel/execution-plan.schema.json",
+    "companion/schemas/capability-kernel/node-config.schema.json",
+    "companion/schemas/capability-kernel/run-record.schema.json",
+    "companion/schemas/capability-kernel/status-handoff-output.schema.json",
+    "development/milestones/ctk-01-capability-trigger-kernel.json",
+    "development/needs-implementing/locaily-architecture-package/00_README.md",
+    "development/needs-implementing/locaily-architecture-package/01_ARCHITECTURE_DECISION_REPORT.md",
+    "development/needs-implementing/locaily-architecture-package/02_MILESTONE_CTK-01.md",
+    "development/needs-implementing/locaily-architecture-package/03_CODEX_EXECUTION_PROMPT.md",
+    "development/needs-implementing/locaily-architecture-package/04_ACCEPTANCE_MATRIX.md",
+    "development/needs-implementing/locaily-architecture-package/contracts/capability-manifest.schema.json",
+    "development/needs-implementing/locaily-architecture-package/contracts/event-envelope.schema.json",
+    "development/needs-implementing/locaily-architecture-package/contracts/execution-plan.schema.json",
+    "development/needs-implementing/locaily-architecture-package/contracts/run-record.schema.json",
+    "development/needs-implementing/locaily-architecture-package/fixtures/project-status-changed.event.json",
+    "development/needs-implementing/locaily-architecture-package/fixtures/status-handoff.capability.json",
+    "development/sessions/session-20260730-001.json",
+    "docs/01-architecture/capability-trigger-kernel.md",
+    "docs/03-workflows/capability-trigger-kernel.md",
+    "scripts/ctk-run.js",
+    "scripts/test-capability-trigger-kernel.js",
+    "scripts/test-console-runs.js"
+  ]
+}

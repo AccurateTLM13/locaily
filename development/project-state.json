@@ -1,19 +1,19 @@
 {
   "schema": "locaily.development.project_state.v1",
   "project": "locaily",
-  "currentMilestone": "px9-remaining-milestones-second-pass",
+  "currentMilestone": null,
   "activeSession": null,
-  "status": "active",
+  "status": "ready-for-delivery",
   "defaultBranch": "main",
-  "activeBranch": "main",
-  "lastCompletedMilestone": null,
-  "nextRecommendedAction": "Working on milestone 'px9-remaining-milestones-second-pass' — PX6 evidence execution, PX7/PX5/PX1 canonical fixes",
+  "activeBranch": "codex/ctk-01-merge",
+  "lastCompletedMilestone": "ctk-01-capability-trigger-kernel",
+  "nextRecommendedAction": "Merge CTK-01, reconcile PX9 as merged, then activate DEV-LOOP-01.",
   "blockers": [],
   "warnings": [],
-  "updatedAt": "2026-07-26T20:36:53.388Z",
+  "updatedAt": "2026-07-31T02:00:00.000Z",
   "updatedBy": {
     "type": "agent",
-    "name": "opencode",
-    "platform": "opencode"
+    "name": "dev-lifecycle",
+    "platform": "system"
   }
 }

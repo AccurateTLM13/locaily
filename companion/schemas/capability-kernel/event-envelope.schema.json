@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/capability-kernel/event-envelope.v1.json",
+  "title": "Locaily Capability Trigger Event Envelope",
+  "description": "A typed contextual observation submitted to the Capability Trigger Kernel.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_id", "event_type", "source", "occurred_at", "payload"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "event_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "event_type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(\\.[a-z0-9_-]+)+$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "adapter_id"],
+      "properties": {
+        "node_id": { "type": "string", "minLength": 1 },
+        "adapter_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "correlation_id": { "type": "string" },
+    "payload": { "type": "object" },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "content_hash": { "type": "string" },
+        "observed_path": { "type": "string" }
+      }
+    }
+  }
+}

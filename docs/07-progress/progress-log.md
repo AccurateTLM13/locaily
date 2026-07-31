@@ -1237,3 +1237,29 @@ eview_2026-07-11.
 ### Next
 
 Second-repo operator acceptance, then physical multi-device pilot.
+
+---
+
+## 2026-07-31 - CTK-01 completion audit and isolation
+
+### Changed
+
+- Audited CTK-01 against its milestone manifest and all 15 acceptance-matrix scenarios.
+- Confirmed the runtime implementation requires no functional correction.
+- Isolated CTK-01 on `codex/ctk-01-completion` so unrelated shell/server work and all CTK-02 files remain outside the delivery commit.
+- Reconciled current status, sprint, blocker, handoff, and closeout surfaces to the CTK-01 lifecycle state.
+- Fixed linked-worktree prepare support, auditable validation manual-check acknowledgements, direct npm profile execution, optional-check labeling, and transient `validating` status recognition after the first official validation exposed those delivery-control defects.
+
+### Evidence
+
+- `node scripts/test-capability-trigger-kernel.js` - 20/20 passed.
+- `npm.cmd run test:full` - passed.
+- `node scripts/test-development-schemas.js` - 29/29 passed.
+- `node scripts/test-lifecycle.js` - 23/23 passed.
+- `node scripts/test-controller-invariants.js` - 11/11 passed.
+- `npm.cmd run test:console-runs` - 8/8 passed.
+- `node scripts/contract-test.js` - passed.
+
+### Next
+
+Review CTK-01 on `codex/ctk-01-completion`. Do not activate CTK-02.

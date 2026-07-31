@@ -1,0 +1,118 @@
+{
+  "schema": "locaily.development.validation_result.v1",
+  "id": "validation-20260731T012126-adab70b6",
+  "milestoneId": "ctk-01-capability-trigger-kernel",
+  "profileId": "pre-delivery",
+  "status": "failed",
+  "gitState": {
+    "branch": "codex/ctk-01-completion",
+    "headCommit": "94e0bbe41e1f915d08677814b199223861dd1b0e",
+    "fingerprint": "sha256:e3b0c44298fc1c14",
+    "changedFiles": [
+      {
+        "path": "evelopment/milestones/ctk-01-capability-trigger-kernel.json",
+        "state": "M"
+      }
+    ],
+    "computedAt": "2026-07-31T01:21:26.859Z"
+  },
+  "startedAt": "2026-07-31T01:21:26.860Z",
+  "completedAt": "2026-07-31T01:21:28.801Z",
+  "results": [
+    {
+      "id": "strict-status",
+      "command": "node scripts/dev-status.js --strict --json",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 0,
+      "stdout": "",
+      "stderr": "",
+      "summary": "No error/critical contradictions",
+      "required": true
+    },
+    {
+      "id": "dev-status-strict",
+      "command": "node scripts/dev-status.js --strict",
+      "status": "failed",
+      "exitCode": 1,
+      "durationMs": 586,
+      "stdout": "=== Locaily Development Status ===\n\nProject:        locaily\nStatus:         active\nDefault branch: main\nCurrent branch: codex/ctk-01-completion\nHEAD:           94e0bbe\n\n--- Working Tree ---\n  Modified:  2 file(s)\n    development/milestones/ctk-01-capability-trigger-kernel.json\n    development/project-state.json\n\n--- Milestones ---\n  No active, paused, blocked, or ready-for-delivery milestones.\n  Planned: 1 | Ready: 0 | Completed: 6\n\n--- Sessions ---\n  No active or paused sessions.\n  Total: 4\n\n--",
+      "stderr": "",
+      "summary": "      Fix: Create milestone record or remove from roadmap.json",
+      "required": true
+    },
+    {
+      "id": "schema-tests",
+      "command": "node scripts/test-development-schemas.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 93,
+      "stdout": "\n## Schema Structure\n  PASS  Schema brief.schema.json has required fields\n  PASS  Schema delivery.schema.json has required fields\n  PASS  Schema issue.schema.json has required fields\n  PASS  Schema milestone.schema.json has required fields\n  PASS  Schema project-state.schema.json has required fields\n  PASS  Schema session.schema.json has required fields\n  PASS  Schema validation-profile.schema.json has required fields\n  PASS  Schema validation-result.schema.json has required fields\n\n## Schema Co",
+      "stderr": "",
+      "summary": "## Results: 29 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "lifecycle-tests",
+      "command": "node scripts/test-lifecycle.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 118,
+      "stdout": "\n## State Machine\n  PASS  STATES are frozen\n  PASS  isTerminal identifies terminal states\n  PASS  isValidTransition enforces legal transitions\n  PASS  Terminal states have no outgoing transitions\n\n## Objective Meta\n  PASS  createObjectiveMeta produces default meta\n  PASS  createObjectiveMeta accepts overrides\n\n## Objective Parsing\n  PASS  parseObjectiveId extracts prefix and slug\n  PASS  parseObjectiveId handles no prefix\n\n## Duplicate Detection\n  PASS  detectDuplicates finds slug duplicates\n  P",
+      "stderr": "",
+      "summary": "## Results: 23 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "controller-tests",
+      "command": "node scripts/test-controller-invariants.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 234,
+      "stdout": "\nTests: 11 passed, 0 failed\n",
+      "stderr": "",
+      "summary": "Tests: 11 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "contract-tests",
+      "command": "node scripts/contract-test.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 246,
+      "stdout": "Contract helpers passed.\n",
+      "stderr": "",
+      "summary": "Contract helpers passed.",
+      "required": true
+    },
+    {
+      "id": "full-suite",
+      "command": "npm run test:full",
+      "status": "failed",
+      "exitCode": 1,
+      "durationMs": 71,
+      "stdout": "",
+      "stderr": "node:internal/modules/cjs/loader:1252\r\n  throw err;\r\n  ^\r\n\r\nError: Cannot find module 'C:\\tmp\\locaily-ctk01-review\\npm'\r\n    at Function._resolveFilename (node:internal/modules/cjs/loader:1249:15)\r\n    at Function._load (node:internal/modules/cjs/loader:1075:27)\r\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\r\n    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)\r\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)\r\n    at node:i",
+      "summary": "",
+      "required": true
+    }
+  ],
+  "manualChecks": [
+    {
+      "id": "review-gate",
+      "description": "Code review must pass (agent-review.js)",
+      "acknowledged": true,
+      "acknowledgedBy": "codex",
+      "acknowledgedAt": "2026-07-31T01:21:28.801Z"
+    },
+    {
+      "id": "closeout-verified",
+      "description": "Closeout record correctly describes completed work",
+      "acknowledged": true,
+      "acknowledgedBy": "codex",
+      "acknowledgedAt": "2026-07-31T01:21:28.801Z"
+    }
+  ],
+  "warnings": [],
+  "error": null
+}

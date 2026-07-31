@@ -120,6 +120,28 @@ function validateValue(value, schema, path, errors, rootSchema) {
     if (typeof schema.minLength === "number" && value.length < schema.minLength) {
       errors.push(`${path} must be at least ${schema.minLength} characters.`);
     }
+
+    if (typeof schema.maxLength === "number" && value.length > schema.maxLength) {
+      errors.push(`${path} must be at most ${schema.maxLength} characters.`);
+    }
+
+    if (typeof schema.pattern === "string") {
+      let pattern;
+
+      try {
+        pattern = new RegExp(schema.pattern);
+      } catch (error) {
+        errors.push(`${path} uses an invalid schema pattern.`);
+      }
+
+      if (pattern && !pattern.test(value)) {
+        errors.push(`${path} must match pattern ${schema.pattern}.`);
+      }
+    }
+
+    if (schema.format === "date-time" && !isDateTime(value)) {
+      errors.push(`${path} must be a valid date-time string.`);
+    }
   }
 
   if (typeof value === "number") {
@@ -139,6 +161,25 @@ function validateValue(value, schema, path, errors, rootSchema) {
   if (schema.type === "array" && Array.isArray(value)) {
     if (typeof schema.minItems === "number" && value.length < schema.minItems) {
       errors.push(`${path} must contain at least ${schema.minItems} item(s).`);
+    }
+
+    if (typeof schema.maxItems === "number" && value.length > schema.maxItems) {
+      errors.push(`${path} must contain at most ${schema.maxItems} item(s).`);
+    }
+
+    if (schema.uniqueItems === true) {
+      const seen = new Set();
+
+      for (const item of value) {
+        const key = stableComparableValue(item);
+
+        if (seen.has(key)) {
+          errors.push(`${path} must contain unique items.`);
+          break;
+        }
+
+        seen.add(key);
+      }
     }
 
     if (schema.items) {
@@ -271,6 +312,29 @@ function matchesJsonType(value, typeName) {
   }
 
   return typeof value === typeName;
+}
+
+function isDateTime(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    return false;
+  }
+
+  return !Number.isNaN(Date.parse(value));
+}
+
+function stableComparableValue(value) {
+  if (!value || typeof value !== "object") {
+    return `${typeof value}:${String(value)}`;
+  }
+
+  if (Array.isArray(value)) {
+    return `[${value.map(stableComparableValue).join(",")}]`;
+  }
+
+  return `{${Object.keys(value)
+    .sort()
+    .map((key) => `${JSON.stringify(key)}:${stableComparableValue(value[key])}`)
+    .join(",")}}`;
 }
 
 module.exports = {

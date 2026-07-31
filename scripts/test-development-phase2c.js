@@ -180,6 +180,12 @@ test("prepare records preparedCommit on milestone", () => {
   assert(content.includes("milestone.preparedAt"), "Missing preparedAt");
 });
 
+test("prepare resolves commit message path for linked worktrees", () => {
+  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
+  assert(content.includes('"rev-parse", "--git-path", "COMMIT_MSG_TEMP"'),
+    "Prepare must resolve the Git directory instead of assuming .git is a directory");
+});
+
 test("prepare requires clean tree after commit", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
   assert(content.includes("postStatus") && content.includes("not clean after commit"), "Missing post-commit clean check");

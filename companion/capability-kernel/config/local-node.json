@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "node_id": "nearby-node-local-dev",
+  "mode": "local_only",
+  "trusted_sources": [
+    {
+      "node_id": "nearby-node-local-dev",
+      "adapter_id": "local-brain-status-watcher"
+    }
+  ],
+  "policy": {
+    "network": false,
+    "cloud_fallback": false,
+    "allowed_filesystem_write": [
+      "local-brain/runs"
+    ],
+    "allow_irreversible": false
+  }
+}

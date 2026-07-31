@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/capability-kernel/status-handoff-output.v1.json",
+  "title": "Status Handoff Capability Output",
+  "description": "Deterministic handoff summary produced from a project.status.changed event.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project_id",
+    "previous_status",
+    "current_status",
+    "summary",
+    "next_action"
+  ],
+  "properties": {
+    "project_id": { "type": "string", "minLength": 1 },
+    "previous_status": { "type": "string", "minLength": 1 },
+    "current_status": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "next_action": { "type": "string", "minLength": 1 }
+  }
+}

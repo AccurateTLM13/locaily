@@ -212,7 +212,12 @@ function detectContradictions(projectState, gitState, legacyState, milestones, s
   }
 
   // --- ERROR: project-state says active but no milestone is active ---
-  if (projectState.data && projectState.data.status === "active" && milestones.active.length === 0) {
+  if (
+    projectState.data
+    && projectState.data.status === "active"
+    && milestones.active.length === 0
+    && milestones.validating.length === 0
+  ) {
     add("error", "CP_ACTIVE_NO_MILESTONE",
       "project-state says 'active' but no milestone has status 'active'",
       "Set project-state status to 'idle' or create an active milestone");

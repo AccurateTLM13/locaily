@@ -157,6 +157,16 @@ test("dev:validate enforces command timeouts", () => {
   assert(content.includes("timeout") && content.includes("ETIMEDOUT"), "Missing timeout handling");
 });
 
+test("dev:validate executes node and npm profile commands directly", () => {
+  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
+  assert(content.includes('requestedCommand === "node"'), "Missing direct Node command handling");
+  assert(content.includes('"npm.cmd"'), "Missing Windows npm command handling");
+  assert(content.includes("checkResult.required = false"), "Optional checks must be recorded as optional");
+  assert(content.includes('result.error.code === "ETIMEDOUT"'), "Runner must distinguish timeout errors");
+  assert(content.includes('status = result.error.code === "ETIMEDOUT" ? "timeout" : "error"'),
+    "Runner must not report spawn errors as passed");
+});
+
 test("dev:validate preserves failed records", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
   // Validation results are immutable - always written regardless of status
@@ -275,6 +285,14 @@ test("Validation IDs include random component", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
   assert(content.includes("generateValidationId"), "Missing generateValidationId");
   assert(content.includes("randomBytes"), "Missing randomBytes for ID generation");
+});
+
+test("Validation records explicit manual-check acknowledgements", () => {
+  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
+  assert(content.includes("--acknowledge-manual"), "Missing manual-check acknowledgement argument");
+  assert(content.includes("--acknowledged-by"), "Missing manual-check acknowledgement actor");
+  assert(content.includes("acknowledgedAt"), "Missing manual-check acknowledgement timestamp");
+  assert(content.includes("Unknown manual check(s)"), "Missing unknown manual-check rejection");
 });
 
 // ---- Warning acknowledgement ----

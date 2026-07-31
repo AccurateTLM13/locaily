@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "px9-remaining-milestones-second-pass",
   "title": "PX Remaining Milestones Second Pass — Evidence Execution and Canonical Fixes",
-  "status": "active",
+  "status": "merged",
   "type": "remediation",
   "priority": "critical",
   "purpose": "Resolve all findings from the PX5–PX7 independent audit: execute PX6 validation evidence (tester protocol dry-run, second workflow, relay pilot blocker), fix PX7 canonical status and broken screenshot placeholder, tighten PX5 dependency check, and add PX milestones to roadmap",
@@ -76,6 +76,6 @@
   "lifecycleRef": null,
   "createdAt": "2026-07-26T00:00:00.000Z",
   "startedAt": "2026-07-26T00:00:00.000Z",
-  "completedAt": null,
-  "mergedAt": null
+  "completedAt": "2026-07-26T23:56:21.000Z",
+  "mergedAt": "2026-07-26T23:56:21.000Z"
 }

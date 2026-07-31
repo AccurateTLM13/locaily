@@ -1,14 +1,20 @@
 # Active Build Slice
 
-**Updated:** 2026-07-22
+**Updated:** 2026-07-31 (CTK-01 completion audit)
 
 ## Current Slice
 
-**None active.** No objective is currently in progress.
+**CTK-01 Capability Trigger Kernel is ready for delivery review.** Its bounded runtime implementation is complete on the isolated `codex/ctk-01-completion` branch. The 20-case CTK acceptance suite, the complete offline repository suite, and the `pre-delivery` validation profile pass.
 
-The repository is between build cycles. Lifecycle integrity passes; continuity check resolves cleanly. The queue is locked via `QUEUE_LOCK.json`.
+No CTK-01 implementation blocker remains. CTK-02 remains planned and inactive. DBVT SEO Audit integration is out of scope.
 
 ## Most Recently Completed Slice
+
+**PX6 External Validation Program**
+
+The last completed milestone recorded by the development control plane is `px6-external-validation-program`.
+
+### Previous Slice
 
 **Objective Lifecycle Hardening and Work-Closeout**
 
@@ -20,9 +26,9 @@ Defined in [maintenance-objective-lifecycle-closeout.md](./maintenance-objective
 - Post-Merge Stabilization (2026-07-18)
 - Security Policy Foundation (docs/security/ + policies/)
 
-## Next Slice候选
+## Next Slice
 
-The next build slice must be explicitly selected. Candidates are listed in [current-sprint.md](./current-sprint.md).
+Do not select or activate a next slice until CTK-01 is reviewed.
 
 ### Deferred (requires specific conditions)
 
@@ -35,3 +41,4 @@ The next build slice must be explicitly selected. Candidates are listed in [curr
 - Do not modify approved benchmark evidence
 - Embedding-based retrieval remains out of scope
 - Do not begin a new milestone without an explicitly supplied objective
+- Do not activate CTK-02 or implement DBVT SEO Audit integration during CTK-01 closeout

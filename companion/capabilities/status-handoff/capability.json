@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "capability_id": "status-handoff",
+  "version": "0.1.0",
+  "status": "tested",
+  "triggers": [
+    {
+      "event_type": "project.status.changed",
+      "conditions": {
+        "payload.current_status": "review_ready"
+      }
+    }
+  ],
+  "tracks": [
+    {
+      "track_id": "build-handoff",
+      "handler_type": "rule",
+      "handler_id": "status-handoff-rule-v1",
+      "input_schema": "event-envelope.v1",
+      "output_schema": "status-handoff-output.v1",
+      "timeout_ms": 1000,
+      "retry": {
+        "max_attempts": 1,
+        "retryable_codes": []
+      }
+    }
+  ],
+  "permissions": {
+    "network": false,
+    "filesystem_write": [
+      "local-brain/runs"
+    ],
+    "irreversible": false
+  },
+  "approval_policy": "none",
+  "final_output_schema": "status-handoff-output.v1",
+  "resource_limits": {
+    "max_runtime_ms": 2000
+  }
+}

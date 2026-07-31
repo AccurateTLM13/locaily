@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/capability-kernel/run-record.v1.json",
+  "title": "Locaily Capability Kernel Run Record",
+  "description": "Append-only evidence for accepted, ignored, rejected, approval-required, and failed trigger evaluations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "node_id",
+    "received_at",
+    "event_id",
+    "event_hash",
+    "event_snapshot",
+    "source_auth",
+    "policy_snapshot",
+    "capability_id",
+    "capability_version",
+    "manifest_hash",
+    "manifest_snapshot",
+    "plan_hash",
+    "execution_plan",
+    "transitions",
+    "attempts",
+    "validations",
+    "outputs",
+    "output_ref",
+    "terminal_state",
+    "error"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "node_id": { "type": "string", "minLength": 1 },
+    "received_at": { "type": "string", "format": "date-time" },
+    "event_id": { "type": ["string", "null"] },
+    "event_hash": { "type": "string", "minLength": 1 },
+    "event_snapshot": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source_auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trusted", "node_id", "adapter_id"],
+      "properties": {
+        "trusted": { "type": "boolean" },
+        "node_id": { "type": ["string", "null"] },
+        "adapter_id": { "type": ["string", "null"] }
+      }
+    },
+    "policy_snapshot": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "capability_id": { "type": ["string", "null"] },
+    "capability_version": { "type": ["string", "null"] },
+    "manifest_hash": { "type": ["string", "null"] },
+    "manifest_snapshot": {
+      "type": ["object", "null"],
+      "additionalProperties": true
+    },
+    "plan_hash": { "type": ["string", "null"] },
+    "execution_plan": {
+      "type": ["object", "null"],
+      "additionalProperties": true
+    },
+    "transitions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "at"],
+        "properties": {
+          "from": { "type": ["string", "null"] },
+          "to": { "type": "string" },
+          "at": { "type": "string", "format": "date-time" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "track_id",
+          "handler_type",
+          "handler_id",
+          "attempt",
+          "started_at",
+          "completed_at",
+          "duration_ms",
+          "status",
+          "output_hash",
+          "error"
+        ],
+        "properties": {
+          "track_id": { "type": "string" },
+          "handler_type": { "type": "string" },
+          "handler_id": { "type": "string" },
+          "attempt": { "type": "integer", "minimum": 1 },
+          "started_at": { "type": "string", "format": "date-time" },
+          "completed_at": { "type": "string", "format": "date-time" },
+          "duration_ms": { "type": "number", "minimum": 0 },
+          "status": { "enum": ["completed", "failed", "timeout"] },
+          "output_hash": { "type": ["string", "null"] },
+          "error": { "type": ["object", "null"], "additionalProperties": true }
+        }
+      }
+    },
+    "validations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["scope", "schema_id", "ok", "errors", "at"],
+        "properties": {
+          "scope": { "type": "string" },
+          "schema_id": { "type": "string" },
+          "ok": { "type": "boolean" },
+          "errors": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "outputs": {
+      "type": ["object", "null"],
+      "additionalProperties": true
+    },
+    "output_ref": { "type": ["string", "null"] },
+    "terminal_state": {
+      "enum": ["completed", "ignored", "rejected", "approval_required", "failed"]
+    },
+    "error": {
+      "type": ["object", "null"],
+      "additionalProperties": true
+    }
+  }
+}
