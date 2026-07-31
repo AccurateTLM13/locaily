@@ -1,6 +1,7 @@
 {
   "latestByMilestone": {
     "px1-canonical-product-status": "validation-20260726T194012-6848fec5",
-    "ctk-01-capability-trigger-kernel": "validation-20260731T012502-3e424fff"
+    "ctk-01-capability-trigger-kernel": "validation-20260731T012502-3e424fff",
+    "dev-loop-01-canonical-queue-safe-runner": "validation-20260731T032130-958f2ebf"
   }
 }

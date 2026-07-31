@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "dev-loop-01-canonical-queue-safe-runner",
   "title": "DEV-LOOP-01 Canonical Queue and Safe Runner Integration",
-  "status": "active",
+  "status": "ready-for-delivery",
   "type": "infrastructure",
   "priority": "critical",
   "purpose": "Connect the existing development control plane to the existing supervisor/worker loop so approved milestone work can run safely from one canonical queue.",
@@ -119,6 +119,12 @@
   "lifecycleRef": null,
   "createdAt": "2026-07-31T02:45:08.144Z",
   "startedAt": "2026-07-31T02:46:02.420Z",
-  "completedAt": null,
-  "mergedAt": null
+  "completedAt": "2026-07-31T03:22:28.611Z",
+  "mergedAt": null,
+  "preparedCommit": "12ce8d232c043459d9e0d714e31c6ee5db34b999",
+  "preparedBranch": "codex/dev-loop-01",
+  "preparedAt": "2026-07-31T03:20:48.140Z",
+  "latestValidationId": "validation-20260731T032130-958f2ebf",
+  "completionBranch": "codex/dev-loop-01",
+  "completionHead": "12ce8d232c043459d9e0d714e31c6ee5db34b999"
 }
