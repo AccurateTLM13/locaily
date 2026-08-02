@@ -1,0 +1,100 @@
+{
+  "fixture_id": "opencode-fixture-001",
+  "capturedAt": "2026-08-01T23:00:00.000Z",
+  "provider": {
+    "display_name": "OpenCode",
+    "version": "fixture-1"
+  },
+  "run": {
+    "session_id": "opencode-session-001",
+    "status": "running",
+    "lifecycle": "running",
+    "reason": null
+  },
+  "agents": [
+    {
+      "id": "worker-1",
+      "name": "Primary worker",
+      "role": "implementation",
+      "phase": "working",
+      "model": null,
+      "objective_refs": ["objective-1"],
+      "worktree_ref": "worktree-1"
+    }
+  ],
+  "checkouts": [
+    {
+      "ref": "worktree-1",
+      "root": "workspace/locailly",
+      "git_branch": "agent/dev-harness-01-agent-operations-contract",
+      "git_commit": "2cedf5b",
+      "has_changes": true
+    }
+  ],
+  "goals": [
+    {
+      "ref": "objective-1",
+      "label": "Implement harness-neutral agent operations contract",
+      "phase": "active",
+      "priority": "high",
+      "assigned_agents": ["worker-1"],
+      "checkout_refs": ["worktree-1"]
+    }
+  ],
+  "transfers": [
+    {
+      "ref": "handoff-1",
+      "from": "worker-1",
+      "to": null,
+      "state": "pending",
+      "summary": "Fixture contains no completed handoff yet.",
+      "created_at": "2026-08-01T22:59:00.000Z"
+    }
+  ],
+  "verifications": [
+    {
+      "id": "check-1",
+      "name": "fixture contract loaded",
+      "status": "passed",
+      "command": null,
+      "completedAt": "2026-08-01T23:00:00.000Z"
+    }
+  ],
+  "hud": {
+    "context": {
+      "used": 2400,
+      "budget": 8000,
+      "pressure": "low"
+    },
+    "tools": {
+      "state": "active",
+      "active": 1,
+      "last": "read_file"
+    },
+    "risk": {
+      "level": "low",
+      "flags": []
+    },
+    "cost": {
+      "amount": null
+    },
+    "sync": {
+      "status": "unknown",
+      "lastSyncedAt": null
+    }
+  },
+  "evidence": {
+    "harness": { "status": "available", "reason": "Fixture identifies OpenCode as the source harness.", "source_ref": "opencode.provider" },
+    "workers": { "status": "available", "reason": "Fixture includes agent records.", "source_ref": "opencode.agents" },
+    "worktrees": { "status": "available", "reason": "Fixture includes checkout records.", "source_ref": "opencode.checkouts" },
+    "objectives": { "status": "available", "reason": "Fixture includes goal records.", "source_ref": "opencode.goals" },
+    "handoffs": { "status": "available", "reason": "Fixture includes transfer records.", "source_ref": "opencode.transfers" },
+    "checks": { "status": "available", "reason": "Fixture includes verification records.", "source_ref": "opencode.verifications" },
+    "context": { "status": "available", "reason": "Fixture provides context token counts.", "source_ref": "opencode.hud.context" },
+    "tool_activity": { "status": "available", "reason": "Fixture provides current tool activity.", "source_ref": "opencode.hud.tools" },
+    "risk": { "status": "available", "reason": "Fixture provides a risk level and flags.", "source_ref": "opencode.hud.risk" },
+    "cost": { "status": "unsupported", "reason": "The fixture does not expose cost accounting.", "source_ref": "opencode.hud.cost" },
+    "sync": { "status": "unavailable", "reason": "The fixture does not expose harness synchronization state.", "source_ref": "opencode.hud.sync" },
+    "model": { "status": "redacted", "reason": "Model identity is intentionally redacted in this fixture.", "source_ref": "opencode.agents.model" }
+  }
+}

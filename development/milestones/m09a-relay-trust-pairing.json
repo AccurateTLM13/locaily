@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "m09a-relay-trust-pairing",
   "title": "M09A Relay Trust and Node Pairing Ceremony",
-  "status": "completed",
+  "status": "planned",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Implement Node identity pairing ceremony, HMAC-SHA256 request signing, node trust allowlists, and node revocation for secure inter-node execution.",

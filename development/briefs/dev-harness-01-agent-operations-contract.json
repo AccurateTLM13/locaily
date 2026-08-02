@@ -1,0 +1,39 @@
+{
+  "schema": "locaily.development.brief.v1",
+  "milestoneId": "dev-harness-01-agent-operations-contract",
+  "context": "ECC's harness-neutral adapter layer is the relevant external pattern: different coding-agent harnesses become one canonical session snapshot, while the HUD makes context pressure, tool activity, risk, cost, and sync state explicit. Locaily should adopt the normalization boundary without importing hooks, transcript capture, mutating harness control, playbook promotion, AgentShield, or NearbyNode routing.",
+  "files": [
+    "companion/harness/",
+    "companion/schemas/harness-operations-snapshot.schema.json",
+    "development/fixtures/harness/",
+    "scripts/test-harness-adapters.js",
+    "scripts/harness-status.js",
+    "companion/server.js"
+  ],
+  "acceptance": [
+    "Codex and OpenCode fixtures normalize into one strict canonical snapshot shape.",
+    "Workers, worktrees, objectives, handoffs, checks, and state are explicit, deterministic, and provenance-linked.",
+    "HUD context pressure, tool activity, risk, cost, and sync state are explicit with unknown/unsupported evidence preserved.",
+    "Locaily lifecycle, session, closeout, validation, and reviewed-memory links are read-only and local-first.",
+    "No hooks, transcript capture, mutating harness control, cloud fallback, playbook promotion, AgentShield, or NearbyNode routing is added."
+  ],
+  "constraints": [
+    "Use existing Locaily schema and result-validator conventions.",
+    "Keep the adapter boundary fixture-first and read-only.",
+    "Do not manually edit generated development/generated files.",
+    "Do not claim live harness integration from fixture evidence."
+  ],
+  "decisions": [
+    {
+      "question": "What is the first integration boundary?",
+      "decision": "Local Codex and OpenCode fixture adapters feeding a canonical snapshot normalizer.",
+      "reason": "It proves the contract and provenance semantics without requiring hooks, live transcripts, or mutating control."
+    },
+    {
+      "question": "How should missing harness evidence be represented?",
+      "decision": "Keep explicit availability and unsupported evidence records instead of inferring values.",
+      "reason": "The control plane must distinguish unavailable evidence from a known negative state."
+    }
+  ],
+  "createdAt": "2026-08-01T23:00:00.000Z"
+}

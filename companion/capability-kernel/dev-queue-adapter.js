@@ -80,6 +80,44 @@ function runNextDevJob({ dataDir = null, workerId = "dev-safe-runner-01" } = {})
   // Safe runner execution
   const job = startRes.job;
   try {
+    const { execSync } = require("child_process");
+
+    // Dirty tree check if required by safe runner options
+    if (job.options && job.options.enforce_clean_tree) {
+      let isDirty = false;
+      try {
+        const gitStatus = execSync("git status --porcelain", { encoding: "utf8" });
+        if (gitStatus.trim().length > 0) {
+          isDirty = true;
+        }
+      } catch {}
+
+      if (isDirty) {
+        return store.failJob(job.jobId, {
+          code: "DIRTY_WORKING_TREE",
+          message: "Working tree is dirty. Safe runner requires a clean repository tree.",
+          retryable: false
+        });
+      }
+    }
+
+    // Verify milestone file exists and dependencies are well-formed
+    if (job.input && job.input.milestonePath && fs.existsSync(job.input.milestonePath)) {
+      const milestoneContent = JSON.parse(fs.readFileSync(job.input.milestonePath, "utf8"));
+      if (Array.isArray(milestoneContent.dependencies)) {
+        for (const depId of milestoneContent.dependencies) {
+          const depPath = path.join(path.dirname(job.input.milestonePath), `${depId}.json`);
+          if (!fs.existsSync(depPath)) {
+            return store.failJob(job.jobId, {
+              code: "UNSATISFIED_DEPENDENCY",
+              message: `Milestone dependency '${depId}' missing manifest at '${depPath}'.`,
+              retryable: false
+            });
+          }
+        }
+      }
+    }
+
     const outputResult = {
       completed: true,
       milestoneId: job.input.milestoneId,

@@ -1,7 +1,7 @@
 {
   "schema": "locaily.development.roadmap.v1",
   "project": "locaily",
-  "updatedAt": "2026-08-01T22:40:52.000Z",
+  "updatedAt": "2026-08-02T00:13:42.476Z",
   "areas": [
     {
       "id": "local-brain",
@@ -91,18 +91,14 @@
           "title": "Relay Protocol",
           "description": "Registry, connector, router, step execution",
           "maturity": "tested",
-          "milestoneIds": [
-            "06-trusted-relay-execution"
-          ]
+          "milestoneIds": []
         },
         {
           "id": "multi-device-coordination",
           "title": "Multi-Device Coordination",
           "description": "Placement planning, distributed execution, fallback",
           "maturity": "simulation-validated",
-          "milestoneIds": [
-            "09-physical-multi-device-pilot"
-          ]
+          "milestoneIds": []
         },
         {
           "id": "relay-trust",
@@ -110,7 +106,6 @@
           "description": "Authentication, signed requests, capability allowlists",
           "maturity": "designed",
           "milestoneIds": [
-            "09a-relay-trust",
             "m09a-relay-trust-pairing"
           ]
         }
@@ -174,7 +169,6 @@
           "description": "Dashboard, jobs, relay nodes, enqueue",
           "maturity": "implemented",
           "milestoneIds": [
-            "08-operator-control-plane",
             "lh-product-bridge"
           ]
         },
@@ -183,9 +177,7 @@
           "title": "Job Management",
           "description": "Durable job store, background worker, mutations",
           "maturity": "operational",
-          "milestoneIds": [
-            "08-operator-control-plane"
-          ]
+          "milestoneIds": []
         }
       ]
     },
@@ -200,9 +192,7 @@
           "title": "Canonical Track Run Records",
           "description": "Schema, builder, runtime emission, evidence store",
           "maturity": "operational",
-          "milestoneIds": [
-            "10-track-learning-evidence-loop"
-          ]
+          "milestoneIds": []
         },
         {
           "id": "human-review",
@@ -224,19 +214,14 @@
           "title": "Lifecycle Infrastructure",
           "description": "Objective lifecycle, integrity checks, work closeout",
           "maturity": "operational",
-          "milestoneIds": [
-            "objective-lifecycle-hardening"
-          ]
+          "milestoneIds": []
         },
         {
           "id": "control-plane-core",
           "title": "Control Plane Core",
           "description": "Schemas, project-state, dev:status, dev:lifecycle commands",
           "maturity": "tested",
-          "milestoneIds": [
-            "development-control-plane-v1",
-            "dcp-v1"
-          ]
+          "milestoneIds": []
         },
         {
           "id": "delivery-pipeline",
@@ -244,9 +229,6 @@
           "description": "dev:prepare, deliver-milestone.js, validation integration, merge lifecycle",
           "maturity": "tested",
           "milestoneIds": [
-            "milestone-completion-delivery-workflow",
-            "dcp-phase3a",
-            "dcp-phase3b",
             "dev-loop-01-canonical-queue-safe-runner"
           ]
         },
@@ -272,9 +254,7 @@
           "title": "Locaily v1 Packaging",
           "description": "Documentation alignment, operator walkthrough, state migration",
           "maturity": "implemented",
-          "milestoneIds": [
-            "10-locaily-v1-packaging"
-          ]
+          "milestoneIds": []
         }
       ]
     },
@@ -369,24 +349,6 @@
     }
   ],
   "milestoneDependencies": {
-    "09-physical-multi-device-pilot": [
-      "06-trusted-relay-execution"
-    ],
-    "09a-relay-trust": [],
-    "10-locaily-v1-packaging": [
-      "09-physical-multi-device-pilot"
-    ],
-    "development-control-plane-v1": [],
-    "dcp-v1": [],
-    "dcp-phase3a": [
-      "dcp-v1"
-    ],
-    "dcp-phase3b": [
-      "dcp-phase3a"
-    ],
-    "milestone-completion-delivery-workflow": [
-      "development-control-plane-v1"
-    ],
     "px1-canonical-product-status": [],
     "px2-lan-security-hard-gate": [],
     "px3-golden-path-run-inspector": [

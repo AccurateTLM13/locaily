@@ -137,18 +137,84 @@ function generateVault(projectRegistry, input) {
 }
 
 function importVault(projectRegistry, input) {
-  const attached = attachVault(projectRegistry, input);
+  const slug = input.slug || projectRegistry.getActiveProjectSlug();
+  const project = projectRegistry.getProject(slug);
+
+  if (!project) {
+    return {
+      ok: false,
+      error: {
+        code: "PROJECT_NOT_FOUND",
+        message: `Project '${slug}' is not registered.`,
+        nextStep: "Run the register step first."
+      },
+      warnings: []
+    };
+  }
+
+  const targetVaultDir = input.vaultPath || project.vaultPath;
+
+  if (!targetVaultDir) {
+    return {
+      ok: false,
+      error: {
+        code: "VAULT_PATH_REQUIRED",
+        message: "vaultPath is required.",
+        nextStep: "Provide a target vault directory."
+      },
+      warnings: []
+    };
+  }
+
+  let copiedFiles = 0;
+  if (input.sourceDir) {
+    const fs = require("node:fs");
+    const sourceDir = path.resolve(input.sourceDir);
+    if (!fs.existsSync(sourceDir)) {
+      return {
+        ok: false,
+        error: {
+          code: "SOURCE_DIR_NOT_FOUND",
+          message: `Source directory '${sourceDir}' does not exist.`
+        },
+        warnings: []
+      };
+    }
+
+    fs.mkdirSync(targetVaultDir, { recursive: true });
+    const entries = fs.readdirSync(sourceDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isFile() && entry.name.endsWith(".md")) {
+        const srcPath = path.join(sourceDir, entry.name);
+        const destPath = path.join(targetVaultDir, entry.name);
+        fs.copyFileSync(srcPath, destPath);
+        copiedFiles++;
+      }
+    }
+  }
+
+  // Ensure input.vaultPath is set for attachVault
+  const attachInput = { ...input, vaultPath: targetVaultDir };
+  const attached = attachVault(projectRegistry, attachInput);
+
   if (!attached.ok) {
     return attached;
   }
+
+  const importValidation = validateImportVault({
+    vaultPath: targetVaultDir,
+    slug
+  });
 
   return {
     ok: true,
     result: {
       project: attached.result,
-      imported: true
+      imported: true,
+      filesImported: copiedFiles,
+      validation: importValidation.ok ? importValidation.result : null
     },
-    warnings: attached.warnings || []
+    warnings: [...(attached.warnings || []), ...(importValidation.warnings || [])]
   };
 }
 

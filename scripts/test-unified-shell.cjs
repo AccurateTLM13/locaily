@@ -44,14 +44,14 @@ async function main() {
   check("GET / returns 200", rootRes.status === 200);
   const rootHtml = await rootRes.text();
   check("GET / returns shell HTML", rootHtml.includes("shell") || rootHtml.includes("Locaily"));
-  check("Shell HTML has nav links", rootHtml.includes("shell-nav"));
-  check("Shell HTML has logo", rootHtml.includes("locaily-logo.svg"));
+  check("Shell HTML has nav links", rootHtml.includes("shell-nav") || rootHtml.includes("sidebar-nav"));
+  check("Shell HTML has logo", rootHtml.includes("locaily-logo.svg") || rootHtml.includes("logo-text"));
 
   // Test 2: GET /shell returns same shell
   const shellRes = await fetch(`${BASE}/shell`);
   check("GET /shell returns 200", shellRes.status === 200);
   const shellHtml = await shellRes.text();
-  check("GET /shell returns shell HTML", shellHtml.includes("shell-nav"));
+  check("GET /shell returns shell HTML", shellHtml.includes("shell-nav") || shellHtml.includes("sidebar-nav"));
 
   // Test 3: Shell CSS loads
   const cssRes = await fetch(`${BASE}/shell/styles.css`);

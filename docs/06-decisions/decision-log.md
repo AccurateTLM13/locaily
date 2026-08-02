@@ -1740,3 +1740,26 @@ Confirmed for CTK-01
 - Model and human handler ports remain unavailable; there is no implicit fallback.
 - CTK-02 remains inactive and DBVT SEO Audit integration remains out of scope.
 - See `docs/01-architecture/capability-trigger-kernel.md`.
+
+---
+
+## 2026-08-02 - Harness-neutral agent operations boundary
+
+### Decision
+
+Add a read-only, fixture-first adapter boundary that normalizes Codex and OpenCode evidence into one canonical Locaily agent-operations snapshot. The snapshot owns a stable shape for workers, worktrees, objectives, handoffs, checks, lifecycle state, HUD fields, evidence availability, provenance, and links to existing Locaily control-plane records.
+
+### Why
+
+Locaily already records lifecycle, development sessions, validation, closeouts, reviewed-memory candidates, and operator status, but external coding-agent harnesses do not yet expose those concepts through one comparable boundary. A contract-first adapter proves the normalization and evidence semantics without requiring harness hooks, transcript capture, mutating control, or network access.
+
+### Status
+
+Experimental — DEV-HARNESS-01 active
+
+### Notes
+
+- Fixture-derived values are explicitly marked as fixture evidence; live harness integration is not claimed.
+- Unsupported, unavailable, and redacted values remain explicit and are never inferred.
+- The first operator surface is `GET /harness/status` and `npm run harness:status`.
+- Hooks, transcript capture, mutating harness control, playbook promotion, AgentShield, NearbyNode routing, and cloud fallback remain excluded.

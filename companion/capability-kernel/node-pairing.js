@@ -9,14 +9,16 @@ function generateSecretToken() {
   return `tok_${crypto.randomBytes(24).toString("hex")}`;
 }
 
-function initiatePairing(hostNodeConfig, peerNodeId) {
+function initiatePairing(hostNodeConfig, peerNodeId, secretToken = null) {
   const challengeHost = generateChallengeNonce();
+  const sharedSecretToken = secretToken || generateSecretToken();
   return {
     step: 1,
     action: "DISCOVERY_CHALLENGE",
     hostNodeId: hostNodeConfig.node_id,
     peerNodeId,
     challengeHost,
+    sharedSecretToken,
     initiatedAt: new Date().toISOString()
   };
 }
@@ -26,8 +28,12 @@ function respondChallenge(peerNodeConfig, pairingRequest) {
     throw new Error(`Pairing target mismatch. Expected ${pairingRequest.peerNodeId}, got ${peerNodeConfig.node_id}`);
   }
 
+  if (!pairingRequest.sharedSecretToken) {
+    throw new Error("Missing sharedSecretToken in pairing request.");
+  }
+
   const challengePeer = generateChallengeNonce();
-  const sharedSecretToken = generateSecretToken();
+  const sharedSecretToken = pairingRequest.sharedSecretToken;
 
   const hmac = crypto.createHmac("sha256", sharedSecretToken);
   hmac.update(`${pairingRequest.challengeHost}:${challengePeer}:${peerNodeConfig.node_id}`);
@@ -39,7 +45,6 @@ function respondChallenge(peerNodeConfig, pairingRequest) {
     peerNodeId: peerNodeConfig.node_id,
     challengeHost: pairingRequest.challengeHost,
     challengePeer,
-    sharedSecretToken,
     proofSignature
   };
 }
@@ -49,7 +54,11 @@ function verifyPairingResponse(hostNodeConfig, pairingRequest, peerResponse) {
     return { ok: false, code: "NONCE_MISMATCH", error: "Host challenge nonce mismatch." };
   }
 
-  const hmac = crypto.createHmac("sha256", peerResponse.sharedSecretToken);
+  if (!pairingRequest.sharedSecretToken) {
+    return { ok: false, code: "MISSING_HOST_TOKEN", error: "Host secret token unavailable." };
+  }
+
+  const hmac = crypto.createHmac("sha256", pairingRequest.sharedSecretToken);
   hmac.update(`${pairingRequest.challengeHost}:${peerResponse.challengePeer}:${peerResponse.peerNodeId}`);
   const computedProof = hmac.digest("hex");
 
@@ -62,18 +71,18 @@ function verifyPairingResponse(hostNodeConfig, pairingRequest, peerResponse) {
     step: 3,
     action: "VERIFICATION_SUCCESS",
     peerNodeId: peerResponse.peerNodeId,
-    sharedSecretToken: peerResponse.sharedSecretToken
+    sharedSecretToken: pairingRequest.sharedSecretToken
   };
 }
 
-function executePairingCeremony(hostNodeConfig, peerNodeConfig, customTrustStorePath = null) {
-  // Step 1: Initiate Challenge
+function executePairingCeremony(hostNodeConfig, peerNodeConfig, customTrustStorePath = null, peerTrustStorePath = null) {
+  // Step 1: Initiate Challenge with host-generated secret token
   const req = initiatePairing(hostNodeConfig, peerNodeConfig.node_id);
 
-  // Step 2: Peer Response
+  // Step 2: Peer Response using host challenge & token
   const resp = respondChallenge(peerNodeConfig, req);
 
-  // Step 3: Host Verification
+  // Step 3: Host Verification against host token
   const verifyRes = verifyPairingResponse(hostNodeConfig, req, resp);
   if (!verifyRes.ok) {
     return {
@@ -89,18 +98,19 @@ function executePairingCeremony(hostNodeConfig, peerNodeConfig, customTrustStore
     };
   }
 
-  // Step 4: Token Enrollment in Trust Store
+  // Step 4: Token Enrollment in host & peer Trust Stores
   const hostEnrollment = addTrustRecord(peerNodeConfig.node_id, {
     status: "active",
     tier: "trusted_local",
-    secretToken: resp.sharedSecretToken
+    secretToken: req.sharedSecretToken
   }, customTrustStorePath);
 
+  const targetPeerStore = peerTrustStorePath || customTrustStorePath;
   const peerEnrollment = addTrustRecord(hostNodeConfig.node_id, {
     status: "active",
     tier: "trusted_local",
-    secretToken: resp.sharedSecretToken
-  }, customTrustStorePath);
+    secretToken: req.sharedSecretToken
+  }, targetPeerStore);
 
   return {
     ok: true,
@@ -108,7 +118,7 @@ function executePairingCeremony(hostNodeConfig, peerNodeConfig, customTrustStore
     action: "ENROLLED",
     hostNodeId: hostNodeConfig.node_id,
     peerNodeId: peerNodeConfig.node_id,
-    secretToken: resp.sharedSecretToken,
+    secretToken: req.sharedSecretToken,
     hostRecord: hostEnrollment,
     peerRecord: peerEnrollment,
     provenance: {

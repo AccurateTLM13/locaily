@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-07-31 (CTK-01 completion audit)
+**Updated:** 2026-08-02 (DEV-HARNESS-01 implementation)
 
 ## Read First
 
@@ -18,7 +18,15 @@ Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
 Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../08-agents/agent-context.md)
 
-## Current CTK-01 Handoff
+## Current DEV-HARNESS-01 Handoff
+
+- DEV-HARNESS-01 is active on `agent/dev-harness-01-agent-operations-contract`.
+- Implemented: strict snapshot schema, Codex/OpenCode fixture adapters, explicit HUD/evidence/provenance semantics, read-only Locaily lifecycle/memory links, `npm run harness:status`, and `GET /harness/status`.
+- Verification: `npm.cmd run test:harness` (28/28), `node scripts/test-development-schemas.js` (29/29), `node scripts/contract-test.js`, syntax checks, `npm.cmd run dev:status -- --strict`, and `npm.cmd run test:full` pass.
+- Remaining: run the broader offline suite, update acceptance evidence through the lifecycle validator, and establish an intentional commit boundary before delivery.
+- Excluded: hooks, automatic transcript capture, mutating harness control, playbook promotion, AgentShield, NearbyNode routing, cloud fallback, and live harness integration claims.
+
+## Previous CTK-01 Handoff
 
 - CTK-01 is ready for delivery review.
 - The CTK acceptance suite passes 20/20, `npm.cmd run test:full` passes, and the `pre-delivery` profile passed as `validation-20260731T012502-3e424fff`.

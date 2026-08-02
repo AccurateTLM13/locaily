@@ -1,35 +1,34 @@
 {
-  "work_id": "wave-3-dm10-lhbridge-20260801",
-  "objective_id": "wave-3-multiproject-product-bridge",
-  "status": "complete",
-  "closed_at": "2026-08-01",
-  "original_goal": "Execute Wave 3 combining DM10 Multi-Project Template and Vault Importer and Lighthouse Handoff Product Bridge.",
+  "work_id": "dev-harness-01-agent-operations-contract",
+  "objective_id": "dev-harness-01-agent-operations-contract",
+  "status": "incomplete",
+  "closed_at": "2026-08-02T01:05:13.661Z",
+  "original_goal": "Define the read-only normalization boundary between external coding-agent harnesses and Locaily's development control plane.",
   "completed": [
-    "DM10: Extended memory-project.js CLI with generate-template and import-vault commands for starter vault generation and multi-codebase importing.",
-    "DM10: Passed scripts/test-development-memory-multi-project.js (6/6 passed).",
-    "LH Product Bridge: Implemented companion/capability-kernel/lighthouse-product-bridge.js with CORS allowlist policy (127.0.0.1, chrome-extension://*), PageSpeed JSON to Markdown conversion, and Local AI recommendation enhancement.",
-    "LH Product Bridge: Passed scripts/test-lighthouse-product-bridge.js (3/3 passed)."
+    "Implemented the read-only harness-neutral snapshot contract, Codex/OpenCode fixture adapters, explicit evidence and Locaily links, harness-status CLI, and GET /harness/status; focused tests pass.",
+    "Full offline repository suite passed after DEV-HARNESS-01 implementation; milestone remains active pending intentional commit boundary and pre-delivery lifecycle validation.",
+    "Added checked-in canonical valid/invalid harness schema fixtures and wired test:harness into test:full; final focused and full offline suites pass.",
+    "Acceptance criterion: Codex and OpenCode fixtures normalize into one strict canonical snapshot shape.",
+    "Acceptance criterion: Workers, worktrees, objectives, handoffs, checks, and state are explicit, deterministic, and provenance-linked.",
+    "Acceptance criterion: HUD context pressure, tool activity, risk, cost, and sync state are explicit with unknown/unsupported evidence preserved.",
+    "Acceptance criterion: Locaily lifecycle, session, closeout, validation, and reviewed-memory links are read-only and local-first.",
+    "Acceptance criterion: No hooks, transcript capture, mutating harness control, cloud fallback, playbook promotion, AgentShield, or NearbyNode routing is added."
   ],
-  "remaining": [],
-  "deferred_outside_ctk_02": [],
-  "next_required_action": "Project roadmap complete. All milestone waves delivered.",
+  "remaining": [
+    "Establish an intentional commit boundary before delivery.",
+    "Run the pre-delivery lifecycle validation against the committed implementation and update milestone acceptance evidence.",
+    "Close the active development session only when the implementation slice is ready for delivery review."
+  ],
+  "next_required_action": "Continue working on 'dev-harness-01-agent-operations-contract'",
   "blockers": [],
-  "safe_to_start_unrelated_work": true,
-  "working_branch": "main",
-  "last_commit": "c2561c3",
+  "safe_to_start_unrelated_work": false,
+  "working_branch": null,
+  "last_commit": null,
   "validation": {
-    "passed": [
-      "node scripts/test-development-memory-multi-project.js - 6/6 passed.",
-      "node scripts/test-lighthouse-product-bridge.js - 3/3 passed.",
-      "node scripts/test-node-event-bus.js - 4/4 passed.",
-      "node scripts/test-relay-trust-pairing.js - 4/4 passed.",
-      "node scripts/test-node-roles-capability-capsules.js - 12/12 passed.",
-      "node scripts/test-dev-loop.js - 4/4 passed.",
-      "node scripts/test-capability-trigger-kernel.js - 20/20 passed.",
-      "node scripts/dev-status.js --strict - clean with 0 errors."
-    ],
+    "passed": [],
     "failed": [],
     "not_run": []
   },
-  "recommended_next_agent": "developer"
+  "recommended_next_agent": "worker",
+  "files_changed": []
 }

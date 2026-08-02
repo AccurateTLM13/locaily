@@ -1,0 +1,103 @@
+{
+  "fixtureId": "codex-fixture-001",
+  "capturedAt": "2026-08-01T23:00:00.000Z",
+  "harness": {
+    "name": "Codex",
+    "version": "fixture-1"
+  },
+  "session": {
+    "id": "codex-session-001",
+    "status": "running",
+    "lifecycle_status": "running",
+    "reason": null
+  },
+  "workers": [
+    {
+      "worker_id": "worker-1",
+      "display_name": "Primary worker",
+      "role": "implementation",
+      "state": "working",
+      "model": {
+        "value": null,
+        "status": "redacted"
+      },
+      "objective_ids": ["objective-1"],
+      "worktree_id": "worktree-1"
+    }
+  ],
+  "worktrees": [
+    {
+      "id": "worktree-1",
+      "path": "workspace/locailly",
+      "branch": "agent/dev-harness-01-agent-operations-contract",
+      "commit": "2cedf5b",
+      "dirty": true
+    }
+  ],
+  "objectives": [
+    {
+      "id": "objective-1",
+      "title": "Implement harness-neutral agent operations contract",
+      "status": "active",
+      "priority": "high",
+      "workerIds": ["worker-1"],
+      "worktreeIds": ["worktree-1"]
+    }
+  ],
+  "handoffs": [
+    {
+      "id": "handoff-1",
+      "fromWorkerId": "worker-1",
+      "toWorkerId": null,
+      "status": "pending",
+      "summary": "Fixture contains no completed handoff yet.",
+      "createdAt": "2026-08-01T22:59:00.000Z"
+    }
+  ],
+  "checks": [
+    {
+      "id": "check-1",
+      "name": "fixture contract loaded",
+      "status": "passed",
+      "command": null,
+      "completedAt": "2026-08-01T23:00:00.000Z"
+    }
+  ],
+  "hud": {
+    "context": {
+      "used_tokens": 2400,
+      "limit_tokens": 8000,
+      "level": "low"
+    },
+    "tool_activity": {
+      "state": "active",
+      "active_count": 1,
+      "last_tool": "read_file"
+    },
+    "risk": {
+      "level": "low",
+      "flags": []
+    },
+    "cost": {
+      "amount": null
+    },
+    "sync": {
+      "status": "unknown",
+      "last_synced_at": null
+    }
+  },
+  "evidence": {
+    "harness": { "status": "available", "reason": "Fixture identifies Codex as the source harness.", "source_ref": "codex.harness" },
+    "workers": { "status": "available", "reason": "Fixture includes worker records.", "source_ref": "codex.workers" },
+    "worktrees": { "status": "available", "reason": "Fixture includes worktree records.", "source_ref": "codex.worktrees" },
+    "objectives": { "status": "available", "reason": "Fixture includes objective records.", "source_ref": "codex.objectives" },
+    "handoffs": { "status": "available", "reason": "Fixture includes handoff records.", "source_ref": "codex.handoffs" },
+    "checks": { "status": "available", "reason": "Fixture includes check records.", "source_ref": "codex.checks" },
+    "context": { "status": "available", "reason": "Fixture provides context token counts.", "source_ref": "codex.hud.context" },
+    "tool_activity": { "status": "available", "reason": "Fixture provides current tool activity.", "source_ref": "codex.hud.tool_activity" },
+    "risk": { "status": "available", "reason": "Fixture provides a risk level and flags.", "source_ref": "codex.hud.risk" },
+    "cost": { "status": "unsupported", "reason": "The fixture does not expose cost accounting.", "source_ref": "codex.hud.cost" },
+    "sync": { "status": "unavailable", "reason": "The fixture does not expose harness synchronization state.", "source_ref": "codex.hud.sync" },
+    "model": { "status": "redacted", "reason": "Model identity is intentionally redacted in this fixture.", "source_ref": "codex.workers.model" }
+  }
+}

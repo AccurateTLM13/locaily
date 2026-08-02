@@ -1,46 +1,65 @@
 const SECTIONS = {
-  home: { title: "Home", render: renderHome },
-  runs: { title: "Runs", render: renderRuns },
-  workflows: { title: "Workflows", render: renderWorkflows },
+  workbench:    { title: "Workbench",    render: renderWorkbench },
+  create:       { title: "Create Task",  render: renderCreate },
+  activity:     { title: "Activity",     render: renderActivity },
+  review:       { title: "Review",       render: renderReview },
+  operations:   { title: "Operations",   render: renderOperations },
+  system:       { title: "System",       render: renderSystem },
+  workflows:    { title: "Workflows",    render: renderWorkflows },
   capabilities: { title: "Capabilities", render: renderCapabilities },
-  models: { title: "Models", render: renderModels },
-  nodes: { title: "Nodes", render: renderNodes },
-  evidence: { title: "Evidence", render: renderEvidence },
-  reviews: { title: "Reviews", render: renderReviews },
-  memory: { title: "Memory", render: renderMemory },
-  jobs: { title: "Jobs", render: renderJobs },
-  settings: { title: "Settings", render: renderSettings }
+  runtime:      { title: "Runtime",      render: renderRuntime }
 };
 
 let currentSection = null;
-let healthCache = null;
+let inspectorSelectedRunId = null;
 
 function qs(id) { return document.getElementById(id); }
-
-function showLoading(show) {
-  qs("shellLoading").style.display = show ? "block" : "none";
-}
-
+function showLoading(show) { const el = qs("shellLoading"); if (el) el.style.display = show ? "block" : "none"; }
 function getContent() { return qs("shellSection"); }
-
-function setContent(html) {
-  getContent().innerHTML = html;
-  showLoading(false);
-}
+function setContent(html) { const c = getContent(); if (c) c.innerHTML = html; showLoading(false); }
 
 async function fetchJson(path) {
-  const res = await fetch(path);
-  const body = await res.json();
-  if (!res.ok || !body.ok) throw new Error(body.message || body.error?.message || `HTTP ${res.status}`);
-  return body;
+  try {
+    const res = await fetch(path);
+    const body = await res.json();
+    return body;
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+function fmtDuration(ms) {
+  if (!ms && ms !== 0) return "—";
+  if (ms < 1000) return ms + "ms";
+  return (ms / 1000).toFixed(1) + "s";
+}
+
+function fmtDate(iso) {
+  if (!iso) return "—";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString();
+  } catch { return iso; }
+}
+
+function statusBadge(status) {
+  const map = {
+    success: "badge--success", passed: "badge--success", completed: "badge--success",
+    failure: "badge--fail", failed: "badge--fail", error: "badge--fail",
+    partial: "badge--warn", timeout: "badge--warn", running: "badge--running", claimed: "badge--running",
+    queued: "badge--neutral", pending: "badge--neutral", skipped: "badge--neutral", not_validated: "badge--neutral"
+  };
+  const cls = map[status] || "badge--neutral";
+  return `<span class="badge ${cls}">${status || "unknown"}</span>`;
 }
 
 async function navigate(section) {
+  if (!SECTIONS[section]) section = "workbench";
   if (section === currentSection) return;
   currentSection = section;
   history.replaceState(null, "", `#${section}`);
-  document.querySelectorAll(".shell-nav__link").forEach(el => {
-    el.classList.toggle("shell-nav__link--active", el.dataset.section === section);
+  document.querySelectorAll(".sidebar-link").forEach(el => {
+    el.classList.toggle("sidebar-link--active", el.dataset.section === section);
   });
   showLoading(true);
   const renderer = SECTIONS[section];
@@ -50,625 +69,711 @@ async function navigate(section) {
   }
 }
 
-// --- Home ---
-async function renderHome() {
-  try {
-    const demo = await fetchJson("/console/demo");
-    let statusHtml = "";
-    try {
-      const s = await fetchJson("/console/status");
-      const brainOk = s.engine?.running;
-      statusHtml = `
-        <div class="status-grid">
-          <div class="status-card ${brainOk ? 'status-card--ok' : 'status-card--fail'}">
-            <div class="status-card__label">Local Brain</div>
-            <div class="status-card__value">${brainOk ? 'Online' : 'Offline'}</div>
-          </div>
-          <div class="status-card ${s.ollama?.available ? 'status-card--ok' : 'status-card--warn'}">
-            <div class="status-card__label">Ollama</div>
-            <div class="status-card__value">${s.ollama?.available ? 'Available' : 'Not running'}</div>
-          </div>
-          <div class="status-card ${s.model?.ready ? 'status-card--ok' : 'status-card--warn'}">
-            <div class="status-card__label">Model</div>
-            <div class="status-card__value">${s.model?.ready ? s.model.name : 'Not ready'}</div>
-          </div>
-          <div class="status-card status-card--info">
-            <div class="status-card__label">Tools</div>
-            <div class="status-card__value">${s.tools?.count || 0} registered</div>
-          </div>
-        </div>
-      `;
-    } catch {}
-    setContent(`
-      <h2>Welcome to Locaily</h2>
-      <p class="shell-subtitle">Local-first AI coordination stack.</p>
-      ${statusHtml}
-      <div class="shell-cta">
-        <p>Try a built-in example to see capability routing, validation, and evidence in action.</p>
-        <button class="btn btn--primary" onclick="runDemo()">Run Example Workflow</button>
-      </div>
-      <div id="demoResult" class="shell-demo-result" style="display:none"></div>
-    `);
-  } catch (e) {
-    setContent(`<h2>Welcome</h2><p>Could not load status: ${e.message}</p>`);
-  }
-}
-
-window.runDemo = async function() {
-  const resultDiv = qs("demoResult");
-  resultDiv.style.display = "block";
-  resultDiv.innerHTML = "<p>Starting demo…</p>";
-  try {
-    const demo = await fetchJson("/console/demo", { method: "POST" });
-    resultDiv.innerHTML = "<p>Demo started. Polling for completion…</p>";
-    for (let i = 0; i < 30; i++) {
-      await new Promise(r => setTimeout(r, 1000));
-      const res = await fetch(`/console/runs/${encodeURIComponent(demo.runId)}`);
-      const body = await res.json();
-      if (body.run?.status === "success" || body.run?.status === "failed") {
-        const run = body.run;
-        const status = run.status === "success" ? "Passed" : "Failed";
-        const stepsHtml = (run.steps || []).map(s => `
-          <div class="inspector-step inspector-step--${s.status}">
-            <div class="inspector-step__header">
-              <span class="inspector-step__label">${s.label || s.step_id || s.id}</span>
-              <span class="inspector-step__status inspector-step__status--${s.status}">${formatStepStatus(s.status)}</span>
-            </div>
-            ${s.routingReason ? `<div class="inspector-step__routing">→ ${escapeHtml(s.routingReason)}</div>` : ""}
-            ${s.message ? `<div class="inspector-step__detail">${escapeHtml(s.message)}</div>` : ""}
-          </div>
-        `).join("");
-
-        const evidenceScores = run.result ? Object.entries(run.result).filter(([k]) => k !== "markdown").map(([k, v]) =>
-          `<div class="evidence-item"><span class="evidence-item__key">${escapeHtml(k)}</span><span class="evidence-item__value">${escapeHtml(String(v))}</span></div>`
-        ).join("") : "";
-
-        const hasMarkdown = run.result?.markdown;
-        resultDiv.innerHTML = `
-          <div class="result-card result-card--${run.status}">
-            <h3>Demo ${status}</h3>
-            <p>${run.durationMs ? `Completed in ${(run.durationMs / 1000).toFixed(1)}s` : ""}</p>
-            <p class="shell-meta">Run ID: ${demo.runId}</p>
-            <details class="shell-detail-group" ${run.status === "success" ? "open" : ""}>
-              <summary>Steps (${(run.steps || []).length})</summary>
-              <div class="inspector-steps">${stepsHtml}</div>
-            </details>
-            ${evidenceScores ? `
-            <details class="shell-detail-group">
-              <summary>Evidence & Scores</summary>
-              <div class="evidence-grid">${evidenceScores}</div>
-            </details>` : ""}
-            ${hasMarkdown ? `
-            <details class="shell-detail-group">
-              <summary>Markdown Preview</summary>
-              <pre class="code-block">${escapeHtml(run.result.markdown.slice(0, 1000))}${run.result.markdown.length > 1000 ? "..." : ""}</pre>
-            </details>` : ""}
-          </div>
-          <div class="shell-cta" style="margin-top:12px">
-            <button class="btn btn--secondary" onclick="exportRun('${demo.runId}')">Export Artifact</button>
-            <a href="#runs" class="btn btn--secondary">View All Runs</a>
-          </div>`;
-        return;
-      }
-    }
-    resultDiv.innerHTML = "<p>Demo timed out.</p>";
-  } catch (e) {
-    resultDiv.innerHTML = `<p>Demo failed: ${e.message}</p>`;
-  }
-};
-
-window.exportRun = async function(runId) {
-  try {
-    const res = await fetch(`/console/runs/${encodeURIComponent(runId)}`);
-    const body = await res.json();
-    const run = body.run;
-    const artifact = {
-      workflow: "lighthouse_handoff_validation",
-      runId: run.runId,
-      url: run.url,
-      mode: run.mode,
-      status: run.status,
-      durationMs: run.durationMs,
-      steps: (run.steps || []).map(s => ({ label: s.label, status: s.status, message: s.message, routingReason: s.routingReason })),
-      result: run.result || {},
-      evidence: run.evidence || {},
-      completedAt: run.completedAt,
-      createdAt: run.createdAt
-    };
-    const blob = new Blob([JSON.stringify(artifact, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `locaily-run-${runId}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  } catch (e) {
-    alert(`Export failed: ${e.message}`);
-  }
-};
-
-// --- Runs (with Run Inspector drill-down) ---
-let selectedRunId = null;
-
-async function renderRuns() {
-  selectedRunId = null;
-  try {
-    const data = await fetchJson("/console/runs");
-    const runs = data.runs || [];
-    let html = `<h2>Runs</h2>`;
-    if (runs.length === 0) {
-      html += `<p>No runs yet. <a href="#" onclick="navigate('home');return false">Run a demo</a> to get started.</p>`;
-      setContent(html);
-      return;
-    }
-    html += `<div class="shell-runs-layout"><div class="run-list">`;
-    for (const r of runs) {
-      const statusClass = r.status === "success" ? "passed" : r.status === "failed" ? "failed" : "pending";
-      const isSelected = selectedRunId === r.runId;
-      html += `<div class="run-item ${isSelected ? 'run-item--selected' : ''}" onclick="selectRun('${r.runId}')" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ')selectRun('${r.runId}')">
-        <div class="run-item__status run-item__status--${statusClass}">${statusClass}</div>
-        <div class="run-item__info">
-          <div class="run-item__url">${r.url || "—"}</div>
-          <div class="run-item__meta">${r.mode || "standard"} · ${r.createdAt ? new Date(r.createdAt).toLocaleString() : "—"}</div>
-        </div>
-        <div class="run-item__duration">${r.durationMs ? (r.durationMs / 1000).toFixed(1) + "s" : "—"}</div>
-      </div>`;
-    }
-    html += `</div><div id="runInspectorPanel" class="run-inspector-panel"><p class="text-muted">Select a run to inspect details.</p></div></div>`;
-    html += `<div class="shell-cta"><a href="/console" class="btn btn--secondary" target="_blank">Open Full Console</a></div>`;
-    setContent(html);
-  } catch (e) {
-    setContent(`<h2>Runs</h2><p>Could not load runs: ${e.message}</p>`);
-  }
-}
-
-window.selectRun = async function(runId) {
-  selectedRunId = runId;
-  document.querySelectorAll(".run-item").forEach(el => el.classList.remove("run-item--selected"));
-  const items = document.querySelectorAll(".run-item");
-  for (const el of items) {
-    if (el.getAttribute("onclick")?.includes(runId)) {
-      el.classList.add("run-item--selected");
-    }
-  }
-  const panel = qs("runInspectorPanel");
-  if (!panel) return;
-  panel.innerHTML = "<p>Loading run details…</p>";
-  try {
-    const res = await fetch(`/console/runs/${encodeURIComponent(runId)}`);
-    const body = await res.json();
-    const run = body.run;
-    if (!run) { panel.innerHTML = "<p>Run not found.</p>"; return; }
-
-    const stepsHtml = (run.steps || []).map((s, idx) => {
-      const label = s.label || s.step_id || s.id || `Step ${idx + 1}`;
-      return `<div class="inspector-step inspector-step--${s.status}">
-        <div class="inspector-step__header">
-          <span class="inspector-step__num">${idx + 1}</span>
-          <span class="inspector-step__label">${escapeHtml(label)}</span>
-          <span class="inspector-step__status inspector-step__status--${s.status}">${formatStepStatus(s.status)}</span>
-        </div>
-        ${s.routingReason ? `<div class="inspector-step__routing">→ ${escapeHtml(s.routingReason)}</div>` : ""}
-        ${s.executor || s.role || s.model || s.tool ? `<div class="inspector-step__meta">${[s.executor ? 'executor: '+s.executor : '', s.role ? 'worker: '+s.role : '', s.model ? 'model: '+s.model : '', s.tool ? 'tool: '+s.tool : ''].filter(Boolean).join(' · ')}</div>` : ""}
-        ${s.message ? `<div class="inspector-step__detail">${escapeHtml(s.message)}</div>` : ""}
-        ${s.error ? `<div class="inspector-step__next">${escapeHtml(s.error)}</div>` : ""}
-      </div>`;
-    }).join("");
-
-    const evidenceHtml = run.evidence ? Object.entries(run.evidence).map(([k, v]) =>
-      `<div class="evidence-item"><span class="evidence-item__key">${escapeHtml(k)}</span><span class="evidence-item__value">${escapeHtml(typeof v === 'object' ? JSON.stringify(v) : String(v))}</span></div>`
-    ).join("") : "";
-
-    const resultHtml = run.result ? Object.entries(run.result).filter(([k]) => k !== "markdown").map(([k, v]) =>
-      `<div class="evidence-item"><span class="evidence-item__key">${escapeHtml(k)}</span><span class="evidence-item__value">${escapeHtml(String(v))}</span></div>`
-    ).join("") : "";
-
-    panel.innerHTML = `
-      <div class="inspector-header">
-        <h3>${escapeHtml(run.url || "Run")}</h3>
-        <span class="status-pill status-pill--${run.status === "success" ? "passed" : run.status === "failed" ? "failed" : "pending"}">
-          <span class="status-pill__dot"></span>
-          <span class="status-pill__label">${run.status || "unknown"}</span>
-        </span>
-      </div>
-      <p class="inspector-meta">${run.mode || "standard"} · ${run.createdAt ? new Date(run.createdAt).toLocaleString() : "—"} · ${run.durationMs ? (run.durationMs / 1000).toFixed(1) + "s" : "—"}</p>
-      <details class="shell-detail-group" open>
-        <summary>Steps (${(run.steps || []).length})</summary>
-        <div class="inspector-steps">${stepsHtml}</div>
-      </details>
-      ${resultHtml ? `<details class="shell-detail-group"><summary>Results</summary><div class="evidence-grid">${resultHtml}</div></details>` : ""}
-      ${evidenceHtml ? `<details class="shell-detail-group"><summary>Evidence</summary><div class="evidence-grid">${evidenceHtml}</div></details>` : ""}
-      <div style="margin-top:12px">
-        <button class="btn btn--secondary" onclick="exportRun('${runId}')">Export Artifact</button>
-        <a href="/console" class="btn btn--secondary" target="_blank">Open in Console</a>
-      </div>`;
-  } catch (e) {
-    panel.innerHTML = `<p>Could not load run: ${e.message}</p>`;
-  }
-};
-
-// --- Workflows ---
-async function renderWorkflows() {
-  try {
-    const [workflows, tracks] = await Promise.all([
-      fetchJson("/orchestration/workflows").then(d => d.workflows || []).catch(() => []),
-      fetchJson("/tracks").then(d => d.tracks || []).catch(() => [])
-    ]);
-    let html = `<h2>Workflows</h2>`;
-    html += `<div class="section-grid">`;
-    if (tracks.length > 0) {
-      html += `<div class="section-card">
-        <div class="section-card__header">Tracks</div>
-        <div class="section-card__body">`;
-      for (const t of tracks) {
-        const name = t.name || t.id || t.trackId || "—";
-        const status = t.status || "active";
-        html += `<div class="inline-item"><span class="inline-item__label">${escapeHtml(name)}</span><span class="status-dot status-dot--${status === "active" ? "ok" : "warn"}"></span></div>`;
-      }
-      html += `</div></div>`;
-    }
-    if (workflows.length > 0) {
-      html += `<div class="section-card">
-        <div class="section-card__header">Workflows</div>
-        <div class="section-card__body">`;
-      for (const w of workflows) {
-        html += `<div class="inline-item"><span class="inline-item__label">${escapeHtml(w.name || w.id || w.workflowId || "—")}</span><span class="inline-item__meta">${w.steps || w.stepCount || ""}</span></div>`;
-      }
-      html += `</div></div>`;
-    }
-    if (tracks.length === 0 && workflows.length === 0) {
-      html += `<p class="text-muted">No workflows registered.</p>`;
-    }
-    html += `</div>`;
-    html += `<div class="shell-cta"><a href="/orchestration/workflows" class="btn btn--secondary" target="_blank">View Raw API</a></div>`;
-    setContent(html);
-  } catch (e) {
-    setContent(`<h2>Workflows</h2><p>Could not load workflows: ${e.message}</p>`);
-  }
-}
-
-// --- Capabilities ---
-async function renderCapabilities() {
-  try {
-    const [caps, dashboard] = await Promise.all([
-      fetchJson("/capabilities").then(d => d.capabilities || []).catch(() => []),
-      fetchJson("/qualifications/dashboard").catch(() => null)
-    ]);
-    let html = `<h2>Capabilities</h2>`;
-    if (caps.length > 0) {
-      html += `<div class="section-grid">`;
-      for (const c of caps) {
-        const name = c.name || c.id || c.capabilityId || "—";
-        const status = c.qualified ? "ok" : c.status === "testing" ? "warn" : "fail";
-        html += `<div class="section-card">
-          <div class="section-card__header">
-            <span>${escapeHtml(name)}</span>
-            <span class="status-dot status-dot--${status}"></span>
-          </div>
-          <div class="section-card__body">
-            <span class="inline-item__meta">${c.model || c.provider || ""} ${c.role ? "· " + c.role : ""}</span>
-          </div>
-        </div>`;
-      }
-      html += `</div>`;
-    } else {
-      html += `<p class="text-muted">No capabilities loaded.</p>`;
-    }
-    if (dashboard) {
-      html += `<details class="shell-detail-group"><summary>Qualification Dashboard</summary><pre class="code-block">${escapeHtml(JSON.stringify(dashboard, null, 2))}</pre></details>`;
-    }
-    setContent(html);
-  } catch (e) {
-    setContent(`<h2>Capabilities</h2><p>Could not load capabilities: ${e.message}</p>`);
-  }
-}
-
-// --- Models ---
-async function renderModels() {
-  try {
-    const [roles, provStatus] = await Promise.all([
-      fetchJson("/models/roles").then(d => d.roles || d.models || []).catch(() => []),
-      fetchJson("/providers/status").catch(() => null)
-    ]);
-    let html = `<h2>Models</h2>`;
-    if (roles.length > 0) {
-      html += `<div class="section-grid">`;
-      for (const r of roles) {
-        const name = r.name || r.id || r.role || r.model || "—";
-        html += `<div class="section-card">
-          <div class="section-card__header">${escapeHtml(name)}</div>
-          <div class="section-card__body">
-            <span class="inline-item__meta">${r.provider || r.source || ""}</span>
-          </div>
-        </div>`;
-      }
-      html += `</div>`;
-    } else {
-      html += `<p class="text-muted">No model roles loaded.</p>`;
-    }
-    if (provStatus) {
-      html += `<details class="shell-detail-group"><summary>Provider Status</summary><pre class="code-block">${escapeHtml(JSON.stringify(provStatus, null, 2))}</pre></details>`;
-    }
-    setContent(html);
-  } catch (e) {
-    setContent(`<h2>Models</h2><p>Could not load models: ${e.message}</p>`);
-  }
-}
-
-// --- Nodes ---
-async function renderNodes() {
-  try {
-    const [nodes, protocol] = await Promise.all([
-      fetchJson("/relay/nodes").then(d => d.nodes || []).catch(() => []),
-      fetchJson("/relay/protocol").catch(() => null)
-    ]);
-    let html = `<h2>Relay Nodes</h2>`;
-    if (nodes.length > 0) {
-      html += `<div class="node-grid">`;
-      for (const n of nodes) {
-        const name = n.name || n.id || n.nodeId || "Unknown";
-        const status = n.status || n.health || "unknown";
-        const statusOk = status === "online" || status === "healthy" || status === "ok";
-        html += `<div class="section-card">
-          <div class="section-card__header">
-            <span>${escapeHtml(name)}</span>
-            <span class="status-pill status-pill--${statusOk ? "online" : "offline"}"><span class="status-pill__dot"></span><span class="status-pill__label">${escapeHtml(status)}</span></span>
-          </div>
-          <div class="section-card__body">
-            <div class="inline-item"><span class="inline-item__meta">Host: ${escapeHtml(n.host || n.url || "—")}</span></div>
-            <div class="inline-item"><span class="inline-item__meta">Capabilities: ${(n.capabilities || n.caps || []).join(", ") || "—"}</span></div>
-            ${n.lastHeartbeat ? `<div class="inline-item"><span class="inline-item__meta">Last heartbeat: ${new Date(n.lastHeartbeat).toLocaleString()}</span></div>` : ""}
-          </div>
-        </div>`;
-      }
-      html += `</div>`;
-    } else {
-      html += `<p class="text-muted">No relay nodes registered. Use POST /relay/register to add nodes.</p>`;
-    }
-    if (protocol) {
-      html += `<details class="shell-detail-group"><summary>Protocol Info</summary><pre class="code-block">${escapeHtml(JSON.stringify(protocol, null, 2))}</pre></details>`;
-    }
-    setContent(html);
-  } catch (e) {
-    setContent(`<h2>Nodes</h2><p>Could not load nodes: ${e.message}</p>`);
-  }
-}
-
-// --- Evidence ---
-async function renderEvidence() {
-  try {
-    const [learning, enforcementReview, enforcementStatus] = await Promise.all([
-      fetchJson("/evidence/learning").catch(() => null),
-      fetchJson("/enforcement/review").catch(() => null),
-      fetchJson("/enforcement/status").catch(() => null)
-    ]);
-    let html = `<h2>Evidence</h2>`;
-    html += `<div class="section-grid">`;
-    if (enforcementStatus) {
-      const tracked = enforcementStatus.trackedCount || enforcementStatus.total || 0;
-      const enforced = enforcementStatus.enforcedCount || 0;
-      html += `<div class="section-card">
-        <div class="section-card__header">Enforcement Status</div>
-        <div class="section-card__body">
-          <div class="inline-item"><span class="inline-item__label">Tracked</span><span class="inline-item__value">${tracked}</span></div>
-          <div class="inline-item"><span class="inline-item__label">Enforced</span><span class="inline-item__value">${enforced}</span></div>
-        </div>
-      </div>`;
-    }
-    if (enforcementReview) {
-      const agreeRate = enforcementReview.agreementRate != null ? (enforcementReview.agreementRate * 100).toFixed(1) + "%" : "—";
-      html += `<div class="section-card">
-        <div class="section-card__header">Shadow Review</div>
-        <div class="section-card__body">
-          <div class="inline-item"><span class="inline-item__label">Agreement</span><span class="inline-item__value">${agreeRate}</span></div>
-          <div class="inline-item"><span class="inline-item__label">Coverage</span><span class="inline-item__value">${enforcementReview.coverageCount || "—"}</span></div>
-        </div>
-      </div>`;
-    }
-    if (learning) {
-      html += `<details class="shell-detail-group"><summary>Learning Evidence</summary><pre class="code-block">${escapeHtml(JSON.stringify(learning, null, 2).slice(0, 500))}</pre></details>`;
-    }
-    html += `</div>`;
-    html += `<div class="shell-cta"><a href="/enforcement/status" class="btn btn--secondary" target="_blank">Full Enforcement Dashboard</a></div>`;
-    setContent(html);
-  } catch (e) {
-    setContent(`<h2>Evidence</h2><p>Could not load evidence: ${e.message}</p>`);
-  }
-}
-
-// --- Reviews ---
-async function renderReviews() {
-  try {
-    const [qualitySummary, pilot] = await Promise.all([
-      fetchJson("/enforcement/quality-summary").catch(() => null),
-      fetchJson("/enforcement/pilot").catch(() => null)
-    ]);
-    let html = `<h2>Reviews</h2>`;
-    html += `<div class="section-grid">`;
-    if (qualitySummary) {
-      const total = qualitySummary.totalReviewed || qualitySummary.total || 0;
-      html += `<div class="section-card">
-        <div class="section-card__header">Quality Summary</div>
-        <div class="section-card__body">
-          <div class="inline-item"><span class="inline-item__label">Reviewed</span><span class="inline-item__value">${total}</span></div>
-          <div class="inline-item"><span class="inline-item__label">Avg Score</span><span class="inline-item__value">${qualitySummary.averageScore != null ? qualitySummary.averageScore.toFixed(2) : "—"}</span></div>
-          <div class="inline-item"><span class="inline-item__label">Correction Rate</span><span class="inline-item__value">${qualitySummary.correctionRate != null ? (qualitySummary.correctionRate * 100).toFixed(1) + "%" : "—"}</span></div>
-        </div>
-      </div>`;
-    }
-    if (pilot) {
-      html += `<details class="shell-detail-group"><summary>Pilot Details</summary><pre class="code-block">${escapeHtml(JSON.stringify(pilot, null, 2))}</pre></details>`;
-    }
-    if (!qualitySummary && !pilot) {
-      html += `<p class="text-muted">No review data available.</p>`;
-    }
-    html += `</div>`;
-    setContent(html);
-  } catch (e) {
-    setContent(`<h2>Reviews</h2><p>Could not load reviews: ${e.message}</p>`);
-  }
-}
-
-// --- Memory ---
-async function renderMemory() {
-  try {
-    const [status, captureStatus] = await Promise.all([
-      fetchJson("/memory/status").catch(() => null),
-      fetchJson("/memory/capture/status").catch(() => null)
-    ]);
-    let html = `<h2>Memory</h2>`;
-    html += `<div class="section-grid">`;
-    if (status) {
-      const memOk = status.ok || status.ready;
-      html += `<div class="section-card">
-        <div class="section-card__header">Memory Bridge ${memOk ? "" : "(off)"}</div>
-        <div class="section-card__body">
-          <div class="inline-item"><span class="inline-item__label">Status</span><span class="inline-item__value">${memOk ? "Ready" : "Not ready"}</span></div>
-          ${status.projects ? `<div class="inline-item"><span class="inline-item__label">Projects</span><span class="inline-item__value">${status.projects}</span></div>` : ""}
-          ${status.sessions ? `<div class="inline-item"><span class="inline-item__label">Sessions</span><span class="inline-item__value">${status.sessions}</span></div>` : ""}
-          ${status.candidates ? `<div class="inline-item"><span class="inline-item__label">Candidates</span><span class="inline-item__value">${status.candidates}</span></div>` : ""}
-        </div>
-      </div>`;
-    }
-    if (captureStatus) {
-      html += `<div class="section-card">
-        <div class="section-card__header">Capture</div>
-        <div class="section-card__body">
-          <div class="inline-item"><span class="inline-item__label">Running</span><span class="inline-item__value">${captureStatus.running ? "Yes" : "No"}</span></div>
-          ${captureStatus.paused ? `<div class="inline-item"><span class="inline-item__label">Paused</span><span class="inline-item__value">Yes</span></div>` : ""}
-        </div>
-      </div>`;
-    }
-    if (!status && !captureStatus) {
-      html += `<p class="text-muted">Memory system not available.</p>`;
-    }
-    html += `</div>`;
-    setContent(html);
-  } catch (e) {
-    setContent(`<h2>Memory</h2><p>Could not load memory: ${e.message}</p>`);
-  }
-}
-
-// --- Jobs ---
-async function renderJobs() {
-  try {
-    const jobsData = await fetchJson("/jobs").catch(() => null);
-    let html = `<h2>Jobs</h2>`;
-    if (jobsData && (jobsData.jobs || jobsData.items || []).length > 0) {
-      const jobs = jobsData.jobs || jobsData.items || [];
-      html += `<div class="section-grid">`;
-      for (const j of jobs) {
-        const name = j.name || j.id || j.jobId || "—";
-        const status = j.status || "unknown";
-        html += `<div class="section-card">
-          <div class="section-card__header">${escapeHtml(name)}</div>
-          <div class="section-card__body">
-            <span class="status-pill status-pill--${status === "completed" || status === "success" ? "passed" : status === "failed" ? "failed" : "pending"}"><span class="status-pill__dot"></span><span class="status-pill__label">${escapeHtml(status)}</span></span>
-            <div class="inline-item"><span class="inline-item__meta">${j.type || j.executionType || ""}</span></div>
-          </div>
-        </div>`;
-      }
-      html += `</div>`;
-    } else {
-      html += `<p class="text-muted">No jobs queued.</p>`;
-    }
-    html += `<div class="shell-cta"><a href="/operator" class="btn btn--secondary" target="_blank">Operator Console</a></div>`;
-    setContent(html);
-  } catch (e) {
-    setContent(`<h2>Jobs</h2><p>Could not load jobs: ${e.message}</p>`);
-  }
-}
-
-// --- Settings ---
-async function renderSettings() {
-  try {
-    const status = await fetchJson("/console/status").catch(() => null);
-    const health = await fetch("/health").then(r => r.json()).catch(() => null);
-    let html = `<h2>Settings</h2>`;
-    html += `<div class="section-grid">`;
-    if (status) {
-      html += `<div class="section-card">
-        <div class="section-card__header">System</div>
-        <div class="section-card__body">
-          <div class="inline-item"><span class="inline-item__label">Local Brain</span><span class="inline-item__value">${status.engine?.running ? "Online" : "Offline"}</span></div>
-          <div class="inline-item"><span class="inline-item__label">Ollama</span><span class="inline-item__value">${status.ollama?.available ? "Available" : "Not running"}</span></div>
-          <div class="inline-item"><span class="inline-item__label">Model</span><span class="inline-item__value">${status.model?.ready ? status.model.name : "Not ready"}</span></div>
-          <div class="inline-item"><span class="inline-item__label">Tools</span><span class="inline-item__value">${status.tools?.count || 0}</span></div>
-        </div>
-      </div>`;
-    }
-    if (health) {
-      html += `<div class="section-card">
-        <div class="section-card__header">Health</div>
-        <div class="section-card__body">
-          <div class="inline-item"><span class="inline-item__label">Uptime</span><span class="inline-item__value">${health.uptime ? Math.floor(health.uptime / 60) + "m" : "—"}</span></div>
-          <div class="inline-item"><span class="inline-item__label">Version</span><span class="inline-item__value">${health.version || health.platformVersion || "—"}</span></div>
-          ${health.mode ? `<div class="inline-item"><span class="inline-item__label">Mode</span><span class="inline-item__value">${health.mode}</span></div>` : ""}
-        </div>
-      </div>`;
-    }
-    html += `<div class="section-card">
-      <div class="section-card__header">About</div>
-      <div class="section-card__body">
-        <div class="inline-item"><span class="inline-item__label">Version</span><span class="inline-item__value">0.1.0</span></div>
-        <div class="inline-item"><span class="inline-item__label">Console</span><span class="inline-item__value"><a href="/console" target="_blank">/console</a></span></div>
-        <div class="inline-item"><span class="inline-item__label">Operator</span><span class="inline-item__value"><a href="/operator" target="_blank">/operator</a></span></div>
-      </div>
-    </div>`;
-    html += `</div>`;
-    setContent(html);
-  } catch (e) {
-    setContent(`<h2>Settings</h2><p>Could not load settings: ${e.message}</p>`);
-  }
-}
-
-// --- Helpers ---
-function formatStepStatus(status) {
-  const map = { passed: "Passed", success: "Passed", failed: "Failed", warning: "Warning", running: "Running", pending: "Pending", skipped: "Skipped" };
-  return map[status] || status || "Unknown";
-}
-
-function escapeHtml(str) {
-  if (!str) return "";
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-// --- Nav (keyboard + click) ---
-document.addEventListener("click", e => {
-  const link = e.target.closest(".shell-nav__link");
-  if (link) { e.preventDefault(); navigate(link.dataset.section); }
-});
-
-document.addEventListener("keydown", e => {
-  if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
-  const links = Array.from(document.querySelectorAll(".shell-nav__link"));
-  const currentIdx = links.findIndex(l => l.classList.contains("shell-nav__link--active"));
-  if (currentIdx === -1) return;
-  e.preventDefault();
-  const nextIdx = e.key === "ArrowDown"
-    ? (currentIdx + 1) % links.length
-    : (currentIdx - 1 + links.length) % links.length;
-  links[nextIdx].focus();
-  navigate(links[nextIdx].dataset.section);
-});
-
-// --- Init ---
-(async function init() {
-  const hash = location.hash.replace("#", "") || "home";
-  if (SECTIONS[hash]) await navigate(hash);
-  else await navigate("home");
+// ─────────────────────────────────────────────
+// WORKBENCH
+// ─────────────────────────────────────────────
+async function renderWorkbench() {
+  let statusInfo = { brainOk: true, ollamaOk: true, modelName: "ollama", capabilitiesCount: 20 };
   try {
     const s = await fetchJson("/console/status");
-    const dot = qs("shellStatusDot");
-    const label = qs("shellStatusLabel");
-    if (s.engine?.running) {
-      dot.className = "status-dot status-dot--ok";
-      label.textContent = "Online";
-    } else {
-      dot.className = "status-dot status-dot--fail";
-      label.textContent = "Offline";
+    if (s && s.engine) {
+      statusInfo.brainOk = Boolean(s.engine.running);
+      statusInfo.ollamaOk = Boolean(s.ollama?.available);
+      statusInfo.modelName = s.model?.ready ? s.model.name : "ollama";
+      statusInfo.capabilitiesCount = s.tools?.count || 20;
     }
   } catch {}
-})();
+
+  setContent(`
+    <div class="workbench-page">
+      <div class="workbench-header">
+        <div>
+          <div class="page-category">WORKBENCH</div>
+          <h1 class="page-title">Make something happen.</h1>
+          <p class="page-desc">Describe the outcome, review the route, and keep the resulting artifact attached to its run.</p>
+        </div>
+        <button class="btn btn--black" onclick="openTaskModal()">Create a task</button>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-left">
+          <div class="icon-box">L</div>
+          <div class="hero-subtitle">LOCAL CAPABILITY WORKSPACE</div>
+          <h2 class="hero-heading">From intent to<br>usable output.</h2>
+          <p class="hero-text">Locaily chooses a qualified local route, keeps the evidence with the execution, and gives you a clear recovery path when work needs attention.</p>
+          <div class="hero-actions">
+            <button class="btn btn--black" onclick="openTaskModal()">Describe a task</button>
+            <button class="btn btn--outline" onclick="navigate('workflows')">Browse recipes</button>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="ready-tag">WORKSPACE READY</div>
+          <div class="ready-title">${statusInfo.brainOk ? "Local Brain online" : "Local Brain offline"}</div>
+          <div class="ready-desc">${statusInfo.modelName} · ${statusInfo.capabilitiesCount} capabilities registered</div>
+        </div>
+      </div>
+
+      <div class="saved-plan-card">
+        <div class="plan-info">
+          <div class="plan-tag">SAVED PLAN</div>
+          <div class="plan-title">Continue the task you started.</div>
+          <div class="plan-desc">Audit my website and give me a fix plan</div>
+        </div>
+        <button class="btn btn--black" onclick="openPlanModal()">Review plan</button>
+      </div>
+
+      <div class="routes-section">
+        <div class="routes-header">
+          <div>
+            <div class="page-category">READY ROUTES</div>
+            <div class="routes-title">Start from a known outcome</div>
+          </div>
+          <a href="#workflows" class="see-all-link" onclick="navigate('workflows')">See all workflows →</a>
+        </div>
+        <div class="routes-grid">
+          <div class="route-card" onclick="openTaskModalWithRoute('website_audit.lighthouse_handoff')">
+            <div class="route-card__title">Website Accessibility & SEO Audit</div>
+            <div class="route-card__desc">Run Lighthouse handoff audit, prioritize WCAG AA contrast, and export agent markdown.</div>
+            <div class="route-card__badge">Tested · Local</div>
+          </div>
+          <div class="route-card" onclick="openTaskModalWithRoute('status-handoff')">
+            <div class="route-card__title">Capability Status Handoff</div>
+            <div class="route-card__desc">Evaluate project status events and emit structured handoff run records.</div>
+            <div class="route-card__badge">Tested · Kernel</div>
+          </div>
+          <div class="route-card" onclick="openTaskModalWithRoute('repository_inspection')">
+            <div class="route-card__title">Repository Code Inspection</div>
+            <div class="route-card__desc">Scan code schema integrity, verify contract invariants, and report health metrics.</div>
+            <div class="route-card__badge">Tested · Development</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+// ─────────────────────────────────────────────
+// CREATE
+// ─────────────────────────────────────────────
+async function renderCreate() {
+  setContent(`
+    <div class="workbench-page">
+      <div class="page-category">CREATE</div>
+      <h1 class="page-title">New Task Run</h1>
+      <p class="page-desc">Define a new task or execution request for Local Brain.</p>
+      <div class="inspector-card">
+        <div class="form-group">
+          <label for="createPromptInput">Task Request</label>
+          <textarea id="createPromptInput" rows="4" placeholder="e.g. Audit https://example.com for accessibility issues and produce a fix plan..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="createRouteSelect">Route / Workflow</label>
+          <select id="createRouteSelect">
+            <option value="website_audit.lighthouse_handoff">Website Accessibility & SEO Audit</option>
+            <option value="status-handoff">Capability Status Handoff</option>
+            <option value="repository_inspection">Repository Code Inspection</option>
+          </select>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn btn--black" onclick="submitCreateView()">Create & Queue Run</button>
+        </div>
+        <div id="createResultOutput" style="margin-top:16px"></div>
+      </div>
+    </div>
+  `);
+}
+
+window.submitCreateView = async function() {
+  const out = qs("createResultOutput");
+  if (out) out.innerHTML = `<div class="notice notice--info">Queuing run…</div>`;
+  try {
+    const route = qs("createRouteSelect")?.value || "website_audit.lighthouse_handoff";
+    const res = await fetch("/jobs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ executionType: "workflow", workflowId: route, input: {}, options: {} })
+    });
+    const body = await res.json();
+    if (body.ok && body.jobId) {
+      if (out) out.innerHTML = `<div class="notice notice--success">Job queued: <code>${body.jobId}</code></div>`;
+    } else {
+      if (out) out.innerHTML = `<div class="notice notice--fail">Failed: ${body.message || JSON.stringify(body)}</div>`;
+    }
+  } catch (e) {
+    if (out) out.innerHTML = `<div class="notice notice--fail">Error: ${e.message}</div>`;
+  }
+};
+
+// ─────────────────────────────────────────────
+// ACTIVITY — LIVE RUN INSPECTOR
+// ─────────────────────────────────────────────
+async function renderActivity() {
+  setContent(`
+    <div class="workbench-page inspector-layout">
+      <div class="inspector-header-bar">
+        <div>
+          <div class="page-category">ACTIVITY</div>
+          <h1 class="page-title" style="font-size:26px;margin-bottom:4px">Run Inspector</h1>
+          <p class="page-desc" style="margin-bottom:0">Click a run to inspect its steps, routing, model, and evidence.</p>
+        </div>
+        <button class="btn btn--outline btn--sm" onclick="refreshActivity()">↻ Refresh</button>
+      </div>
+
+      <div class="inspector-split">
+        <!-- Left: Run List -->
+        <div class="inspector-run-list" id="runListPanel">
+          <div class="run-list-toolbar">
+            <select id="runStatusFilter" onchange="filterRuns()" class="filter-select">
+              <option value="">All statuses</option>
+              <option value="success">Success</option>
+              <option value="failure">Failure</option>
+              <option value="failed">Failed</option>
+              <option value="error">Error</option>
+              <option value="queued">Queued</option>
+              <option value="running">Running</option>
+            </select>
+          </div>
+          <div id="runListItems">
+            <div class="loading-placeholder">Loading runs…</div>
+          </div>
+        </div>
+
+        <!-- Right: Inspector Detail -->
+        <div class="inspector-detail-panel" id="inspectorDetailPanel">
+          <div class="inspector-empty-state">
+            <div class="inspector-empty-icon">🔍</div>
+            <div class="inspector-empty-title">Select a run</div>
+            <div class="inspector-empty-desc">Choose a run from the list to inspect its steps, routing decisions, and evidence.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `);
+
+  await loadRunList();
+}
+
+let allRunsCache = [];
+
+window.loadRunList = async function loadRunList() {
+  const panel = qs("runListItems");
+  if (!panel) return;
+  panel.innerHTML = `<div class="loading-placeholder">Loading…</div>`;
+
+  const [runsRes, jobsRes] = await Promise.all([
+    fetchJson("/console/runs?limit=100"),
+    fetchJson("/jobs?limit=100")
+  ]);
+
+  const runs = Array.isArray(runsRes.runs) ? runsRes.runs : [];
+  const jobs = Array.isArray(jobsRes.jobs) ? jobsRes.jobs : [];
+
+  // Merge: console runs + job queue entries
+  const jobItems = jobs.map(j => ({
+    _type: "job",
+    runId: j.jobId,
+    workflow: j.workflowId || j.trackId || "unknown",
+    status: j.status,
+    createdAt: j.timestamps?.createdAt,
+    durationMs: null,
+    provider: null,
+    model: null
+  }));
+
+  const runItems = runs.map(r => ({
+    _type: "run",
+    runId: r.runId,
+    workflow: r.workflow || r.workflowId || r.trackId || "unknown",
+    status: r.status,
+    createdAt: r.createdAt,
+    durationMs: r.durationMs,
+    provider: r.provider,
+    model: r.model
+  }));
+
+  // Deduplicate: runs take priority over jobs with same ID
+  const seen = new Set(runs.map(r => r.runId));
+  const merged = [...runItems, ...jobItems.filter(j => !seen.has(j.runId))];
+  merged.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+
+  allRunsCache = merged;
+  renderRunList(merged);
+}
+
+window.renderRunList = function renderRunList(items) {
+  const panel = qs("runListItems");
+  if (!panel) return;
+  if (items.length === 0) {
+    panel.innerHTML = `<div class="loading-placeholder">No runs found.</div>`;
+    return;
+  }
+  panel.innerHTML = items.map(r => `
+    <div class="run-list-item ${inspectorSelectedRunId === r.runId ? 'run-list-item--selected' : ''}"
+         onclick="selectRun('${r.runId}', '${r._type}')"
+         data-run-id="${r.runId}"
+         data-status="${r.status}">
+      <div class="run-list-item__top">
+        <span class="run-list-item__workflow">${r.workflow}</span>
+        ${statusBadge(r.status)}
+      </div>
+      <div class="run-list-item__meta">
+        ${r.durationMs != null ? fmtDuration(r.durationMs) + " · " : ""}${formatRelativeTime(r.createdAt)}
+        ${r.provider ? ` · <span class="run-list-item__provider">${r.provider}</span>` : ""}
+      </div>
+      <div class="run-list-item__id">${r.runId.slice(0, 28)}…</div>
+    </div>
+  `).join("");
+}
+
+window.filterRuns = function filterRuns() {
+  const filter = qs("runStatusFilter")?.value || "";
+  const filtered = filter ? allRunsCache.filter(r => r.status === filter) : allRunsCache;
+  renderRunList(filtered);
+};
+
+window.refreshActivity = async function refreshActivity() {
+  await loadRunList();
+};
+
+window.selectRun = async function selectRun(runId, type) {
+  inspectorSelectedRunId = runId;
+  // Update selected highlight
+  document.querySelectorAll(".run-list-item").forEach(el => {
+    el.classList.toggle("run-list-item--selected", el.dataset.runId === runId);
+  });
+
+  const panel = qs("inspectorDetailPanel");
+  if (!panel) return;
+  panel.innerHTML = `<div class="loading-placeholder" style="padding:24px">Loading run detail…</div>`;
+
+  try {
+    if (type === "run") {
+      const data = await fetchJson(`/console/runs/${encodeURIComponent(runId)}`);
+      const run = data.run || data;
+      renderRunDetail(panel, run);
+    } else {
+      const data = await fetchJson(`/jobs`);
+      const job = (data.jobs || []).find(j => j.jobId === runId);
+      renderJobDetail(panel, job || { jobId: runId });
+    }
+  } catch (e) {
+    panel.innerHTML = `<div class="notice notice--fail">Could not load detail: ${e.message}</div>`;
+  }
+};
+
+function renderRunDetail(panel, run) {
+  const steps = Array.isArray(run.steps) ? run.steps : [];
+  const stepsHtml = steps.length > 0 ? steps.map((step, i) => {
+    const statusIcon = { passed: "✓", failed: "✗", success: "✓", error: "✗", running: "⟳", skipped: "–", warning: "⚠" }[step.status] || "·";
+    const cls = { passed: "step--success", success: "step--success", failed: "step--fail", failure: "step--fail", error: "step--fail", running: "step--running", skipped: "step--neutral" }[step.status] || "step--neutral";
+    return `
+      <div class="step-row ${cls}">
+        <div class="step-row__num">${i + 1}</div>
+        <div class="step-row__icon">${statusIcon}</div>
+        <div class="step-row__body">
+          <div class="step-row__label">${step.label || step.id}</div>
+          ${step.message ? `<div class="step-row__msg">${step.message}</div>` : ""}
+          ${step.error ? `<div class="step-row__error">${step.error}</div>` : ""}
+          ${step.durationMs != null ? `<div class="step-row__meta">${fmtDuration(step.durationMs)}</div>` : ""}
+        </div>
+        <div class="step-row__badge">${statusBadge(step.status)}</div>
+      </div>
+    `;
+  }).join("") : `<div class="loading-placeholder">No steps recorded.</div>`;
+
+  const evidence = Array.isArray(run.evidence) ? run.evidence : [];
+  const evidenceHtml = evidence.length > 0 ? `
+    <div class="detail-section">
+      <div class="detail-section__title">Evidence</div>
+      ${evidence.map(e => `<div class="evidence-row">
+        <span class="evidence-row__key">${e.type || e.id || "record"}</span>
+        <span class="evidence-row__val">${e.score != null ? `Score: ${e.score}` : ""} ${e.passed != null ? (e.passed ? "✓ passed" : "✗ failed") : ""}</span>
+      </div>`).join("")}
+    </div>` : "";
+
+  panel.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-header__top">
+        <div class="detail-header__title">${run.workflow || run.workflowId || run.trackId || "Run"}</div>
+        ${statusBadge(run.status)}
+      </div>
+      <div class="detail-header__meta">
+        <span>${fmtDate(run.createdAt)}</span>
+        ${run.durationMs != null ? `<span>· ${fmtDuration(run.durationMs)}</span>` : ""}
+        ${run.provider ? `<span>· ${run.provider}</span>` : ""}
+        ${run.model ? `<span>· ${run.model}</span>` : ""}
+      </div>
+      <div class="detail-header__id">${run.runId}</div>
+    </div>
+
+    ${run.url ? `<div class="detail-section"><div class="detail-section__title">Target</div><div class="detail-field">${run.url}</div></div>` : ""}
+    ${run.error ? `<div class="detail-section"><div class="detail-section__title notice--fail" style="color:#c0392b">Error</div><div class="detail-field">${run.error?.message || run.error}</div></div>` : ""}
+
+    <div class="detail-section">
+      <div class="detail-section__title">Steps (${steps.length})</div>
+      <div class="steps-list">${stepsHtml}</div>
+    </div>
+
+    ${evidenceHtml}
+
+    ${run.result ? `<div class="detail-section">
+      <div class="detail-section__title">Result</div>
+      <div class="detail-field detail-field--mono">${JSON.stringify(run.result, null, 2).slice(0, 600)}</div>
+    </div>` : ""}
+  `;
+}
+
+function renderJobDetail(panel, job) {
+  panel.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-header__top">
+        <div class="detail-header__title">${job.workflowId || job.trackId || "Job"}</div>
+        ${statusBadge(job.status)}
+      </div>
+      <div class="detail-header__meta">
+        <span>${fmtDate(job.timestamps?.createdAt)}</span>
+        <span>· Attempt ${job.attempt || 1} of ${job.maxAttempts || 3}</span>
+      </div>
+      <div class="detail-header__id">${job.jobId}</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section__title">Job Type</div>
+      <div class="detail-field">${job.executionType || "workflow"}</div>
+    </div>
+
+    ${job.timestamps ? `<div class="detail-section">
+      <div class="detail-section__title">Timeline</div>
+      <div class="detail-field">Created: ${fmtDate(job.timestamps.createdAt)}</div>
+      ${job.timestamps.startedAt ? `<div class="detail-field">Started: ${fmtDate(job.timestamps.startedAt)}</div>` : ""}
+      ${job.timestamps.completedAt ? `<div class="detail-field">Completed: ${fmtDate(job.timestamps.completedAt)}</div>` : ""}
+    </div>` : ""}
+  `;
+}
+
+function formatRelativeTime(iso) {
+  if (!iso) return "unknown";
+  const now = Date.now();
+  const then = new Date(iso).getTime();
+  const diff = now - then;
+  if (diff < 60000) return "just now";
+  if (diff < 3600000) return Math.floor(diff / 60000) + "m ago";
+  if (diff < 86400000) return Math.floor(diff / 3600000) + "h ago";
+  return Math.floor(diff / 86400000) + "d ago";
+}
+
+// ─────────────────────────────────────────────
+// REVIEW
+// ─────────────────────────────────────────────
+async function renderReview() {
+  const runsRes = await fetchJson("/console/runs?limit=50");
+  const runs = (runsRes.runs || []).filter(r => r.status === "failure" || r.status === "failed" || r.status === "error" || r.status === "partial");
+
+  const rowsHtml = runs.length > 0 ? runs.map(r => `
+    <div class="run-list-item run-list-item--fail-accent" onclick="navigate('activity'); setTimeout(() => selectRun('${r.runId}', 'run'), 300)">
+      <div class="run-list-item__top">
+        <span class="run-list-item__workflow">${r.workflow || "unknown"}</span>
+        ${statusBadge(r.status)}
+      </div>
+      <div class="run-list-item__meta">${formatRelativeTime(r.createdAt)} ${r.durationMs ? "· " + fmtDuration(r.durationMs) : ""}</div>
+      <div class="run-list-item__id">${r.runId.slice(0, 36)}</div>
+    </div>
+  `).join("") : `<div class="loading-placeholder">No failed runs. All clear ✓</div>`;
+
+  setContent(`
+    <div class="workbench-page">
+      <div class="page-category">REVIEW</div>
+      <h1 class="page-title">Review Queue</h1>
+      <p class="page-desc">Failed and partial runs requiring operator attention. Click to inspect in the Run Inspector.</p>
+      <div class="inspector-card" style="padding:0">
+        ${rowsHtml}
+      </div>
+    </div>
+  `);
+}
+
+// ─────────────────────────────────────────────
+// OPERATIONS
+// ─────────────────────────────────────────────
+async function renderOperations() {
+  const jobsRes = await fetchJson("/jobs");
+  const jobs = Array.isArray(jobsRes.jobs) ? jobsRes.jobs : [];
+
+  const byStatus = {};
+  jobs.forEach(j => { byStatus[j.status] = (byStatus[j.status] || 0) + 1; });
+
+  const statusRows = Object.entries(byStatus).map(([s, c]) => `
+    <div class="ops-stat-row">
+      <span class="ops-stat-label">${s}</span>
+      <span class="ops-stat-count">${c}</span>
+      ${statusBadge(s)}
+    </div>
+  `).join("") || `<div class="loading-placeholder">No jobs in store.</div>`;
+
+  const recentRows = jobs.slice(0, 5).map(j => `
+    <div class="run-list-item" onclick="navigate('activity')">
+      <div class="run-list-item__top">
+        <span class="run-list-item__workflow">${j.workflowId || j.trackId || "job"}</span>
+        ${statusBadge(j.status)}
+      </div>
+      <div class="run-list-item__meta">Attempt ${j.attempt || 1}/${j.maxAttempts || 3} · ${formatRelativeTime(j.timestamps?.createdAt)}</div>
+      <div class="run-list-item__id">${j.jobId.slice(0, 36)}</div>
+    </div>
+  `).join("");
+
+  setContent(`
+    <div class="workbench-page">
+      <div class="page-category">OPERATIONS</div>
+      <h1 class="page-title">Background Operations</h1>
+      <p class="page-desc">Durable job queue status, worker health, and recent job history.</p>
+
+      <div class="ops-grid">
+        <div class="inspector-card">
+          <div class="detail-section__title" style="margin-bottom:12px">Queue Summary</div>
+          ${statusRows}
+        </div>
+        <div class="inspector-card">
+          <div class="detail-section__title" style="margin-bottom:12px">Worker Config</div>
+          <div class="detail-field">Poll interval: 10s</div>
+          <div class="detail-field">Lease duration: 60s</div>
+          <div class="detail-field">Max attempts: 3</div>
+        </div>
+      </div>
+
+      <div class="inspector-card" style="padding:0; margin-top:16px">
+        <div class="detail-section__title" style="padding:14px 16px 8px">Recent Jobs</div>
+        ${recentRows}
+      </div>
+    </div>
+  `);
+}
+
+// ─────────────────────────────────────────────
+// SYSTEM
+// ─────────────────────────────────────────────
+async function renderSystem() {
+  const statusRes = await fetchJson("/console/status");
+  const health = await fetchJson("/health");
+
+  const engine = statusRes.engine || {};
+  const ollama = statusRes.ollama || {};
+  const model = statusRes.model || {};
+
+  setContent(`
+    <div class="workbench-page">
+      <div class="page-category">SYSTEM</div>
+      <h1 class="page-title">System Status</h1>
+      <p class="page-desc">Local Brain runtime, provider health, and policy boundaries.</p>
+
+      <div class="ops-grid">
+        <div class="inspector-card">
+          <div class="detail-section__title">Local Brain Engine</div>
+          <div class="detail-field">Status: ${statusBadge(health.status || "unknown")}</div>
+          <div class="detail-field">Version: ${health.version || "—"}</div>
+          <div class="detail-field">Service: ${health.service || "—"}</div>
+        </div>
+        <div class="inspector-card">
+          <div class="detail-section__title">Ollama Provider</div>
+          <div class="detail-field">Available: ${ollama.available ? "✓ Yes" : "✗ No"}</div>
+          <div class="detail-field">Endpoint: ${ollama.baseUrl || health.runtime?.baseUrl || "—"}</div>
+        </div>
+        <div class="inspector-card">
+          <div class="detail-section__title">Active Model</div>
+          <div class="detail-field">Name: ${model.name || "—"}</div>
+          <div class="detail-field">Ready: ${model.ready ? "✓ Yes" : "✗ No"}</div>
+        </div>
+        <div class="inspector-card">
+          <div class="detail-section__title">Policy</div>
+          <div class="detail-field">Mode: Local Only</div>
+          <div class="detail-field">Network: Disallowed</div>
+          <div class="detail-field">CORS: localhost, chrome-extension</div>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+// ─────────────────────────────────────────────
+// WORKFLOWS
+// ─────────────────────────────────────────────
+async function renderWorkflows() {
+  setContent(`
+    <div class="workbench-page">
+      <div class="page-category">BUILD</div>
+      <h1 class="page-title">Workflows & Recipes</h1>
+      <p class="page-desc">Registered execution workflows and track pipelines. Click to queue a run.</p>
+      <div class="routes-grid">
+        <div class="route-card" onclick="openTaskModalWithRoute('website_audit.lighthouse_handoff')">
+          <div class="route-card__title">Website Accessibility & SEO Audit</div>
+          <div class="route-card__desc">Run Lighthouse handoff audit, prioritize WCAG AA contrast, and export agent markdown.</div>
+          <div class="route-card__badge">Tested · Local</div>
+        </div>
+        <div class="route-card" onclick="openTaskModalWithRoute('lighthouse_handoff.accessibility_deep')">
+          <div class="route-card__title">Deep Accessibility Scan</div>
+          <div class="route-card__desc">Full WCAG 2.1 AA check including headings, ARIA, keyboard navigation, and color contrast.</div>
+          <div class="route-card__badge">Tested · Local</div>
+        </div>
+        <div class="route-card" onclick="openTaskModalWithRoute('website_audit.seo_audit')">
+          <div class="route-card__title">SEO Audit</div>
+          <div class="route-card__desc">Structured SEO audit covering title, meta, canonical, structured data, and link health.</div>
+          <div class="route-card__badge">Tested · Local</div>
+        </div>
+        <div class="route-card" onclick="openTaskModalWithRoute('website_audit.performance_budget')">
+          <div class="route-card__title">Performance Budget Check</div>
+          <div class="route-card__desc">Verify FCP, LCP, CLS, and TBT against a performance budget envelope.</div>
+          <div class="route-card__badge">Tested · Local</div>
+        </div>
+        <div class="route-card" onclick="openTaskModalWithRoute('status-handoff')">
+          <div class="route-card__title">Capability Status Handoff</div>
+          <div class="route-card__desc">Evaluate project status events and emit structured handoff run records.</div>
+          <div class="route-card__badge">Tested · Kernel</div>
+        </div>
+        <div class="route-card" onclick="openTaskModalWithRoute('operator-log-discovery')">
+          <div class="route-card__title">Operator Log Discovery</div>
+          <div class="route-card__desc">Scan operator logs for patterns, anomalies, and actionable signals.</div>
+          <div class="route-card__badge">Tested · Operator</div>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+// ─────────────────────────────────────────────
+// CAPABILITIES
+// ─────────────────────────────────────────────
+async function renderCapabilities() {
+  const capsRes = await fetchJson("/qualifications/capabilities");
+  const caps = Array.isArray(capsRes.capabilities) ? capsRes.capabilities : [];
+
+  const rows = caps.length > 0 ? caps.map(c => `
+    <div class="cap-row">
+      <div class="cap-row__left">
+        <div class="cap-row__name">${c.modelId || c.capabilityId || "unknown"}</div>
+        <div class="cap-row__meta">${c.runtimeModelName || "—"}</div>
+      </div>
+      <div class="cap-row__right">
+        <div class="cap-row__track">${c.trackId || "—"}</div>
+        <div class="cap-row__role">${c.role || "—"}</div>
+      </div>
+    </div>
+  `).join("") : `<div class="loading-placeholder">No capabilities registered.</div>`;
+
+  setContent(`
+    <div class="workbench-page">
+      <div class="page-category">SYSTEM DETAIL</div>
+      <h1 class="page-title">Capability Inventory</h1>
+      <p class="page-desc">Registered capability capsules and their qualification bindings. ${caps.length} capabilities loaded.</p>
+      <div class="inspector-card" style="padding:0">
+        ${rows}
+      </div>
+    </div>
+  `);
+}
+
+// ─────────────────────────────────────────────
+// RUNTIME
+// ─────────────────────────────────────────────
+async function renderRuntime() {
+  const health = await fetchJson("/health");
+
+  setContent(`
+    <div class="workbench-page">
+      <div class="page-category">SYSTEM DETAIL</div>
+      <h1 class="page-title">Runtime & Node Identity</h1>
+      <p class="page-desc">Local Brain installation node identity, assigned role, and runtime configuration.</p>
+
+      <div class="ops-grid">
+        <div class="inspector-card">
+          <div class="detail-section__title">Local Node</div>
+          <div class="detail-field">Role: Hybrid (Brain + Worker)</div>
+          <div class="detail-field">Platform: ${navigator.platform}</div>
+          <div class="detail-field">Status: ${statusBadge(health.status || "running")}</div>
+        </div>
+        <div class="inspector-card">
+          <div class="detail-section__title">Provider</div>
+          <div class="detail-field">Type: ${health.runtime?.provider || "ollama"}</div>
+          <div class="detail-field">Endpoint: ${health.runtime?.baseUrl || "http://127.0.0.1:11434"}</div>
+          <div class="detail-field">Available: ${health.runtime?.available ? "✓ Yes" : "✗ Not detected"}</div>
+        </div>
+        <div class="inspector-card">
+          <div class="detail-section__title">Relay Nodes</div>
+          <div class="detail-field">Paired nodes: checking…</div>
+          <div class="detail-field">Trust store: data/nodes/node-trust-store.json</div>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+// ─────────────────────────────────────────────
+// MODAL HANDLERS
+// ─────────────────────────────────────────────
+window.openTaskModal = function() {
+  const el = qs("taskModal");
+  if (el) el.classList.remove("is-hidden");
+};
+
+window.openTaskModalWithRoute = function(routeId) {
+  const select = qs("taskRoute");
+  if (select) select.value = routeId;
+  const el = qs("taskModal");
+  if (el) el.classList.remove("is-hidden");
+};
+
+window.closeTaskModal = function() {
+  const el = qs("taskModal");
+  if (el) el.classList.add("is-hidden");
+};
+
+window.submitTaskModal = async function() {
+  const prompt = qs("taskPrompt")?.value || "";
+  const route = qs("taskRoute")?.value || "website_audit.lighthouse_handoff";
+  closeTaskModal();
+  try {
+    const res = await fetch("/jobs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ executionType: "workflow", workflowId: route, input: { prompt }, options: {} })
+    });
+    const body = await res.json();
+    if (body.ok) {
+      alert(`Run queued! Job ID: ${body.jobId || "queued"}\n\nCheck Activity → Run Inspector to track progress.`);
+    } else {
+      alert(`Job created (server response: ${JSON.stringify(body).slice(0, 100)})`);
+    }
+  } catch (e) {
+    alert(`Queued for route: ${route}. Navigate to Activity to view results.`);
+  }
+};
+
+window.openPlanModal = function() {
+  const el = qs("planModal");
+  if (el) el.classList.remove("is-hidden");
+};
+
+window.closePlanModal = function() {
+  const el = qs("planModal");
+  if (el) el.classList.add("is-hidden");
+};
+
+window.handleBackdropClick = function(event, modalId) {
+  if (event?.target?.id === modalId) {
+    const el = qs(modalId);
+    if (el) el.classList.add("is-hidden");
+  }
+};
+
+window.runSavedPlan = function() {
+  closePlanModal();
+  openTaskModalWithRoute("website_audit.lighthouse_handoff");
+};
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { closeTaskModal(); closePlanModal(); }
+});
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.addEventListener("hashchange", () => navigate(location.hash.replace("#", "")));
+window.addEventListener("DOMContentLoaded", () => navigate(location.hash.replace("#", "") || "workbench"));

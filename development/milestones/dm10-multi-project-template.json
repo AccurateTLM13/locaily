@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "dm10-multi-project-template",
   "title": "DM10 Multi-Project Template and Vault Importer",
-  "status": "completed",
+  "status": "planned",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Provide multi-project memory starter template generation and automated vault importing across external codebases with namespaced storage health validation.",

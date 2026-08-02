@@ -1,12 +1,12 @@
 # Active Build Slice
 
-**Updated:** 2026-07-31 (CTK-01 completion audit)
+**Updated:** 2026-08-02 (DEV-HARNESS-01 implementation)
 
 ## Current Slice
 
-**CTK-01 Capability Trigger Kernel is ready for delivery review.** Its bounded runtime implementation is complete on the isolated `codex/ctk-01-completion` branch. The 20-case CTK acceptance suite, the complete offline repository suite, and the `pre-delivery` validation profile pass.
+**DEV-HARNESS-01 Harness-Neutral Agent Operations Contract is active.** The branch `agent/dev-harness-01-agent-operations-contract` now contains the strict canonical snapshot schema, Codex/OpenCode fixture adapters, explicit evidence/provenance semantics, read-only Locaily links, the `harness-status` CLI, and `GET /harness/status`. Focused adapter tests, development schema tests, contract tests, syntax checks, strict status checks, and the complete offline repository suite pass. Commit-boundary and pre-delivery validation remain outstanding.
 
-No CTK-01 implementation blocker remains. CTK-02 remains planned and inactive. DBVT SEO Audit integration is out of scope.
+No implementation blocker is known for the current slice. DEV-HARNESS-01 remains active until its pre-delivery validation and lifecycle gates run. CTK-02 and DBVT SEO Audit integration remain outside this slice.
 
 ## Most Recently Completed Slice
 
@@ -28,7 +28,7 @@ Defined in [maintenance-objective-lifecycle-closeout.md](./maintenance-objective
 
 ## Next Slice
 
-Do not select or activate a next slice until CTK-01 is reviewed.
+Do not select or activate a next slice until DEV-HARNESS-01 is reviewed and its lifecycle gates complete.
 
 ### Deferred (requires specific conditions)
 
