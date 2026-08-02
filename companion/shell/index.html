@@ -3,43 +3,175 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Locaily</title>
+    <title>Locaily — Local Operator Workspace</title>
     <link rel="stylesheet" href="/shell/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>⚡</text></svg>">
   </head>
   <body>
     <div class="shell">
+      <!-- Topbar -->
       <header class="shell-topbar">
-        <div class="shell-topbar__brand">
-          <img src="/console/assets/locaily-logo.svg" alt="Locaily" class="shell-topbar__logo" width="100" height="24">
+        <div class="shell-topbar__left">
+          <div class="shell-topbar__logo">
+            <span class="logo-text">Loc<span class="logo-ai">AI</span>ly</span>
+          </div>
+          <div class="topbar-divider"></div>
+          <span class="topbar-subtitle">Local operator workspace</span>
+          <nav class="topbar-tabs">
+            <a href="#workbench" class="topbar-tab topbar-tab--active">Workbench</a>
+          </nav>
         </div>
-        <div class="shell-topbar__status" id="shellStatus">
-          <span class="status-dot" id="shellStatusDot"></span>
-          <span class="status-label" id="shellStatusLabel">Loading…</span>
+        <div class="shell-topbar__right">
+          <div class="shell-topbar__status" id="shellStatus">
+            <span class="status-dot status-dot--ok" id="shellStatusDot"></span>
+            <span class="status-label" id="shellStatusLabel">Local Brain online</span>
+          </div>
+          <button class="btn btn--black btn--sm" id="btnTopNewTask" onclick="openTaskModal()">New task</button>
         </div>
       </header>
+
+      <!-- Main Shell Body -->
       <div class="shell-body">
-        <nav class="shell-nav">
-          <ul class="shell-nav__list" id="shellNav">
-            <li><a href="#home" class="shell-nav__link shell-nav__link--active" data-section="home">Home</a></li>
-            <li><a href="#runs" class="shell-nav__link" data-section="runs">Runs</a></li>
-            <li><a href="#workflows" class="shell-nav__link" data-section="workflows">Workflows</a></li>
-            <li><a href="#capabilities" class="shell-nav__link" data-section="capabilities">Capabilities</a></li>
-            <li><a href="#models" class="shell-nav__link" data-section="models">Models</a></li>
-            <li><a href="#nodes" class="shell-nav__link" data-section="nodes">Nodes</a></li>
-            <li><a href="#evidence" class="shell-nav__link" data-section="evidence">Evidence</a></li>
-            <li><a href="#reviews" class="shell-nav__link" data-section="reviews">Reviews</a></li>
-            <li><a href="#memory" class="shell-nav__link" data-section="memory">Memory</a></li>
-            <li><a href="#jobs" class="shell-nav__link" data-section="jobs">Jobs</a></li>
-            <li><a href="#settings" class="shell-nav__link" data-section="settings">Settings</a></li>
-          </ul>
-        </nav>
-        <main class="shell-content" id="shellContent">
-          <div class="shell-loading" id="shellLoading">Loading section…</div>
+        <!-- Sidebar Navigation -->
+        <aside class="shell-sidebar">
+          <div class="sidebar-workspace">
+            <div class="sidebar-caption">WORKSPACE</div>
+            <div class="workspace-name">Locaily local</div>
+            <div class="workspace-privacy">Private by default</div>
+          </div>
+
+          <nav class="sidebar-nav" id="shellNav">
+            <ul class="sidebar-menu">
+              <li>
+                <a href="#workbench" class="sidebar-link sidebar-link--active" data-section="workbench">
+                  <span class="sidebar-icon">⚡</span>
+                  <span class="sidebar-label">Workbench</span>
+                </a>
+              </li>
+              <li>
+                <a href="#create" class="sidebar-link" data-section="create">
+                  <span class="sidebar-icon">+</span>
+                  <span class="sidebar-label">Create</span>
+                </a>
+              </li>
+              <li>
+                <a href="#activity" class="sidebar-link" data-section="activity">
+                  <span class="sidebar-icon">↗</span>
+                  <span class="sidebar-label">Activity</span>
+                </a>
+              </li>
+              <li>
+                <a href="#review" class="sidebar-link" data-section="review">
+                  <span class="sidebar-icon">✓</span>
+                  <span class="sidebar-label">Review</span>
+                </a>
+              </li>
+              <li>
+                <a href="#operations" class="sidebar-link" data-section="operations">
+                  <span class="sidebar-icon">⏰</span>
+                  <span class="sidebar-label">Operations</span>
+                </a>
+              </li>
+              <li>
+                <a href="#system" class="sidebar-link" data-section="system">
+                  <span class="sidebar-icon">⚙</span>
+                  <span class="sidebar-label">System</span>
+                </a>
+              </li>
+            </ul>
+
+            <div class="sidebar-section-title">BUILD</div>
+            <ul class="sidebar-menu">
+              <li>
+                <a href="#workflows" class="sidebar-link" data-section="workflows">
+                  <span class="sidebar-icon">◇</span>
+                  <span class="sidebar-label">Workflows</span>
+                </a>
+              </li>
+            </ul>
+
+            <div class="sidebar-section-title">SYSTEM DETAIL</div>
+            <ul class="sidebar-menu">
+              <li>
+                <a href="#capabilities" class="sidebar-link" data-section="capabilities">
+                  <span class="sidebar-icon">◇</span>
+                  <span class="sidebar-label">Capabilities</span>
+                </a>
+              </li>
+              <li>
+                <a href="#runtime" class="sidebar-link" data-section="runtime">
+                  <span class="sidebar-icon">⚙</span>
+                  <span class="sidebar-label">Runtime</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="shell-main" id="shellContent">
+          <div class="shell-loading" id="shellLoading">Loading workspace…</div>
           <div id="shellSection"></div>
         </main>
       </div>
     </div>
+
+    <!-- Task Modal Dialog -->
+    <div class="modal-backdrop is-hidden" id="taskModal" onclick="handleBackdropClick(event, 'taskModal')">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">Create a new task</h3>
+          <button class="modal-close" type="button" onclick="closeTaskModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="taskPrompt">Task Description or Target URL</label>
+            <textarea id="taskPrompt" rows="3" placeholder="e.g. Audit https://example.com for accessibility and SEO fix plan..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="taskRoute">Route / Workflow</label>
+            <select id="taskRoute">
+              <option value="website_audit.lighthouse_handoff">Website Accessibility & SEO Audit</option>
+              <option value="status-handoff">Capability Status Handoff</option>
+              <option value="repository_inspection">Repository Code Inspection</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn--outline" type="button" onclick="closeTaskModal()">Cancel</button>
+          <button class="btn btn--black" type="button" onclick="submitTaskModal()">Start Run</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plan Review Modal Dialog -->
+    <div class="modal-backdrop is-hidden" id="planModal" onclick="handleBackdropClick(event, 'planModal')">
+      <div class="modal-card modal-card--lg">
+        <div class="modal-header">
+          <h3 class="modal-title">Saved Plan Review</h3>
+          <button class="modal-close" type="button" onclick="closePlanModal()">×</button>
+        </div>
+        <div class="modal-body" id="planModalBody">
+          <div class="plan-summary-card">
+            <h4>Saved Plan: Audit my website and give me a fix plan</h4>
+            <p>Target: <code>https://example.com</code></p>
+            <div class="plan-steps-list">
+              <div class="plan-step-item">1. Execute Lighthouse Accessibility & SEO Audit track</div>
+              <div class="plan-step-item">2. Evaluate WCAG AA contrast and image alt attributes</div>
+              <div class="plan-step-item">3. Generate Local AI fix recommendations and agent markdown</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn--outline" type="button" onclick="closePlanModal()">Close</button>
+          <button class="btn btn--black" type="button" onclick="runSavedPlan()">Execute Plan</button>
+        </div>
+      </div>
+    </div>
+
     <script src="/shell/app.js"></script>
   </body>
 </html>

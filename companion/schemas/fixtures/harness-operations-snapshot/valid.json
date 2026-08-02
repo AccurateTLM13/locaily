@@ -1,0 +1,134 @@
+{
+  "schema": "locaily.harness.operations_snapshot.v1",
+  "snapshotId": "harness-snapshot-fixture-canonical-001",
+  "capturedAt": "2026-08-01T23:00:00.000Z",
+  "mode": "fixture",
+  "readOnly": true,
+  "harness": {
+    "id": "codex",
+    "name": "Codex",
+    "version": "fixture-1",
+    "sessionId": "codex-session-001",
+    "sessionStatus": "active"
+  },
+  "state": {
+    "overallStatus": "active",
+    "lifecycleStatus": "active",
+    "reason": null
+  },
+  "workers": [],
+  "worktrees": [],
+  "objectives": [],
+  "handoffs": [],
+  "checks": [],
+  "hud": {
+    "contextPressure": {
+      "level": "unknown",
+      "usedTokens": null,
+      "limitTokens": null,
+      "percent": null,
+      "evidenceIds": ["evidence-fixture"]
+    },
+    "toolActivity": {
+      "state": "unknown",
+      "activeCount": null,
+      "lastTool": null,
+      "evidenceIds": ["evidence-fixture"]
+    },
+    "risk": {
+      "level": "unknown",
+      "flags": [],
+      "evidenceIds": ["evidence-fixture"]
+    },
+    "cost": {
+      "availability": "unsupported",
+      "currency": "USD",
+      "amount": null,
+      "evidenceIds": ["evidence-fixture"]
+    },
+    "sync": {
+      "status": "unknown",
+      "lastSyncedAt": null,
+      "evidenceIds": ["evidence-fixture"]
+    }
+  },
+  "evidence": {
+    "collectionMode": "fixture",
+    "readOnly": true,
+    "records": [
+      {
+        "id": "evidence-fixture",
+        "field": "fixture",
+        "status": "available",
+        "reason": "Canonical schema fixture is available.",
+        "sourceRef": "fixture.canonical",
+        "redacted": false
+      }
+    ]
+  },
+  "provenance": {
+    "sourceKind": "fixture",
+    "sourceId": "canonical-fixture-001",
+    "fixturePath": "companion/schemas/fixtures/harness-operations-snapshot/valid.json",
+    "adapterId": "codex-fixture-adapter",
+    "adapterVersion": "0.1.0",
+    "sourceHarness": "codex",
+    "sourceSessionId": "codex-session-001",
+    "transformations": [
+      {
+        "field": "fixture",
+        "operation": "copied",
+        "note": "Canonical schema fixture records a read-only source."
+      }
+    ]
+  },
+  "locailyLinks": {
+    "projectState": {
+      "available": false,
+      "path": "development/project-state.json",
+      "currentMilestoneId": null,
+      "activeSessionId": null,
+      "status": null,
+      "branch": null,
+      "readOnly": true
+    },
+    "milestone": {
+      "available": false,
+      "path": "development/milestones/example.json",
+      "id": null,
+      "status": null,
+      "title": null,
+      "readOnly": true
+    },
+    "session": {
+      "available": false,
+      "path": "development/sessions/example.json",
+      "id": null,
+      "status": null,
+      "branch": null,
+      "readOnly": true
+    },
+    "workCloseout": {
+      "available": false,
+      "path": "docs/07-progress/work-closeout.json",
+      "workId": null,
+      "status": null,
+      "readOnly": true
+    },
+    "validation": {
+      "available": false,
+      "path": "development/validation-results",
+      "id": null,
+      "status": null,
+      "profileId": null,
+      "readOnly": true
+    },
+    "reviewedMemory": {
+      "available": false,
+      "path": "data/memory/development-candidates",
+      "candidateCount": 0,
+      "pendingReviewCount": 0,
+      "readOnly": true
+    }
+  }
+}

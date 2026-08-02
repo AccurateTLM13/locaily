@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "dev-harness-01-agent-operations-contract",
   "title": "DEV-HARNESS-01 Harness-Neutral Agent Operations Contract",
-  "status": "planned",
+  "status": "active",
   "type": "infrastructure",
   "priority": "medium",
   "purpose": "Establish a Locaily-owned, harness-neutral contract that can inspect coding-agent sessions, worktrees, workers, checks, risks, and handoffs without making Codex, OpenCode, Claude Code, or any other harness the canonical control plane.",
@@ -72,7 +72,7 @@
   "blockers": [],
   "lifecycleRef": null,
   "createdAt": "2026-08-01T22:40:52.000Z",
-  "startedAt": null,
+  "startedAt": "2026-08-02T00:26:31.266Z",
   "completedAt": null,
   "mergedAt": null
 }

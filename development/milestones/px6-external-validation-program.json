@@ -1,8 +1,8 @@
 {
   "schema": "locaily.development.milestone.v1",
   "id": "px6-external-validation-program",
-  "title": "External Validation Program",
-  "status": "completed",
+  "title": "External Validation Readiness",
+  "status": "planned",
   "type": "validation",
   "priority": "high",
   "purpose": "Prove Locaily externally with three programs: five unassisted developer testers on Lighthouse Handoff, authenticated two-device Relay pilot, and one second real workflow used for actual work.",

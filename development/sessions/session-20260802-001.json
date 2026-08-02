@@ -1,0 +1,51 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260802-001",
+  "milestoneId": "dev-harness-01-agent-operations-contract",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "active",
+  "objective": "Define the read-only normalization boundary between external coding-agent harnesses and Locaily's development control plane.",
+  "branch": "agent/dev-harness-01-agent-operations-contract",
+  "startingCommit": "2cedf5bbf1fa423d304af1c3c54d30066be9507e",
+  "plannedFiles": [],
+  "completedWork": [
+    "Implemented the read-only harness-neutral snapshot contract, Codex/OpenCode fixture adapters, explicit evidence and Locaily links, harness-status CLI, and GET /harness/status; focused tests pass.",
+    "Full offline repository suite passed after DEV-HARNESS-01 implementation; milestone remains active pending intentional commit boundary and pre-delivery lifecycle validation.",
+    "Added checked-in canonical valid/invalid harness schema fixtures and wired test:harness into test:full; final focused and full offline suites pass."
+  ],
+  "remainingWork": [
+    "Establish an intentional commit boundary before delivery.",
+    "Run the pre-delivery lifecycle validation against the committed implementation and update milestone acceptance evidence.",
+    "Close the active development session only when the implementation slice is ready for delivery review."
+  ],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-08-02T00:54:33.896Z",
+      "message": "Implemented the read-only harness-neutral snapshot contract, Codex/OpenCode fixture adapters, explicit evidence and Locaily links, harness-status CLI, and GET /harness/status; focused tests pass.",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    },
+    {
+      "timestamp": "2026-08-02T00:57:21.868Z",
+      "message": "Full offline repository suite passed after DEV-HARNESS-01 implementation; milestone remains active pending intentional commit boundary and pre-delivery lifecycle validation.",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    },
+    {
+      "timestamp": "2026-08-02T01:04:37.563Z",
+      "message": "Added checked-in canonical valid/invalid harness schema fixtures and wired test:harness into test:full; final focused and full offline suites pass.",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-08-02T00:26:31.268Z",
+  "closedAt": null
+}

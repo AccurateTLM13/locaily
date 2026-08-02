@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "dev-loop-01-canonical-queue-safe-runner",
   "title": "DEV-LOOP-01 Canonical Queue and Safe Runner Integration",
-  "status": "completed",
+  "status": "planned",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Connect the agent-neutral Development Control Plane with the canonical Durable Job Store and background worker polling loop to enable safe, isolated background task execution.",

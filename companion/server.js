@@ -77,6 +77,7 @@ const { createShadowRouter } = require("./core/shadow-routing");
 const { createEnforcementPolicy } = require("./core/enforcement-policy");
 const { getEvidenceReview, getTrackReview, getDisagreements, getEnforcementDecisions, getShadowComparisons, getLearningState, getDrift, buildEnforcementMetrics, buildLearningState } = require("./evidence/shadow-evidence-review");
 const { loadRecord: loadTrackRunRecord } = require("./evidence/track-run-record-store");
+const { buildHarnessSnapshot, listHarnessFixtures } = require("./harness");
 const {
   loadReview,
   upsertReview,
@@ -467,6 +468,36 @@ const server = http.createServer(async (request, response) => {
       const modelOverride = url.searchParams.get("model");
       const consoleStatus = await consoleController.getStatus(modelOverride);
       return sendJson(response, consoleStatus.statusCode, consoleStatus.body);
+    }
+
+    if (request.method === "GET" && url.pathname === "/harness/status") {
+      const fixture = url.searchParams.get("fixture") || "codex";
+      const harnessResult = buildHarnessSnapshot({
+        fixture,
+        repoRoot: join(__dirname, "..")
+      });
+
+      if (!harnessResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: harnessResult.error.code,
+          message: harnessResult.error.message,
+          nextStep: harnessResult.error.nextStep
+        });
+      }
+
+      return sendJson(response, 200, {
+        ok: true,
+        result: harnessResult.result,
+        warnings: harnessResult.warnings,
+        meta: {
+          requestId: identity.requestId,
+          durationMs: Date.now() - startedAt,
+          readOnly: true,
+          fixture,
+          availableFixtures: listHarnessFixtures()
+        }
+      });
     }
 
     if (request.method === "POST" && url.pathname === "/console/run-validation") {
@@ -2698,7 +2729,7 @@ const server = http.createServer(async (request, response) => {
       ok: false,
       code: "NOT_FOUND",
       message: `No route matched ${request.method} ${url.pathname}.`,
-      nextStep: "Use GET /console, GET /health, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, POST /jobs, GET /jobs, GET /jobs/:id, POST /jobs/:id/cancel, POST /jobs/:id/retry, POST /jobs/:id/review, or legacy POST /analyze."
+      nextStep: "Use GET /console, GET /health, GET /harness/status, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, POST /jobs, GET /jobs, GET /jobs/:id, POST /jobs/:id/cancel, POST /jobs/:id/retry, POST /jobs/:id/review, or legacy POST /analyze."
     });
   } catch (error) {
     console.error("Unexpected server error.");
@@ -2939,6 +2970,12 @@ async function buildHealthResponse() {
       trackCount: Object.keys(learningState.trackStates).length,
       lastAggregationTimestamp: learningState.generatedAt,
       learningEndpoint: "/evidence/learning"
+    },
+    harness_operations: {
+      readOnly: true,
+      evidenceMode: "fixture-only",
+      statusEndpoint: "/harness/status",
+      fixtures: listHarnessFixtures()
     },
     jobTotals
   };

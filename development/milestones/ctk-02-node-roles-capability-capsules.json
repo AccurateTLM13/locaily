@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "ctk-02-node-roles-capability-capsules",
   "title": "CTK-02 Node Roles and Capability Capsule Foundation",
-  "status": "completed",
+  "status": "planned",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Prove that one Locaily installation can identify as a node, assume an implemented role, advertise and evaluate a portable capability capsule, install it by version and hash, attach node-local bindings, and route CTK-01 execution to its eligible host.",

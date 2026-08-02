@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "ctk-03-node-event-bus-transport",
   "title": "CTK-03 Local Node Event Bus and Transport Adapter",
-  "status": "completed",
+  "status": "planned",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Provide a pub/sub event bus and transport adapter abstraction connecting Locaily Node instances for event routing, topic subscriptions, and inter-node event envelope delivery.",

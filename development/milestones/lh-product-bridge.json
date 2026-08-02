@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "lh-product-bridge",
   "title": "Lighthouse Handoff Product Bridge",
-  "status": "completed",
+  "status": "planned",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Provide Chrome extension discovery, CORS allowlist policy enforcement, PageSpeed payload transformation, Local AI report enhancement mode, and coding-agent-ready Markdown export.",

@@ -49,14 +49,22 @@ try {
     assert.ok(markdown.includes("Performance:** 90/100"));
     assert.ok(markdown.includes("[ACCESSIBILITY]"));
     assert.ok(markdown.includes("Image elements do not have [alt] attributes"));
+
+    // Missing input fail-closed test
+    assert.throws(() => {
+      convertPagespeedToMarkdown({});
+    }, /INVALID_AUDIT_INPUT/);
   });
 
   // AC 3: Local AI Enhancement
   runTest("AC 3: Local AI enhancement mode adds prioritized recommendation summaries", () => {
     const baseMarkdown = "# Report Base";
-    const enhanced = enhanceReportWithLocalAI(baseMarkdown);
-    assert.ok(enhanced.includes("Local AI Recommendations"));
-    assert.ok(enhanced.includes("WCAG AA compliance"));
+    const unenhanced = enhanceReportWithLocalAI(baseMarkdown);
+    assert.ok(unenhanced.includes("AI enhancement unavailable"));
+
+    const demoEnhanced = enhanceReportWithLocalAI(baseMarkdown, null, { demo: true });
+    assert.ok(demoEnhanced.includes("Local AI Recommendations"));
+    assert.ok(demoEnhanced.includes("WCAG AA compliance"));
   });
 
 } catch (err) {
