@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/benchmark-aggregation.schema.json",
+  "title": "Benchmark Lab Repeated-Trial Aggregation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "aggregationId", "createdAt", "runIds", "runCount", "independentRunCount", "suiteId", "trackId", "contractId", "provenance", "metrics", "difficultyStrata", "difficultyStrataCount", "caseResults", "qualificationGate"],
+  "properties": {
+    "schemaVersion": { "const": "benchmark.aggregation.v1" },
+    "aggregationId": { "type": "string", "minLength": 1 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "runIds": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "runCount": { "type": "integer", "minimum": 1 },
+    "independentRunCount": { "type": "integer", "minimum": 1 },
+    "suiteId": { "type": "string", "minLength": 1 },
+    "trackId": { "type": "string", "minLength": 1 },
+    "contractId": { "type": "string", "minLength": 1 },
+    "provenance": { "type": "object" },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trialCount", "scoredTrialCount", "passed", "failed", "partial", "errors", "timeouts", "malformed", "criticalFailureCount", "passRate", "scoredPassRate", "uncertainty", "scoredUncertainty"],
+      "properties": {
+        "trialCount": { "type": "integer", "minimum": 1 },
+        "scoredTrialCount": { "type": "integer", "minimum": 0 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "partial": { "type": "integer", "minimum": 0 },
+        "errors": { "type": "integer", "minimum": 0 },
+        "timeouts": { "type": "integer", "minimum": 0 },
+        "malformed": { "type": "integer", "minimum": 0 },
+        "criticalFailureCount": { "type": "integer", "minimum": 0 },
+        "passRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "scoredPassRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "uncertainty": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "confidence", "lower", "upper"],
+          "properties": {
+            "method": { "const": "wilson" },
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+            "lower": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+            "upper": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+          }
+        },
+        "scoredUncertainty": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "confidence", "lower", "upper"],
+          "properties": {
+            "method": { "const": "wilson" },
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+            "lower": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+            "upper": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "difficultyStrata": { "type": "array", "items": { "type": "string" } },
+    "difficultyStrataCount": { "type": "integer", "minimum": 0 },
+    "caseResults": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caseId", "difficulty", "trialCount", "scoredTrialCount", "passed", "failed", "partial", "errors", "timeouts", "malformed", "criticalFailureCount", "passRate", "scoredPassRate", "uncertainty", "scoredUncertainty"],
+        "properties": {
+          "caseId": { "type": "string", "minLength": 1 },
+          "difficulty": { "type": "string", "minLength": 1 },
+          "trialCount": { "type": "integer", "minimum": 1 },
+          "scoredTrialCount": { "type": "integer", "minimum": 0 },
+          "passed": { "type": "integer", "minimum": 0 },
+          "failed": { "type": "integer", "minimum": 0 },
+          "partial": { "type": "integer", "minimum": 0 },
+          "errors": { "type": "integer", "minimum": 0 },
+          "timeouts": { "type": "integer", "minimum": 0 },
+          "malformed": { "type": "integer", "minimum": 0 },
+          "criticalFailureCount": { "type": "integer", "minimum": 0 },
+          "passRate": { "type": "number", "minimum": 0, "maximum": 1 },
+          "scoredPassRate": { "type": "number", "minimum": 0, "maximum": 1 },
+          "uncertainty": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["method", "confidence", "lower", "upper"],
+            "properties": {
+              "method": { "const": "wilson" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+              "lower": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+              "upper": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+            }
+          },
+          "scoredUncertainty": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["method", "confidence", "lower", "upper"],
+            "properties": {
+              "method": { "const": "wilson" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+              "lower": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+              "upper": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+            }
+          }
+        }
+      }
+    },
+    "qualificationGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eligible", "reasons", "policy"],
+      "properties": {
+        "eligible": { "type": "boolean" },
+        "reasons": { "type": "array", "items": { "type": "string" } },
+        "policy": { "type": "object", "additionalProperties": true }
+      }
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260803-001",
+  "milestoneId": "benchmark-lab-m2-reproducible-semantic-qualification",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": "Resumed milestone: Benchmark Lab M2 — Reproducible Semantic Qualification",
+  "branch": "codex/benchmark-lab-m2-reproducible-semantic-qualification",
+  "startingCommit": "2cedf5bbf1fa423d304af1c3c54d30066be9507e",
+  "plannedFiles": [],
+  "completedWork": [
+    "Resolved Ollama blocker; added lifecycle blocker clearing and exact Ollama tags digest provenance with mismatch rejection.",
+    "Completed live M2 requalification, exact digest provenance, full test suite, acceptance evidence, docs, and staged review with zero errors.",
+    "Implemented M2 reproducible semantic qualification, generated gate-eligible live v2 draft evidence, verified exact Ollama model provenance, and passed the full repository suite."
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-08-03T02:14:30.160Z",
+      "message": "Resolved Ollama blocker; added lifecycle blocker clearing and exact Ollama tags digest provenance with mismatch rejection.",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    },
+    {
+      "timestamp": "2026-08-03T02:26:45.088Z",
+      "message": "Completed live M2 requalification, exact digest provenance, full test suite, acceptance evidence, docs, and staged review with zero errors.",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-08-03T02:11:53.910Z",
+  "closedAt": "2026-08-03T02:26:46.788Z",
+  "closingCommit": "2cedf5bbf1fa423d304af1c3c54d30066be9507e",
+  "dirtyFiles": [
+    "benchmark-lab/OPERATOR_GUIDE.md",
+    "benchmark-lab/README.md",
+    "benchmark-lab/VALIDATION_CHECKLIST.md",
+    "benchmark-lab/engine/aggregation.js",
+    "benchmark-lab/engine/cli/benchmark-aggregate.js",
+    "benchmark-lab/engine/cli/benchmark-promote.js",
+    "benchmark-lab/engine/cli/benchmark-requalify.js",
+    "benchmark-lab/engine/compare-runs.js",
+    "benchmark-lab/engine/provenance.js",
+    "benchmark-lab/engine/qualification.js",
+    "benchmark-lab/engine/requalification.js",
+    "benchmark-lab/engine/review-run.js",
+    "benchmark-lab/engine/runners/suite-runner.js",
+    "benchmark-lab/engine/semantic-scorer.js",
+    "benchmark-lab/locaily/tracks/accessibility-deep/cases-v2.json",
+    "benchmark-lab/locaily/tracks/accessibility-deep/scenarios-v2.js",
+    "benchmark-lab/locaily/tracks/accessibility-deep/suite-v2.json",
+    "benchmark-lab/locaily/tracks/accessibility-deep/suite.json",
+    "benchmark-lab/locaily/tracks/dealsniper/suite.json",
+    "benchmark-lab/locaily/tracks/performance-budget/suite.json",
+    "benchmark-lab/locaily/tracks/semantic-scorer-fixture/cases.json",
+    "benchmark-lab/locaily/tracks/semantic-scorer-fixture/mock-responses.json",
+    "benchmark-lab/locaily/tracks/semantic-scorer-fixture/scenarios.js",
+    "benchmark-lab/locaily/tracks/semantic-scorer-fixture/suite.json",
+    "benchmark-lab/locaily/tracks/seo-audit/suite.json",
+    "benchmark-lab/models/manifests/llama3.2-local.json",
+    "benchmark-lab/schemas/benchmark-aggregation.schema.json",
+    "benchmark-lab/schemas/benchmark-provenance.schema.json",
+    "benchmark-lab/schemas/benchmark-run-summary.schema.json",
+    "benchmark-lab/schemas/benchmark-suite.schema.json",
+    "benchmark-lab/schemas/fixtures/benchmark-aggregation.invalid.json",
+    "benchmark-lab/schemas/fixtures/benchmark-aggregation.valid.json",
+    "benchmark-lab/schemas/fixtures/benchmark-provenance.invalid.json",
+    "benchmark-lab/schemas/fixtures/benchmark-provenance.valid.json",
+    "benchmark-lab/schemas/fixtures/benchmark-run-summary.valid.json",
+    "benchmark-lab/schemas/fixtures/benchmark-suite.valid.json",
+    "benchmark-lab/schemas/promoted-evidence.schema.json",
+    "development/milestones/benchmark-lab-m2-reproducible-semantic-qualification.json",
+    "development/project-state.json",
+    "development/reviews/review-benchmark-lab-m2-reproducible-semantic-qualification-20260803T022424.json",
+    "development/roadmap.json",
+    "development/sessions/session-20260802-001.json",
+    "development/sessions/session-20260803-001.json",
+    "docs/00-start-here/current-state.md",
+    "docs/06-decisions/decision-log.md",
+    "docs/07-progress/active-build-slice.md",
+    "docs/07-progress/build-status.md",
+    "docs/07-progress/next-agent-brief.md",
+    "docs/07-progress/progress-log.md",
+    "docs/07-progress/work-closeout.json",
+    "package.json",
+    "scripts/benchmark-lab-aggregation-test.js",
+    "scripts/benchmark-lab-requalification-test.js",
+    "scripts/benchmark-lab-run-test.js",
+    "scripts/benchmark-lab-schema-test.js",
+    "scripts/benchmark-lab-semantic-scorer-test.js",
+    "scripts/dev-lifecycle.js",
+    "scripts/test-development-phase2b.js",
+    "development/sessions/session-20260803-001.json",
+    "development/reviews/review-benchmark-lab-m2-reproducible-semantic-qualification-20260803T022623.json"
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "schema": "locaily.development.validation_result.v1",
+  "id": "validation-20260803T023410-3563bd82",
+  "milestoneId": "benchmark-lab-m2-reproducible-semantic-qualification",
+  "profileId": "pre-delivery",
+  "status": "passed",
+  "gitState": {
+    "branch": "codex/benchmark-lab-m2-reproducible-semantic-qualification",
+    "headCommit": "eeb7e5aac8e909a3d3f17291d32482c1888908f5",
+    "fingerprint": "sha256:e3b0c44298fc1c14",
+    "changedFiles": [],
+    "computedAt": "2026-08-03T02:34:10.078Z"
+  },
+  "startedAt": "2026-08-03T02:34:10.079Z",
+  "completedAt": "2026-08-03T02:35:03.348Z",
+  "results": [
+    {
+      "id": "strict-status",
+      "command": "node scripts/dev-status.js --strict --json",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 0,
+      "stdout": "",
+      "stderr": "",
+      "summary": "No error/critical contradictions",
+      "required": true
+    },
+    {
+      "id": "dev-status-strict",
+      "command": "node scripts/dev-status.js --strict",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 675,
+      "stdout": "=== Locaily Development Status ===\n\nProject:        locaily\nStatus:         active\nDefault branch: main\nCurrent branch: codex/benchmark-lab-m2-reproducible-semantic-qualification\nHEAD:           eeb7e5a\n\n--- Working Tree ---\n  Modified:  1 file(s)\n    development/milestones/benchmark-lab-m2-reproducible-semantic-qualification.json\n\n--- Milestones ---\n  No active, paused, blocked, or ready-for-delivery milestones.\n  Planned: 7 | Ready: 0 | Completed: 9\n\n--- Sessions ---\n  No active or paused sess",
+      "stderr": "",
+      "summary": "  Select and start one of 7 planned/ready milestone(s) (dev:milestone:start)",
+      "required": true
+    },
+    {
+      "id": "schema-tests",
+      "command": "node scripts/test-development-schemas.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 83,
+      "stdout": "\n## Schema Structure\n  PASS  Schema brief.schema.json has required fields\n  PASS  Schema delivery.schema.json has required fields\n  PASS  Schema issue.schema.json has required fields\n  PASS  Schema milestone.schema.json has required fields\n  PASS  Schema project-state.schema.json has required fields\n  PASS  Schema session.schema.json has required fields\n  PASS  Schema validation-profile.schema.json has required fields\n  PASS  Schema validation-result.schema.json has required fields\n\n## Schema Co",
+      "stderr": "",
+      "summary": "## Results: 29 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "lifecycle-tests",
+      "command": "node scripts/test-lifecycle.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 138,
+      "stdout": "\n## State Machine\n  PASS  STATES are frozen\n  PASS  isTerminal identifies terminal states\n  PASS  isValidTransition enforces legal transitions\n  PASS  Terminal states have no outgoing transitions\n\n## Objective Meta\n  PASS  createObjectiveMeta produces default meta\n  PASS  createObjectiveMeta accepts overrides\n\n## Objective Parsing\n  PASS  parseObjectiveId extracts prefix and slug\n  PASS  parseObjectiveId handles no prefix\n\n## Duplicate Detection\n  PASS  detectDuplicates finds slug duplicates\n  P",
+      "stderr": "",
+      "summary": "## Results: 23 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "controller-tests",
+      "command": "node scripts/test-controller-invariants.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 303,
+      "stdout": "\nTests: 11 passed, 0 failed\n",
+      "stderr": "",
+      "summary": "Tests: 11 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "contract-tests",
+      "command": "node scripts/contract-test.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 257,
+      "stdout": "Contract helpers passed.\n",
+      "stderr": "",
+      "summary": "Contract helpers passed.",
+      "required": true
+    },
+    {
+      "id": "full-suite",
+      "command": "npm run test:full",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 51087,
+      "stdout": "\n> locaily@0.1.0 test:full\n> npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && npm run test:development-memory && npm run test:controller && npm run test:capability-kernel\n\n\n> locaily@0.1.0 test:co",
+      "stderr": "",
+      "summary": "P",
+      "required": false
+    }
+  ],
+  "manualChecks": [
+    {
+      "id": "review-gate",
+      "description": "Code review must pass (agent-review.js)",
+      "acknowledged": true,
+      "acknowledgedBy": "codex",
+      "acknowledgedAt": "2026-08-03T02:35:03.348Z"
+    },
+    {
+      "id": "closeout-verified",
+      "description": "Closeout record correctly describes completed work",
+      "acknowledged": true,
+      "acknowledgedBy": "codex",
+      "acknowledgedAt": "2026-08-03T02:35:03.348Z"
+    }
+  ],
+  "warnings": [],
+  "error": null
+}

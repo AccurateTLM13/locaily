@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "locaily.companion.benchmark-worker-event.v1",
+  "title": "Benchmark worker event",
+  "type": "object",
+  "required": ["schemaVersion", "type", "timestamp", "data"],
+  "properties": {
+    "schemaVersion": { "const": "benchmark.worker_event.v1" },
+    "sequence": { "type": "integer", "minimum": 1 },
+    "type": { "enum": ["queued", "preflight", "started", "phase", "trial-started", "case-completed", "trial-completed", "completed", "failed", "cancelled"] },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "data": { "type": "object" }
+  },
+  "additionalProperties": false
+}

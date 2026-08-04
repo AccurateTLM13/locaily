@@ -13,6 +13,7 @@
  *   node scripts/dev-lifecycle.js checkpoint --message "What was done"
  *   node scripts/dev-lifecycle.js pause --reason "Why pausing"
  *   node scripts/dev-lifecycle.js block --reason "Why blocked" --type <type>
+ *   node scripts/dev-lifecycle.js block --clear [--id <blocker-id>]
  *   node scripts/dev-lifecycle.js resume
  *   node scripts/dev-lifecycle.js validate
  *   node scripts/dev-lifecycle.js complete
@@ -149,6 +150,17 @@ function findPausedMilestone() {
   return listMilestones().find(m => m.status === "paused") || null;
 }
 
+function findBlockedMilestone() {
+  const ps = readProjectState();
+  if (ps && ps.currentMilestone) {
+    const current = readMilestone(ps.currentMilestone);
+    if (current && current.status === "blocked") return current;
+  }
+
+  const blocked = listMilestones().filter(m => m.status === "blocked");
+  return blocked.length === 1 ? blocked[0] : null;
+}
+
 // ---- session operations ----
 
 function sessionPath(id) {
@@ -187,7 +199,8 @@ function computeGitFingerprint() {
 
   // Get list of changed files with their git status
   // Exclude development/ directory (control plane state, expected to change during validation)
-  const statusOutput = git(["status", "--porcelain"]) || "";
+  const statusResult = gitResult(["status", "--porcelain"]);
+  const statusOutput = statusResult.status === 0 ? (statusResult.stdout || "") : "";
   const lines = statusOutput.split(/\r?\n/).filter(Boolean);
 
   const changedFiles = [];
@@ -563,6 +576,57 @@ function cmdPause(args) {
 }
 
 function cmdBlock(args) {
+  if (hasFlag(args, "--clear")) {
+    const milestone = findBlockedMilestone();
+    if (!milestone) {
+      console.error("Error: No unambiguous blocked milestone to clear.");
+      process.exit(1);
+    }
+
+    const blockerId = extractArg(args, "--id");
+    const blockers = Array.isArray(milestone.blockers) ? milestone.blockers : [];
+    if (blockers.length === 0) {
+      console.error(`Error: Milestone '${milestone.id}' has no blockers to clear.`);
+      process.exit(1);
+    }
+    if (!blockerId && blockers.length > 1) {
+      console.error("Error: Multiple blockers exist. Pass --id <blocker-id> to clear one explicitly.");
+      process.exit(1);
+    }
+
+    const cleared = blockerId
+      ? blockers.find(blocker => blocker.id === blockerId)
+      : blockers[0];
+    if (!cleared) {
+      console.error(`Error: Blocker '${blockerId}' was not found on milestone '${milestone.id}'.`);
+      process.exit(1);
+    }
+
+    milestone.blockers = blockers.filter(blocker => blocker.id !== cleared.id);
+    milestone.status = milestone.blockers.length > 0 ? "blocked" : "paused";
+    writeMilestone(milestone);
+
+    const ps = readProjectState();
+    if (ps) {
+      ps.currentMilestone = milestone.id;
+      ps.activeSession = null;
+      ps.status = milestone.status;
+      ps.blockers = milestone.blockers.map(blocker => blocker.description);
+      ps.nextRecommendedAction = milestone.status === "paused"
+        ? `Resume milestone '${milestone.id}'`
+        : `Resolve remaining blocker(s) for milestone '${milestone.id}'`;
+      writeProjectState(ps);
+    }
+
+    console.log(JSON.stringify({
+      ok: true,
+      milestone: { id: milestone.id, status: milestone.status },
+      clearedBlocker: { id: cleared.id, description: cleared.description },
+      remainingBlockers: milestone.blockers,
+    }, null, 2));
+    return;
+  }
+
   const reason = extractArg(args, "--reason");
   const type = extractArg(args, "--type") || "human-action";
 
@@ -1030,7 +1094,7 @@ function cmdComplete(args) {
 
   // Gate 4b: Clean tree requirement (from profile)
   if (policy.requireCleanTree && latestValidation && latestValidation.status === "passed") {
-    const currentDirty = isDirty();
+    const currentDirty = currentFingerprint.changedFiles.length > 0;
     const validatedDirty = latestValidation.gitState && latestValidation.gitState.changedFiles &&
       latestValidation.gitState.changedFiles.length > 0;
 
@@ -1294,7 +1358,7 @@ function cmdPrepare(args) {
   const subject = `feat(${deriveAreaFromFiles(stagedAfter)}): complete ${milestone.id}`;
   const bodyLines = [];
   if (completed.length > 0) {
-    bodyLines.push(...completed.map(c => `- ${c}`));
+    bodyLines.push(...completed.map(c => `- ${typeof c === "string" ? c : c.description}`));
     bodyLines.push("");
   }
   bodyLines.push(`Prepared from branch: ${branch}`);
@@ -1318,7 +1382,7 @@ function cmdPrepare(args) {
 
   const commitSha = git(["rev-parse", "HEAD"]);
 
-  // Gate 5: Verify clean tree after commit
+  // Gate 5a: Verify the implementation commit consumed the staged work
   const postStatus = git(["status", "--porcelain"]) || "";
   if (postStatus.trim()) {
     console.error("Error: Working tree is not clean after commit.");
@@ -1338,6 +1402,32 @@ function cmdPrepare(args) {
     writeProjectState(ps);
   }
 
+  // The prepared commit SHA cannot be recorded inside the commit it identifies.
+  // Commit lifecycle metadata separately so validation still runs from a clean HEAD.
+  git(["add", path.relative(PROJECT_ROOT, milestonePath(milestone.id))]);
+  if (ps) git(["add", path.relative(PROJECT_ROOT, PROJECT_STATE_PATH)]);
+  const metadataMessagePath = git(["rev-parse", "--git-path", "COMMIT_MSG_TEMP"]);
+  const metadataCommitMessagePath = metadataMessagePath
+    ? path.resolve(PROJECT_ROOT, metadataMessagePath)
+    : path.join(PROJECT_ROOT, ".git", "COMMIT_MSG_TEMP");
+  fs.writeFileSync(
+    metadataCommitMessagePath,
+    `chore(development): record prepared state for ${milestone.id}`,
+    "utf8"
+  );
+  const metadataCommitResult = gitResult(["commit", "--file", metadataCommitMessagePath]);
+  try { fs.unlinkSync(metadataCommitMessagePath); } catch {}
+  if (metadataCommitResult.status !== 0) {
+    console.error(`Error: Prepared-state commit failed: ${(metadataCommitResult.stderr || metadataCommitResult.stdout || "").trim()}`);
+    process.exit(1);
+  }
+  const preparedStateCommit = getCurrentHead();
+  const finalStatus = git(["status", "--porcelain"]) || "";
+  if (finalStatus.trim()) {
+    console.error("Error: Working tree is not clean after recording prepared state.");
+    process.exit(1);
+  }
+
   console.log(JSON.stringify({
     ok: true,
     milestoneId: milestone.id,
@@ -1345,6 +1435,7 @@ function cmdPrepare(args) {
     branch,
     filesStaged: stagedAfter.length,
     unscoped: unscoped.length,
+    preparedStateCommit,
     message: `Prepared commit ${commitSha.slice(0, 8)} on ${branch}`,
     nextAction: "Run dev:validate against committed HEAD",
   }, null, 2));

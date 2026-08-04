@@ -6,6 +6,7 @@
  */
 
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
@@ -13,7 +14,18 @@ const PROJECT_ROOT = path.resolve(__dirname, "..");
 const MILESTONES_DIR = path.join(PROJECT_ROOT, "development", "milestones");
 const SESSIONS_DIR = path.join(PROJECT_ROOT, "development", "sessions");
 const REVIEW_DIR = path.join(PROJECT_ROOT, "development", "reviews");
+const ISSUES_DIR = path.join(PROJECT_ROOT, "development", "issues");
+const BRIEFS_DIR = path.join(PROJECT_ROOT, "development", "briefs");
 const PROFILES_DIR = path.join(PROJECT_ROOT, "development", "profiles");
+const PROJECT_STATE_PATH = path.join(PROJECT_ROOT, "development", "project-state.json");
+const ROADMAP_PATH = path.join(PROJECT_ROOT, "development", "roadmap.json");
+const VALIDATION_INDEX_PATH = path.join(PROJECT_ROOT, "development", "validation-index.json");
+const MUTABLE_STATE_PATHS = [MILESTONES_DIR, SESSIONS_DIR, REVIEW_DIR, ISSUES_DIR, BRIEFS_DIR, PROJECT_STATE_PATH, ROADMAP_PATH, VALIDATION_INDEX_PATH];
+const STATE_BACKUP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "locaily-dev-control-test-"));
+let stateRestored = false;
+
+captureMutableState();
+process.on("exit", restoreMutableState);
 
 let passed = 0;
 let failed = 0;
@@ -49,18 +61,65 @@ function runReview(args) {
 }
 
 function cleanState() {
-  for (const dir of [MILESTONES_DIR, SESSIONS_DIR, REVIEW_DIR]) {
+  for (const dir of [MILESTONES_DIR, SESSIONS_DIR, REVIEW_DIR, ISSUES_DIR, BRIEFS_DIR]) {
     if (fs.existsSync(dir)) {
       for (const f of fs.readdirSync(dir)) {
         if (f.endsWith(".json")) fs.unlinkSync(path.join(dir, f));
       }
     }
   }
+  writeJson(PROJECT_STATE_PATH, {
+    schema: "locaily.development.project_state.v1",
+    project: "locaily-test",
+    currentMilestone: null,
+    activeSession: null,
+    status: "idle",
+    defaultBranch: "main",
+    activeBranch: null,
+    lastCompletedMilestone: null,
+    nextRecommendedAction: "Select a test milestone",
+    blockers: [],
+    warnings: [],
+    updatedAt: new Date(0).toISOString(),
+    updatedBy: { type: "agent", name: "test", platform: "system" }
+  });
+  writeJson(ROADMAP_PATH, {
+    schema: "locaily.development.roadmap.v1",
+    project: "locaily-test",
+    updatedAt: new Date(0).toISOString(),
+    areas: [],
+    milestoneDependencies: {}
+  });
+  writeJson(VALIDATION_INDEX_PATH, { latestByMilestone: {} });
 }
 
 function writeJson(p, data) {
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, JSON.stringify(data, null, 2) + "\n");
+}
+
+function captureMutableState() {
+  for (const target of MUTABLE_STATE_PATHS) {
+    const relative = path.relative(path.join(PROJECT_ROOT, "development"), target);
+    const backup = path.join(STATE_BACKUP_DIR, relative);
+    if (!fs.existsSync(target)) continue;
+    fs.mkdirSync(path.dirname(backup), { recursive: true });
+    fs.cpSync(target, backup, { recursive: true });
+  }
+}
+
+function restoreMutableState() {
+  if (stateRestored) return;
+  stateRestored = true;
+  for (const target of MUTABLE_STATE_PATHS) {
+    const relative = path.relative(path.join(PROJECT_ROOT, "development"), target);
+    const backup = path.join(STATE_BACKUP_DIR, relative);
+    fs.rmSync(target, { recursive: true, force: true });
+    if (!fs.existsSync(backup)) continue;
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.cpSync(backup, target, { recursive: true });
+  }
+  fs.rmSync(STATE_BACKUP_DIR, { recursive: true, force: true });
 }
 
 // ---- Script existence ----
@@ -101,10 +160,12 @@ test("begin --json produces output", () => {
 
 test("begin --slug creates milestone", () => {
   cleanState();
-  const r = runBegin(["--slug", "test-begin", "--title", "Test", "--purpose", "Testing"]);
+  const r = runBegin(["--slug", "test-begin", "--title", "Test Milestone", "--purpose", "Testing multi word purpose"]);
   assert(r.exitCode === 0, `Failed: ${r.stderr}`);
   const milestone = readJson(path.join(MILESTONES_DIR, "test-begin.json"));
   assert(milestone.status === "active", "Milestone not active");
+  assert(milestone.title === "Test Milestone", `Title was truncated: ${milestone.title}`);
+  assert(milestone.purpose === "Testing multi word purpose", `Purpose was truncated: ${milestone.purpose}`);
   const sessions = fs.readdirSync(SESSIONS_DIR).filter(f => f.endsWith(".json"));
   assert(sessions.length > 0, "No session created");
   cleanState();
@@ -160,6 +221,12 @@ test("agent-review detects out-of-scope files", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "agent-review.js"), "utf8");
   assert(content.includes("OUT_OF_SCOPE_EXCLUDED"), "Missing OUT_OF_SCOPE_EXCLUDED");
   assert(content.includes("UNEXPECTED_DIR"), "Missing UNEXPECTED_DIR");
+});
+
+test("agent-review includes untracked files", () => {
+  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "agent-review.js"), "utf8");
+  assert(content.includes('"ls-files", "--others", "--exclude-standard"'), "Review does not enumerate untracked files");
+  assert(content.includes("function reviewDiff"), "Missing combined review diff builder");
 });
 
 test("agent-review creates review record", () => {

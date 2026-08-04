@@ -17,7 +17,7 @@ The companion runtime should consume qualification records and approved summarie
 
 ## Status
 
-Benchmark Lab Milestone 1 is complete and operator-ready.
+Benchmark Lab Milestone 1 is complete and operator-ready. Benchmark Lab M2 is active for reproducible semantic qualification.
 
 Qualification breadth remains incremental across models, Tracks, hardware profiles, prompts, runtimes, and regression packs.
 
@@ -30,6 +30,8 @@ Qualification breadth remains incremental across models, Tracks, hardware profil
 - Qualification records available for runtime consumption via compact schema-validated artifacts
 - Read-only `/benchmark/status` endpoint on the Local Brain
 - Local Brain consumes compact qualification data without importing Benchmark Lab engine internals
+- M2 reproducibility slice: versioned semantic scorers, summary-safe run provenance, provenance-aware comparison gates, repeated-trial aggregation with Wilson uncertainty, and explicit qualification gates
+- Representative v2 requalification path: versioned accessibility-deep suite with easy, medium, and hard strata plus an independent-trial runner
 
 ### What Remains Incremental
 
@@ -47,6 +49,8 @@ Qualification breadth remains incremental across models, Tracks, hardware profil
 | `run` | `npm run benchmark:run` | Run a suite, write raw results + draft summary |
 | `review` | `npm run benchmark:review` | Review a draft run summary without promoting |
 | `compare` | `npm run benchmark:compare` | Compare two draft summaries |
+| `aggregate` | `npm run benchmark:aggregate` | Aggregate independent runs and evaluate qualification evidence gates |
+| `requalify` | `npm run benchmark:requalify` | Run repeated independent trials and write an aggregation for review |
 | `promote` | `npm run benchmark:promote` | Explicitly promote a draft run to approved evidence |
 | `matrix` | `npm run benchmark:matrix` | Run a suite across multiple model manifests |
 | `report:generate` | `npm run report:generate` | Generate published report from promoted evidence |
@@ -85,6 +89,7 @@ runtime consumption of compact qualification data
 - Promotion is explicit and requires human approval.
 - Published artifacts (evidence, reports, model cards, qualification records) must come from approved, reviewed evidence.
 - Qualification records are evidence-backed hints or policy inputs for the runtime router.
+- `qualified` status requires promoted evidence with an eligible repeated-trial aggregation: at least 20 scored trials, 3 difficulty strata, 3 independent runs, no critical failures, and complete required provenance.
 - The runtime does not consume raw run folders; it reads only compact qualification JSON.
 
 ### Additional Tooling
@@ -103,6 +108,7 @@ runtime consumption of compact qualification data
 - No automatic universal model ranking.
 - No automatic model swapping implied.
 - A model qualified for one Track must not be claimed as generally superior.
+- Provenance completeness and the repeated-trial gate are required before M2 qualification claims; a manifest fingerprint is not the same as a runtime model-weight digest.
 
 ## Operator Workflow
 

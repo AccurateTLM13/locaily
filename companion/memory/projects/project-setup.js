@@ -196,7 +196,7 @@ function importVault(projectRegistry, input) {
   // Ensure input.vaultPath is set for attachVault
   const attachInput = { ...input, vaultPath: targetVaultDir };
   const attached = attachVault(projectRegistry, attachInput);
-
+  
   if (!attached.ok) {
     return attached;
   }

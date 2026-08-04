@@ -7,17 +7,19 @@ async function main() {
     run: {},
     evidence: {},
     approvedBy: {},
+    aggregation: {},
     note: {}
   });
 
   if (args.help) {
     printHelp({
-      command: "npm run benchmark:promote -- --run <run-id> --evidence <evidence-id> --approved-by <name>",
+      command: "npm run benchmark:promote -- --run <run-id> --evidence <evidence-id> --approved-by <name> [--aggregation <aggregation-id>]",
       description: "Explicitly promote a draft run summary into approved benchmark evidence.",
       options: [
         { flag: "--run <run-id>", description: "Run id under benchmark-lab/reports/drafts/." },
         { flag: "--evidence <id>", description: "Stable evidence id to write." },
         { flag: "--approved-by <name>", description: "Reviewer/operator approving promotion." },
+        { flag: "--aggregation <id>", description: "Optional repeated-trial aggregation to attach to evidence." },
         { flag: "--note <text>", description: "Optional review note." },
         { flag: "--help", description: "Show this help." }
       ]
@@ -30,6 +32,7 @@ async function main() {
     runId: args.run,
     evidenceId: args.evidence,
     approvedBy: args.approvedBy,
+    aggregationId: args.aggregation || null,
     notes: args.note ? [args.note] : []
   });
 

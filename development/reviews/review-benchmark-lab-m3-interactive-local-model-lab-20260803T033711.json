@@ -1,0 +1,130 @@
+{
+  "id": "review-benchmark-lab-m3-interactive-local-model-lab-20260803T033711",
+  "milestoneId": "benchmark-lab-m3-interactive-local-model-lab",
+  "status": "warning",
+  "branch": "codex/benchmark-lab-m3-interactive-local-model-lab",
+  "headCommit": "d52b3758c650c26c8b2acd215d799c495276fde5",
+  "findings": [
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/console/app.js",
+      "file": "companion/console/app.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/console/index.html",
+      "file": "companion/console/index.html"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/console/styles.css",
+      "file": "companion/console/styles.css"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/runtime/ollama.js",
+      "file": "companion/runtime/ollama.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/server.js",
+      "file": "companion/server.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/shell/app.js",
+      "file": "companion/shell/app.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/shell/index.html",
+      "file": "companion/shell/index.html"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/shell/styles.css",
+      "file": "companion/shell/styles.css"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: scripts/agent-review.js",
+      "file": "scripts/agent-review.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: scripts/dev-begin.js",
+      "file": "scripts/dev-begin.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/benchmark/controller.js",
+      "file": "companion/benchmark/controller.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/benchmark/model-inventory.js",
+      "file": "companion/benchmark/model-inventory.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/benchmark/run-store.js",
+      "file": "companion/benchmark/run-store.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/benchmark/suite-catalog.js",
+      "file": "companion/benchmark/suite-catalog.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/benchmark/worker-client.js",
+      "file": "companion/benchmark/worker-client.js"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/schemas/benchmark-lab-run.schema.json",
+      "file": "companion/schemas/benchmark-lab-run.schema.json"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/schemas/benchmark-model-inventory.schema.json",
+      "file": "companion/schemas/benchmark-model-inventory.schema.json"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/schemas/benchmark-run-create.schema.json",
+      "file": "companion/schemas/benchmark-run-create.schema.json"
+    },
+    {
+      "severity": "warning",
+      "code": "MISSING_TEST",
+      "message": "Source file changed but no matching test found: companion/schemas/benchmark-worker-event.schema.json",
+      "file": "companion/schemas/benchmark-worker-event.schema.json"
+    }
+  ],
+  "summary": {
+    "total": 19,
+    "errors": 0,
+    "warnings": 19,
+    "info": 0
+  },
+  "reviewedAt": "2026-08-03T03:37:11.938Z"
+}

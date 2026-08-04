@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "locaily.companion.benchmark-model-inventory.v1",
+  "title": "Benchmark model inventory response",
+  "type": "object",
+  "required": ["ok", "runtime", "models"],
+  "properties": {
+    "ok": { "const": true },
+    "runtime": {
+      "type": "object",
+      "required": ["provider", "state"],
+      "properties": {
+        "provider": { "const": "ollama" },
+        "state": { "enum": ["online", "offline", "degraded"] }
+      },
+      "additionalProperties": true
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "runtimeState", "installationState", "loadState", "loadabilityState", "manifestState", "qualificationState", "digest"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "runtimeState": { "enum": ["online", "offline", "degraded"] },
+          "installationState": { "enum": ["installed", "missing"] },
+          "loadState": { "enum": ["loaded", "unloaded", "loading", "unloading", "error"] },
+          "loadabilityState": { "enum": ["ready", "blocked", "unknown"] },
+          "manifestState": { "enum": ["registered", "unregistered", "stale"] },
+          "qualificationState": { "enum": ["qualified", "conditional", "screening", "rejected", "stale", "untested"] },
+          "digest": { "type": ["string", "null"] }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

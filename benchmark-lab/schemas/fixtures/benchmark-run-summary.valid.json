@@ -9,6 +9,11 @@
     "modelId": "mock-intent-classifier",
     "runtimeModelName": "mock-intent-classifier"
   },
+  "semanticScorer": {
+    "id": "fixture-semantic-scorer",
+    "version": "1.0.0",
+    "module": "scenarios.js"
+  },
   "startedAt": "2026-06-23T00:00:00.000Z",
   "completedAt": "2026-06-23T00:00:01.000Z",
   "caseCount": 1,

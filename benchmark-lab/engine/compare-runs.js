@@ -65,7 +65,20 @@ function buildDifferences(left, right) {
     "trackId",
     "contractId",
     "runtime.provider",
-    "caseCount"
+    "caseCount",
+    "provenance.runtime.provider",
+    "provenance.runtime.version",
+    "provenance.runtime.adapterId",
+    "provenance.runtime.adapterVersion",
+    "provenance.suite.configDigest",
+    "provenance.prompt.id",
+    "provenance.prompt.version",
+    "provenance.prompt.inputDigest",
+    "provenance.scorer.id",
+    "provenance.scorer.version",
+    "provenance.cases.caseSetDigest",
+    "provenance.cases.difficultyStrataDigest",
+    "provenance.hardware.profileId"
   ];
 
   return fields.flatMap((field) => {

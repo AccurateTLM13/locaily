@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "locaily.companion.benchmark-run-create.v1",
+  "title": "Interactive benchmark run request",
+  "type": "object",
+  "required": ["modelId", "suiteId", "mode"],
+  "properties": {
+    "modelId": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "suiteId": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,120}$" },
+    "mode": { "enum": ["quick", "qualification"] },
+    "trialCount": { "type": "integer", "minimum": 1, "maximum": 10 },
+    "requestKey": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{8,120}$" }
+  },
+  "additionalProperties": false
+}

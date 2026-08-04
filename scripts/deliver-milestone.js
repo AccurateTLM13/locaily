@@ -184,8 +184,9 @@ function preflight(slug) {
     errors.push({ code: "HEAD_MISMATCH", message: `Current HEAD ${currentHead?.slice(0, 8)} != milestone completion HEAD ${milestone.completionHead?.slice(0, 8)}` });
   }
 
-  // 4. Prepared commit matches HEAD
-  if (milestone.preparedCommit && currentHead !== milestone.preparedCommit) {
+  // 4. Before completion, prepared commit must match HEAD. After completion,
+  // completionHead is authoritative because prepare may add a metadata commit.
+  if (!milestone.completionHead && milestone.preparedCommit && currentHead !== milestone.preparedCommit) {
     errors.push({ code: "PREPARED_COMMIT_MISMATCH", message: `Current HEAD ${currentHead?.slice(0, 8)} != prepared commit ${milestone.preparedCommit?.slice(0, 8)}` });
   }
 

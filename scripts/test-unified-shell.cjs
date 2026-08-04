@@ -44,14 +44,15 @@ async function main() {
   check("GET / returns 200", rootRes.status === 200);
   const rootHtml = await rootRes.text();
   check("GET / returns shell HTML", rootHtml.includes("shell") || rootHtml.includes("Locaily"));
-  check("Shell HTML has nav links", rootHtml.includes("shell-nav") || rootHtml.includes("sidebar-nav"));
-  check("Shell HTML has logo", rootHtml.includes("locaily-logo.svg") || rootHtml.includes("logo-text"));
+  check("Shell HTML has nav links", rootHtml.includes("sidebar-nav"));
+  check("Shell HTML has brand", rootHtml.includes("logo-text") && rootHtml.includes("Loc"));
+  check("Shell HTML links Benchmark Lab", rootHtml.includes("data-section=\"benchmarks\""));
 
   // Test 2: GET /shell returns same shell
   const shellRes = await fetch(`${BASE}/shell`);
   check("GET /shell returns 200", shellRes.status === 200);
   const shellHtml = await shellRes.text();
-  check("GET /shell returns shell HTML", shellHtml.includes("shell-nav") || shellHtml.includes("sidebar-nav"));
+  check("GET /shell returns shell HTML", shellHtml.includes("sidebar-nav"));
 
   // Test 3: Shell CSS loads
   const cssRes = await fetch(`${BASE}/shell/styles.css`);
@@ -60,6 +61,8 @@ async function main() {
   // Test 4: Shell JS loads
   const jsRes = await fetch(`${BASE}/shell/app.js`);
   check("GET /shell/app.js returns JS", jsRes.status === 200 && jsRes.headers.get("content-type").includes("javascript"));
+  const shellJs = await jsRes.text();
+  check("Shell JS renders interactive benchmarks", shellJs.includes("renderBenchmarks") && shellJs.includes("EventSource"));
 
   // Test 5: Legacy /console still works
   const consoleRes = await fetch(`${BASE}/console`);

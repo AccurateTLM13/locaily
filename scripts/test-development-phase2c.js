@@ -191,6 +191,20 @@ test("prepare requires clean tree after commit", () => {
   assert(content.includes("postStatus") && content.includes("not clean after commit"), "Missing post-commit clean check");
 });
 
+test("prepare commits prepared-state metadata and leaves a clean HEAD", () => {
+  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
+  assert(content.includes("preparedStateCommit"), "Missing prepared-state commit result");
+  assert(content.includes("record prepared state for"), "Missing prepared-state metadata commit");
+  assert(content.includes("Working tree is not clean after recording prepared state"),
+    "Missing final clean-tree verification");
+});
+
+test("prepare formats structured acceptance criteria in commit bodies", () => {
+  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
+  assert(content.includes('typeof c === "string" ? c : c.description'),
+    "Structured acceptance criteria must use descriptions in commit messages");
+});
+
 test("prepare checks unrelated files", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
   assert(content.includes("UNRELATED_FILES"), "Missing UNRELATED_FILES error");
@@ -316,6 +330,8 @@ test("Preflight checks HEAD match", () => {
 test("Preflight checks prepared commit match", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "deliver-milestone.js"), "utf8");
   assert(content.includes("PREPARED_COMMIT_MISMATCH"), "Missing PREPARED_COMMIT_MISMATCH");
+  assert(content.includes("!milestone.completionHead"),
+    "Completed milestones must use completionHead after prepared-state metadata commits");
 });
 
 test("Preflight checks clean tree", () => {

@@ -14,6 +14,10 @@
     "numPredict": 4096
   },
   "caseFiles": ["cases.json"],
+  "prompt": {
+    "id": "accessibility-deep-json-v1",
+    "version": "1.0.0"
+  },
   "outputSchema": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "A11y Analyzer Output",
@@ -39,5 +43,10 @@
       }
     }
   },
-  "validators": ["json-parse", "json-schema"]
+  "semanticScorer": {
+    "id": "accessibility-deep-semantic-v1",
+    "version": "1.0.0",
+    "module": "scenarios.js"
+  },
+  "validators": ["json-parse", "json-schema", "semantic-scorer"]
 }

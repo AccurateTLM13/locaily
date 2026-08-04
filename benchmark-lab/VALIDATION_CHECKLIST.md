@@ -6,6 +6,12 @@ Use this before committing or opening a PR for Benchmark Lab framework changes o
 
 - [ ] Schema validation passes (`npm run benchmark:test`)
 - [ ] Mock run loop deterministic
+- [ ] Run summary contains model, runtime, suite, prompt, scorer, case-set, difficulty, and hardware provenance
+- [ ] Pairwise comparison rejects prompt/scorer/case-set/runtime/hardware provenance mismatches
+- [ ] Pairwise comparison permits intentional model identity changes under the same evaluation contract
+- [ ] Repeated-trial aggregation reports pass rates, Wilson uncertainty, difficulty strata, and critical failures
+- [ ] Qualification gate requires minimum scored trials, strata, independent runs, and required provenance
+- [ ] Qualified status rejects missing or ineligible aggregation evidence; screening/candidate status remains available below the gate
 - [ ] Mode comparison test passes (`node scripts/benchmark-lab-mode-comparison-test.js`) — also run via `npm run test:benchmark`
 - [ ] Status smoke test passes (`npm run benchmark:status-smoke`)
 - [ ] Contract tests pass (`node scripts/contract-test.js`)
@@ -18,9 +24,12 @@ Use this before committing or opening a PR for Benchmark Lab framework changes o
 
 - [ ] Model manifest reviewed and matches installed runtime model
 - [ ] Runtime model identity verified (digest or version match)
+- [ ] Runtime version and model digest are captured when the local runtime exposes them
 - [ ] Suite fixed (suite and cases are not modified during run)
 - [ ] Prompt/contract version recorded in evidence
 - [ ] Draft output inspected (pass/fail/error distribution, case-level verdicts)
+- [ ] At least three independent runs aggregated for qualification consideration
+- [ ] Aggregated uncertainty and critical failures reviewed; gate reasons are recorded when ineligible
 - [ ] Failures reviewed for legitimate model behavior vs fixture issues
 - [ ] Evidence claim scoped narrowly to tested Track + contract
 - [ ] Hardware context recorded where required
@@ -35,6 +44,8 @@ Use this before committing or opening a PR for Benchmark Lab framework changes o
 - [ ] Checksums generated and verified
 - [ ] No sensitive data in promoted evidence
 - [ ] Qualification status justified by evidence (use `qualified` only when genuinely supported)
+- [ ] Qualified status has an attached eligible repeated-trial aggregation
+- [ ] Representative v2 suite has at least three difficulty strata and a declared semantic scorer
 - [ ] Model card/report claims traceable to promoted evidence
 
 ## Runtime Integration

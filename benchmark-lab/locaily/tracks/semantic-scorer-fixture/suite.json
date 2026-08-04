@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "semantic-scorer-fixture-v1",
+  "name": "Semantic Scorer Fixture V1",
+  "mode": "quick-screen",
+  "trackId": "semantic-scorer-fixture",
+  "contractId": "semantic-scorer-fixture-v1",
+  "runtime": {
+    "provider": "mock",
+    "modelManifest": "mock-intent-classifier",
+    "responsesPath": "mock-responses.json"
+  },
+  "caseFiles": ["cases.json"],
+  "prompt": {
+    "id": "semantic-scorer-fixture-json-v1",
+    "version": "1.0.0"
+  },
+  "outputSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["label", "answer"],
+    "properties": {
+      "label": { "const": "extract" },
+      "answer": { "enum": ["correct", "wrong"] }
+    }
+  },
+  "semanticScorer": {
+    "id": "semantic-scorer-fixture-v1",
+    "version": "1.0.0",
+    "module": "scenarios.js"
+  },
+  "validators": ["json-parse", "json-schema", "semantic-scorer"]
+}

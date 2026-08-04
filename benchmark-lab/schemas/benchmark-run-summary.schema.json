@@ -41,6 +41,9 @@
       "type": "string",
       "minLength": 1
     },
+    "provenance": {
+      "type": "object"
+    },
     "runtime": {
       "type": "object",
       "additionalProperties": false,
@@ -56,6 +59,25 @@
         },
         "runtimeModelName": {
           "type": "string"
+        }
+      }
+    },
+    "semanticScorer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "module"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "module": {
+          "type": "string",
+          "minLength": 1
         }
       }
     },
@@ -105,11 +127,14 @@
           "verdict",
           "checks"
         ],
-        "properties": {
-          "caseId": {
-            "type": "string"
-          },
-          "verdict": {
+          "properties": {
+            "caseId": {
+              "type": "string"
+            },
+            "difficulty": {
+              "type": "string"
+            },
+            "verdict": {
             "enum": [
               "PASS",
               "PARTIAL",

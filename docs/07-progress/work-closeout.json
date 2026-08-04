@@ -1,34 +1,40 @@
 {
-  "work_id": "dev-harness-01-agent-operations-contract",
-  "objective_id": "dev-harness-01-agent-operations-contract",
-  "status": "incomplete",
-  "closed_at": "2026-08-02T01:05:13.661Z",
-  "original_goal": "Define the read-only normalization boundary between external coding-agent harnesses and Locaily's development control plane.",
+  "work_id": "benchmark-lab-m3-interactive-local-model-lab-20260803",
+  "objective_id": "benchmark-lab-m3-interactive-local-model-lab",
+  "status": "complete",
+  "closed_at": "2026-08-03T03:30:00.000Z",
+  "original_goal": "Provide an interactive local model lab that discovers available Ollama models, explicitly controls loading, runs cataloged benchmarks, and presents durable credible results through the Locaily frontend and backend.",
   "completed": [
-    "Implemented the read-only harness-neutral snapshot contract, Codex/OpenCode fixture adapters, explicit evidence and Locaily links, harness-status CLI, and GET /harness/status; focused tests pass.",
-    "Full offline repository suite passed after DEV-HARNESS-01 implementation; milestone remains active pending intentional commit boundary and pre-delivery lifecycle validation.",
-    "Added checked-in canonical valid/invalid harness schema fixtures and wired test:harness into test:full; final focused and full offline suites pass.",
-    "Acceptance criterion: Codex and OpenCode fixtures normalize into one strict canonical snapshot shape.",
-    "Acceptance criterion: Workers, worktrees, objectives, handoffs, checks, and state are explicit, deterministic, and provenance-linked.",
-    "Acceptance criterion: HUD context pressure, tool activity, risk, cost, and sync state are explicit with unknown/unsupported evidence preserved.",
-    "Acceptance criterion: Locaily lifecycle, session, closeout, validation, and reviewed-memory links are read-only and local-first.",
-    "Acceptance criterion: No hooks, transcript capture, mutating harness control, cloud fallback, playbook promotion, AgentShield, or NearbyNode routing is added."
+    "Created branch codex/benchmark-lab-m3-interactive-local-model-lab after M2 reached ready-for-delivery.",
+    "Added registered Ollama model inventory with separate runtime, installed, loaded, loadable, manifest, exact identity, and qualification states.",
+    "Added explicit bounded per-model load and unload controls without automatic bulk loading or downloads.",
+    "Added an allowlisted summary-safe suite catalog and exact-provenance preflight for quick and qualification modes.",
+    "Added an isolated Benchmark Lab worker with versioned summary-safe JSONL events; companion code does not import benchmark-lab/engine.",
+    "Added durable summary-safe run storage and start, list, detail, live-event, cancellation, duplicate, and server-restart recovery APIs.",
+    "Added unified shell inventory, launcher, live progress, M2 result/provenance/gate display, history, and refresh recovery.",
+    "Added diagnostic model and benchmark status to the legacy console while keeping the unified shell as the primary workflow.",
+    "Added M3 schemas and automated fixture/integration/recovery/privacy/frontend tests.",
+    "Completed a real browser benchmark with llama3.2:latest and exact digest provenance; verified durable refresh recovery.",
+    "Fixed cold-model load timeout handling and responsive desktop layout clipping found during live browser acceptance.",
+    "Hardened development lifecycle tests to snapshot and restore real control-plane state.",
+    "Hardened deterministic milestone review so untracked source files are included in secret and scope checks.",
+    "Kept raw prompts/responses and local run artifacts out of default APIs and Git; no evidence was promoted and no qualification or routing changed."
   ],
-  "remaining": [
-    "Establish an intentional commit boundary before delivery.",
-    "Run the pre-delivery lifecycle validation against the committed implementation and update milestone acceptance evidence.",
-    "Close the active development session only when the implementation slice is ready for delivery review."
-  ],
-  "next_required_action": "Continue working on 'dev-harness-01-agent-operations-contract'",
+  "remaining": [],
+  "next_required_action": "Follow the canonical project state. No follow-on Benchmark Lab milestone is approved.",
   "blockers": [],
-  "safe_to_start_unrelated_work": false,
-  "working_branch": null,
-  "last_commit": null,
+  "safe_to_start_unrelated_work": true,
+  "working_branch": "codex/benchmark-lab-m3-interactive-local-model-lab",
   "validation": {
-    "passed": [],
+    "passed": [
+      "npm.cmd run benchmark:m3:test - 33 assertions passed across contracts, inventory, exact provenance, isolated execution, durable runs, malformed/crash/timeout paths, progress, cancellation, recovery, privacy, and offline behavior.",
+      "npm.cmd run test:full - complete offline repository validation passed with M3 included in the canonical benchmark suite.",
+      "node scripts/test-unified-shell.cjs - 19/19 passed.",
+      "node scripts/test-development-begin-end.js - 35/35 passed with control-plane state preserved and untracked-file review coverage.",
+      "Live browser acceptance - run bench-20260803031401-57923dc6 completed 3/4 cases and recovered after refresh with exact llama3.2:latest digest provenance."
+    ],
     "failed": [],
     "not_run": []
   },
-  "recommended_next_agent": "worker",
-  "files_changed": []
+  "recommended_next_agent": "worker"
 }

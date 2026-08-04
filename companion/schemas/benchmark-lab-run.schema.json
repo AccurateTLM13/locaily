@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "locaily.companion.benchmark-lab-run.v1",
+  "title": "Durable interactive benchmark run",
+  "type": "object",
+  "required": ["schemaVersion", "runId", "model", "suiteId", "mode", "trialCount", "status", "phase", "progress", "events", "createdAt", "updatedAt"],
+  "properties": {
+    "schemaVersion": { "const": "benchmark.lab_run.v1" },
+    "runId": { "type": "string", "pattern": "^[A-Za-z0-9-]{8,100}$" },
+    "model": { "type": "object" },
+    "suiteId": { "type": "string" },
+    "mode": { "enum": ["quick", "qualification"] },
+    "trialCount": { "type": "integer", "minimum": 1, "maximum": 10 },
+    "status": { "enum": ["queued", "preflight", "loading", "running", "aggregating", "completed", "failed", "cancelled"] },
+    "phase": { "type": "string" },
+    "progress": { "type": "object" },
+    "events": { "type": "array" },
+    "result": { "type": ["object", "null"] },
+    "error": { "type": ["object", "null"] },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": true
+}

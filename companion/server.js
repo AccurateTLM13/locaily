@@ -26,6 +26,12 @@ const { createModelQualificationLoader } = require("./core/model-qualification-l
 const { createPermissionManager } = require("./core/permissions");
 const { runToolWithValidation } = require("./core/result-validator");
 const { createProviderRouter } = require("./providers/router");
+const { createOllamaRuntime } = require("./runtime/ollama");
+const { createModelInventory } = require("./benchmark/model-inventory");
+const { createSuiteCatalog } = require("./benchmark/suite-catalog");
+const { createBenchmarkRunStore } = require("./benchmark/run-store");
+const { createWorkerClient } = require("./benchmark/worker-client");
+const { createBenchmarkController } = require("./benchmark/controller");
 const { createToolRegistry } = require("./tools/registry");
 const { listTracks, runTrack, createJob, updateJob } = require("./crew");
 const { loadTrack } = require("./crew/decomposer");
@@ -332,6 +338,22 @@ const consoleController = createConsoleController({
   onSetupSaved: refreshVaultAdapterForConsoleSetup
 });
 
+const benchmarkRunStore = createBenchmarkRunStore({ runDir: process.env.BENCHMARK_RUN_DIR || undefined });
+const benchmarkRuntime = createOllamaRuntime({ baseUrl: config.runtime.baseUrl, model: config.runtime.model });
+const benchmarkSuiteCatalog = createSuiteCatalog();
+const benchmarkModelInventory = createModelInventory({
+  runtime: benchmarkRuntime,
+  qualificationLoader: modelQualificationLoader,
+  runStore: benchmarkRunStore
+});
+const benchmarkController = createBenchmarkController({
+  inventory: benchmarkModelInventory,
+  catalog: benchmarkSuiteCatalog,
+  runStore: benchmarkRunStore,
+  workerClient: createWorkerClient(),
+  runtimeBaseUrl: config.runtime.baseUrl
+});
+
 const durableJobStore = createDurableJobStore({
   dataDir: join(__dirname, "..", "data")
 });
@@ -564,6 +586,10 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && url.pathname === "/benchmark/status") {
       return sendJson(response, 200, buildBenchmarkStatusResponse());
+    }
+
+    if (url.pathname.startsWith("/benchmark/") && await handleInteractiveBenchmarkRequest(request, response, url)) {
+      return;
     }
 
     if (request.method === "GET" && url.pathname === "/qualifications/status") {
@@ -2779,6 +2805,11 @@ server.listen(config.server.port, config.server.host, async () => {
   } catch (initError) {
     console.warn("[Enforcement Policy] Initialization warning:", initError.message);
   }
+  try {
+    await benchmarkController.initialize();
+  } catch (initError) {
+    console.warn("[Benchmark Lab] Initialization warning:", initError.message);
+  }
   await printStartupStatus();
   backgroundWorker.start();
   if (process.env.DEVELOPMENT_MEMORY_CAPTURE !== "0") {
@@ -3055,8 +3086,169 @@ function buildBenchmarkStatusResponse() {
   return {
     ok: true,
     benchmark_lab: modelQualificationLoader.getStatus(),
-    qualifications: qualificationResolver.getAllSummary()
+    qualifications: qualificationResolver.getAllSummary(),
+    interactive: {
+      enabled: true,
+      activeRunId: benchmarkController.getActiveRunId(),
+      modelsEndpoint: "/benchmark/models",
+      suitesEndpoint: "/benchmark/suites",
+      runsEndpoint: "/benchmark/runs"
+    }
   };
+}
+
+async function handleInteractiveBenchmarkRequest(request, response, url) {
+  try {
+    if (request.method === "GET" && url.pathname === "/benchmark/models") {
+      try {
+        const models = await benchmarkController.listModels();
+        sendJson(response, 200, { ok: true, runtime: { provider: "ollama", state: "online" }, models });
+      } catch (error) {
+        if (isOllamaUnavailable(error)) {
+          sendJson(response, 200, {
+            ok: true,
+            runtime: { provider: "ollama", state: "offline", error: publicBenchmarkError(error) },
+            models: []
+          });
+        } else {
+          throw error;
+        }
+      }
+      return true;
+    }
+
+    const modelActionMatch = url.pathname.match(/^\/benchmark\/models\/(.+)\/(load|unload)$/);
+    if (request.method === "POST" && modelActionMatch) {
+      const modelId = decodeURIComponent(modelActionMatch[1]);
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) throw benchmarkApiError("BAD_JSON", "Request body could not be parsed as JSON.", 400);
+      const model = modelActionMatch[2] === "load"
+        ? await benchmarkController.loadModel(modelId, bodyResult.body.keepAlive)
+        : await benchmarkController.unloadModel(modelId);
+      sendJson(response, 200, { ok: true, model });
+      return true;
+    }
+
+    const modelMatch = url.pathname.match(/^\/benchmark\/models\/(.+)$/);
+    if (request.method === "GET" && modelMatch) {
+      const model = await benchmarkController.getModel(decodeURIComponent(modelMatch[1]));
+      sendJson(response, 200, { ok: true, model });
+      return true;
+    }
+
+    if (request.method === "GET" && url.pathname === "/benchmark/suites") {
+      const suites = await benchmarkController.listSuites();
+      sendJson(response, 200, { ok: true, suites });
+      return true;
+    }
+
+    if (request.method === "POST" && url.pathname === "/benchmark/preflight") {
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) throw benchmarkApiError("BAD_JSON", "Request body could not be parsed as JSON.", 400);
+      sendJson(response, 200, await benchmarkController.preflight(bodyResult.body));
+      return true;
+    }
+
+    if (request.method === "POST" && url.pathname === "/benchmark/runs") {
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) throw benchmarkApiError("BAD_JSON", "Request body could not be parsed as JSON.", 400);
+      const result = await benchmarkController.startRun(bodyResult.body);
+      sendJson(response, result.duplicate ? 200 : 202, { ok: true, duplicate: result.duplicate, run: result.run, runId: result.run.runId });
+      return true;
+    }
+
+    if (request.method === "GET" && url.pathname === "/benchmark/runs") {
+      const result = await benchmarkController.listRuns(url.searchParams.get("limit"));
+      sendJson(response, 200, result);
+      return true;
+    }
+
+    const cancelMatch = url.pathname.match(/^\/benchmark\/runs\/([^/]+)\/cancel$/);
+    if (request.method === "POST" && cancelMatch) {
+      const run = await benchmarkController.cancelRun(decodeURIComponent(cancelMatch[1]));
+      sendJson(response, 200, { ok: true, run });
+      return true;
+    }
+
+    const eventsMatch = url.pathname.match(/^\/benchmark\/runs\/([^/]+)\/events$/);
+    if (request.method === "GET" && eventsMatch) {
+      const runId = decodeURIComponent(eventsMatch[1]);
+      const afterSequence = Number(url.searchParams.get("after") || request.headers["last-event-id"] || 0);
+      if (url.searchParams.get("format") === "json" || String(request.headers.accept || "").includes("application/json")) {
+        const events = await benchmarkController.listEvents(runId, afterSequence);
+        sendJson(response, 200, { ok: true, events });
+      } else {
+        await sendBenchmarkEventStream(request, response, runId, afterSequence);
+      }
+      return true;
+    }
+
+    const runMatch = url.pathname.match(/^\/benchmark\/runs\/([^/]+)$/);
+    if (request.method === "GET" && runMatch) {
+      const run = await benchmarkController.getRun(decodeURIComponent(runMatch[1]));
+      sendJson(response, 200, { ok: true, run });
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    sendJson(response, error.statusCode || (isOllamaUnavailable(error) ? 503 : 500), {
+      ok: false,
+      ...publicBenchmarkError(error),
+      nextStep: benchmarkNextStep(error.code)
+    });
+    return true;
+  }
+}
+
+async function sendBenchmarkEventStream(request, response, runId, afterSequence) {
+  const run = await benchmarkController.getRun(runId);
+  response.writeHead(200, {
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-cache, no-transform",
+    "Connection": "keep-alive",
+    "X-Accel-Buffering": "no"
+  });
+  const writeEvent = (event) => {
+    response.write(`id: ${event.sequence}\n`);
+    response.write(`event: ${event.type}\n`);
+    response.write(`data: ${JSON.stringify(event)}\n\n`);
+  };
+  for (const event of run.events.filter((item) => item.sequence > afterSequence)) writeEvent(event);
+  if (["completed", "failed", "cancelled"].includes(run.status)) {
+    response.end();
+    return;
+  }
+  const unsubscribe = benchmarkController.subscribe(runId, writeEvent);
+  const heartbeat = setInterval(() => response.write(": keep-alive\n\n"), 15000);
+  request.on("close", () => {
+    clearInterval(heartbeat);
+    unsubscribe();
+  });
+}
+
+function isOllamaUnavailable(error) {
+  return error && ["OLLAMA_NOT_RUNNING", "OLLAMA_TIMEOUT", "OLLAMA_REQUEST_FAILED"].includes(error.code);
+}
+
+function publicBenchmarkError(error) {
+  return { code: error.code || "BENCHMARK_API_FAILED", message: error.message || "Benchmark request failed." };
+}
+
+function benchmarkApiError(code, message, statusCode) {
+  const error = new Error(message);
+  error.code = code;
+  error.statusCode = statusCode;
+  return error;
+}
+
+function benchmarkNextStep(code) {
+  if (["OLLAMA_NOT_RUNNING", "OLLAMA_TIMEOUT", "OLLAMA_REQUEST_FAILED"].includes(code)) return "Start local Ollama and refresh the model inventory.";
+  if (code === "MODEL_DIGEST_MISMATCH") return "Install the exact manifest-pinned model digest or update the manifest through review before qualification.";
+  if (code === "MODEL_MANIFEST_REQUIRED" || code === "MODEL_DIGEST_REQUIRED") return "Select a registered, digest-pinned local model.";
+  if (code === "MODEL_NOT_LOADED") return "Use the explicit Load action for this model, then run preflight again.";
+  if (code === "BENCHMARK_CAPACITY_REACHED") return "Wait for the active local benchmark to finish or cancel it.";
+  return "Refresh Benchmark Lab state, review the structured error, and try again.";
 }
 
 async function buildAuditResponse(searchParams) {

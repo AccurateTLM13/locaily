@@ -4,21 +4,25 @@ const { MockRuntimeAdapter } = require("../adapters/mock-runtime");
 const { OllamaRuntimeAdapter } = require("../adapters/ollama-runtime");
 const { readJson, writeJson, toPosixPath } = require("../fs-utils");
 const { validateSchema } = require("../schema-validator");
+const { loadSemanticScorer, evaluateSemanticCase } = require("../semantic-scorer");
+const { buildRunProvenance } = require("../provenance");
 const { buildModelRecord } = require("../../../companion/evidence/track-run-record-builder");
 
 const LAB_ROOT = path.resolve(__dirname, "..", "..");
 const SUITE_SCHEMA_PATH = path.join(LAB_ROOT, "schemas", "benchmark-suite.schema.json");
 const CASE_SCHEMA_PATH = path.join(LAB_ROOT, "schemas", "benchmark-case.schema.json");
 const SUMMARY_SCHEMA_PATH = path.join(LAB_ROOT, "schemas", "benchmark-run-summary.schema.json");
+const PROVENANCE_SCHEMA_PATH = path.join(LAB_ROOT, "schemas", "benchmark-provenance.schema.json");
 const MODEL_MANIFEST_SCHEMA_PATH = path.join(LAB_ROOT, "schemas", "model-manifest.schema.json");
 
-async function runSuite({ suitePath, modelManifest = null, runId = createRunId(), now = () => new Date() }) {
+async function runSuite({ suitePath, modelManifest = null, runtimeBaseUrl = null, runId = createRunId(), now = () => new Date(), onCaseComplete = null }) {
   const suiteFile = path.resolve(suitePath);
   const suiteDir = path.dirname(suiteFile);
   const startedAt = now().toISOString();
   const suiteSchema = await readJson(SUITE_SCHEMA_PATH);
   const caseSchema = await readJson(CASE_SCHEMA_PATH);
   const summarySchema = await readJson(SUMMARY_SCHEMA_PATH);
+  const provenanceSchema = await readJson(PROVENANCE_SCHEMA_PATH);
   const suite = await readJson(suiteFile);
 
   if (modelManifest) {
@@ -27,19 +31,42 @@ async function runSuite({ suitePath, modelManifest = null, runId = createRunId()
       modelManifest
     };
   }
+  if (runtimeBaseUrl && suite.runtime && suite.runtime.provider === "ollama") {
+    suite.runtime = { ...suite.runtime, baseUrl: runtimeBaseUrl };
+  }
 
   assertValid(validateSchema(suite, suiteSchema, "suite"), "Suite config is invalid.");
 
   const cases = await loadCases({ suite, suiteDir, caseSchema });
   const runtimeContext = await createRuntime({ suite, suiteDir });
+  const semanticScorer = loadSemanticScorer({ suite, suiteDir });
+  const provenance = buildRunProvenance({
+    suite,
+    cases,
+    modelManifest: runtimeContext.modelManifest,
+    runtimeContext,
+    semanticScorer
+  });
+  assertValid(validateSchema(provenance, provenanceSchema, "provenance"), "Run provenance is invalid.");
   const runtime = runtimeContext.runtime;
   const rawCaseResults = [];
   const summaryCaseResults = [];
 
-  for (const benchmarkCase of cases) {
-    const rawCaseResult = await executeCase({ suite, benchmarkCase, runtime });
+  for (let caseIndex = 0; caseIndex < cases.length; caseIndex += 1) {
+    const benchmarkCase = cases[caseIndex];
+    const rawCaseResult = await executeCase({ suite, benchmarkCase, runtime, semanticScorer });
     rawCaseResults.push(rawCaseResult);
     summaryCaseResults.push(toSummaryCase(rawCaseResult));
+    if (typeof onCaseComplete === "function") {
+      await onCaseComplete({
+        caseIndex: caseIndex + 1,
+        caseCount: cases.length,
+        caseId: rawCaseResult.caseId,
+        difficulty: rawCaseResult.difficulty,
+        verdict: rawCaseResult.verdict,
+        durationMs: rawCaseResult.durationMs
+      });
+    }
   }
 
   const completedAt = now().toISOString();
@@ -47,6 +74,8 @@ async function runSuite({ suitePath, modelManifest = null, runId = createRunId()
     runId,
     suite,
     runtimeContext,
+    semanticScorer,
+    provenance,
     startedAt,
     completedAt,
     caseResults: summaryCaseResults
@@ -65,6 +94,7 @@ async function runSuite({ suitePath, modelManifest = null, runId = createRunId()
     suitePath: toPosixPath(path.relative(LAB_ROOT, suiteFile)),
     suite,
     modelManifest: runtimeContext.modelManifest || null,
+    provenance,
     startedAt,
     completedAt,
     caseResults: rawCaseResults
@@ -140,7 +170,14 @@ async function createRuntime({ suite, suiteDir }) {
     const responses = await readJson(path.resolve(suiteDir, suite.runtime.responsesPath));
     return {
       runtime: new MockRuntimeAdapter({ responsesByCaseId: responses }),
-      modelManifest
+      modelManifest,
+      adapterId: "mock-runtime",
+      adapterVersion: "1.0.0",
+      runtimeVersion: "mock-runtime-v1",
+      runtimeVersionSource: "adapter-declared",
+      promptId: "mock-runtime-default",
+      promptVersion: "1.0.0",
+      runtimeModelDigest: null
     };
   }
 
@@ -149,20 +186,132 @@ async function createRuntime({ suite, suiteDir }) {
       throw new Error("Ollama suites require runtime.modelManifest.");
     }
 
-    return {
-      runtime: new OllamaRuntimeAdapter({
+    const runtime = new OllamaRuntimeAdapter({
         baseUrl: suite.runtime.baseUrl,
         model: modelManifest.runtimeModelName,
         outputSchema: suite.outputSchema,
         timeoutMs: suite.runtime.timeoutMs,
         temperature: suite.runtime.temperature,
         numPredict: suite.runtime.numPredict
-      }),
-      modelManifest
+    });
+    const runtimeMetadata = await captureOllamaRuntimeMetadata(runtime);
+    assertOllamaModelIdentity(modelManifest, runtimeMetadata);
+
+    return {
+      runtime,
+      modelManifest,
+      adapterId: "ollama-runtime",
+      adapterVersion: "1.0.0",
+      runtimeVersion: runtimeMetadata.version,
+      runtimeVersionSource: runtimeMetadata.versionSource,
+      promptId: "ollama-runtime-default",
+      promptVersion: "1.0.0",
+      runtimeModelDigest: runtimeMetadata.modelDigest
     };
   }
 
   throw new Error(`Unsupported runtime provider: ${suite.runtime.provider}`);
+}
+
+async function captureOllamaRuntimeMetadata(runtime) {
+  const [versionData, modelData, tagsData] = await Promise.all([
+    fetchOllamaJson({
+      runtime,
+      url: `${runtime.baseUrl}/api/version`,
+      method: "GET"
+    }),
+    fetchOllamaJson({
+      runtime,
+      url: `${runtime.baseUrl}/api/show`,
+      method: "POST",
+      body: { model: runtime.model }
+    }),
+    fetchOllamaJson({
+      runtime,
+      url: `${runtime.baseUrl}/api/tags`,
+      method: "GET"
+    })
+  ]);
+  const installedModel = findInstalledOllamaModel(tagsData, runtime.model);
+  const digest = installedModel && installedModel.digest
+    ? installedModel.digest
+    : modelData && (
+      modelData.digest ||
+      (modelData.details && modelData.details.digest) ||
+      (modelData.model_info && modelData.model_info.digest)
+    );
+
+  return {
+    version: versionData && typeof versionData.version === "string" && versionData.version
+      ? versionData.version
+      : "unreported",
+    versionSource: versionData && versionData.version ? "ollama-api" : "ollama-api-unavailable",
+    modelDigest: normalizeOllamaDigest(digest),
+    resolvedModelName: installedModel && (installedModel.name || installedModel.model) || null
+  };
+}
+
+function findInstalledOllamaModel(tagsData, requestedModelName) {
+  const models = tagsData && Array.isArray(tagsData.models) ? tagsData.models : [];
+  const requested = normalizeOllamaModelName(requestedModelName);
+  return models.find(model => [model.name, model.model]
+    .filter(Boolean)
+    .some(name => normalizeOllamaModelName(name) === requested)) || null;
+}
+
+function normalizeOllamaModelName(modelName) {
+  return String(modelName || "").replace(/:latest$/i, "");
+}
+
+function normalizeOllamaDigest(digest) {
+  if (!digest) return null;
+  const value = String(digest);
+  if (/^sha256:[a-f0-9]{64}$/i.test(value)) return value.toLowerCase();
+  if (/^[a-f0-9]{64}$/i.test(value)) return `sha256:${value.toLowerCase()}`;
+  return value;
+}
+
+function assertOllamaModelIdentity(modelManifest, runtimeMetadata) {
+  if (!modelManifest.digest) return;
+
+  const declaredDigest = normalizeOllamaDigest(modelManifest.digest);
+  if (!runtimeMetadata.modelDigest) {
+    const error = new Error(`Unable to verify the installed digest for model '${modelManifest.runtimeModelName}'.`);
+    error.code = "MODEL_IDENTITY_UNVERIFIED";
+    throw error;
+  }
+  if (declaredDigest !== runtimeMetadata.modelDigest) {
+    const error = new Error(`Installed model digest does not match manifest '${modelManifest.modelId}'.`);
+    error.code = "MODEL_DIGEST_MISMATCH";
+    error.expectedDigest = declaredDigest;
+    error.actualDigest = runtimeMetadata.modelDigest;
+    throw error;
+  }
+}
+
+async function fetchOllamaJson({ runtime, url, method, body = undefined }) {
+  if (typeof runtime.fetchImpl !== "function") {
+    return null;
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const response = await runtime.fetchImpl(url, {
+      method,
+      signal: controller.signal,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (!response.ok) {
+      return null;
+    }
+    return await response.json();
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function loadModelManifest(modelManifestId) {
@@ -176,7 +325,7 @@ async function loadModelManifest(modelManifestId) {
   return manifest;
 }
 
-async function executeCase({ suite, benchmarkCase, runtime }) {
+async function executeCase({ suite, benchmarkCase, runtime, semanticScorer = null }) {
   const generated = await runtime.generate({ caseId: benchmarkCase.caseId, input: benchmarkCase.input });
   const checks = [];
   let parsed = null;
@@ -229,10 +378,32 @@ async function executeCase({ suite, benchmarkCase, runtime }) {
     if (!labelMatches && verdict === "PASS") {
       verdict = "FAIL";
     }
+
+    if (semanticScorer) {
+      const evaluation = evaluateSemanticCase({
+        scorer: semanticScorer,
+        benchmarkCase,
+        output: parsed
+      });
+      checks.push({
+        validator: "semantic-scorer",
+        status: evaluation.pass ? "pass" : "fail",
+        code: evaluation.code,
+        scorerId: semanticScorer.config.id,
+        scorerVersion: semanticScorer.config.version,
+        errors: evaluation.errors,
+        details: evaluation.details
+      });
+
+      if (!evaluation.pass && verdict === "PASS") {
+        verdict = "FAIL";
+      }
+    }
   }
 
   return {
     caseId: benchmarkCase.caseId,
+    difficulty: benchmarkCase.difficulty,
     input: benchmarkCase.input,
     expected: benchmarkCase.expected,
     rawText: generated.rawText,
@@ -246,12 +417,13 @@ async function executeCase({ suite, benchmarkCase, runtime }) {
 function toSummaryCase(rawCaseResult) {
   return {
     caseId: rawCaseResult.caseId,
+    difficulty: rawCaseResult.difficulty,
     verdict: rawCaseResult.verdict,
     checks: rawCaseResult.checks
   };
 }
 
-function buildSummary({ runId, suite, runtimeContext, startedAt, completedAt, caseResults }) {
+function buildSummary({ runId, suite, runtimeContext, semanticScorer, provenance, startedAt, completedAt, caseResults }) {
   const modelManifest = runtimeContext.modelManifest;
   const runtime = {
     provider: suite.runtime.provider
@@ -262,12 +434,13 @@ function buildSummary({ runId, suite, runtimeContext, startedAt, completedAt, ca
     runtime.runtimeModelName = modelManifest.runtimeModelName;
   }
 
-  return {
+  const summary = {
     schemaVersion: "benchmark.run_summary.v1",
     runId,
     suiteId: suite.suiteId,
     trackId: suite.trackId,
     contractId: suite.contractId,
+    provenance,
     runtime,
     startedAt,
     completedAt,
@@ -279,6 +452,12 @@ function buildSummary({ runId, suite, runtimeContext, startedAt, completedAt, ca
     malformed: caseResults.filter((result) => result.verdict === "MALFORMED_OUTPUT").length,
     caseResults
   };
+
+  if (semanticScorer) {
+    summary.semanticScorer = semanticScorer.config;
+  }
+
+  return summary;
 }
 
 function assertValid(validation, message) {
@@ -298,5 +477,7 @@ function createRunId() {
 
 module.exports = {
   runSuite,
-  createRunId
+  createRunId,
+  captureOllamaRuntimeMetadata,
+  assertOllamaModelIdentity
 };

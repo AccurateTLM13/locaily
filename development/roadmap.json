@@ -1,7 +1,7 @@
 {
   "schema": "locaily.development.roadmap.v1",
   "project": "locaily",
-  "updatedAt": "2026-08-02T00:13:42.476Z",
+  "updatedAt": "2026-08-03T02:42:32.539Z",
   "areas": [
     {
       "id": "local-brain",
@@ -65,7 +65,10 @@
           "title": "Model Qualification",
           "description": "Qualification records, evidence, capability registry",
           "maturity": "operational",
-          "milestoneIds": []
+          "milestoneIds": [
+            "benchmark-lab-m2-reproducible-semantic-qualification",
+            "benchmark-lab-m3-interactive-local-model-lab"
+          ]
         }
       ]
     },
@@ -231,15 +234,6 @@
           "milestoneIds": [
             "dev-loop-01-canonical-queue-safe-runner"
           ]
-        },
-        {
-          "id": "harness-adapter-layer",
-          "title": "Harness-Neutral Agent Operations",
-          "description": "Normalize external coding-agent harnesses into durable session, status, handoff, and evidence records",
-          "maturity": "designed",
-          "milestoneIds": [
-            "dev-harness-01-agent-operations-contract"
-          ]
         }
       ]
     },
@@ -373,6 +367,10 @@
     "ctk-02-node-roles-capability-capsules": [
       "ctk-01-capability-trigger-kernel"
     ],
+    "benchmark-lab-m2-reproducible-semantic-qualification": [],
+    "benchmark-lab-m3-interactive-local-model-lab": [
+      "benchmark-lab-m2-reproducible-semantic-qualification"
+    ],
     "px8-audit-second-pass": [
       "px1-canonical-product-status",
       "px3-golden-path-run-inspector",
@@ -382,9 +380,6 @@
       "px5-tester-package",
       "px6-external-validation-program",
       "px7-organic-discovery-loop"
-    ],
-    "dev-harness-01-agent-operations-contract": [
-      "dev-loop-01-canonical-queue-safe-runner"
     ]
   }
 }

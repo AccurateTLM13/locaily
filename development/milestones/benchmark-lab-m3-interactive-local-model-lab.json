@@ -1,0 +1,214 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "benchmark-lab-m3-interactive-local-model-lab",
+  "title": "Benchmark Lab M3 — Interactive Local Model Lab",
+  "status": "ready-for-delivery",
+  "type": "feature",
+  "priority": "high",
+  "purpose": "Provide a local-first model inventory and durable interactive benchmark workflow from Ollama discovery through live frontend progress and reproducible M2 result presentation.",
+  "scope": {
+    "included": [
+      "benchmark-lab/",
+      "companion/benchmark/",
+      "companion/runtime/ollama.js",
+      "companion/server.js",
+      "companion/schemas/",
+      "companion/shell/",
+      "companion/console/",
+      "scripts/",
+      "development/",
+      "docs/",
+      "package.json",
+      "Ollama installed, loaded, capability, loadability, manifest, and qualification state normalization",
+      "Generated summary-safe suite catalog",
+      "Isolated Benchmark Lab worker process and versioned JSONL event protocol",
+      "Durable summary-safe benchmark run storage, start, status, history, events, and cancellation APIs",
+      "Unified shell benchmark inventory, launcher, live progress, results, and history",
+      "Legacy console diagnostics for model inventory and benchmark runs",
+      "Local fixture, integration, recovery, privacy, and live Ollama acceptance tests"
+    ],
+    "excluded": [
+      "Cloud or hosted inference providers",
+      "Automatic model downloads or arbitrary registry pulls",
+      "Automatic qualification, promotion, or global enforcement changes",
+      "Public leaderboard or universal model ranking",
+      "Relay-node benchmark execution",
+      "Arbitrary filesystem paths, shell commands, or user-authored benchmark code through the API",
+      "General workflow-job schema refactor",
+      "Modification or deletion of existing approved Benchmark Lab evidence"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "model-inventory",
+      "description": "The backend and unified frontend discover installed Ollama models and distinguish runtime, installation, load, loadability, manifest-registration, and qualification states without free-text model entry.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "npm.cmd run benchmark:m3:test",
+          "note": "Covers online/offline inventory, installed versus loaded state, manifest join, and exact digest."
+        },
+        {
+          "type": "document",
+          "reference": "companion/benchmark/model-inventory.js"
+        }
+      ]
+    },
+    {
+      "id": "exact-model-identity",
+      "description": "Model details include an exact runtime slug and digest, and qualification-mode preflight rejects missing, stale, or mismatched provenance.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "npm.cmd run benchmark:m3:test",
+          "note": "Covers exact digest match, missing model, and qualification-mode digest mismatch rejection."
+        }
+      ]
+    },
+    {
+      "id": "explicit-load-control",
+      "description": "Operators can explicitly load and unload a selected local model with bounded keep-alive behavior and structured failures; inventory never loads every model automatically.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "npm.cmd run benchmark:m3:test"
+        },
+        {
+          "type": "document",
+          "reference": "companion/runtime/ollama.js",
+          "note": "Load uses a separate 120-second cold-start timeout and caller-bounded keep-alive; unload is explicit."
+        }
+      ]
+    },
+    {
+      "id": "suite-catalog",
+      "description": "The companion exposes a validated summary-safe benchmark suite catalog without importing or crawling Benchmark Lab engine internals.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "npm.cmd run benchmark:m3:test"
+        },
+        {
+          "type": "document",
+          "reference": "companion/benchmark/suite-catalog.js"
+        }
+      ]
+    },
+    {
+      "id": "isolated-worker",
+      "description": "Benchmark execution runs through an isolated worker that owns Benchmark Lab engine imports and emits versioned summary-safe JSONL events; companion code does not import benchmark-lab/engine.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "npm.cmd run benchmark:m3:test",
+          "note": "Covers versioned envelopes, import boundary, malformed JSONL, crash reporting, and bounded timeout."
+        },
+        {
+          "type": "document",
+          "reference": "benchmark-lab/engine/interactive-worker.js"
+        }
+      ]
+    },
+    {
+      "id": "durable-run-api",
+      "description": "Validated APIs support benchmark start, list, detail, live events, cancellation, duplicate-submit protection, and restart-safe terminal history through a durable summary-safe run store.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "npm.cmd run benchmark:m3:test",
+          "note": "Covers duplicate submit, M2 result persistence, SSE/polling replay, cancellation, corrupt records, and restart recovery."
+        },
+        {
+          "type": "document",
+          "reference": "docs/01-architecture/api-contract.md"
+        }
+      ]
+    },
+    {
+      "id": "interactive-frontend",
+      "description": "The unified shell can select a registered model and suite, perform preflight, start quick or qualification runs, receive live progress with reconnect fallback, and recover state after refresh.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/test-unified-shell.cjs"
+        },
+        {
+          "type": "manual-verification",
+          "reference": "Browser acceptance run bench-20260803031401-57923dc6",
+          "note": "Completed run rendered in the unified shell and recovered after browser refresh."
+        }
+      ]
+    },
+    {
+      "id": "credible-results",
+      "description": "Completed results display M2 pass metrics, Wilson uncertainty, trial count, difficulty strata, critical failures, semantic failure codes, runtime metrics, provenance fingerprint, and qualification-gate reasons without automatic promotion.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "npm.cmd run benchmark:m3:test"
+        },
+        {
+          "type": "manual-verification",
+          "reference": "Browser acceptance run bench-20260803031401-57923dc6",
+          "note": "Displayed 3/4 pass, Wilson 0.300642-0.954413, three strata, zero critical failures, semantic failure code, exact provenance, and two below-threshold gate reasons."
+        }
+      ]
+    },
+    {
+      "id": "privacy-and-failure-safety",
+      "description": "Raw prompts and model responses remain outside default APIs/browser state, routes remain localhost-only, identifiers are allowlisted, concurrency is bounded, and offline, missing-model, timeout, worker-crash, malformed-event, cancellation, and restart paths are truthful and tested.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "npm.cmd run benchmark:m3:test",
+          "note": "33 assertions cover raw-data exclusion, allowlists, duplicate/concurrency behavior, offline and missing models, timeout, crash, malformed events, cancellation, corrupt history, and restart truthfulness."
+        },
+        {
+          "type": "test",
+          "reference": "npm.cmd run test:full"
+        }
+      ]
+    },
+    {
+      "id": "live-end-to-end-acceptance",
+      "description": "A real installed Ollama model completes an end-to-end benchmark from frontend selection through durable backend result, with exact slug/digest provenance and browser-visible refresh recovery verified.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "manual-verification",
+          "reference": "Browser acceptance run bench-20260803031401-57923dc6",
+          "note": "Real llama3.2:latest quick run completed with digest sha256:a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72 and recovered after refresh; result remains unpromoted screening evidence."
+        },
+        {
+          "type": "document",
+          "reference": "docs/07-progress/progress-log.md"
+        }
+      ]
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [
+    "benchmark-lab-m2-reproducible-semantic-qualification"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-08-03T02:40:56.868Z",
+  "startedAt": "2026-08-04T03:02:25.604Z",
+  "completedAt": "2026-08-04T03:05:47.533Z",
+  "mergedAt": null,
+  "preparedCommit": "a1a7d343425ad16d592edd0c47d7f5dd054d4f75",
+  "preparedBranch": "codex/benchmark-lab-m3-interactive-local-model-lab",
+  "preparedAt": "2026-08-04T03:03:26.790Z",
+  "latestValidationId": "validation-20260804T030446-0b281076",
+  "completionBranch": "codex/benchmark-lab-m3-interactive-local-model-lab",
+  "completionHead": "26eba1eb422e9993e45cd22060fb2c46b4e5e914"
+}

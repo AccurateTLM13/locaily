@@ -165,6 +165,17 @@ GET  /memory/status
 POST /memory/context-pack
 POST /memory/writeback/propose
 GET  /benchmark/status
+GET  /benchmark/models
+GET  /benchmark/models/:id
+POST /benchmark/models/:id/load
+POST /benchmark/models/:id/unload
+GET  /benchmark/suites
+POST /benchmark/preflight
+POST /benchmark/runs
+GET  /benchmark/runs
+GET  /benchmark/runs/:id
+GET  /benchmark/runs/:id/events
+POST /benchmark/runs/:id/cancel
 GET  /console/status
 POST /console/run-validation
 POST /console/setup/pagespeed-key

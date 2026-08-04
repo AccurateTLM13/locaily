@@ -1,0 +1,8 @@
+{
+  "semantic-fixture-001": {
+    "output": { "label": "extract", "answer": "correct" }
+  },
+  "semantic-fixture-002": {
+    "output": { "label": "extract", "answer": "wrong" }
+  }
+}

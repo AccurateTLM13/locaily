@@ -5,6 +5,7 @@ const { writeChecksumRecord } = require("./checksums");
 
 const LAB_ROOT = path.resolve(__dirname, "..");
 const SUMMARY_SCHEMA_PATH = path.join(LAB_ROOT, "schemas", "benchmark-run-summary.schema.json");
+const AGGREGATION_SCHEMA_PATH = path.join(LAB_ROOT, "schemas", "benchmark-aggregation.schema.json");
 const REVIEW_SCHEMA_PATH = path.join(LAB_ROOT, "schemas", "benchmark-review.schema.json");
 const APPROVED_EVIDENCE_SCHEMA_PATH = path.join(LAB_ROOT, "schemas", "approved-evidence-summary.schema.json");
 const PROMOTED_EVIDENCE_SCHEMA_PATH = path.join(LAB_ROOT, "schemas", "promoted-evidence.schema.json");
@@ -30,7 +31,7 @@ async function reviewRun({ runId, now = () => new Date() }) {
   };
 }
 
-async function promoteRun({ runId, evidenceId, approvedBy, notes = [], now = () => new Date() }) {
+async function promoteRun({ runId, evidenceId, approvedBy, aggregationId = null, notes = [], now = () => new Date() }) {
   if (!evidenceId) {
     throw new Error("Promotion requires --evidence.");
   }
@@ -40,11 +41,30 @@ async function promoteRun({ runId, evidenceId, approvedBy, notes = [], now = () 
   }
 
   const summarySchema = await readJson(SUMMARY_SCHEMA_PATH);
+  const aggregationSchema = aggregationId
+    ? await readJson(AGGREGATION_SCHEMA_PATH)
+    : null;
   const approvedEvidenceSchema = await readJson(APPROVED_EVIDENCE_SCHEMA_PATH);
   const promotedEvidenceSchema = await readJson(PROMOTED_EVIDENCE_SCHEMA_PATH);
   const summary = await readJson(getDraftSummaryPath(runId));
 
   assertValid(validateSchema(summary, summarySchema, "summary"), "Draft summary is invalid.");
+
+  let aggregation = null;
+  if (aggregationId) {
+    aggregation = await readJson(path.join(LAB_ROOT, "reports", "drafts", "aggregations", `${aggregationId}.json`));
+    assertValid(validateSchema(aggregation, aggregationSchema, "aggregation"), "Aggregation is invalid.");
+    if (!aggregation.runIds.includes(runId)) {
+      throw new Error(`Aggregation ${aggregationId} does not include source run ${runId}.`);
+    }
+    if (
+      aggregation.suiteId !== summary.suiteId
+      || aggregation.trackId !== summary.trackId
+      || aggregation.contractId !== summary.contractId
+    ) {
+      throw new Error(`Aggregation ${aggregationId} does not match source run ${runId}.`);
+    }
+  }
 
   const approvedAt = now().toISOString();
   const promotedEvidence = {
@@ -59,6 +79,9 @@ async function promoteRun({ runId, evidenceId, approvedBy, notes = [], now = () 
     summary,
     notes
   };
+  if (aggregation) {
+    promotedEvidence.aggregation = aggregation;
+  }
 
   assertValid(validateSchema(promotedEvidence, promotedEvidenceSchema, "promotedEvidence"), "Promoted evidence is invalid.");
 

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "benchmark.provenance.v1",
+  "model": {
+    "modelId": "mock-intent-classifier",
+    "provider": "mock",
+    "runtimeModelName": "mock-intent-classifier",
+    "manifestDigest": "sha256:manifest",
+    "declaredModelDigest": null,
+    "runtimeModelDigest": null
+  },
+  "runtime": {
+    "provider": "mock",
+    "adapterId": "mock-runtime",
+    "adapterVersion": "1.0.0",
+    "version": "mock-runtime-v1",
+    "versionSource": "adapter-declared"
+  },
+  "suite": {
+    "suiteId": "fixture-suite",
+    "trackId": "intent-classification",
+    "contractId": "intent-classifier-worker-v1",
+    "mode": "quick-screen",
+    "configDigest": "sha256:suite"
+  },
+  "prompt": {
+    "id": "mock-runtime-default",
+    "version": "1.0.0",
+    "declared": false,
+    "inputDigest": "sha256:inputs"
+  },
+  "scorer": null,
+  "cases": {
+    "caseCount": 1,
+    "caseSetDigest": "sha256:cases",
+    "caseIdsDigest": "sha256:ids",
+    "difficultyStrata": ["easy"],
+    "difficultyStrataCount": 1,
+    "difficultyStrataDigest": "sha256:strata"
+  },
+  "hardware": {
+    "profileId": null,
+    "captured": false,
+    "source": "not-captured"
+  }
+}

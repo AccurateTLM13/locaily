@@ -1,0 +1,14 @@
+[
+  {
+    "caseId": "a11y-004",
+    "trackId": "website_audit.accessibility_deep",
+    "difficulty": "adversarial",
+    "responseMode": "json",
+    "input": {
+      "text": "Analyze the Lighthouse accessibility audit results below.\nFor each failing audit, identify the relevant WCAG success criterion and describe the issue in plain language.\nUse only supplied Lighthouse audit IDs and titles. Do not invent audits not present in the input.\nSeverity: critical (blocks access), high (significant barrier), medium (moderate barrier), low (minor issue).\nReturn JSON only matching the schema.\n\nPage URL: https://example.com/account/settings\nAudit count: 12\nFailing audits: 5\nExtracted audits: [{\"id\":\"aria-allowed-attr\",\"title\":\"Elements must only use allowed ARIA attributes\",\"severity\":\"high\"},{\"id\":\"button-name\",\"title\":\"Buttons must have discernible text\",\"severity\":\"high\"},{\"id\":\"keyboard-access\",\"title\":\"Interactive elements must be keyboard accessible\",\"severity\":\"critical\"},{\"id\":\"focus-traps\",\"title\":\"User focus must not be trapped\",\"severity\":\"high\"},{\"id\":\"target-size\",\"title\":\"Touch targets must be large enough\",\"severity\":\"medium\"}]\n\nOutput must include: \"label\": \"extract\""
+    },
+    "expected": {
+      "label": "extract"
+    }
+  }
+]

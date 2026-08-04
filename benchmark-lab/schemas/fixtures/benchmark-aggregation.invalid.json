@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "benchmark.aggregation.v1",
+  "aggregationId": "aggregation-fixture",
+  "createdAt": "2026-08-02T00:00:00.000Z",
+  "runIds": ["run-a"],
+  "runCount": 1,
+  "independentRunCount": 1,
+  "suiteId": "fixture-suite",
+  "trackId": "fixture-track",
+  "contractId": "fixture-contract",
+  "provenance": {},
+  "metrics": {
+    "trialCount": 1,
+    "scoredTrialCount": 1,
+    "passed": 1,
+    "failed": 0,
+    "partial": 0,
+    "errors": 0,
+    "timeouts": 0,
+    "malformed": 0,
+    "criticalFailureCount": 0,
+    "passRate": 1,
+    "scoredPassRate": 1,
+    "uncertainty": { "method": "wilson", "confidence": 0.95, "lower": 1, "upper": 1 },
+    "scoredUncertainty": { "method": "wilson", "confidence": 0.95, "lower": 1, "upper": 1 }
+  },
+  "difficultyStrata": ["easy"],
+  "difficultyStrataCount": 1,
+  "caseResults": [],
+  "qualificationGate": {
+    "eligible": false,
+    "reasons": ["fixture"],
+    "policy": { "minScoredTrials": 20 }
+  }
+}

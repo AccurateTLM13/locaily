@@ -45,6 +45,9 @@ const elements = {
   historyList: document.getElementById("historyList")
 };
 
+const refreshBenchmarkDiagnosticsButton = document.getElementById("refreshBenchmarkDiagnosticsButton");
+if (refreshBenchmarkDiagnosticsButton) refreshBenchmarkDiagnosticsButton.addEventListener("click", loadBenchmarkDiagnostics);
+
 elements.refreshStatusButton.addEventListener("click", loadStatus);
 elements.refreshRunsButton.addEventListener("click", loadRuns);
 elements.runForm.addEventListener("submit", startRun);
@@ -75,6 +78,7 @@ if (elements.modelInput) {
 
 loadStatus();
 loadRuns();
+loadBenchmarkDiagnostics();
 if (elements.modelField) {
   elements.modelField.hidden = true;
 }
@@ -972,4 +976,36 @@ function clearPoll() {
 
 function uniqueStrings(values) {
   return Array.from(new Set(values.filter((value) => typeof value === "string" && value.trim())));
+}
+
+async function loadBenchmarkDiagnostics() {
+  const target = document.getElementById("benchmarkDiagnostics");
+  if (!target) return;
+  try {
+    const [modelsResponse, runsResponse] = await Promise.all([
+      fetchJson("/benchmark/models"),
+      fetchJson("/benchmark/runs?limit=5")
+    ]);
+    const models = modelsResponse.models || [];
+    const runs = runsResponse.runs || [];
+    target.innerHTML = `
+      <dl class="result-fields">
+        <div><dt>Ollama</dt><dd>${escapeDiagnostic(modelsResponse.runtime?.state || "unknown")}</dd></div>
+        <div><dt>Installed</dt><dd>${models.length}</dd></div>
+        <div><dt>Loaded</dt><dd>${models.filter((model) => model.loadState === "loaded").length}</dd></div>
+        <div><dt>Registered</dt><dd>${models.filter((model) => model.manifestState === "registered").length}</dd></div>
+      </dl>
+      <div class="benchmark-diagnostics__runs">${runs.length ? runs.map((run) => `<div><code>${escapeDiagnostic(run.runId)}</code><span>${escapeDiagnostic(run.status)} · ${escapeDiagnostic(run.modelName || "unknown model")}</span></div>`).join("") : "No interactive runs."}</div>`;
+  } catch (error) {
+    target.textContent = `Benchmark diagnostics unavailable: ${error.message}`;
+  }
+}
+
+function escapeDiagnostic(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

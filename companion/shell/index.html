@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/shell/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Archivo:wght@700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>⚡</text></svg>">
   </head>
   <body>
@@ -20,6 +20,7 @@
           </div>
           <div class="topbar-divider"></div>
           <span class="topbar-subtitle">Local operator workspace</span>
+          <span class="topbar-readout">UNIT / LOCAL-01 <span>REV 03</span></span>
           <nav class="topbar-tabs">
             <a href="#workbench" class="topbar-tab topbar-tab--active">Workbench</a>
           </nav>
@@ -41,13 +42,14 @@
             <div class="sidebar-caption">WORKSPACE</div>
             <div class="workspace-name">Locaily local</div>
             <div class="workspace-privacy">Private by default</div>
+            <div class="workspace-code">UNIT / LOCAL-01<br>MODE / LOCAL-FIRST</div>
           </div>
 
           <nav class="sidebar-nav" id="shellNav">
             <ul class="sidebar-menu">
               <li>
                 <a href="#workbench" class="sidebar-link sidebar-link--active" data-section="workbench">
-                  <span class="sidebar-icon">⚡</span>
+                  <span class="sidebar-icon">//</span>
                   <span class="sidebar-label">Workbench</span>
                 </a>
               </li>
@@ -59,25 +61,25 @@
               </li>
               <li>
                 <a href="#activity" class="sidebar-link" data-section="activity">
-                  <span class="sidebar-icon">↗</span>
+                  <span class="sidebar-icon">&gt;&gt;</span>
                   <span class="sidebar-label">Activity</span>
                 </a>
               </li>
               <li>
                 <a href="#review" class="sidebar-link" data-section="review">
-                  <span class="sidebar-icon">✓</span>
+                  <span class="sidebar-icon">OK</span>
                   <span class="sidebar-label">Review</span>
                 </a>
               </li>
               <li>
                 <a href="#operations" class="sidebar-link" data-section="operations">
-                  <span class="sidebar-icon">⏰</span>
+                  <span class="sidebar-icon">::</span>
                   <span class="sidebar-label">Operations</span>
                 </a>
               </li>
               <li>
                 <a href="#system" class="sidebar-link" data-section="system">
-                  <span class="sidebar-icon">⚙</span>
+                  <span class="sidebar-icon">[]</span>
                   <span class="sidebar-label">System</span>
                 </a>
               </li>
@@ -86,8 +88,14 @@
             <div class="sidebar-section-title">BUILD</div>
             <ul class="sidebar-menu">
               <li>
+                <a href="#benchmarks" class="sidebar-link" data-section="benchmarks">
+                  <span class="sidebar-icon">B</span>
+                  <span class="sidebar-label">Benchmark Lab</span>
+                </a>
+              </li>
+              <li>
                 <a href="#workflows" class="sidebar-link" data-section="workflows">
-                  <span class="sidebar-icon">◇</span>
+                  <span class="sidebar-icon">W/</span>
                   <span class="sidebar-label">Workflows</span>
                 </a>
               </li>
@@ -97,13 +105,13 @@
             <ul class="sidebar-menu">
               <li>
                 <a href="#capabilities" class="sidebar-link" data-section="capabilities">
-                  <span class="sidebar-icon">◇</span>
+                  <span class="sidebar-icon">C/</span>
                   <span class="sidebar-label">Capabilities</span>
                 </a>
               </li>
               <li>
                 <a href="#runtime" class="sidebar-link" data-section="runtime">
-                  <span class="sidebar-icon">⚙</span>
+                  <span class="sidebar-icon">R/</span>
                   <span class="sidebar-label">Runtime</span>
                 </a>
               </li>

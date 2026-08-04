@@ -31,7 +31,7 @@ function readText(p) {
 }
 
 function run(cmd, args) {
-  const r = spawnSync(cmd, args, { cwd: PROJECT_ROOT, encoding: "utf8", maxBuffer: 1024 * 1024, shell: process.platform === "win32" });
+  const r = spawnSync(cmd, args, { cwd: PROJECT_ROOT, encoding: "utf8", maxBuffer: 1024 * 1024, shell: false });
   return { stdout: r.stdout || "", stderr: r.stderr || "", status: r.status || 0 };
 }
 

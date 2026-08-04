@@ -1,12 +1,12 @@
 # Active Build Slice
 
-**Updated:** 2026-08-02 (DEV-HARNESS-01 implementation)
+**Updated:** 2026-08-03 (Benchmark Lab M3 live acceptance complete)
 
 ## Current Slice
 
-**DEV-HARNESS-01 Harness-Neutral Agent Operations Contract is active.** The branch `agent/dev-harness-01-agent-operations-contract` now contains the strict canonical snapshot schema, Codex/OpenCode fixture adapters, explicit evidence/provenance semantics, read-only Locaily links, the `harness-status` CLI, and `GET /harness/status`. Focused adapter tests, development schema tests, contract tests, syntax checks, strict status checks, and the complete offline repository suite pass. Commit-boundary and pre-delivery validation remain outstanding.
+**Benchmark Lab M3 — Interactive Local Model Lab is implementation-complete with live acceptance** on `codex/benchmark-lab-m3-interactive-local-model-lab`. The localhost shell now discovers registered installed Ollama models, exposes explicit load/unload controls, launches only cataloged suites through an isolated worker, streams summary-safe progress, stores durable result history, and restores completed runs after refresh. Canonical lifecycle state in `development/project-state.json` determines delivery readiness.
 
-No implementation blocker is known for the current slice. DEV-HARNESS-01 remains active until its pre-delivery validation and lifecycle gates run. CTK-02 and DBVT SEO Audit integration remain outside this slice.
+The live browser run used exact `llama3.2:latest` digest provenance and completed 3/4 cases. It correctly remained below the M2 qualification gate because the sample had only four scored trials and one independent run. No approved evidence artifacts or qualification records were modified.
 
 ## Most Recently Completed Slice
 
@@ -28,7 +28,7 @@ Defined in [maintenance-objective-lifecycle-closeout.md](./maintenance-objective
 
 ## Next Slice
 
-Do not select or activate a next slice until DEV-HARNESS-01 is reviewed and its lifecycle gates complete.
+Complete the canonical M3 review, prepare, validate, and complete gates. Do not begin a follow-on Benchmark Lab milestone without an explicitly supplied objective.
 
 ### Deferred (requires specific conditions)
 
@@ -37,8 +37,9 @@ Do not select or activate a next slice until DEV-HARNESS-01 is reviewed and its 
 
 ## Stop Conditions
 
-- Do not claim hardware-proven until pilot runs on physical devices
 - Do not modify approved benchmark evidence
-- Embedding-based retrieval remains out of scope
-- Do not begin a new milestone without an explicitly supplied objective
-- Do not activate CTK-02 or implement DBVT SEO Audit integration during CTK-01 closeout
+- Do not claim broad model quality from the semantic scorer slice or from small samples
+- Do not add hosted judges, automatic model switching, or hardware-pilot execution in M2
+- Do not expose raw prompts/model responses through the M3 API or browser state
+- Do not auto-download, auto-promote, auto-qualify, or auto-route models from interactive runs
+- Do not begin another milestone without an explicitly supplied objective

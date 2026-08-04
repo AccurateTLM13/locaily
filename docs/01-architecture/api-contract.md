@@ -161,6 +161,33 @@ Success:
 
 `POST /memory/writeback/apply` is **not** implemented in v0.
 
+## Interactive Benchmark Lab
+
+These routes are localhost-only and summary-safe. Model and suite identifiers must resolve through the server-owned inventory/catalog; arbitrary paths, shell commands, model downloads, and user-authored benchmark code are rejected.
+
+```txt
+GET  /benchmark/status
+GET  /benchmark/models
+GET  /benchmark/models/:id
+POST /benchmark/models/:id/load
+POST /benchmark/models/:id/unload
+GET  /benchmark/suites
+POST /benchmark/preflight
+POST /benchmark/runs
+GET  /benchmark/runs
+GET  /benchmark/runs/:id
+GET  /benchmark/runs/:id/events
+POST /benchmark/runs/:id/cancel
+```
+
+`GET /benchmark/models` keeps runtime reachability, installation, active loading, loadability, manifest registration, exact slug/digest, and qualification state as separate fields. Load/unload is explicit and operates on one allowlisted model with a bounded keep-alive.
+
+`POST /benchmark/preflight` and `POST /benchmark/runs` accept a registered `modelId`, catalog `suiteId`, and `mode` (`quick` or `qualification`). Qualification mode requires exact current model provenance. Only one run may be active; duplicate requests return the existing run instead of spawning unbounded work.
+
+`GET /benchmark/runs/:id/events` serves SSE by default and JSON replay with `?format=json`. Events and durable records contain progress, aggregate metrics, failure codes, provenance, and gate reasons, but never raw prompts or model responses. Nonterminal runs recovered after a server restart become terminal failures with `SERVER_RESTART` rather than appearing to continue.
+
+Completed interactive runs remain local screening evidence. These routes do not promote evidence, create qualification records, change routing, or modify approved artifacts.
+
 ## Local Test Bench Console
 
 The console is a localhost-only operator UI for Lighthouse Handoff validation. It is not a SaaS dashboard and does not validate multi-model routing.

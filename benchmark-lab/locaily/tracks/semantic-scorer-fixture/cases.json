@@ -1,0 +1,18 @@
+[
+  {
+    "caseId": "semantic-fixture-001",
+    "trackId": "semantic-scorer-fixture",
+    "difficulty": "easy",
+    "responseMode": "json",
+    "input": { "text": "Return the correct semantic answer." },
+    "expected": { "label": "extract" }
+  },
+  {
+    "caseId": "semantic-fixture-002",
+    "trackId": "semantic-scorer-fixture",
+    "difficulty": "medium",
+    "responseMode": "json",
+    "input": { "text": "Return the schema-valid negative control." },
+    "expected": { "label": "extract" }
+  }
+]

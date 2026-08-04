@@ -1743,23 +1743,172 @@ Confirmed for CTK-01
 
 ---
 
-## 2026-08-02 - Harness-neutral agent operations boundary
+## 2026-08-02 - Benchmark Lab M2 semantic qualification boundary
 
 ### Decision
 
-Add a read-only, fixture-first adapter boundary that normalizes Codex and OpenCode evidence into one canonical Locaily agent-operations snapshot. The snapshot owns a stable shape for workers, worktrees, objectives, handoffs, checks, lifecycle state, HUD fields, evidence availability, provenance, and links to existing Locaily control-plane records.
+Benchmark Lab M2 will treat semantic scoring as a declared, versioned suite contract. Generic runs may use local scenario evaluators, and their identity/version must be present in run summaries. Schema validity remains a separate check; a schema-valid but semantically incorrect output is a failed benchmark case with an actionable semantic failure code.
 
 ### Why
 
-Locaily already records lifecycle, development sessions, validation, closeouts, reviewed-memory candidates, and operator status, but external coding-agent harnesses do not yet expose those concepts through one comparable boundary. A contract-first adapter proves the normalization and evidence semantics without requiring harness hooks, transcript capture, mutating control, or network access.
+The existing generic runner proved JSON parsing, output-schema validity, and expected-label checks, but did not invoke the track-specific semantic rubrics already present in several suites. This made promoted pass rates weaker than their track names implied. M2 must improve evidence credibility without rewriting or mutating prior approved artifacts.
 
 ### Status
 
-Experimental — DEV-HARNESS-01 active
+Confirmed for M2
 
 ### Notes
 
-- Fixture-derived values are explicitly marked as fixture evidence; live harness integration is not claimed.
-- Unsupported, unavailable, and redacted values remain explicit and are never inferred.
-- The first operator surface is `GET /harness/status` and `npm run harness:status`.
-- Hooks, transcript capture, mutating harness control, playbook promotion, AgentShield, NearbyNode routing, and cloud fallback remain excluded.
+- M2 qualification claims require stronger provenance and repeated-trial evidence than the first semantic-dispatch slice provides.
+- Hosted judges, automatic model switching, hardware-pilot execution, and public rankings remain outside this milestone.
+
+---
+
+## 2026-08-02 - Benchmark Lab M2 provenance and comparison boundary
+
+### Decision
+
+Benchmark Lab run summaries will carry stable, summary-safe provenance for model manifest identity, runtime adapter/version, suite contract, prompt declaration and input fingerprint, scorer, case set/difficulty strata, and hardware-profile capture state. Pairwise comparisons invalidate mismatches in evaluation conditions, but model identity is intentionally excluded from invalidation because model-to-model comparison is a primary use case.
+
+### Why
+
+Pass rates are not credible when the prompt, scorer, case set, runtime version, or hardware context changed between runs. Conversely, treating the model itself as a mismatch would make controlled model comparison impossible. Separating evaluation-condition fingerprints from subject-model identity gives the comparison tool the correct gate.
+
+### Status
+
+Confirmed for M2
+
+### Notes
+
+- `manifestDigest` fingerprints the declared model manifest; it is not a substitute for a runtime model-weight digest.
+- Missing runtime digest or hardware capture is recorded as provenance state and remains disqualifying for future qualification gates where required.
+
+---
+
+## 2026-08-02 - Benchmark Lab M2 repeated-trial qualification gate
+
+### Decision
+
+Repeated qualification evidence must be assembled by the Benchmark Lab aggregation command from independent, provenance-compatible run summaries. Aggregations report overall and per-case pass rates, Wilson 95% intervals, difficulty strata, and critical infrastructure failures. The default M2 gate requires at least 20 scored trials, 3 difficulty strata, 3 independent runs, zero critical failures, a declared semantic scorer and prompt, stable model identity, and a reported runtime version. Promoted evidence may attach an aggregation; `qualification:generate` rejects `qualified` status unless that aggregation is eligible.
+
+### Why
+
+A single deterministic run can demonstrate wiring but cannot establish repeatability or meaningful uncertainty. Separating aggregation from execution keeps raw outputs local, makes the sample policy inspectable, and preserves candidate/screening records when evidence is below the qualification threshold.
+
+### Status
+
+Confirmed for M2
+
+### Notes
+
+- Wilson intervals are descriptive uncertainty for pass-rate estimates, not a substitute for representative live-model evidence.
+- Model identity remains comparable across runs; evaluation-condition fingerprints must match.
+- Existing approved evidence artifacts remain unchanged.
+
+---
+
+## 2026-08-02 - Benchmark Lab M2 representative v2 execution path
+
+### Decision
+
+Use `accessibility-deep/suite-v2.json` as the first representative M2 requalification path. It preserves the existing three cases, adds a hard account-settings case, raises the prompt/contract/scorer identities to v2, and is executed through `benchmark:requalify` with five independent trials by default. The resulting aggregation remains draft-only until an operator reviews and promotes it.
+
+### Why
+
+The existing accessibility suite had only easy and medium strata, so it could not satisfy the default three-strata gate. A versioned additive suite makes the change auditable and avoids rewriting prior suite evidence or approved artifacts.
+
+### Status
+
+Confirmed for M2
+
+### Notes
+
+- The suite targets the declared local Ollama manifest and localhost runtime.
+- The runtime was initially unavailable; the resolved live run is recorded below.
+- No qualification claim is implied by the suite or its test fixture.
+
+---
+
+## 2026-08-02 - Benchmark Lab M2 exact live-model identity boundary
+
+### Decision
+
+Live Ollama qualification runs pin the model manifest to the exact installed runtime slug and SHA-256 digest. Runtime metadata resolves the authoritative digest from Ollama `/api/tags`; when a manifest declares a digest, execution fails closed if the runtime digest is missing or different. The representative v2 third stratum uses the existing canonical `adversarial` difficulty value.
+
+### Why
+
+Ollama `/api/show` does not reliably include the installed model digest, while `/api/tags` does. Recording a manifest fingerprint without verifying the local model weights would leave a provenance gap and allow evidence to be attributed to the wrong artifact.
+
+### Status
+
+Confirmed for M2
+
+### Notes
+
+- `llama3.2-local` is pinned to `llama3.2:latest` with digest `sha256:a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72` for the representative run.
+- The live aggregation remains draft-only. Evidence-gate eligibility is not promotion or qualification.
+- Existing approved evidence artifacts were not modified.
+
+---
+
+## 2026-08-03 - Benchmark Lab M3 interactive execution boundary
+
+### Decision
+
+The Local Brain companion owns model inventory, allowlisted suite discovery, durable summary-safe run state, and browser APIs, but benchmark execution occurs in a separate Node worker. Only the worker imports `benchmark-lab/engine/`; it receives one validated request over stdin and emits versioned JSONL progress/result events over stdout.
+
+### Why
+
+Interactive execution must not collapse the existing Benchmark Lab trust boundary into the long-running Local Brain process. Process isolation makes cancellation, timeout, malformed-event handling, worker crashes, and server restart recovery explicit while keeping engine internals out of the companion.
+
+### Status
+
+Confirmed for M3
+
+### Notes
+
+- The worker accepts only loopback runtime URLs, registered model manifests, and catalog suites.
+- One active run is permitted; duplicate submits return the existing run.
+- Raw prompts and model responses are never copied into default events, durable API records, or browser state.
+
+---
+
+## 2026-08-03 - Benchmark Lab M3 model state and operator-control boundary
+
+### Decision
+
+Model inventory reports runtime reachability, installation, active loaded state, loadability, manifest registration, exact slug/digest, and qualification independently. Loading and unloading are explicit per-model operations. Interactive completion never triggers download, promotion, qualification, swapping, enforcement, or routing changes.
+
+### Why
+
+An installed model is not necessarily loaded, a loaded model is not necessarily qualified, and a qualification record may be stale or refer to different weights. Keeping these dimensions separate prevents the UI from implying readiness or trust that the underlying evidence does not support.
+
+### Status
+
+Confirmed for M3
+
+### Notes
+
+- Qualification-mode preflight fails closed on absent, stale, or mismatched exact provenance.
+- Cold model loading has a separate bounded timeout because real Ollama acceptance exceeded the ordinary request timeout.
+- Completed runs remain local screening evidence until the existing human-gated evidence lifecycle is used.
+
+---
+
+## 2026-08-03 - Development lifecycle integration tests must preserve repository state
+
+### Decision
+
+Lifecycle integration tests snapshot and restore mutable `development/` control-plane state, including milestones, sessions, reviews, issues, briefs, project state, roadmap, and validation index, even when a test fails.
+
+### Why
+
+The begin/end test previously cleaned shared development directories and could erase the active repository lifecycle state. Test isolation is part of control-plane correctness; a passing test must not mutate the real milestone ledger.
+
+### Status
+
+Confirmed
+
+### Notes
+
+- Deterministic milestone review now combines the tracked diff with untracked files so new source is included in secret, scope, and coverage checks.

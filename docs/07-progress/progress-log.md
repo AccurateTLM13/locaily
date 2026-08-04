@@ -1263,3 +1263,77 @@ Second-repo operator acceptance, then physical multi-device pilot.
 ### Next
 
 Review CTK-01 on `codex/ctk-01-completion`. Do not activate CTK-02.
+
+---
+
+## 2026-08-02 - Benchmark Lab M2 repeated requalification path
+
+### Changed
+
+- Added `benchmark-lab/engine/requalification.js` and `npm.cmd run benchmark:requalify` to execute independent suite trials and persist a draft aggregation.
+- Added `benchmark-lab/locaily/tracks/accessibility-deep/suite-v2.json` with a hard case and `easy`, `medium`, and `hard` difficulty strata.
+- Added automated coverage for stable trial IDs, aggregation wiring, v2 suite schema, and the semantic scenario registry.
+
+### Evidence
+
+- `npm.cmd run benchmark:test` - passed, including repeated-run orchestration.
+- `npm.cmd run test:full` - passed previously on this branch before the v2 path additions; targeted benchmark tests pass after the additions.
+- Local Ollama probe: unavailable at `127.0.0.1:11434`; no live evidence was created.
+
+### Next
+
+Run the v2 suite with the requested local model, review the aggregation and gate, then complete M2 lifecycle validation before promotion or qualification.
+
+---
+
+## 2026-08-02 - Benchmark Lab M2 live requalification acceptance
+
+### Changed
+
+- Resolved the local Ollama blocker and added the missing `dev:block --clear` lifecycle path.
+- Pinned `llama3.2-local` to exact runtime slug `llama3.2:latest` and digest `sha256:a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72`.
+- Captured the authoritative installed digest from Ollama `/api/tags` and rejected declared/runtime digest mismatches before execution.
+- Aligned the v2 third difficulty stratum with the canonical `adversarial` vocabulary.
+- Generated five independent live accessibility-deep v2 runs and a draft aggregation without modifying approved evidence.
+
+### Evidence
+
+- Aggregation `m2-accessibility-v2-llama32-20260802`: 20 scored trials, 15 pass, 5 fail, 0 runtime errors/timeouts/malformed outputs, 0 critical failures.
+- Scored pass rate 0.75; Wilson 95% interval 0.531299-0.888138.
+- Three strata: easy, medium, adversarial; five repeatable failures are isolated to `a11y-003`.
+- Exact runtime provenance: Ollama 0.32.5 and matching declared/runtime model digest.
+- `npm.cmd run test:full` passed after the live provenance fixes.
+
+### Next
+
+Complete the official M2 prepare, validate, and complete gates. Keep the live aggregation draft-only unless an operator explicitly reviews and promotes it.
+
+---
+
+## 2026-08-03 - Benchmark Lab M3 interactive local model acceptance
+
+### Changed
+
+- Added an Ollama inventory that separates runtime, installed, loaded, loadable, manifest, exact identity, and qualification states, plus explicit bounded load/unload controls.
+- Added a validated summary-safe suite catalog and exact-provenance preflight for quick and qualification modes.
+- Added an isolated Benchmark Lab worker with versioned JSONL events; the companion does not import Benchmark Lab engine modules.
+- Added durable summary-safe run storage, start/list/detail/events/cancel APIs, SSE replay with polling fallback, duplicate protection, terminal restart recovery, and truthful failure codes.
+- Added the unified shell model lab with inventory, launcher, live case/trial progress, M2 metrics/provenance/gate reasons, run history, and refresh recovery. The legacy console remains diagnostic-only.
+- Hardened the lifecycle integration test so it snapshots/restores real control-plane state.
+- Hardened deterministic milestone review so secret/scope checks include untracked files instead of silently reviewing tracked diffs only.
+
+### Evidence
+
+- `npm.cmd run benchmark:m3:test` passed 33 assertions covering contracts, inventory, exact identity, worker isolation/protocol, durable runs, malformed/crash/timeout paths, progress, cancellation, recovery, privacy, and offline behavior.
+- `npm.cmd run test:full` passed with M3 included in the canonical Benchmark Lab suite.
+- `node scripts/test-unified-shell.cjs` passed 19/19 assertions.
+- `node scripts/test-development-begin-end.js` passed 35/35 assertions, including state restoration and untracked-file review coverage.
+- Real browser run `bench-20260803031401-57923dc6` completed against `llama3.2:latest`, digest `sha256:a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72`, using Accessibility Deep V2 quick mode.
+- Live result: 3/4 pass, 0.75 pass rate, Wilson 95% interval 0.300642-0.954413, three strata, zero critical failures, and semantic code `SEMANTIC_EXPECTATION_MISMATCH` for the failed case.
+- The browser recovered the completed run after refresh. Live acceptance also identified and fixed cold-load timeout handling and desktop-width layout clipping.
+- The qualification gate correctly remained ineligible because four trials and one run are below the M2 minimums. No evidence was promoted and no qualification changed.
+- Deterministic review found zero blocking errors. Its filename-based coverage heuristic reported warnings for files covered by the aggregate M3 and unified-shell suites.
+
+### Next
+
+Complete the M3 review, prepare, validate, and completion gates. Do not start a follow-on milestone without an explicitly supplied objective.

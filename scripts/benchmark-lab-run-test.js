@@ -1,6 +1,10 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
-const { runSuite } = require("../benchmark-lab/engine/runners/suite-runner");
+const {
+  runSuite,
+  captureOllamaRuntimeMetadata,
+  assertOllamaModelIdentity
+} = require("../benchmark-lab/engine/runners/suite-runner");
 const { reviewRun, promoteRun } = require("../benchmark-lab/engine/review-run");
 const { compareRuns } = require("../benchmark-lab/engine/compare-runs");
 const { runMatrix } = require("../benchmark-lab/engine/matrix-runner");
@@ -166,6 +170,7 @@ async function main() {
   assert(roleMatches.some((match) => match.status === "conditional"), "Expected loader to find conditional role match.");
 
   await testOllamaAdapter();
+  await testOllamaRuntimeMetadata();
 
   const comparison = await compareRuns({
     leftRunId: first.runId,
@@ -275,6 +280,49 @@ async function testOllamaAdapter() {
 
   assert(failed.ok === false, "Expected failed Ollama request to be captured as case failure.");
   assert(failed.errorCode === "RUNTIME_ERROR", "Expected failed Ollama request to be runtime error.");
+}
+
+async function testOllamaRuntimeMetadata() {
+  const digest = "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72";
+  const runtime = {
+    baseUrl: "http://127.0.0.1:11434",
+    model: "llama3.2:latest",
+    fetchImpl: async (url) => {
+      if (url.endsWith("/api/version")) {
+        return { ok: true, json: async () => ({ version: "0.11.4" }) };
+      }
+      if (url.endsWith("/api/tags")) {
+        return {
+          ok: true,
+          json: async () => ({ models: [{ name: "llama3.2:latest", digest }] })
+        };
+      }
+      return { ok: true, json: async () => ({ details: { family: "llama" } }) };
+    }
+  };
+
+  const metadata = await captureOllamaRuntimeMetadata(runtime);
+  assert(metadata.version === "0.11.4", "Expected Ollama runtime version metadata.");
+  assert(metadata.resolvedModelName === "llama3.2:latest", "Expected exact installed model name.");
+  assert(metadata.modelDigest === `sha256:${digest}`, "Expected normalized digest from Ollama tags.");
+
+  assertOllamaModelIdentity({
+    modelId: "llama3.2-local",
+    runtimeModelName: "llama3.2:latest",
+    digest: `sha256:${digest}`
+  }, metadata);
+
+  let mismatch = null;
+  try {
+    assertOllamaModelIdentity({
+      modelId: "llama3.2-local",
+      runtimeModelName: "llama3.2:latest",
+      digest: `sha256:${"0".repeat(64)}`
+    }, metadata);
+  } catch (error) {
+    mismatch = error;
+  }
+  assert(mismatch && mismatch.code === "MODEL_DIGEST_MISMATCH", "Expected digest mismatch to fail closed.");
 }
 
 function withoutRunId(summary) {

@@ -2,13 +2,13 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-08-02 (DEV-HARNESS-01 implementation)
+**Updated:** 2026-08-03 (Benchmark Lab M3 live acceptance complete)
 
 ## Read First
 
 1. [../00-start-here/current-state.md](../00-start-here/current-state.md)
 2. [active-build-slice.md](./active-build-slice.md)
-3. [../01-architecture/capability-trigger-kernel.md](../01-architecture/capability-trigger-kernel.md) *(active objective)*
+3. [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md) *(active objective)*
 4. [../01-architecture/development-memory-loop.md](../01-architecture/development-memory-loop.md) *(Development Memory Loop DM1–DM10 complete)*
 5. [../02-planning/development-memory-roadmap.md](../02-planning/development-memory-roadmap.md)
 6. [build-status.md](./build-status.md)
@@ -18,22 +18,14 @@ Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
 Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../08-agents/agent-context.md)
 
-## Current DEV-HARNESS-01 Handoff
+## Current Benchmark Lab M3 Handoff
 
-- DEV-HARNESS-01 is active on `agent/dev-harness-01-agent-operations-contract`.
-- Implemented: strict snapshot schema, Codex/OpenCode fixture adapters, explicit HUD/evidence/provenance semantics, read-only Locaily lifecycle/memory links, `npm run harness:status`, and `GET /harness/status`.
-- Verification: `npm.cmd run test:harness` (28/28), `node scripts/test-development-schemas.js` (29/29), `node scripts/contract-test.js`, syntax checks, `npm.cmd run dev:status -- --strict`, and `npm.cmd run test:full` pass.
-- Remaining: run the broader offline suite, update acceptance evidence through the lifecycle validator, and establish an intentional commit boundary before delivery.
-- Excluded: hooks, automatic transcript capture, mutating harness control, playbook promotion, AgentShield, NearbyNode routing, cloud fallback, and live harness integration claims.
-
-## Previous CTK-01 Handoff
-
-- CTK-01 is ready for delivery review.
-- The CTK acceptance suite passes 20/20, `npm.cmd run test:full` passes, and the `pre-delivery` profile passed as `validation-20260731T012502-3e424fff`.
-- The implementation is isolated on `codex/ctk-01-completion` so the unrelated dirty `main` worktree is not included.
-- No implementation blocker remains; the next action is review.
-- CTK-02 must remain planned and inactive.
-- DBVT SEO Audit integration is outside CTK-01 scope.
+- M2 is ready for delivery. M3 is implemented on `codex/benchmark-lab-m3-interactive-local-model-lab`; consult `development/project-state.json` for the canonical lifecycle state.
+- The unified shell discovers manifest-registered installed Ollama models and keeps installation, runtime reachability, loaded state, loadability, manifest status, and qualification state separate.
+- Operators explicitly load/unload models, choose only allowlisted catalog suites, run exact-provenance preflight, and launch quick or qualification runs. The companion spawns an isolated JSONL worker and never imports `benchmark-lab/engine/`.
+- Run summaries and events are durable and summary-safe. The API supports list/detail, SSE replay, polling fallback, cancellation, duplicate protection, and truthful server-restart recovery. Raw prompts and model responses are not exposed.
+- Real browser acceptance completed run `bench-20260803031401-57923dc6` against `llama3.2:latest` at digest `sha256:a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72`: 3/4 passed, Wilson 95% interval 0.300642-0.954413, three strata, zero critical failures. Refresh recovery was verified. This quick run is below qualification thresholds and was not promoted.
+- Preserve the local-only, explicit-control boundary. Do not add automatic downloads, model switching, promotion, qualification, or routing from interactive results.
 
 ## Important: Benchmark Lab Status
 

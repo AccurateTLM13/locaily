@@ -1,0 +1,146 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "benchmark-lab-m2-reproducible-semantic-qualification",
+  "title": "Benchmark Lab M2 — Reproducible Semantic Qualification",
+  "status": "ready-for-delivery",
+  "type": "feature",
+  "priority": "medium",
+  "purpose": "Make model qualification evidence semantically meaningful, reproducible, and statistically defensible before expanding model comparisons.",
+  "scope": {
+    "included": [
+      "benchmark-lab/",
+      "Benchmark Lab suite and scorer contracts",
+      "Semantic evaluator dispatch for generic Benchmark Lab runs",
+      "Negative-control and rubric validation fixtures",
+      "Model, runtime, suite, prompt, scorer, case, and hardware provenance capture",
+      "Qualification and comparison gates for minimum evidence quality",
+      "Repeated-trial aggregation and uncertainty reporting",
+      "Representative v2 requalification evidence for existing benchmark tracks",
+      "Benchmark Lab tests and operator documentation"
+    ],
+    "excluded": [
+      "Automatic model swapping or global enforcement changes",
+      "New cloud or hosted evaluation judges",
+      "Public leaderboard or universal model ranking",
+      "New model/provider onboarding unrelated to provenance tests",
+      "Hardware pilot execution",
+      "Modification or deletion of existing approved evidence artifacts"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "semantic-scorer-dispatch",
+      "description": "Generic Benchmark Lab suites dispatch to a declared semantic scorer and record scorer identity/version in every run.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/benchmark-lab-semantic-scorer-test.js"
+        },
+        {
+          "type": "document",
+          "reference": "benchmark-lab/engine/semantic-scorer.js"
+        }
+      ]
+    },
+    {
+      "id": "semantic-negative-controls",
+      "description": "Schema-valid but semantically incorrect negative-control outputs fail with actionable validator codes.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/benchmark-lab-semantic-scorer-test.js",
+          "note": "Covers SEMANTIC_EXPECTATION_MISMATCH with a schema-valid negative control."
+        }
+      ]
+    },
+    {
+      "id": "qualification-thresholds",
+      "description": "Qualified status requires at least 20 scored trials across at least 3 difficulty strata and at least 3 independent runs, unless a documented track-specific policy defines a different threshold with an explicit rationale; screening remains available below the gate.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/benchmark-lab-aggregation-test.js"
+        },
+        {
+          "type": "test",
+          "reference": "node scripts/benchmark-lab-requalification-test.js"
+        }
+      ]
+    },
+    {
+      "id": "live-provenance",
+      "description": "Live qualification evidence records non-unknown model identity, runtime version, suite/case/prompt/scorer provenance, and hardware profile where relevant.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "generated-artifact",
+          "reference": "benchmark-lab/reports/drafts/aggregations/m2-accessibility-v2-llama32-20260802.json",
+          "note": "Draft-only live aggregation records llama3.2:latest, exact declared/runtime digest, Ollama 0.32.5, suite/prompt/scorer/case fingerprints, and explicit hardware-not-captured state."
+        }
+      ]
+    },
+    {
+      "id": "aggregation-and-comparison",
+      "description": "Run aggregation reports per-case outcomes, repeated-trial statistics, uncertainty bounds, and critical failure counts; comparisons reject provenance mismatches.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "node scripts/benchmark-lab-aggregation-test.js"
+        },
+        {
+          "type": "generated-artifact",
+          "reference": "benchmark-lab/reports/drafts/aggregations/m2-accessibility-v2-llama32-20260802.json"
+        }
+      ]
+    },
+    {
+      "id": "representative-v2-evidence",
+      "description": "Representative v2 evidence is generated without modifying prior approved artifacts, and all relevant Benchmark Lab plus repository validation tests pass.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "generated-artifact",
+          "reference": "benchmark-lab/reports/drafts/aggregations/m2-accessibility-v2-llama32-20260802.json",
+          "note": "Five independent live runs, 20 scored trials, three strata, and zero critical failures; remains draft-only."
+        },
+        {
+          "type": "test",
+          "reference": "npm.cmd run test:full"
+        }
+      ]
+    },
+    {
+      "id": "documented-evidence-boundary",
+      "description": "Benchmark Lab documentation and canonical progress surfaces describe the implemented evidence boundary without broad model-quality claims.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "document",
+          "reference": "benchmark-lab/OPERATOR_GUIDE.md"
+        },
+        {
+          "type": "document",
+          "reference": "docs/06-decisions/decision-log.md"
+        }
+      ]
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-08-02T22:33:45.978Z",
+  "startedAt": "2026-08-02T22:33:45.979Z",
+  "completedAt": "2026-08-03T02:40:56.868Z",
+  "mergedAt": null,
+  "preparedCommit": "37da775d1313523c3de3efe92d4d34d91823c1a0",
+  "preparedBranch": "codex/benchmark-lab-m2-reproducible-semantic-qualification",
+  "preparedAt": "2026-08-03T02:39:45.986Z",
+  "latestValidationId": "validation-20260803T023959-bd677b49",
+  "completionBranch": "codex/benchmark-lab-m2-reproducible-semantic-qualification",
+  "completionHead": "d52b3758c650c26c8b2acd215d799c495276fde5"
+}

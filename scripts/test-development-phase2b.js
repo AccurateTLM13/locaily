@@ -132,6 +132,14 @@ test("dev:status --strict exits 1 for warnings", () => {
 
 console.log("\n## Validation Command");
 
+test("dev:block supports clearing a resolved blocker before resume", () => {
+  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
+  assert(content.includes('hasFlag(args, "--clear")'), "Missing --clear handling");
+  assert(content.includes("findBlockedMilestone"), "Missing blocked milestone lookup");
+  assert(content.includes('milestone.status = milestone.blockers.length > 0 ? "blocked" : "paused"'),
+    "Clearing the final blocker must make the milestone resumable");
+});
+
 test("dev:validate requires active milestone", () => {
   cleanState();
   resetProjectState();
@@ -329,6 +337,10 @@ test("Completion enforces requireCleanTree", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
   assert(content.includes("DIRTY_SINCE_VALIDATION") && content.includes("policy.requireCleanTree"),
     "Missing DIRTY_SINCE_VALIDATION gate with policy check");
+  assert(content.includes("currentFingerprint.changedFiles.length > 0"),
+    "Completion must exclude control-plane validation metadata from dirty source checks");
+  assert(content.includes('gitResult(["status", "--porcelain"])'),
+    "Porcelain parsing must preserve the leading Git status column");
 });
 
 test("Completion enforces requireCloseout", () => {

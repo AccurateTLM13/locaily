@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/benchmark-lab/benchmark-provenance.schema.json",
+  "title": "Benchmark Lab Run Provenance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "model", "runtime", "suite", "prompt", "scorer", "cases", "hardware"],
+  "properties": {
+    "schemaVersion": { "const": "benchmark.provenance.v1" },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["modelId", "provider", "runtimeModelName", "manifestDigest", "declaredModelDigest", "runtimeModelDigest"],
+      "properties": {
+        "modelId": { "type": ["string", "null"] },
+        "provider": { "type": "string", "minLength": 1 },
+        "runtimeModelName": { "type": ["string", "null"] },
+        "manifestDigest": { "type": ["string", "null"] },
+        "declaredModelDigest": { "type": ["string", "null"] },
+        "runtimeModelDigest": { "type": ["string", "null"] }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "adapterId", "adapterVersion", "version", "versionSource"],
+      "properties": {
+        "provider": { "type": "string", "minLength": 1 },
+        "adapterId": { "type": "string", "minLength": 1 },
+        "adapterVersion": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "versionSource": { "type": "string", "minLength": 1 }
+      }
+    },
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["suiteId", "trackId", "contractId", "mode", "configDigest"],
+      "properties": {
+        "suiteId": { "type": "string", "minLength": 1 },
+        "trackId": { "type": "string", "minLength": 1 },
+        "contractId": { "type": "string", "minLength": 1 },
+        "mode": { "type": "string", "minLength": 1 },
+        "configDigest": { "type": "string", "minLength": 1 }
+      }
+    },
+    "prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "declared", "inputDigest"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "declared": { "type": "boolean" },
+        "inputDigest": { "type": "string", "minLength": 1 }
+      }
+    },
+    "scorer": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "module": { "type": "string", "minLength": 1 }
+      }
+    },
+    "cases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["caseCount", "caseSetDigest", "caseIdsDigest", "difficultyStrata", "difficultyStrataCount", "difficultyStrataDigest"],
+      "properties": {
+        "caseCount": { "type": "integer", "minimum": 0 },
+        "caseSetDigest": { "type": "string", "minLength": 1 },
+        "caseIdsDigest": { "type": "string", "minLength": 1 },
+        "difficultyStrata": { "type": "array", "items": { "type": "string" } },
+        "difficultyStrataCount": { "type": "integer", "minimum": 0 },
+        "difficultyStrataDigest": { "type": "string", "minLength": 1 }
+      }
+    },
+    "hardware": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profileId", "captured", "source"],
+      "properties": {
+        "profileId": { "type": ["string", "null"] },
+        "captured": { "type": "boolean" },
+        "source": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

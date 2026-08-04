@@ -28,6 +28,23 @@ function git(args) {
   return r.status === 0 ? (r.stdout || "").trim() : null;
 }
 
+function reviewDiff() {
+  let diff = git(["diff", "HEAD"]) || "";
+  const untracked = (git(["ls-files", "--others", "--exclude-standard"]) || "").split(/\r?\n/).filter(Boolean);
+  for (const file of untracked) {
+    const absolute = path.join(PROJECT_ROOT, file);
+    let content;
+    try {
+      const bytes = fs.readFileSync(absolute);
+      content = bytes.includes(0) ? "Binary files differ" : bytes.toString("utf8").split(/\r?\n/).map(line => `+${line}`).join("\n");
+    } catch {
+      content = "+<unreadable untracked file>";
+    }
+    diff += `\ndiff --git a/${file} b/${file}\nnew file mode 100644\n--- /dev/null\n+++ b/${file}\n${content}\n`;
+  }
+  return diff;
+}
+
 function extractArg(args, name) {
   const idx = args.indexOf(name);
   if (idx === -1 || idx + 1 >= args.length) return null;
@@ -186,7 +203,7 @@ function main() {
   }
 
   // Get diff from HEAD
-  const diff = git(["diff", "HEAD"]) || "";
+  const diff = reviewDiff();
 
   // Run checks
   const allFindings = [

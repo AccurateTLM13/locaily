@@ -50,6 +50,9 @@
     "summary": {
       "type": "object"
     },
+    "aggregation": {
+      "type": "object"
+    },
     "notes": {
       "type": "array",
       "items": {

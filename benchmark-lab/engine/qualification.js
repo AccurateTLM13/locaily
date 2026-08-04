@@ -74,6 +74,7 @@ function buildQualificationRecord({
   const normalizedRoleStatus = typeof roleStatus === "string" && roleStatus.trim()
     ? roleStatus.trim()
     : null;
+  assertQualificationEligible({ status, roleStatus: normalizedRoleStatus, evidence });
   const qualifiedFor = [];
 
   if (normalizedRole && normalizedRoleStatus) {
@@ -118,6 +119,23 @@ function buildQualificationRecord({
   };
 }
 
+function assertQualificationEligible({ status, roleStatus, evidence }) {
+  const requestsQualification = status === "qualified" || roleStatus === "qualified";
+  if (!requestsQualification) {
+    return;
+  }
+
+  const gate = evidence && evidence.aggregation && evidence.aggregation.qualificationGate;
+  if (gate && gate.eligible === true) {
+    return;
+  }
+
+  const reasons = gate && Array.isArray(gate.reasons) && gate.reasons.length > 0
+    ? ` Reasons: ${gate.reasons.join(" ")}`
+    : "";
+  throw new Error(`Qualified status requires eligible repeated-trial aggregation evidence.${reasons}`);
+}
+
 function calculatePassRate(summary) {
   if (!summary || !summary.caseCount) {
     return 0;
@@ -137,5 +155,6 @@ function assertValid(validation, message) {
 module.exports = {
   generateQualification,
   buildQualificationRecord,
-  calculatePassRate
+  calculatePassRate,
+  assertQualificationEligible
 };

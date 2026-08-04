@@ -5,6 +5,7 @@ const SECTIONS = {
   review:       { title: "Review",       render: renderReview },
   operations:   { title: "Operations",   render: renderOperations },
   system:       { title: "System",       render: renderSystem },
+  benchmarks:   { title: "Benchmark Lab", render: renderBenchmarks },
   workflows:    { title: "Workflows",    render: renderWorkflows },
   capabilities: { title: "Capabilities", render: renderCapabilities },
   runtime:      { title: "Runtime",      render: renderRuntime }
@@ -12,6 +13,7 @@ const SECTIONS = {
 
 let currentSection = null;
 let inspectorSelectedRunId = null;
+const benchmarkUi = { models: [], suites: [], runs: [], activeRunId: null, eventSource: null, pollTimer: null };
 
 function qs(id) { return document.getElementById(id); }
 function showLoading(show) { const el = qs("shellLoading"); if (el) el.style.display = show ? "block" : "none"; }
@@ -44,18 +46,40 @@ function fmtDate(iso) {
 
 function statusBadge(status) {
   const map = {
-    success: "badge--success", passed: "badge--success", completed: "badge--success",
+    success: "badge--success", passed: "badge--success", completed: "badge--success", online: "badge--success", loaded: "badge--success", qualified: "badge--success",
     failure: "badge--fail", failed: "badge--fail", error: "badge--fail",
     partial: "badge--warn", timeout: "badge--warn", running: "badge--running", claimed: "badge--running",
-    queued: "badge--neutral", pending: "badge--neutral", skipped: "badge--neutral", not_validated: "badge--neutral"
+    queued: "badge--neutral", pending: "badge--neutral", skipped: "badge--neutral", not_validated: "badge--neutral", offline: "badge--fail", cancelled: "badge--warn", preflight: "badge--running"
   };
   const cls = map[status] || "badge--neutral";
   return `<span class="badge ${cls}">${status || "unknown"}</span>`;
 }
 
+function escapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+async function requestJson(path, options = {}) {
+  const response = await fetch(path, options);
+  const body = await response.json().catch(() => null);
+  if (!response.ok || !body || body.ok === false) {
+    const error = new Error(body?.message || `Request failed with HTTP ${response.status}.`);
+    error.code = body?.code;
+    error.nextStep = body?.nextStep;
+    throw error;
+  }
+  return body;
+}
+
 async function navigate(section) {
   if (!SECTIONS[section]) section = "workbench";
   if (section === currentSection) return;
+  if (currentSection === "benchmarks") closeBenchmarkStream();
   currentSection = section;
   history.replaceState(null, "", `#${section}`);
   document.querySelectorAll(".sidebar-link").forEach(el => {
@@ -641,6 +665,326 @@ async function renderWorkflows() {
 // ─────────────────────────────────────────────
 // CAPABILITIES
 // ─────────────────────────────────────────────
+// BENCHMARK LAB — INTERACTIVE LOCAL MODEL QUALIFICATION
+async function renderBenchmarks() {
+  closeBenchmarkStream();
+  setContent(`
+    <div class="workbench-page benchmark-page">
+      <div class="benchmark-header">
+        <div>
+          <div class="page-category">BENCHMARK LAB / LOCAL ONLY</div>
+          <h1 class="page-title">Interactive Model Lab</h1>
+          <p class="page-desc">Inspect exact local model identity, load one model deliberately, and run reproducible screening or qualification evidence.</p>
+        </div>
+        <button class="btn btn--outline btn--sm" onclick="renderBenchmarks()">Refresh inventory</button>
+      </div>
+      <div id="benchmarkNotice" class="notice notice--info">Discovering Ollama models and benchmark suites…</div>
+      <div id="benchmarkRuntime"></div>
+      <div class="benchmark-layout">
+        <section>
+          <div class="benchmark-section-head">
+            <div><div class="page-category">MODEL INVENTORY</div><h2>Installed on this machine</h2></div>
+            <input id="benchmarkModelFilter" class="benchmark-search" type="search" placeholder="Filter models" oninput="benchmarkFilterModels()">
+          </div>
+          <div id="benchmarkModels" class="benchmark-model-grid"></div>
+        </section>
+        <aside id="benchmarkLauncher" class="inspector-card benchmark-launcher"></aside>
+      </div>
+      <section class="benchmark-run-section">
+        <div class="benchmark-section-head"><div><div class="page-category">ACTIVE / RECENT</div><h2>Run evidence</h2></div></div>
+        <div id="benchmarkRunDetail" class="inspector-card"><div class="loading-placeholder">Select or start a run.</div></div>
+      </section>
+      <section class="benchmark-run-section">
+        <div class="benchmark-section-head"><div><div class="page-category">DURABLE HISTORY</div><h2>Local benchmark runs</h2></div></div>
+        <div id="benchmarkHistory" class="benchmark-history"></div>
+      </section>
+    </div>
+  `);
+
+  try {
+    const [modelsResponse, suitesResponse, runsResponse] = await Promise.all([
+      requestJson("/benchmark/models"),
+      requestJson("/benchmark/suites"),
+      requestJson("/benchmark/runs?limit=30")
+    ]);
+    benchmarkUi.models = modelsResponse.models || [];
+    benchmarkUi.suites = (suitesResponse.suites || []).filter((suite) => suite.executable);
+    benchmarkUi.runs = runsResponse.runs || [];
+    const notice = qs("benchmarkNotice");
+    const runtime = modelsResponse.runtime || { state: "offline" };
+    if (notice) {
+      notice.className = `notice ${runtime.state === "online" ? "notice--success" : "notice--fail"}`;
+      notice.textContent = runtime.state === "online"
+        ? `Ollama online · ${benchmarkUi.models.length} installed · ${benchmarkUi.models.filter((model) => model.loadState === "loaded").length} loaded`
+        : `Ollama offline. ${runtime.error?.message || "Start the local runtime to inspect or test models."}`;
+    }
+    renderBenchmarkRuntime(runtime);
+    renderBenchmarkModels(benchmarkUi.models);
+    renderBenchmarkLauncher();
+    qs("benchmarkStartButton")?.addEventListener("click", window.benchmarkStartRun);
+    renderBenchmarkHistory();
+    const active = benchmarkUi.runs.find((run) => !["completed", "failed", "cancelled"].includes(run.status));
+    const selected = active || benchmarkUi.runs[0];
+    if (selected) await benchmarkOpenRun(selected.runId);
+  } catch (error) {
+    const notice = qs("benchmarkNotice");
+    if (notice) {
+      notice.className = "notice notice--fail";
+      notice.textContent = `${error.message}${error.nextStep ? ` ${error.nextStep}` : ""}`;
+    }
+  }
+}
+
+function renderBenchmarkRuntime(runtime) {
+  const target = qs("benchmarkRuntime");
+  if (!target) return;
+  target.innerHTML = `<div class="benchmark-state-strip">
+    <span>Runtime ${statusBadge(runtime.state || "offline")}</span>
+    <span>Installed <strong>${benchmarkUi.models.length}</strong></span>
+    <span>Registered <strong>${benchmarkUi.models.filter((model) => model.manifestState === "registered").length}</strong></span>
+    <span>Loaded <strong>${benchmarkUi.models.filter((model) => model.loadState === "loaded").length}</strong></span>
+    <span>Privacy <strong>raw outputs stay local</strong></span>
+  </div>`;
+}
+
+function renderBenchmarkModels(models) {
+  const target = qs("benchmarkModels");
+  if (!target) return;
+  if (!models.length) {
+    target.innerHTML = `<div class="inspector-card"><div class="loading-placeholder">No installed models discovered.</div></div>`;
+    return;
+  }
+  target.innerHTML = models.map((model) => {
+    const safeId = encodeURIComponent(model.id).replace(/'/g, "%27");
+    const digest = model.digest ? model.digest.replace(/^sha256:/, "").slice(0, 12) : "unreported";
+    const isLoaded = model.loadState === "loaded";
+    const action = isLoaded
+      ? `<button class="btn btn--outline btn--sm" onclick="benchmarkUnloadModel('${safeId}')">Unload</button>`
+      : `<button class="btn btn--black btn--sm" ${model.loadabilityState === "blocked" ? "disabled" : ""} onclick="benchmarkLoadModel('${safeId}')">Load</button>`;
+    return `<article class="benchmark-model-card" data-model-search="${escapeHtml(`${model.name} ${model.family} ${model.parameterSize} ${model.manifestState}`.toLowerCase())}">
+      <div class="benchmark-model-card__head">
+        <div><h3>${escapeHtml(model.name)}</h3><div class="benchmark-model-meta">${escapeHtml(model.family || "unknown family")} · ${escapeHtml(model.parameterSize || "size unknown")} · ${escapeHtml(model.quantizationLevel || "quant unknown")}</div></div>
+        ${statusBadge(model.loadState)}
+      </div>
+      <div class="benchmark-chip-row"><span class="benchmark-chip">${escapeHtml(model.manifestState)}</span><span class="benchmark-chip">${escapeHtml(model.qualificationState)}</span><span class="benchmark-chip">loadability: ${escapeHtml(model.loadabilityState)}</span></div>
+      <dl class="benchmark-model-facts">
+        <div><dt>Digest</dt><dd title="${escapeHtml(model.digest)}">${escapeHtml(digest)}</dd></div>
+        <div><dt>Disk</dt><dd>${formatBytes(model.sizeBytes)}</dd></div>
+        <div><dt>VRAM</dt><dd>${formatBytes(model.loaded?.sizeVramBytes)}</dd></div>
+        <div><dt>Expires</dt><dd>${model.loaded?.expiresAt ? fmtDate(model.loaded.expiresAt) : "—"}</dd></div>
+      </dl>
+      ${model.manifest?.digestMatch === false ? `<div class="notice notice--fail">Digest differs from ${escapeHtml(model.manifest.id)}. Qualification is blocked.</div>` : ""}
+      <div class="benchmark-card-actions">${action}<button class="btn btn--outline btn--sm" onclick="benchmarkSelectModel('${safeId}')">Select</button></div>
+    </article>`;
+  }).join("");
+}
+
+function renderBenchmarkLauncher(selectedModelId = null) {
+  const target = qs("benchmarkLauncher");
+  if (!target) return;
+  const registered = benchmarkUi.models.filter((model) => model.manifestState === "registered");
+  const selected = selectedModelId || registered.find((model) => model.loadState === "loaded")?.id || registered[0]?.id || "";
+  const suites = [...benchmarkUi.suites].sort((a, b) => (a.id === "accessibility-deep-v2" ? -1 : b.id === "accessibility-deep-v2" ? 1 : a.name.localeCompare(b.name)));
+  target.innerHTML = `
+    <div class="page-category">NEW RUN</div><h2>Launch benchmark</h2>
+    <p class="benchmark-help">Only catalog suites and registered local manifests are accepted. Running never promotes evidence automatically.</p>
+    <div class="form-group"><label for="benchmarkModelSelect">Model</label><select id="benchmarkModelSelect">${registered.map((model) => `<option value="${escapeHtml(model.id)}" ${model.id === selected ? "selected" : ""}>${escapeHtml(model.name)} · ${escapeHtml(model.loadState)}</option>`).join("")}</select></div>
+    <div class="form-group"><label for="benchmarkSuiteSelect">Suite</label><select id="benchmarkSuiteSelect">${suites.map((suite) => `<option value="${escapeHtml(suite.id)}">${escapeHtml(suite.name)} · ${suite.caseCount} cases</option>`).join("")}</select></div>
+    <div class="form-group"><label for="benchmarkModeSelect">Evidence mode</label><select id="benchmarkModeSelect" onchange="benchmarkModeChanged()"><option value="quick">Quick screening · 1 trial</option><option value="qualification">Qualification · 5 independent trials</option></select></div>
+    <div id="benchmarkPreflight" class="benchmark-preflight">Load the selected model explicitly, then run preflight.</div>
+    <button id="benchmarkStartButton" class="btn btn--black" ${registered.length && suites.length ? "" : "disabled"}>Preflight & start</button>
+  `;
+}
+
+function renderBenchmarkHistory() {
+  const target = qs("benchmarkHistory");
+  if (!target) return;
+  target.innerHTML = benchmarkUi.runs.length ? benchmarkUi.runs.map((run) => `<button class="benchmark-history-row" onclick="benchmarkOpenRun('${escapeHtml(run.runId)}')"><span><strong>${escapeHtml(run.suiteName || run.suiteId)}</strong><small>${escapeHtml(run.modelName || run.model?.runtimeModelName || "unknown model")} · ${fmtDate(run.createdAt)}</small></span>${statusBadge(run.status)}</button>`).join("") : `<div class="loading-placeholder">No interactive benchmark runs yet.</div>`;
+}
+
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "—";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  return `${(bytes / (1024 ** exponent)).toFixed(exponent > 2 ? 1 : 0)} ${units[exponent]}`;
+}
+
+function formatPercent(value) {
+  return typeof value === "number" ? `${(value * 100).toFixed(1)}%` : "—";
+}
+
+window.benchmarkFilterModels = function() {
+  const query = (qs("benchmarkModelFilter")?.value || "").trim().toLowerCase();
+  document.querySelectorAll("[data-model-search]").forEach((card) => { card.hidden = Boolean(query) && !card.dataset.modelSearch.includes(query); });
+};
+
+window.benchmarkSelectModel = function(encodedId) {
+  const select = qs("benchmarkModelSelect");
+  if (select) select.value = decodeURIComponent(encodedId);
+  qs("benchmarkLauncher")?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+window.benchmarkModeChanged = function() {
+  const target = qs("benchmarkPreflight");
+  if (!target) return;
+  target.textContent = qs("benchmarkModeSelect")?.value === "qualification"
+    ? "Qualification runs 5 independent trials and applies M2 evidence gates. It does not promote the result."
+    : "Quick mode runs one screening trial and cannot qualify a model.";
+};
+
+window.benchmarkLoadModel = async function(encodedId) { await benchmarkModelAction(encodedId, "load"); };
+window.benchmarkUnloadModel = async function(encodedId) { await benchmarkModelAction(encodedId, "unload"); };
+
+async function benchmarkModelAction(encodedId, action) {
+  const notice = qs("benchmarkNotice");
+  const modelId = decodeURIComponent(encodedId);
+  try {
+    if (notice) notice.textContent = `${action === "load" ? "Loading" : "Unloading"} ${modelId}…`;
+    await requestJson(`/benchmark/models/${encodeURIComponent(modelId)}/${action}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(action === "load" ? { keepAlive: "10m" } : {})
+    });
+    await renderBenchmarks();
+  } catch (error) {
+    if (notice) {
+      notice.className = "notice notice--fail";
+      notice.textContent = `${error.message}${error.nextStep ? ` ${error.nextStep}` : ""}`;
+    }
+  }
+}
+
+window.benchmarkStartRun = async function() {
+  const button = qs("benchmarkStartButton");
+  const output = qs("benchmarkPreflight");
+  const mode = qs("benchmarkModeSelect")?.value || "quick";
+  const payload = {
+    modelId: qs("benchmarkModelSelect")?.value,
+    suiteId: qs("benchmarkSuiteSelect")?.value,
+    mode,
+    trialCount: mode === "qualification" ? 5 : 1,
+    requestKey: `ui-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`
+  };
+  try {
+    if (button) { button.disabled = true; button.textContent = "Checking…"; }
+    const preflight = await requestJson("/benchmark/preflight", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    if (output) {
+      output.className = "benchmark-preflight benchmark-preflight--ok";
+      output.textContent = `Eligible: exact digest ${preflight.model.runtimeDigest?.slice(-12) || "unreported"}. Starting…`;
+    }
+    const started = await requestJson("/benchmark/runs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    benchmarkUi.activeRunId = started.runId;
+    await benchmarkOpenRun(started.runId);
+  } catch (error) {
+    if (output) {
+      output.className = "benchmark-preflight benchmark-preflight--fail";
+      output.textContent = `${error.message}${error.nextStep ? ` ${error.nextStep}` : ""}`;
+    }
+  } finally {
+    if (button) { button.disabled = false; button.textContent = "Preflight & start"; }
+  }
+};
+
+window.benchmarkOpenRun = async function(runId) {
+  benchmarkUi.activeRunId = runId;
+  try {
+    const response = await requestJson(`/benchmark/runs/${encodeURIComponent(runId)}`);
+    renderBenchmarkRun(response.run);
+    if (!["completed", "failed", "cancelled"].includes(response.run.status)) openBenchmarkStream(runId);
+    else closeBenchmarkStream();
+  } catch (error) {
+    const target = qs("benchmarkRunDetail");
+    if (target) target.innerHTML = `<div class="notice notice--fail">${escapeHtml(error.message)}</div>`;
+  }
+};
+
+function renderBenchmarkRun(run) {
+  const target = qs("benchmarkRunDetail");
+  if (!target) return;
+  const progress = run.progress || {};
+  target.innerHTML = `
+    <div class="benchmark-run-head"><div><h3>${escapeHtml(run.suiteName || run.suiteId)}</h3><div class="benchmark-model-meta">${escapeHtml(run.model?.runtimeModelName)} · ${escapeHtml(run.mode)} · ${escapeHtml(run.runId)}</div></div>${statusBadge(run.status)}</div>
+    <div class="benchmark-progress"><div style="width:${Math.max(0, Math.min(100, progress.percent || 0))}%"></div></div>
+    <div class="benchmark-progress-label">${escapeHtml(run.phase)} · ${progress.completedTrials || 0}/${progress.totalTrials || run.trialCount} trials${progress.totalCases ? ` · ${progress.completedCases || 0}/${progress.totalCases} cases` : ""}</div>
+    ${run.error ? `<div class="notice notice--fail"><strong>${escapeHtml(run.error.code)}</strong> ${escapeHtml(run.error.message)}</div>` : ""}
+    ${run.result ? renderBenchmarkResult(run.result) : `<div class="benchmark-event-list">${(run.events || []).slice(-8).reverse().map((event) => `<div><time>${fmtDate(event.timestamp)}</time><strong>${escapeHtml(event.type)}</strong></div>`).join("")}</div>`}
+    ${!["completed", "failed", "cancelled"].includes(run.status) ? `<button class="btn btn--outline btn--sm" onclick="benchmarkCancelRun('${escapeHtml(run.runId)}')">Cancel run</button>` : ""}
+  `;
+}
+
+function renderBenchmarkResult(result) {
+  const metrics = result.metrics || {};
+  const uncertainty = metrics.scoredUncertainty || metrics.uncertainty || {};
+  const provenance = result.provenance || {};
+  const gate = result.qualificationGate || { eligible: false, reasons: [] };
+  const strata = Object.entries(result.strata || {}).map(([name, values]) => `<tr><td>${escapeHtml(name)}</td><td>${values.passed}/${values.trialCount}</td><td>${values.criticalFailureCount}</td></tr>`).join("");
+  return `<div class="benchmark-result-grid">
+    <div class="benchmark-metric"><span>Pass rate</span><strong>${formatPercent(metrics.scoredPassRate)}</strong></div>
+    <div class="benchmark-metric"><span>95% Wilson interval</span><strong>${formatPercent(uncertainty.lower)}–${formatPercent(uncertainty.upper)}</strong></div>
+    <div class="benchmark-metric"><span>Scored trials</span><strong>${metrics.scoredTrialCount ?? "—"}</strong></div>
+    <div class="benchmark-metric"><span>Critical failures</span><strong>${metrics.criticalFailureCount ?? "—"}</strong></div>
+  </div>
+  <div class="benchmark-result-columns">
+    <div><h4>Difficulty strata</h4><table class="benchmark-table"><thead><tr><th>Stratum</th><th>Passed</th><th>Critical</th></tr></thead><tbody>${strata}</tbody></table></div>
+    <div><h4>Evidence gate</h4><div class="notice ${gate.eligible ? "notice--success" : "notice--info"}">${gate.eligible ? "M2 evidence minimums satisfied. Result remains draft-only." : "Screening evidence only."}</div><ul>${(gate.reasons || []).map((reason) => `<li>${escapeHtml(reason)}</li>`).join("") || "<li>No gate rejections.</li>"}</ul></div>
+  </div>
+  <details class="benchmark-provenance"><summary>Provenance and failure semantics</summary>
+    <dl><dt>Runtime model</dt><dd>${escapeHtml(provenance.model?.runtimeModelName || "—")}</dd><dt>Runtime digest</dt><dd>${escapeHtml(provenance.model?.runtimeModelDigest || "—")}</dd><dt>Manifest fingerprint</dt><dd>${escapeHtml(provenance.model?.manifestDigest || "—")}</dd><dt>Suite fingerprint</dt><dd>${escapeHtml(provenance.suite?.configDigest || "—")}</dd><dt>Scorer</dt><dd>${escapeHtml(`${provenance.scorer?.id || "—"} ${provenance.scorer?.version || ""}`)}</dd><dt>Semantic codes</dt><dd>${escapeHtml((result.semanticFailureCodes || []).join(", ") || "none")}</dd><dt>Runtime</dt><dd>${fmtDuration(result.runtimeMetrics?.durationMs)}</dd></dl>
+  </details>`;
+}
+
+window.benchmarkCancelRun = async function(runId) {
+  try {
+    const response = await requestJson(`/benchmark/runs/${encodeURIComponent(runId)}/cancel`, { method: "POST" });
+    renderBenchmarkRun(response.run);
+    closeBenchmarkStream();
+  } catch (error) {
+    const target = qs("benchmarkRunDetail");
+    if (target) target.insertAdjacentHTML("afterbegin", `<div class="notice notice--fail">${escapeHtml(error.message)}</div>`);
+  }
+};
+
+function openBenchmarkStream(runId) {
+  closeBenchmarkStream();
+  if (typeof EventSource === "function") {
+    const source = new EventSource(`/benchmark/runs/${encodeURIComponent(runId)}/events`);
+    benchmarkUi.eventSource = source;
+    for (const type of ["queued", "preflight", "started", "phase", "trial-started", "case-completed", "trial-completed", "completed", "failed", "cancelled"]) {
+      source.addEventListener(type, () => benchmarkRefreshRun(runId));
+    }
+    source.onerror = () => {
+      source.close();
+      benchmarkUi.eventSource = null;
+      startBenchmarkPolling(runId);
+    };
+  } else startBenchmarkPolling(runId);
+}
+
+function startBenchmarkPolling(runId) {
+  if (benchmarkUi.pollTimer) clearInterval(benchmarkUi.pollTimer);
+  benchmarkUi.pollTimer = setInterval(() => benchmarkRefreshRun(runId), 2000);
+}
+
+async function benchmarkRefreshRun(runId) {
+  try {
+    const response = await requestJson(`/benchmark/runs/${encodeURIComponent(runId)}`);
+    renderBenchmarkRun(response.run);
+    if (["completed", "failed", "cancelled"].includes(response.run.status)) {
+      closeBenchmarkStream();
+      const runs = await requestJson("/benchmark/runs?limit=30");
+      benchmarkUi.runs = runs.runs || [];
+      renderBenchmarkHistory();
+    }
+  } catch {}
+}
+
+function closeBenchmarkStream() {
+  if (benchmarkUi.eventSource) benchmarkUi.eventSource.close();
+  if (benchmarkUi.pollTimer) clearInterval(benchmarkUi.pollTimer);
+  benchmarkUi.eventSource = null;
+  benchmarkUi.pollTimer = null;
+}
+
 async function renderCapabilities() {
   const capsRes = await fetchJson("/qualifications/capabilities");
   const caps = Array.isArray(capsRes.capabilities) ? capsRes.capabilities : [];
