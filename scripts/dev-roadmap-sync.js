@@ -54,7 +54,7 @@ function main() {
         const originalLength = init.milestoneIds.length;
         init.milestoneIds = init.milestoneIds.filter(mid => allMilestoneIds.has(mid));
         removedCount += (originalLength - init.milestoneIds.length);
-        
+
         for (const mid of init.milestoneIds) {
           roadmapMilestoneIds.add(mid);
         }
@@ -93,7 +93,7 @@ function main() {
       };
       roadmap.areas.push(uncategorizedArea);
     }
-    
+
     const init = uncategorizedArea.initiatives[0];
     for (const mid of unreferenced) {
       if (!init.milestoneIds.includes(mid)) {
@@ -105,7 +105,7 @@ function main() {
 
   roadmap.updatedAt = new Date().toISOString();
   writeJson(ROADMAP_PATH, roadmap);
-  
+
   console.log(`Roadmap synchronized successfully. Removed ${removedCount} dangling references.`);
 }
 

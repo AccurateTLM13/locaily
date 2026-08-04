@@ -1,0 +1,78 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "dev-harness-01-agent-operations-contract",
+  "title": "DEV-HARNESS-01 Harness-Neutral Agent Operations Contract",
+  "status": "active",
+  "type": "infrastructure",
+  "priority": "medium",
+  "purpose": "Establish a Locaily-owned, harness-neutral contract that can inspect coding-agent sessions, worktrees, workers, checks, risks, and handoffs without making Codex, OpenCode, Claude Code, or any other harness the canonical control plane.",
+  "problem": "Locaily already has durable development sessions, lifecycle records, safe queued execution, reviewed development memory, and operator status surfaces, but those records are primarily produced by Locaily's own control plane. Different coding harnesses still expose different session, worktree, transcript, hook, and status shapes. Without a normalization boundary, future operator views and handoffs would need vendor-specific readers and could not reliably distinguish supported evidence from unavailable surfaces.",
+  "scope": {
+    "included": [
+      "Define and validate a versioned locaily.agent_adapter.v1 contract for read-only harness adapters.",
+      "Define a canonical agent-session snapshot that normalizes repository, branch, worktree, session identity, harness, model, objective, workers, checks, handoff references, lifecycle state, and unsupported-surface reasons.",
+      "Define a machine-readable agent-status payload covering context pressure, tool activity, active workers, queue state, checks, risk, cost, and handoff/sync state; unavailable values must be explicit rather than inferred.",
+      "Implement an adapter registry with fixture-backed Codex and OpenCode adapters plus a generic unsupported/read-only fallback adapter.",
+      "Connect normalized snapshots and handoffs to existing development session, milestone, work-closeout, and development-memory references without creating a second memory vault.",
+      "Add deterministic fixtures and tests for adapter selection, normalization, partial evidence, malformed input, secret/path redaction, and unsupported actions.",
+      "Document the adapter boundary, evidence ownership, and the rule that adapters observe harnesses while Locaily's development control plane remains authoritative for milestone state."
+    ],
+    "excluded": [
+      "Installing, synchronizing, or replacing any external coding-agent harness.",
+      "Automatic transcript capture, hooks, background polling, or vendor-specific runtime control.",
+      "Creating, stopping, resuming, merging, or rebasing worktrees through the adapter contract.",
+      "Automatic playbook, skill, rule, prompt, or agent-config promotion; that requires a separate verifier-gated learning milestone.",
+      "AgentShield-style security scanning of prompts, hooks, MCP servers, permissions, or supply-chain packages; that is a separate security milestone.",
+      "NearbyNode discovery, relay transport, distributed scheduling, model routing, or automatic brain failover.",
+      "A visual HUD redesign; this milestone defines a machine-readable status contract that existing consoles may consume later.",
+      "Raw transcript, credential, secret, or private-path persistence."
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "ac-adapter-contract",
+      "description": "The adapter and canonical snapshot contracts validate through the repository's schema test path and define explicit supported, unsupported, partial, and error states.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-adapter-registry",
+      "description": "A deterministic registry selects the correct adapter for Codex, OpenCode, and generic/unknown targets and reports why a target is unsupported when no adapter can open it.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-snapshot-normalization",
+      "description": "Codex and OpenCode fixtures produce the same canonical snapshot shape for equivalent session facts, while absent facts remain unavailable instead of being guessed.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-status-contract",
+      "description": "A versioned machine-readable status payload exposes context, tool activity, workers, queue state, checks, risk, cost, and handoff/sync fields with deterministic output and explicit unknown values.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-handoff-linkage",
+      "description": "A normalized handoff references existing Locaily development session, milestone, work-closeout, and/or memory evidence by stable identifiers without duplicating raw transcripts.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-safety",
+      "description": "Malformed input, secret-shaped values, path escapes, and unsupported mutating actions are rejected or redacted with stable reason codes and no unauthorized filesystem or network writes.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-validation",
+      "description": "Targeted adapter/schema tests, lifecycle/control-plane tests, and the relevant offline repository validation profile pass from a clean committed state.",
+      "status": "pending"
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [
+    "dev-loop-01-canonical-queue-safe-runner"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-08-01T22:40:52.000Z",
+  "startedAt": "2026-08-02T00:26:31.266Z",
+  "completedAt": null,
+  "mergedAt": null
+}

@@ -101,6 +101,8 @@
     "test:controller": "node scripts/test-controller-invariants.js",
     "deliver-milestone": "node scripts/deliver-milestone.js",
     "dev:status": "node scripts/dev-status.js",
+    "harness:status": "node scripts/harness-status.js",
+    "test:harness": "node scripts/test-harness-adapters.js",
     "dev:roadmap:sync": "node scripts/dev-roadmap-sync.js",
     "dev:milestone:start": "node scripts/dev-lifecycle.js start",
     "dev:checkpoint": "node scripts/dev-lifecycle.js checkpoint",
@@ -125,6 +127,6 @@
     "test:track-records": "node scripts/track-run-record-schema-test.js && node scripts/crew-track-run-record-test.js",
     "test:human-review": "node scripts/test-human-review-records.js",
     "test:capability-kernel": "node scripts/test-node-roles-capability-capsules.js && node scripts/test-node-event-bus.js && node scripts/test-relay-trust-pairing.js && node scripts/test-lighthouse-product-bridge.js && node scripts/test-dev-loop.js && node scripts/test-development-schemas.js",
-    "test:full": "npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && npm run test:development-memory && npm run test:controller && npm run test:capability-kernel"
+    "test:full": "npm run test:harness && npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && npm run test:development-memory && npm run test:controller && npm run test:capability-kernel"
   }
 }

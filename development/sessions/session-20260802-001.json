@@ -1,144 +1,51 @@
 {
   "schema": "locaily.development.session.v1",
   "id": "session-20260802-001",
-  "milestoneId": "benchmark-lab-m2-reproducible-semantic-qualification",
+  "milestoneId": "dev-harness-01-agent-operations-contract",
   "agent": {
     "platform": "unknown",
     "model": "unknown"
   },
-  "status": "closed",
-  "objective": "Make model qualification evidence semantically meaningful, reproducible, and statistically defensible before expanding model comparisons.",
-  "branch": "codex/benchmark-lab-m2-reproducible-semantic-qualification",
+  "status": "active",
+  "objective": "Define the read-only normalization boundary between external coding-agent harnesses and Locaily's development control plane.",
+  "branch": "agent/dev-harness-01-agent-operations-contract",
   "startingCommit": "2cedf5bbf1fa423d304af1c3c54d30066be9507e",
-  "plannedFiles": [
-    "benchmark-lab/engine/semantic-scorer.js",
-    "benchmark-lab/engine/aggregation.js",
-    "benchmark-lab/engine/requalification.js",
-    "benchmark-lab/engine/cli/benchmark-aggregate.js",
-    "benchmark-lab/engine/cli/benchmark-requalify.js",
-    "benchmark-lab/engine/review-run.js",
-    "benchmark-lab/engine/qualification.js",
-    "benchmark-lab/engine/runners/suite-runner.js",
-    "benchmark-lab/schemas/benchmark-suite.schema.json",
-    "benchmark-lab/schemas/benchmark-run-summary.schema.json",
-    "benchmark-lab/locaily/tracks/semantic-scorer-fixture/",
-    "benchmark-lab/locaily/tracks/accessibility-deep/suite-v2.json",
-    "benchmark-lab/locaily/tracks/accessibility-deep/cases-v2.json",
-    "benchmark-lab/locaily/tracks/accessibility-deep/scenarios-v2.js",
-    "scripts/benchmark-lab-semantic-scorer-test.js",
-    "docs/06-decisions/decision-log.md",
-    "docs/07-progress/active-build-slice.md",
-    "docs/07-progress/work-closeout.json",
-    "docs/07-progress/progress-log.md",
-    "benchmark-lab/OPERATOR_GUIDE.md",
-    "benchmark-lab/VALIDATION_CHECKLIST.md"
-  ],
+  "plannedFiles": [],
   "completedWork": [
-    "M2 semantic scorer contract and generic runner dispatch implemented; negative-control fixture passes; provenance and repeated-trial gates remain.",
-    "M2 semantic scorer tests pass schema-valid negative control and semantic failure code; npm.cmd run test:full passes; provenance and repeated-trial gates remain.",
-    "M2 provenance slice complete: stable model/runtime/suite/prompt/scorer/case/hardware fingerprints are emitted; comparisons reject evaluation-condition mismatches but permit model-to-model comparisons; npm.cmd run test:full passes.",
-    "M2 repeated-trial slice complete: deterministic aggregation reports per-case metrics, Wilson uncertainty, difficulty strata, and critical failures; promotion can attach aggregation evidence; qualified status requires an eligible gate; benchmark:test, test:full, dev:status --strict, and git diff --check pass.",
-    "M2 v2 requalification path complete: added benchmark:requalify repeated-run orchestration and accessibility-deep-v2 with easy, medium, and hard strata; offline benchmark and full repository validation pass; local Ollama probe unavailable, so live evidence remains pending.",
-    "Session closed"
+    "Implemented the read-only harness-neutral snapshot contract, Codex/OpenCode fixture adapters, explicit evidence and Locaily links, harness-status CLI, and GET /harness/status; focused tests pass.",
+    "Full offline repository suite passed after DEV-HARNESS-01 implementation; milestone remains active pending intentional commit boundary and pre-delivery lifecycle validation.",
+    "Added checked-in canonical valid/invalid harness schema fixtures and wired test:harness into test:full; final focused and full offline suites pass."
   ],
   "remainingWork": [
-    "Generate representative v2 evidence without changing approved artifacts.",
-    "Run the representative v2 suite when the local model runtime is available, then complete M2 lifecycle gates, including dev:validate after prepare."
+    "Establish an intentional commit boundary before delivery.",
+    "Run the pre-delivery lifecycle validation against the committed implementation and update milestone acceptance evidence.",
+    "Close the active development session only when the implementation slice is ready for delivery review."
   ],
   "blockers": [],
   "validationRunIds": [],
   "checks": [
     {
-      "timestamp": "2026-08-02T22:41:28.851Z",
-      "message": "M2 semantic scorer contract and generic runner dispatch implemented; negative-control fixture passes; provenance and repeated-trial gates remain.",
+      "timestamp": "2026-08-02T00:54:33.896Z",
+      "message": "Implemented the read-only harness-neutral snapshot contract, Codex/OpenCode fixture adapters, explicit evidence and Locaily links, harness-status CLI, and GET /harness/status; focused tests pass.",
       "filesChanged": [
         "(uncommitted changes)"
       ]
     },
     {
-      "timestamp": "2026-08-02T22:43:28.131Z",
-      "message": "M2 semantic scorer tests pass schema-valid negative control and semantic failure code; npm.cmd run test:full passes; provenance and repeated-trial gates remain.",
+      "timestamp": "2026-08-02T00:57:21.868Z",
+      "message": "Full offline repository suite passed after DEV-HARNESS-01 implementation; milestone remains active pending intentional commit boundary and pre-delivery lifecycle validation.",
       "filesChanged": [
         "(uncommitted changes)"
       ]
     },
     {
-      "timestamp": "2026-08-02T23:00:42.066Z",
-      "message": "M2 provenance slice complete: stable model/runtime/suite/prompt/scorer/case/hardware fingerprints are emitted; comparisons reject evaluation-condition mismatches but permit model-to-model comparisons; npm.cmd run test:full passes.",
-      "filesChanged": [
-        "(uncommitted changes)"
-      ]
-    },
-    {
-      "timestamp": "2026-08-02T23:17:38.361Z",
-      "message": "M2 repeated-trial slice complete: deterministic aggregation reports per-case metrics, Wilson uncertainty, difficulty strata, and critical failures; promotion can attach aggregation evidence; qualified status requires an eligible gate; benchmark:test, test:full, dev:status --strict, and git diff --check pass.",
-      "filesChanged": [
-        "(uncommitted changes)"
-      ]
-    },
-    {
-      "timestamp": "2026-08-03T00:22:34.928Z",
-      "message": "M2 v2 requalification path complete: added benchmark:requalify repeated-run orchestration and accessibility-deep-v2 with easy, medium, and hard strata; offline benchmark and full repository validation pass; local Ollama probe unavailable, so live evidence remains pending.",
+      "timestamp": "2026-08-02T01:04:37.563Z",
+      "message": "Added checked-in canonical valid/invalid harness schema fixtures and wired test:harness into test:full; final focused and full offline suites pass.",
       "filesChanged": [
         "(uncommitted changes)"
       ]
     }
   ],
-  "startedAt": "2026-08-02T22:33:45.981Z",
-  "closedAt": "2026-08-03T00:44:22.834Z",
-  "closingCommit": "2cedf5bbf1fa423d304af1c3c54d30066be9507e",
-  "dirtyFiles": [
-    "benchmark-lab/OPERATOR_GUIDE.md",
-    "benchmark-lab/README.md",
-    "benchmark-lab/VALIDATION_CHECKLIST.md",
-    "benchmark-lab/engine/cli/benchmark-promote.js",
-    "benchmark-lab/engine/compare-runs.js",
-    "benchmark-lab/engine/qualification.js",
-    "benchmark-lab/engine/review-run.js",
-    "benchmark-lab/engine/runners/suite-runner.js",
-    "benchmark-lab/locaily/tracks/accessibility-deep/suite.json",
-    "benchmark-lab/locaily/tracks/dealsniper/suite.json",
-    "benchmark-lab/locaily/tracks/performance-budget/suite.json",
-    "benchmark-lab/locaily/tracks/seo-audit/suite.json",
-    "benchmark-lab/schemas/benchmark-run-summary.schema.json",
-    "benchmark-lab/schemas/benchmark-suite.schema.json",
-    "benchmark-lab/schemas/fixtures/benchmark-run-summary.valid.json",
-    "benchmark-lab/schemas/fixtures/benchmark-suite.valid.json",
-    "benchmark-lab/schemas/promoted-evidence.schema.json",
-    "development/project-state.json",
-    "development/roadmap.json",
-    "docs/00-start-here/current-state.md",
-    "docs/06-decisions/decision-log.md",
-    "docs/07-progress/active-build-slice.md",
-    "docs/07-progress/build-status.md",
-    "docs/07-progress/next-agent-brief.md",
-    "docs/07-progress/progress-log.md",
-    "docs/07-progress/work-closeout.json",
-    "package.json",
-    "scripts/benchmark-lab-schema-test.js",
-    "benchmark-lab/engine/aggregation.js",
-    "benchmark-lab/engine/cli/benchmark-aggregate.js",
-    "benchmark-lab/engine/cli/benchmark-requalify.js",
-    "benchmark-lab/engine/provenance.js",
-    "benchmark-lab/engine/requalification.js",
-    "benchmark-lab/engine/semantic-scorer.js",
-    "benchmark-lab/locaily/tracks/accessibility-deep/cases-v2.json",
-    "benchmark-lab/locaily/tracks/accessibility-deep/scenarios-v2.js",
-    "benchmark-lab/locaily/tracks/accessibility-deep/suite-v2.json",
-    "benchmark-lab/locaily/tracks/semantic-scorer-fixture/cases.json",
-    "benchmark-lab/locaily/tracks/semantic-scorer-fixture/mock-responses.json",
-    "benchmark-lab/locaily/tracks/semantic-scorer-fixture/scenarios.js",
-    "benchmark-lab/locaily/tracks/semantic-scorer-fixture/suite.json",
-    "benchmark-lab/schemas/benchmark-aggregation.schema.json",
-    "benchmark-lab/schemas/benchmark-provenance.schema.json",
-    "benchmark-lab/schemas/fixtures/benchmark-aggregation.invalid.json",
-    "benchmark-lab/schemas/fixtures/benchmark-aggregation.valid.json",
-    "benchmark-lab/schemas/fixtures/benchmark-provenance.invalid.json",
-    "benchmark-lab/schemas/fixtures/benchmark-provenance.valid.json",
-    "development/milestones/benchmark-lab-m2-reproducible-semantic-qualification.json",
-    "development/sessions/session-20260802-001.json",
-    "scripts/benchmark-lab-aggregation-test.js",
-    "scripts/benchmark-lab-requalification-test.js",
-    "scripts/benchmark-lab-semantic-scorer-test.js"
-  ]
+  "startedAt": "2026-08-02T00:26:31.268Z",
+  "closedAt": null
 }

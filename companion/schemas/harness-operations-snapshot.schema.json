@@ -1,0 +1,337 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.local/schemas/harness-operations-snapshot.schema.json",
+  "title": "Harness-Neutral Agent Operations Snapshot",
+  "description": "Read-only normalized evidence from an external coding-agent harness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "snapshotId",
+    "capturedAt",
+    "mode",
+    "readOnly",
+    "harness",
+    "state",
+    "workers",
+    "worktrees",
+    "objectives",
+    "handoffs",
+    "checks",
+    "hud",
+    "evidence",
+    "provenance",
+    "locailyLinks"
+  ],
+  "properties": {
+    "schema": { "const": "locaily.harness.operations_snapshot.v1" },
+    "snapshotId": { "type": "string", "minLength": 1, "pattern": "^harness-snapshot-" },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "mode": { "const": "fixture" },
+    "readOnly": { "const": true },
+    "harness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "version", "sessionId", "sessionStatus"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "pattern": "^[a-z0-9-]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": ["string", "null"], "minLength": 1 },
+        "sessionId": { "type": "string", "minLength": 1 },
+        "sessionStatus": { "type": "string", "enum": ["active", "idle", "completed", "paused", "failed", "unknown"] }
+      }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["overallStatus", "lifecycleStatus", "reason"],
+      "properties": {
+        "overallStatus": { "type": "string", "enum": ["active", "idle", "completed", "paused", "failed", "unknown"] },
+        "lifecycleStatus": { "type": "string", "enum": ["queued", "active", "blocked", "paused", "completed", "cancelled", "unknown"] },
+        "reason": { "type": ["string", "null"], "minLength": 1 }
+      }
+    },
+    "workers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "role", "status", "model", "objectiveIds", "worktreeId", "evidenceIds"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "role": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "enum": ["queued", "working", "blocked", "idle", "completed", "failed", "unknown"] },
+          "model": { "type": ["string", "null"], "minLength": 1 },
+          "objectiveIds": { "type": "array", "items": { "type": "string" } },
+          "worktreeId": { "type": ["string", "null"], "minLength": 1 },
+          "evidenceIds": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "worktrees": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "path", "branch", "commit", "dirty", "evidenceIds"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "minLength": 1 },
+          "branch": { "type": "string", "minLength": 1 },
+          "commit": { "type": ["string", "null"], "minLength": 1 },
+          "dirty": { "type": ["boolean", "null"] },
+          "evidenceIds": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "objectives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "status", "priority", "workerIds", "worktreeIds", "evidenceIds"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "enum": ["queued", "active", "blocked", "completed", "cancelled", "unknown"] },
+          "priority": { "type": ["string", "null"], "enum": ["critical", "high", "medium", "low", null] },
+          "workerIds": { "type": "array", "items": { "type": "string" } },
+          "worktreeIds": { "type": "array", "items": { "type": "string" } },
+          "evidenceIds": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "handoffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "fromWorkerId", "toWorkerId", "status", "summary", "createdAt", "evidenceIds"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "fromWorkerId": { "type": "string", "minLength": 1 },
+          "toWorkerId": { "type": ["string", "null"], "minLength": 1 },
+          "status": { "type": "string", "enum": ["pending", "sent", "accepted", "rejected", "unknown"] },
+          "summary": { "type": ["string", "null"], "minLength": 1 },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "evidenceIds": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "status", "command", "completedAt", "evidenceIds"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "enum": ["passed", "failed", "running", "skipped", "unknown"] },
+          "command": { "type": ["string", "null"], "minLength": 1 },
+          "completedAt": { "type": ["string", "null"], "format": "date-time" },
+          "evidenceIds": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "hud": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contextPressure", "toolActivity", "risk", "cost", "sync"],
+      "properties": {
+        "contextPressure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["level", "usedTokens", "limitTokens", "percent", "evidenceIds"],
+          "properties": {
+            "level": { "type": "string", "enum": ["low", "medium", "high", "critical", "unknown"] },
+            "usedTokens": { "type": ["integer", "null"] },
+            "limitTokens": { "type": ["integer", "null"] },
+            "percent": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+            "evidenceIds": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "toolActivity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "activeCount", "lastTool", "evidenceIds"],
+          "properties": {
+            "state": { "type": "string", "enum": ["active", "idle", "unknown"] },
+            "activeCount": { "type": ["integer", "null"], "minimum": 0 },
+            "lastTool": { "type": ["string", "null"], "minLength": 1 },
+            "evidenceIds": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "risk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["level", "flags", "evidenceIds"],
+          "properties": {
+            "level": { "type": "string", "enum": ["low", "medium", "high", "critical", "unknown"] },
+            "flags": { "type": "array", "items": { "type": "string" } },
+            "evidenceIds": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "cost": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availability", "currency", "amount", "evidenceIds"],
+          "properties": {
+            "availability": { "type": "string", "enum": ["available", "unavailable", "unsupported", "redacted"] },
+            "currency": { "const": "USD" },
+            "amount": { "type": ["number", "null"], "minimum": 0 },
+            "evidenceIds": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "sync": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "lastSyncedAt", "evidenceIds"],
+          "properties": {
+            "status": { "type": "string", "enum": ["synced", "pending", "stale", "unknown"] },
+            "lastSyncedAt": { "type": ["string", "null"], "format": "date-time" },
+            "evidenceIds": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["collectionMode", "readOnly", "records"],
+      "properties": {
+        "collectionMode": { "const": "fixture" },
+        "readOnly": { "const": true },
+        "records": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "field", "status", "reason", "sourceRef", "redacted"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1, "pattern": "^evidence-" },
+              "field": { "type": "string", "minLength": 1 },
+              "status": { "type": "string", "enum": ["available", "unavailable", "unsupported", "redacted"] },
+              "reason": { "type": "string", "minLength": 1 },
+              "sourceRef": { "type": "string", "minLength": 1 },
+              "redacted": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceKind", "sourceId", "fixturePath", "adapterId", "adapterVersion", "sourceHarness", "sourceSessionId", "transformations"],
+      "properties": {
+        "sourceKind": { "const": "fixture" },
+        "sourceId": { "type": "string", "minLength": 1 },
+        "fixturePath": { "type": "string", "minLength": 1 },
+        "adapterId": { "type": "string", "minLength": 1 },
+        "adapterVersion": { "type": "string", "minLength": 1 },
+        "sourceHarness": { "type": "string", "minLength": 1 },
+        "sourceSessionId": { "type": "string", "minLength": 1 },
+        "transformations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["field", "operation", "note"],
+            "properties": {
+              "field": { "type": "string", "minLength": 1 },
+              "operation": { "type": "string", "enum": ["copied", "normalized", "redacted"] },
+              "note": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "locailyLinks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["projectState", "milestone", "session", "workCloseout", "validation", "reviewedMemory"],
+      "properties": {
+        "projectState": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "path", "currentMilestoneId", "activeSessionId", "status", "branch", "readOnly"],
+          "properties": {
+            "available": { "type": "boolean" },
+            "path": { "type": "string", "minLength": 1 },
+            "currentMilestoneId": { "type": ["string", "null"], "minLength": 1 },
+            "activeSessionId": { "type": ["string", "null"], "minLength": 1 },
+            "status": { "type": ["string", "null"], "minLength": 1 },
+            "branch": { "type": ["string", "null"], "minLength": 1 },
+            "readOnly": { "const": true }
+          }
+        },
+        "milestone": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "path", "id", "status", "title", "readOnly"],
+          "properties": {
+            "available": { "type": "boolean" },
+            "path": { "type": "string", "minLength": 1 },
+            "id": { "type": ["string", "null"], "minLength": 1 },
+            "status": { "type": ["string", "null"], "minLength": 1 },
+            "title": { "type": ["string", "null"], "minLength": 1 },
+            "readOnly": { "const": true }
+          }
+        },
+        "session": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "path", "id", "status", "branch", "readOnly"],
+          "properties": {
+            "available": { "type": "boolean" },
+            "path": { "type": "string", "minLength": 1 },
+            "id": { "type": ["string", "null"], "minLength": 1 },
+            "status": { "type": ["string", "null"], "minLength": 1 },
+            "branch": { "type": ["string", "null"], "minLength": 1 },
+            "readOnly": { "const": true }
+          }
+        },
+        "workCloseout": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "path", "workId", "status", "readOnly"],
+          "properties": {
+            "available": { "type": "boolean" },
+            "path": { "type": "string", "minLength": 1 },
+            "workId": { "type": ["string", "null"], "minLength": 1 },
+            "status": { "type": ["string", "null"], "minLength": 1 },
+            "readOnly": { "const": true }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "path", "id", "status", "profileId", "readOnly"],
+          "properties": {
+            "available": { "type": "boolean" },
+            "path": { "type": "string", "minLength": 1 },
+            "id": { "type": ["string", "null"], "minLength": 1 },
+            "status": { "type": ["string", "null"], "minLength": 1 },
+            "profileId": { "type": ["string", "null"], "minLength": 1 },
+            "readOnly": { "const": true }
+          }
+        },
+        "reviewedMemory": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["available", "path", "candidateCount", "pendingReviewCount", "readOnly"],
+          "properties": {
+            "available": { "type": "boolean" },
+            "path": { "type": "string", "minLength": 1 },
+            "candidateCount": { "type": "integer", "minimum": 0 },
+            "pendingReviewCount": { "type": "integer", "minimum": 0 },
+            "readOnly": { "const": true }
+          }
+        }
+      }
+    }
+  }
+}
