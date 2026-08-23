@@ -1,0 +1,15 @@
+{
+  "id": "review-dev-harness-01-agent-operations-contract-20260823T173702",
+  "milestoneId": "dev-harness-01-agent-operations-contract",
+  "status": "passed",
+  "branch": "fix/dev-harness-01-delivery-review-20260823",
+  "headCommit": "ee5df0011ececbe55bcfb9d680900748b10c762a",
+  "findings": [],
+  "summary": {
+    "total": 0,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0
+  },
+  "reviewedAt": "2026-08-23T17:37:02.401Z"
+}
