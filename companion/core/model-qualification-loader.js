@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 const { validateResult } = require("./result-validator");
 
 const DEFAULT_QUALIFICATION_SCHEMA_PATH = path.resolve(
@@ -25,6 +26,7 @@ function createModelQualificationLoader(options = {}) {
     getStatus() {
       const scan = scanQualificationRecords(qualificationDir, qualificationSchema);
       const checksumCount = countJsonFiles(checksumDir);
+      const checksumVerification = verifyQualificationChecksums(checksumDir);
       const byStatus = {};
       const byRole = {};
       let latestGeneratedAt = null;
@@ -50,6 +52,7 @@ function createModelQualificationLoader(options = {}) {
         records: scan.records.length,
         invalidRecords: scan.errors.length,
         checksums: checksumCount,
+        checksumVerification,
         byStatus,
         byRole,
         latestGeneratedAt,
@@ -111,6 +114,17 @@ function loadQualificationRecords(qualificationDir, qualificationSchema = loadQu
 }
 
 function scanQualificationRecords(qualificationDir, qualificationSchema = loadQualificationSchema()) {
+  if (!qualificationSchema) {
+    return {
+      records: [],
+      errors: [{
+        file: qualificationDir,
+        code: "QUALIFICATION_SCHEMA_UNAVAILABLE",
+        message: "Qualification records are not trusted because the qualification schema is unavailable."
+      }]
+    };
+  }
+
   if (!fs.existsSync(qualificationDir)) {
     return {
       records: [],
@@ -141,9 +155,7 @@ function scanQualificationRecords(qualificationDir, qualificationSchema = loadQu
       continue;
     }
 
-    const schemaValidation = qualificationSchema
-      ? validateResult(parsed, qualificationSchema, "qualification")
-      : { ok: parsed && parsed.schemaVersion === "benchmark.qualification.v1", errors: [] };
+    const schemaValidation = validateResult(parsed, qualificationSchema, "qualification");
 
     if (schemaValidation.ok) {
       records.push(parsed);
@@ -164,6 +176,56 @@ function scanQualificationRecords(qualificationDir, qualificationSchema = loadQu
     records,
     errors
   };
+}
+
+function verifyQualificationChecksums(checksumDir) {
+  const result = { total: 0, passed: 0, failures: [] };
+  if (!fs.existsSync(checksumDir)) {
+    return result;
+  }
+
+  for (const entry of fs.readdirSync(checksumDir, { withFileTypes: true })) {
+    if (!entry.isFile() || !entry.name.endsWith(".json")) {
+      continue;
+    }
+
+    const checksumPath = path.join(checksumDir, entry.name);
+    let record;
+    try {
+      record = JSON.parse(fs.readFileSync(checksumPath, "utf8"));
+    } catch (error) {
+      continue;
+    }
+    if (record.artifactType !== "qualification_record") {
+      continue;
+    }
+
+    result.total += 1;
+    try {
+      const repositoryRoot = path.resolve(__dirname, "..", "..");
+      const artifactPath = path.resolve(repositoryRoot, record.artifactPath);
+      if (!artifactPath.startsWith(`${repositoryRoot}${path.sep}`)) {
+        throw new Error("Checksum artifact path escapes the repository root.");
+      }
+      const raw = fs.readFileSync(artifactPath);
+      const content = record.checksumMode === "canonical_text_v1"
+        ? Buffer.from(raw.toString("utf8").replace(/\r\n/g, "\n").replace(/\r/g, "\n"), "utf8")
+        : raw;
+      const actual = `sha256:${crypto.createHash("sha256").update(content).digest("hex")}`;
+      if (actual !== record.checksum) {
+        throw new Error(`Checksum mismatch: expected ${record.checksum}, received ${actual}.`);
+      }
+      result.passed += 1;
+    } catch (error) {
+      result.failures.push({
+        file: checksumPath,
+        code: "QUALIFICATION_CHECKSUM_INVALID",
+        message: error.message
+      });
+    }
+  }
+
+  return result;
 }
 
 function countJsonFiles(dir) {

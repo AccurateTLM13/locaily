@@ -58,14 +58,16 @@ function evaluateSemanticCase({ scorer, benchmarkCase, output }) {
     };
   }
 
-  const pass = evaluation && (evaluation.pass === true || evaluation.verdict === "PASS");
-  if (typeof pass !== "boolean") {
+  const hasPass = evaluation && typeof evaluation.pass === "boolean";
+  const hasVerdict = evaluation && (evaluation.verdict === "PASS" || evaluation.verdict === "FAIL");
+  if (!hasPass && !hasVerdict) {
     return {
       pass: false,
       code: "SEMANTIC_RESULT_INVALID",
       errors: ["Semantic scorer must return { pass: boolean } or { verdict: \"PASS\" | \"FAIL\" }."]
     };
   }
+  const pass = hasPass ? evaluation.pass : evaluation.verdict === "PASS";
 
   return {
     pass,

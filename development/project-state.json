@@ -5,15 +5,17 @@
   "activeSession": null,
   "status": "ready-for-delivery",
   "defaultBranch": "main",
-  "activeBranch": "codex/benchmark-lab-m3-interactive-local-model-lab",
+  "activeBranch": "fix/post-merge-stabilization-20260823",
   "lastCompletedMilestone": "benchmark-lab-m3-interactive-local-model-lab",
-  "nextRecommendedAction": "Deliver milestone 'benchmark-lab-m3-interactive-local-model-lab' (deliver-milestone.js --slug benchmark-lab-m3-interactive-local-model-lab --all)",
+  "nextRecommendedAction": "Review the post-merge stabilization pull request and require a green full validation run before merge",
   "blockers": [],
-  "warnings": [],
-  "updatedAt": "2026-08-04T03:05:47.534Z",
+  "warnings": [
+    "DEV-HARNESS-01 milestone and session records still report active work from 2026-08-02 and require separate lifecycle reconciliation."
+  ],
+  "updatedAt": "2026-08-23T14:20:00.000Z",
   "updatedBy": {
     "type": "agent",
-    "name": "dev-lifecycle",
-    "platform": "system"
+    "name": "stabilization-review",
+    "platform": "codex"
   }
 }

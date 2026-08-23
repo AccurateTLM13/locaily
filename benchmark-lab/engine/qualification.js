@@ -15,7 +15,8 @@ async function generateQualification({
   status = "screening",
   roleStatus = null,
   notes = [],
-  now = () => new Date()
+  now = () => new Date(),
+  overwrite = false
 }) {
   if (!modelId) {
     throw new Error("Qualification generation requires --model.");
@@ -47,6 +48,10 @@ async function generateQualification({
   assertValid(validateSchema(record, qualificationSchema, "qualification"), "Qualification record is invalid.");
 
   const recordPath = path.join(LAB_ROOT, "qualifications", "models", `${record.recordId}.json`);
+  const existingRecord = await readJsonIfExists(recordPath);
+  if (existingRecord && !overwrite && JSON.stringify(existingRecord) !== JSON.stringify(record)) {
+    throw new Error(`Qualification record already exists with different content; pass overwrite: true to replace ${record.recordId}.`);
+  }
   await writeJson(recordPath, record);
   const checksum = await writeChecksumRecord({
     artifactPath: recordPath,
@@ -76,6 +81,9 @@ function buildQualificationRecord({
     : null;
   assertQualificationEligible({ status, roleStatus: normalizedRoleStatus, evidence });
   const qualifiedFor = [];
+  const provenanceNotes = manifest.digest
+    ? []
+    : ["Model manifest has no digest; exact model provenance is unavailable."];
 
   if (normalizedRole && normalizedRoleStatus) {
     qualifiedFor.push({
@@ -113,10 +121,22 @@ function buildQualificationRecord({
     modelProfileId: manifest.modelId,
     notes: [
       "Generated from explicitly promoted Benchmark Lab evidence.",
+      ...provenanceNotes,
       ...notes
     ],
     generatedAt
   };
+}
+
+async function readJsonIfExists(filePath) {
+  try {
+    return await readJson(filePath);
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
 }
 
 function assertQualificationEligible({ status, roleStatus, evidence }) {
