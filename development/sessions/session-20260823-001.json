@@ -1,0 +1,42 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260823-001",
+  "milestoneId": "dev-harness-01-agent-operations-contract",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": "Establish a Locaily-owned, harness-neutral contract that can inspect coding-agent sessions, worktrees, workers, checks, risks, and handoffs without making Codex, OpenCode, Claude Code, or any other harness the canonical control plane.",
+  "branch": "fix/dev-harness-01-delivery-review-20260823",
+  "startingCommit": "65e7a4ab55e53220aa00dc28792e0eb2cf4d8cac",
+  "plannedFiles": [],
+  "completedWork": [
+    "Fresh pre-delivery validation validation-20260823T200221-3ad2b6e9 passed on committed source HEAD 65e7a4a after rebasing onto origin/main.",
+    "Final pre-delivery validation passed on reachable HEAD 65e7a4ab55e53220aa00dc28792e0eb2cf4d8cac after rebasing PR #38 onto origin/main."
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [
+    "validation-20260823T200221-3ad2b6e9"
+  ],
+  "checks": [
+    {
+      "timestamp": "2026-08-23T20:03:36.827Z",
+      "message": "Fresh pre-delivery validation validation-20260823T200221-3ad2b6e9 passed on committed source HEAD 65e7a4a after rebasing onto origin/main.",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-08-23T20:02:13.283Z",
+  "closedAt": "2026-08-23T20:03:45.231Z",
+  "closingCommit": "65e7a4ab55e53220aa00dc28792e0eb2cf4d8cac",
+  "dirtyFiles": [
+    "development/milestones/dev-harness-01-agent-operations-contract.json",
+    "development/project-state.json",
+    "development/validation-index.json",
+    "development/sessions/session-20260823-001.json",
+    "development/validation-results/validation-20260823T200221-3ad2b6e9.json"
+  ]
+}

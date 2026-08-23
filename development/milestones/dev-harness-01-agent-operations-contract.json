@@ -34,8 +34,14 @@
       "description": "The adapter and canonical snapshot contracts validate through the repository's schema test path and define explicit supported, unsupported, partial, and error states.",
       "status": "satisfied",
       "evidence": [
-        { "type": "test", "reference": "npm run test:harness" },
-        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+        {
+          "type": "test",
+          "reference": "npm run test:harness"
+        },
+        {
+          "type": "validation-record",
+          "reference": "validation-20260823T200221-3ad2b6e9"
+        }
       ]
     },
     {
@@ -43,8 +49,14 @@
       "description": "A deterministic registry selects the correct adapter for Codex, OpenCode, and generic/unknown targets and reports why a target is unsupported when no adapter can open it.",
       "status": "satisfied",
       "evidence": [
-        { "type": "test", "reference": "npm run test:harness" },
-        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+        {
+          "type": "test",
+          "reference": "npm run test:harness"
+        },
+        {
+          "type": "validation-record",
+          "reference": "validation-20260823T200221-3ad2b6e9"
+        }
       ]
     },
     {
@@ -52,8 +64,14 @@
       "description": "Codex and OpenCode fixtures produce the same canonical snapshot shape for equivalent session facts, while absent facts remain unavailable instead of being guessed.",
       "status": "satisfied",
       "evidence": [
-        { "type": "test", "reference": "npm run test:harness" },
-        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+        {
+          "type": "test",
+          "reference": "npm run test:harness"
+        },
+        {
+          "type": "validation-record",
+          "reference": "validation-20260823T200221-3ad2b6e9"
+        }
       ]
     },
     {
@@ -61,8 +79,14 @@
       "description": "A versioned machine-readable status payload exposes context, tool activity, workers, queue state, checks, risk, cost, and handoff/sync fields with deterministic output and explicit unknown values.",
       "status": "satisfied",
       "evidence": [
-        { "type": "test", "reference": "npm run test:harness" },
-        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+        {
+          "type": "test",
+          "reference": "npm run test:harness"
+        },
+        {
+          "type": "validation-record",
+          "reference": "validation-20260823T200221-3ad2b6e9"
+        }
       ]
     },
     {
@@ -70,8 +94,14 @@
       "description": "A normalized handoff references existing Locaily development session, milestone, work-closeout, and/or memory evidence by stable identifiers without duplicating raw transcripts.",
       "status": "satisfied",
       "evidence": [
-        { "type": "test", "reference": "npm run test:harness" },
-        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+        {
+          "type": "test",
+          "reference": "npm run test:harness"
+        },
+        {
+          "type": "validation-record",
+          "reference": "validation-20260823T200221-3ad2b6e9"
+        }
       ]
     },
     {
@@ -79,8 +109,14 @@
       "description": "Malformed input, secret-shaped values, path escapes, and unsupported mutating actions are rejected or redacted with stable reason codes and no unauthorized filesystem or network writes.",
       "status": "satisfied",
       "evidence": [
-        { "type": "test", "reference": "npm run test:harness" },
-        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+        {
+          "type": "test",
+          "reference": "npm run test:harness"
+        },
+        {
+          "type": "validation-record",
+          "reference": "validation-20260823T200221-3ad2b6e9"
+        }
       ]
     },
     {
@@ -88,8 +124,14 @@
       "description": "Targeted adapter/schema tests, lifecycle/control-plane tests, and the relevant offline repository validation profile pass from a clean committed state.",
       "status": "satisfied",
       "evidence": [
-        { "type": "test", "reference": "pre-delivery validation profile" },
-        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+        {
+          "type": "test",
+          "reference": "pre-delivery validation profile"
+        },
+        {
+          "type": "validation-record",
+          "reference": "validation-20260823T200221-3ad2b6e9"
+        }
       ]
     }
   ],
@@ -100,7 +142,8 @@
   "blockers": [],
   "lifecycleRef": null,
   "createdAt": "2026-08-01T22:40:52.000Z",
-  "startedAt": "2026-08-02T00:26:31.266Z",
+  "startedAt": "2026-08-23T20:02:13.281Z",
   "completedAt": "2026-08-23T14:45:00.000Z",
-  "mergedAt": null
+  "mergedAt": null,
+  "latestValidationId": "validation-20260823T200221-3ad2b6e9"
 }

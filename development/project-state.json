@@ -12,7 +12,7 @@
   "warnings": [
     "DEV-LOOP-01 remains planned while PR #30 is open and dirty; do not mark the dependency delivered without a separate lifecycle decision."
   ],
-  "updatedAt": "2026-08-23T17:33:42.097Z",
+  "updatedAt": "2026-08-23T20:02:13.284Z",
   "updatedBy": {
     "type": "agent",
     "name": "stabilization-review",
