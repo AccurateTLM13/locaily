@@ -10,7 +10,8 @@
     "Removed the superseded review record that pointed to unreachable commit ee5df0011ececbe55bcfb9d680900748b10c762a.",
     "Corrected validation so its transient validating state remains in memory until required profile checks finish, preventing the validator from dirtying its own committed checkout.",
     "Added regression coverage proving required profile checks run before milestone metadata is persisted.",
-    "Ran focused lifecycle-gate and schema tests and generated a zero-finding agent review at reachable commit 244f2c58c89126a6e7bd88f1782ad0f2144a20b2."
+    "Ran focused lifecycle-gate and schema tests and generated a zero-finding agent review at reachable commit 244f2c58c89126a6e7bd88f1782ad0f2144a20b2.",
+    "Ran the pre-delivery profile from a clean committed checkout; all six required checks, the optional full suite, and both acknowledged manual gates passed."
   ],
   "remaining": [
     "DEV-LOOP-01 remains planned while PR #30 is open and dirty; a separate owner decision is required before changing that lifecycle state.",
@@ -32,12 +33,11 @@
       "node scripts/test-controller-invariants.js",
       "node scripts/contract-test.js",
       "node scripts/test-development-lifecycle-gate.js (7 passed)",
-      "node scripts/test-development-schemas.js (29 passed)"
+      "node scripts/test-development-schemas.js (29 passed)",
+      "npm.cmd run dev:validate (clean committed checkout; 6 required and 1 optional check passed)"
     ],
     "failed": [],
-    "not_run": [
-      "Fresh pre-delivery validation — pending after this closeout and review metadata are committed."
-    ]
+    "not_run": []
   },
   "recommended_next_agent": "reviewer"
 }
