@@ -14,22 +14,22 @@
   "completedWork": [
     "Removed superseded review evidence that pointed to unreachable commit ee5df0011ececbe55bcfb9d680900748b10c762a.",
     "Corrected validation so required checks inspect the clean committed checkout before validation metadata is persisted.",
-    "Final pre-delivery validation validation-20260823T211004-a51ea6e3 passed from clean committed head a5aa1565197432f0b2ebb9a8c016fb17632ddc36 with both manual gates acknowledged."
+    "Final pre-delivery validation validation-20260823T211614-13b4ddad passed from clean committed head 3177ddb19373ccaf784b512454f49842058339b6 with both manual gates acknowledged."
   ],
   "remainingWork": [],
   "blockers": [],
   "validationRunIds": [
-    "validation-20260823T211004-a51ea6e3"
+    "validation-20260823T211614-13b4ddad"
   ],
   "checks": [
     {
-      "timestamp": "2026-08-23T21:10:59.845Z",
-      "message": "Final pre-delivery validation validation-20260823T211004-a51ea6e3 passed from clean committed head a5aa1565197432f0b2ebb9a8c016fb17632ddc36.",
+      "timestamp": "2026-08-23T21:17:14.266Z",
+      "message": "Final pre-delivery validation validation-20260823T211614-13b4ddad passed from clean committed head 3177ddb19373ccaf784b512454f49842058339b6.",
       "filesChanged": []
     }
   ],
   "startedAt": "2026-08-23T20:54:07.000Z",
-  "closedAt": "2026-08-23T21:10:59.845Z",
-  "closingCommit": "a5aa1565197432f0b2ebb9a8c016fb17632ddc36",
+  "closedAt": "2026-08-23T21:17:14.266Z",
+  "closingCommit": "3177ddb19373ccaf784b512454f49842058339b6",
   "dirtyFiles": []
 }
