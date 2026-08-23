@@ -18,9 +18,7 @@
   ],
   "remainingWork": [],
   "blockers": [],
-  "validationRunIds": [
-    "validation-20260823T174000-issue37"
-  ],
+  "validationRunIds": [],
   "checks": [
     {
       "timestamp": "2026-08-02T00:54:33.896Z",
