@@ -1,21 +1,21 @@
 {
   "schema": "locaily.development.project_state.v1",
   "project": "locaily",
-  "currentMilestone": "dev-harness-01-agent-operations-contract",
+  "currentMilestone": null,
   "activeSession": null,
-  "status": "active",
+  "status": "ready-for-delivery",
   "defaultBranch": "main",
   "activeBranch": "fix/dev-harness-01-delivery-review-20260823",
-  "lastCompletedMilestone": "benchmark-lab-m3-interactive-local-model-lab",
-  "nextRecommendedAction": "Regenerate DEV-HARNESS-01 validation from a clean committed control-plane state, then complete delivery preflight",
+  "lastCompletedMilestone": "dev-harness-01-agent-operations-contract",
+  "nextRecommendedAction": "Deliver milestone 'dev-harness-01-agent-operations-contract' (deliver-milestone.js --slug dev-harness-01-agent-operations-contract --all)",
   "blockers": [],
   "warnings": [
     "DEV-LOOP-01 remains planned while PR #30 is open and dirty; do not mark the dependency delivered without a separate lifecycle decision."
   ],
-  "updatedAt": "2026-08-23T21:04:26.508Z",
+  "updatedAt": "2026-08-23T21:12:05.309Z",
   "updatedBy": {
     "type": "agent",
-    "name": "review-reconciliation",
-    "platform": "codex"
+    "name": "dev-lifecycle",
+    "platform": "system"
   }
 }
