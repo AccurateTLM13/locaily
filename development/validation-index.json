@@ -3,6 +3,7 @@
     "px1-canonical-product-status": "validation-20260726T194012-6848fec5",
     "ctk-01-capability-trigger-kernel": "validation-20260731T012502-3e424fff",
     "benchmark-lab-m2-reproducible-semantic-qualification": "validation-20260803T023959-bd677b49",
+    "dev-harness-01-agent-operations-contract": "validation-20260823T174000-issue37",
     "benchmark-lab-m3-interactive-local-model-lab": "validation-20260804T030446-0b281076"
   }
 }
