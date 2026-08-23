@@ -194,6 +194,24 @@
       "candidateReason": "Strong fit for Lighthouse Handoff and developer workflows.",
       "knownStrengths": ["Dense 0.8B coding model with reasoning on Qwen3 platform", "Fast draft generation for developer-facing tracks"],
       "knownWeaknesses": ["Not yet benchmarked on Lighthouse Handoff fixtures", "Coding-specific; may need validators for factual handoff content"]
+    },
+    {
+      "id": "meta-muse-glimmer-30b",
+      "provider": "Meta",
+      "runtimeModel": "hf.co/meta-models/Muse-Glimmer-30B-GGUF",
+      "family": "Muse Glimmer",
+      "size": "~30B",
+      "license": "Apache-2.0",
+      "primaryRole": "agentic_generalist",
+      "roleCandidates": ["crew-chief", "heavy-nearbynode", "escalation-model", "general-agent", "coding-agent"],
+      "recommendedRoles": [],
+      "testTracks": ["basic-tool-use", "track-planning", "developer_task_expansion", "code_drafting"],
+      "status": "proposed",
+      "priority": "research",
+      "candidateReason": "Heavy local agentic-generalist tier for testing the smallest capability that completes a task correctly alongside deterministic tools and tiny specialists.",
+      "runtimeNotes": "Official safetensors and GGUF artifacts exist. The current Benchmark Lab runtime is Ollama-only; no Glimmer artifact is installed or locally load-tested, and no exact runtime digest is pinned.",
+      "knownStrengths": ["Official source exposes text-and-image conditional generation artifacts", "Official chat template includes a function-call protocol"],
+      "knownWeaknesses": ["No Locaily benchmark, qualification, or runtime-load evidence", "17 GB official GGUF artifact exceeds the available RTX 2060 6 GB VRAM before context and runtime overhead", "Language coverage, exact context limit, and supported local runtime versions are not yet source-verified in Locaily"]
     }
   ]
 }

@@ -84,3 +84,6 @@ companion/evidence/lessons/*.json
 !companion/evidence/lessons/.gitkeep
 !companion/evidence/records/fixtures/
 !companion/evidence/lessons/fixtures/
+
+# CodeGraph local index
+.codegraph/

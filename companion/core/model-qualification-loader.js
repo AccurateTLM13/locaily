@@ -12,21 +12,178 @@ const DEFAULT_QUALIFICATION_SCHEMA_PATH = path.resolve(
   "qualification-record.schema.json"
 );
 
+const TEXT_EXTENSIONS = new Set([".json", ".md", ".js", ".txt", ".yaml", ".yml", ".toml", ".html", ".css", ".xml", ".svg"]);
+
+function createRecordCache() {
+  const entries = new Map();
+
+  return {
+    get(filePath, stat) {
+      const cached = entries.get(filePath);
+      if (!cached || cached.key !== `${stat.mtimeMs}:${stat.size}`) {
+        return null;
+      }
+      return cached.value;
+    },
+    set(filePath, stat, value) {
+      entries.set(filePath, { key: `${stat.mtimeMs}:${stat.size}`, value });
+    },
+    drop(filePath) {
+      entries.delete(filePath);
+    }
+  };
+}
+
+function verifyChecksumDirectory(checksumDir) {
+  const summary = {
+    total: 0,
+    verified: 0,
+    failed: 0,
+    failures: [],
+    results: []
+  };
+
+  if (!fs.existsSync(checksumDir)) {
+    return summary;
+  }
+
+  for (const entry of fs.readdirSync(checksumDir, { withFileTypes: true })) {
+    if (!entry.isFile() || !entry.name.endsWith(".json")) {
+      continue;
+    }
+
+    summary.total += 1;
+    const filePath = path.join(checksumDir, entry.name);
+    const result = verifyChecksumFile(filePath);
+    result.file = filePath;
+    summary.results.push(result);
+
+    if (result.ok) {
+      summary.verified += 1;
+    } else {
+      summary.failed += 1;
+      summary.failures.push({
+        file: filePath,
+        checksumId: result.checksumId || null,
+        reason: result.reason,
+        detail: result.detail || null
+      });
+    }
+  }
+
+  return summary;
+}
+
+function verifyChecksumFile(checksumFilePath) {
+  let record;
+
+  try {
+    record = JSON.parse(fs.readFileSync(checksumFilePath, "utf8"));
+  } catch (error) {
+    return {
+      ok: false,
+      reason: "CHECKSUM_RECORD_INVALID_JSON",
+      detail: error.message
+    };
+  }
+
+  if (!record || typeof record.artifactPath !== "string" || typeof record.checksum !== "string") {
+    return {
+      ok: false,
+      checksumId: record && record.checksumId ? record.checksumId : null,
+      reason: "CHECKSUM_RECORD_INCOMPLETE",
+      detail: "Checksum record is missing artifactPath or checksum."
+    };
+  }
+
+  const repositoryRoot = path.resolve(__dirname, "..", "..");
+  const artifactPath = path.resolve(repositoryRoot, record.artifactPath);
+
+  if (!artifactPath.startsWith(`${repositoryRoot}${path.sep}`)) {
+    return {
+      ok: false,
+      checksumId: record.checksumId || null,
+      reason: "ARTIFACT_PATH_ESCAPES_REPOSITORY",
+      detail: artifactPath
+    };
+  }
+
+  let artifact;
+  try {
+    artifact = fs.readFileSync(artifactPath);
+  } catch (error) {
+    return {
+      ok: false,
+      checksumId: record.checksumId || null,
+      reason: "ARTIFACT_MISSING",
+      detail: artifactPath
+    };
+  }
+
+  const mode = record.checksumMode || "byte_exact";
+  const actual = checksumContent(artifact, mode);
+
+  if (actual === record.checksum) {
+    return {
+      ok: true,
+      checksumId: record.checksumId || null,
+      expected: record.checksum,
+      actual
+    };
+  }
+
+  if (mode === "byte_exact" && isTextArtifact(artifactPath)) {
+    const canonicalActual = checksumContent(artifact, "canonical_text_v1");
+    if (canonicalActual === record.checksum) {
+      return {
+        ok: true,
+        checksumId: record.checksumId || null,
+        expected: record.checksum,
+        actual: canonicalActual,
+        legacyCanonicalMatch: true
+      };
+    }
+  }
+
+  return {
+    ok: false,
+    checksumId: record.checksumId || null,
+    reason: "CHECKSUM_MISMATCH",
+    detail: `expected ${record.checksum}, got ${actual}`,
+    expected: record.checksum,
+    actual
+  };
+}
+
+function checksumContent(buffer, mode) {
+  let content = buffer;
+
+  if (mode === "canonical_text_v1") {
+    content = Buffer.from(buffer.toString("utf8").replace(/\r\n/g, "\n").replace(/\r/g, "\n"), "utf8");
+  }
+
+  return `sha256:${crypto.createHash("sha256").update(content).digest("hex")}`;
+}
+
+function isTextArtifact(filePath) {
+  return TEXT_EXTENSIONS.has(path.extname(filePath).toLowerCase());
+}
+
 function createModelQualificationLoader(options = {}) {
   const qualificationDir = options.qualificationDir
     || path.resolve(__dirname, "..", "..", "benchmark-lab", "qualifications", "models");
   const checksumDir = options.checksumDir
     || path.resolve(__dirname, "..", "..", "benchmark-lab", "evidence", "checksums");
   const qualificationSchema = options.qualificationSchema || loadQualificationSchema(options.schemaPath);
+  const recordCache = createRecordCache();
 
   return {
     list() {
-      return loadQualificationRecords(qualificationDir, qualificationSchema);
+      return loadQualificationRecords(qualificationDir, qualificationSchema, recordCache);
     },
     getStatus() {
-      const scan = scanQualificationRecords(qualificationDir, qualificationSchema);
-      const checksumCount = countJsonFiles(checksumDir);
-      const checksumVerification = verifyQualificationChecksums(checksumDir);
+      const scan = scanQualificationRecords(qualificationDir, qualificationSchema, recordCache);
+      const checksumVerification = verifyChecksumDirectory(checksumDir);
       const byStatus = {};
       const byRole = {};
       let latestGeneratedAt = null;
@@ -51,8 +208,14 @@ function createModelQualificationLoader(options = {}) {
         checksumDir,
         records: scan.records.length,
         invalidRecords: scan.errors.length,
-        checksums: checksumCount,
-        checksumVerification,
+        checksums: checksumVerification.total,
+        checksumVerification: {
+          total: checksumVerification.total,
+          verified: checksumVerification.verified,
+          passed: checksumVerification.verified,
+          failed: checksumVerification.failed,
+          failures: checksumVerification.failures
+        },
         byStatus,
         byRole,
         latestGeneratedAt,
@@ -61,7 +224,7 @@ function createModelQualificationLoader(options = {}) {
     },
     findByModel(modelId) {
       const normalizedModelId = normalizeId(modelId);
-      return loadQualificationRecords(qualificationDir, qualificationSchema)
+      return loadQualificationRecords(qualificationDir, qualificationSchema, recordCache)
         .filter((record) => matchesModel(record, normalizedModelId));
     },
     findForRole({ modelId, role, trackId = null, contractId = null }) {
@@ -71,7 +234,7 @@ function createModelQualificationLoader(options = {}) {
       const normalizedContractId = normalizeId(contractId);
       const matches = [];
 
-      for (const record of loadQualificationRecords(qualificationDir, qualificationSchema)) {
+      for (const record of loadQualificationRecords(qualificationDir, qualificationSchema, recordCache)) {
         if (!matchesModel(record, normalizedModelId)) {
           continue;
         }
@@ -109,11 +272,11 @@ function createModelQualificationLoader(options = {}) {
   };
 }
 
-function loadQualificationRecords(qualificationDir, qualificationSchema = loadQualificationSchema()) {
-  return scanQualificationRecords(qualificationDir, qualificationSchema).records;
+function loadQualificationRecords(qualificationDir, qualificationSchema = loadQualificationSchema(), cache = null) {
+  return scanQualificationRecords(qualificationDir, qualificationSchema, cache).records;
 }
 
-function scanQualificationRecords(qualificationDir, qualificationSchema = loadQualificationSchema()) {
+function scanQualificationRecords(qualificationDir, qualificationSchema = loadQualificationSchema(), cache = null) {
   if (!qualificationSchema) {
     return {
       records: [],
@@ -134,6 +297,7 @@ function scanQualificationRecords(qualificationDir, qualificationSchema = loadQu
 
   const records = [];
   const errors = [];
+
   const entries = fs.readdirSync(qualificationDir, { withFileTypes: true });
 
   for (const entry of entries) {
@@ -142,24 +306,42 @@ function scanQualificationRecords(qualificationDir, qualificationSchema = loadQu
     }
 
     const filePath = path.join(qualificationDir, entry.name);
-    let parsed;
+    let stat;
 
     try {
-      parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      stat = fs.statSync(filePath);
     } catch (error) {
-      errors.push({
-        file: filePath,
-        code: "QUALIFICATION_RECORD_INVALID_JSON",
-        message: error.message
-      });
       continue;
     }
 
+    let parsed = cache ? cache.get(filePath, stat) : null;
+    const fromCache = parsed !== null;
+
+    if (!parsed) {
+      try {
+        parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      } catch (error) {
+        errors.push({
+          file: filePath,
+          code: "QUALIFICATION_RECORD_INVALID_JSON",
+          message: error.message
+        });
+        continue;
+      }
+    }
     const schemaValidation = validateResult(parsed, qualificationSchema, "qualification");
 
     if (schemaValidation.ok) {
       records.push(parsed);
+
+      if (cache && !fromCache) {
+        cache.set(filePath, stat, parsed);
+      }
     } else {
+      if (cache) {
+        cache.drop(filePath);
+      }
+
       errors.push({
         file: filePath,
         code: parsed && parsed.schemaVersion === "benchmark.qualification.v1"
@@ -176,74 +358,6 @@ function scanQualificationRecords(qualificationDir, qualificationSchema = loadQu
     records,
     errors
   };
-}
-
-function verifyQualificationChecksums(checksumDir) {
-  const result = { total: 0, passed: 0, failures: [] };
-  if (!fs.existsSync(checksumDir)) {
-    return result;
-  }
-
-  for (const entry of fs.readdirSync(checksumDir, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith(".json")) {
-      continue;
-    }
-
-    const checksumPath = path.join(checksumDir, entry.name);
-    let record;
-    try {
-      record = JSON.parse(fs.readFileSync(checksumPath, "utf8"));
-    } catch (error) {
-      if (entry.name.endsWith("-qualification.json")) {
-        result.total += 1;
-        result.failures.push({
-          file: checksumPath,
-          code: "QUALIFICATION_CHECKSUM_INVALID_JSON",
-          message: error.message
-        });
-      }
-      continue;
-    }
-    if (record.artifactType !== "qualification_record") {
-      continue;
-    }
-
-    result.total += 1;
-    try {
-      const repositoryRoot = path.resolve(__dirname, "..", "..");
-      const artifactPath = path.resolve(repositoryRoot, record.artifactPath);
-      if (!artifactPath.startsWith(`${repositoryRoot}${path.sep}`)) {
-        throw new Error("Checksum artifact path escapes the repository root.");
-      }
-      const raw = fs.readFileSync(artifactPath);
-      const content = record.checksumMode === "canonical_text_v1"
-        ? Buffer.from(raw.toString("utf8").replace(/\r\n/g, "\n").replace(/\r/g, "\n"), "utf8")
-        : raw;
-      const actual = `sha256:${crypto.createHash("sha256").update(content).digest("hex")}`;
-      if (actual !== record.checksum) {
-        throw new Error(`Checksum mismatch: expected ${record.checksum}, received ${actual}.`);
-      }
-      result.passed += 1;
-    } catch (error) {
-      result.failures.push({
-        file: checksumPath,
-        code: "QUALIFICATION_CHECKSUM_INVALID",
-        message: error.message
-      });
-    }
-  }
-
-  return result;
-}
-
-function countJsonFiles(dir) {
-  if (!fs.existsSync(dir)) {
-    return 0;
-  }
-
-  return fs.readdirSync(dir, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
-    .length;
 }
 
 function loadQualificationSchema(schemaPath = DEFAULT_QUALIFICATION_SCHEMA_PATH) {
