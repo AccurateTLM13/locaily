@@ -20,7 +20,7 @@
   ],
   "safe_to_start_unrelated_work": true,
   "working_branch": "fix/dev-harness-01-delivery-review-20260823",
-  "last_commit": "d3c418f9874ec81159c3aee89288245d8e436286",
+  "last_commit": "2717c50",
   "validation": {
     "passed": [
       "node scripts/test-harness-adapters.js",
