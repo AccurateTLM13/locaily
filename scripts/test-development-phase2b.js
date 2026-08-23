@@ -11,6 +11,8 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const PROJECT_ROOT = path.resolve(__dirname, "..");
+const LIFECYCLE_SOURCE = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
+const GIT_STATE_SOURCE = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "development-git-state.js"), "utf8");
 const DEVELOPMENT_DIR = path.join(PROJECT_ROOT, "development");
 const MILESTONES_DIR = path.join(DEVELOPMENT_DIR, "milestones");
 const SESSIONS_DIR = path.join(DEVELOPMENT_DIR, "sessions");
@@ -213,7 +215,7 @@ test("dev:milestone:complete refuses with error/critical contradictions", () => 
 });
 
 test("dev:milestone:complete refuses without validation", () => {
-  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
+  const content = LIFECYCLE_SOURCE + GIT_STATE_SOURCE;
   assert(content.includes("NO_VALIDATION"), "Missing NO_VALIDATION gate");
 });
 
@@ -223,8 +225,8 @@ test("dev:milestone:complete refuses with failed validation", () => {
 });
 
 test("dev:milestone:complete refuses with stale validation", () => {
-  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
-  assert(content.includes("VALIDATION_STALE"), "Missing VALIDATION_STALE gate");
+  const content = LIFECYCLE_SOURCE + GIT_STATE_SOURCE;
+  assert(content.includes("FINGERPRINT_CONTENT"), "Missing stale fingerprint gate");
   assert(content.includes("isFingerprintStale"), "Missing isFingerprintStale function");
 });
 
@@ -271,7 +273,7 @@ test("isFingerprintStale detects fingerprint mismatch", () => {
 });
 
 test("computeGitFingerprint produces sha256 fingerprint", () => {
-  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
+  const content = LIFECYCLE_SOURCE + GIT_STATE_SOURCE;
   assert(content.includes("computeGitFingerprint"), "Missing computeGitFingerprint");
   assert(content.includes("sha256:"), "Missing sha256 fingerprint");
 });
@@ -334,12 +336,12 @@ test("getCompletionPolicy reads from profile", () => {
 });
 
 test("Completion enforces requireCleanTree", () => {
-  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
+  const content = LIFECYCLE_SOURCE + GIT_STATE_SOURCE;
   assert(content.includes("DIRTY_SINCE_VALIDATION") && content.includes("policy.requireCleanTree"),
     "Missing DIRTY_SINCE_VALIDATION gate with policy check");
   assert(content.includes("currentFingerprint.changedFiles.length > 0"),
     "Completion must exclude control-plane validation metadata from dirty source checks");
-  assert(content.includes('gitResult(["status", "--porcelain"])'),
+  assert(content.includes('runGit(cwd, ["status", "--porcelain"])'),
     "Porcelain parsing must preserve the leading Git status column");
 });
 

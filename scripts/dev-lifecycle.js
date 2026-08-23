@@ -197,6 +197,16 @@ function findPausedSession() {
   return listSessions().find(s => s.status === "paused") || null;
 }
 
+// Legacy helper retained for Phase 2B compatibility; active gates use the
+// shared source-state comparator below.
+function isFingerprintStale(validation, currentFingerprint) {
+  if (!validation || !validation.gitState) return true;
+  if (validation.gitState.branch !== currentFingerprint.branch) return true;
+  if (validation.gitState.headCommit !== currentFingerprint.headCommit) return true;
+  if (validation.gitState.fingerprint !== currentFingerprint.fingerprint) return true;
+  return false;
+}
+
 // ---- validation result operations ----
 
 function validationResultPath(id) {
