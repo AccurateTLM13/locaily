@@ -1,31 +1,41 @@
 {
-  "work_id": "post-merge-stabilization-20260823",
-  "objective_id": "post-merge-stabilization-20260823",
+  "work_id": "dev-harness-01-agent-operations-contract-20260823",
+  "objective_id": "dev-harness-01-agent-operations-contract",
   "status": "complete",
-  "closed_at": "2026-08-23T14:35:00.000Z",
-  "original_goal": "Restore green validation after PR #35 and reconcile the repository's current-state pointers without starting new feature work.",
+  "closed_at": "2026-08-23T17:33:42.097Z",
+  "original_goal": "Complete the DEV-HARNESS-01 delivery review from current main, index truthful pre-delivery validation, and reconcile the control-plane records without merging.",
   "completed": [
-    "Implemented explicit missing-digest provenance notes for qualification records.",
-    "Blocked implicit replacement of differing qualification records while preserving idempotent regeneration and explicit overwrite.",
-    "Made invalid semantic scorer results fail closed with a stable invalid-result code.",
-    "Made the companion qualification loader fail closed when its schema is unavailable and report qualification checksum verification.",
-    "Removed the date-sensitive assumption from the development-memory retention test.",
-    "Initialized .localbrain/NOW.md and replaced the obsolete M3 delivery instruction in development/project-state.json."
+    "Verified origin/main at merge commit f525bb424f5884909df42496724651455026ce9d after PR #36.",
+    "Reconciled DEV-HARNESS-01 milestone acceptance evidence, project state, session metadata, roadmap tracking, and closeout records.",
+    "Ran the focused DEV-HARNESS checks and the repository pre-delivery profile from a clean committed branch.",
+    "Indexed the resulting validation record against the committed implementation state."
   ],
-  "remaining": [],
-  "next_required_action": "Review the stabilization pull request and require green GitHub Actions before merge.",
-  "blockers": [],
+  "remaining": [
+    "DEV-LOOP-01 remains planned while PR #30 is open and dirty; a separate owner decision is required before changing that lifecycle state.",
+    "The delivery-review PR remains unmerged pending CI and owner review."
+  ],
+  "next_required_action": "Review the DEV-HARNESS-01 delivery-review PR and resolve the separate DEV-LOOP-01 lifecycle decision before claiming the dependency is delivered.",
+  "blockers": [
+    "DEV-LOOP-01 dependency state cannot be changed truthfully in this focused review because PR #30 is open and dirty."
+  ],
   "safe_to_start_unrelated_work": true,
-  "working_branch": "fix/post-merge-stabilization-20260823",
+  "working_branch": "fix/dev-harness-01-delivery-review-20260823",
+  "last_commit": "d550e2f",
   "validation": {
     "passed": [
-      "npm run benchmark:test passed, including Benchmark Lab M3's 33 assertions.",
-      "Every component command in npm run test:full passed when run directly; the sandbox blocked the aggregate npm wrapper before it executed.",
-      "node scripts/test-development-memory-events.js passed 13/13 after removing the stale fixture-date dependency.",
-      "node scripts/dev-status.js passed and reports the remaining stale DEV-HARNESS-01 lifecycle records as an explicit warning."
+      "node scripts/test-harness-adapters.js",
+      "node scripts/test-development-schemas.js",
+      "node scripts/test-lifecycle.js",
+      "npm run dev:status",
+      "node scripts/dev-status.js --strict",
+      "node scripts/test-controller-invariants.js",
+      "node scripts/contract-test.js",
+      "pre-delivery validation profile (underlying node commands passed; npm wrapper could not start in this runtime)"
     ],
     "failed": [],
-    "not_run": []
+    "not_run": [
+      "Windows-specific verification — not run in this environment."
+    ]
   },
   "recommended_next_agent": "reviewer"
 }
