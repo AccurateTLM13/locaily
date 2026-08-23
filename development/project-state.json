@@ -3,19 +3,19 @@
   "project": "locaily",
   "currentMilestone": "dev-harness-01-agent-operations-contract",
   "activeSession": null,
-  "status": "ready-for-delivery",
+  "status": "active",
   "defaultBranch": "main",
   "activeBranch": "fix/dev-harness-01-delivery-review-20260823",
   "lastCompletedMilestone": "benchmark-lab-m3-interactive-local-model-lab",
-  "nextRecommendedAction": "Review the DEV-HARNESS-01 delivery-review PR; do not merge until CI and owner review pass",
+  "nextRecommendedAction": "Regenerate DEV-HARNESS-01 validation from a clean committed control-plane state, then complete delivery preflight",
   "blockers": [],
   "warnings": [
     "DEV-LOOP-01 remains planned while PR #30 is open and dirty; do not mark the dependency delivered without a separate lifecycle decision."
   ],
-  "updatedAt": "2026-08-23T20:12:22.142Z",
+  "updatedAt": "2026-08-23T21:04:26.508Z",
   "updatedBy": {
     "type": "agent",
-    "name": "stabilization-review",
+    "name": "review-reconciliation",
     "platform": "codex"
   }
 }

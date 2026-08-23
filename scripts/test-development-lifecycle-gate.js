@@ -46,6 +46,20 @@ function errorCodes(errors) {
   return errors.map(error => error.code);
 }
 
+test("validation profile checks run before milestone metadata is persisted", () => {
+  const lifecycleSource = fs.readFileSync(path.join(__dirname, "dev-lifecycle.js"), "utf8");
+  const validatingIndex = lifecycleSource.indexOf('milestone.status = "validating"');
+  const requiredChecksIndex = lifecycleSource.indexOf(
+    "for (const check of (profile.required || []))",
+    validatingIndex
+  );
+  const persistedMilestoneIndex = lifecycleSource.indexOf("writeMilestone(milestone)", validatingIndex);
+
+  assert.notEqual(validatingIndex, -1);
+  assert.ok(requiredChecksIndex > validatingIndex);
+  assert.ok(persistedMilestoneIndex > requiredChecksIndex);
+});
+
 const repo = fs.mkdtempSync(path.join(os.tmpdir(), "locaily-lifecycle-gate-"));
 
 try {
