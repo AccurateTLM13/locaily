@@ -52,8 +52,36 @@ function verifyChecksumDirectory(checksumDir) {
       continue;
     }
 
-    summary.total += 1;
     const filePath = path.join(checksumDir, entry.name);
+    let record;
+    try {
+      record = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    } catch (error) {
+      // A malformed qualification checksum is still a real failure. Draft,
+      // raw, and other transient checksum artifacts remain outside this
+      // endpoint's qualification verification scope.
+      if (!entry.name.endsWith("-qualification.json")) {
+        continue;
+      }
+      summary.total += 1;
+      const result = verifyChecksumFile(filePath);
+      result.file = filePath;
+      summary.results.push(result);
+      summary.failed += 1;
+      summary.failures.push({
+        file: filePath,
+        checksumId: result.checksumId || null,
+        reason: result.reason,
+        detail: result.detail || error.message
+      });
+      continue;
+    }
+
+    if (!record || record.artifactType !== "qualification_record") {
+      continue;
+    }
+
+    summary.total += 1;
     const result = verifyChecksumFile(filePath);
     result.file = filePath;
     summary.results.push(result);

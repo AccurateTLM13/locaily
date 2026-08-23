@@ -593,7 +593,8 @@ async function testModelQualificationLoader() {
     recordId: "schema-invalid"
   }, null, 2), "utf8");
   await writeFile(join(checksumDir, "mock-checksum.json"), JSON.stringify({
-    schemaVersion: "benchmark.checksum.v1"
+    schemaVersion: "benchmark.checksum.v1",
+    artifactType: "qualification_record"
   }), "utf8");
 
   try {

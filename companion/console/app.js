@@ -1001,19 +1001,34 @@ async function loadBenchmarkDiagnostics() {
   const target = document.getElementById("benchmarkDiagnostics");
   if (!target) return;
   try {
-    const [modelsResponse, runsResponse] = await Promise.all([
+    const [modelsResponse, runsResponse, benchmarkStatusResponse] = await Promise.all([
       fetchJson("/benchmark/models"),
-      fetchJson("/benchmark/runs?limit=5")
+      fetchJson("/benchmark/runs?limit=5"),
+      fetchJson("/benchmark/status")
     ]);
     const models = modelsResponse.models || [];
     const runs = runsResponse.runs || [];
+    const benchmarkStatus = benchmarkStatusResponse.benchmark_lab || {};
+    const checksumVerification = benchmarkStatus.checksumVerification || {};
+    const checksumFailures = Array.isArray(checksumVerification.failures)
+      ? checksumVerification.failures
+      : [];
+    const failureMarkup = checksumFailures.length > 0
+      ? `<div class="benchmark-diagnostics__failures" role="alert">
+          <strong>Qualification checksum failures</strong>
+          <ul>${checksumFailures.map((failure) => `<li><code>${escapeDiagnostic(failure.checksumId || failure.file || "unknown")}</code>: ${escapeDiagnostic(failure.reason || "CHECKSUM_FAILED")} — ${escapeDiagnostic(failure.detail || "No detail")}</li>`).join("")}</ul>
+        </div>`
+      : `<p class="meta-text">All qualification checksums verified.</p>`;
     target.innerHTML = `
       <dl class="result-fields">
         <div><dt>Ollama</dt><dd>${escapeDiagnostic(modelsResponse.runtime?.state || "unknown")}</dd></div>
         <div><dt>Installed</dt><dd>${models.length}</dd></div>
         <div><dt>Loaded</dt><dd>${models.filter((model) => model.loadState === "loaded").length}</dd></div>
         <div><dt>Registered</dt><dd>${models.filter((model) => model.manifestState === "registered").length}</dd></div>
+        <div><dt>Qualification records</dt><dd>${escapeDiagnostic(benchmarkStatus.records ?? 0)}</dd></div>
+        <div><dt>Checksums</dt><dd>${escapeDiagnostic(checksumVerification.verified ?? 0)} verified / ${escapeDiagnostic(checksumVerification.failed ?? 0)} failed</dd></div>
       </dl>
+      ${failureMarkup}
       <div class="benchmark-diagnostics__runs">${runs.length ? runs.map((run) => `<div><code>${escapeDiagnostic(run.runId)}</code><span>${escapeDiagnostic(run.status)} · ${escapeDiagnostic(run.modelName || "unknown model")}</span></div>`).join("") : "No interactive runs."}</div>`;
   } catch (error) {
     target.textContent = `Benchmark diagnostics unavailable: ${error.message}`;
