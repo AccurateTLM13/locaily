@@ -43,5 +43,7 @@
     }
   ],
   "startedAt": "2026-08-02T00:26:31.268Z",
-  "closedAt": "2026-08-23T14:45:00.000Z"
+  "closedAt": "2026-08-23T14:45:00.000Z",
+  "closingCommit": "f525bb424f5884909df42496724651455026ce9d",
+  "nextRecommendedAction": "Review the DEV-HARNESS-01 delivery-review PR; DEV-LOOP-01 remains a separate decision blocker."
 }

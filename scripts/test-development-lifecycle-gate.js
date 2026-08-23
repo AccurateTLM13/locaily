@@ -10,6 +10,7 @@ const {
   compareValidationGitState,
   computeGitFingerprint,
   getChangedPathsBetweenCommits,
+  isAllowedMetadataOnlyChange,
   validateValidationRecordReference,
 } = require("./development-git-state");
 
@@ -45,6 +46,29 @@ function commit(cwd, message) {
 function errorCodes(errors) {
   return errors.map(error => error.code);
 }
+
+test("validation profile checks run before milestone metadata is persisted", () => {
+  const lifecycleSource = fs.readFileSync(path.join(__dirname, "dev-lifecycle.js"), "utf8");
+  const validatingIndex = lifecycleSource.indexOf('milestone.status = "validating"');
+  const requiredChecksIndex = lifecycleSource.indexOf(
+    "for (const check of (profile.required || []))",
+    validatingIndex
+  );
+  const persistedMilestoneIndex = lifecycleSource.indexOf("writeMilestone(milestone)", validatingIndex);
+
+  assert.notEqual(validatingIndex, -1);
+  assert.ok(requiredChecksIndex > validatingIndex);
+  assert.ok(persistedMilestoneIndex > requiredChecksIndex);
+});
+
+test("delivery completion HEAD requires proven metadata-only ancestry", () => {
+  const deliverySource = fs.readFileSync(path.join(__dirname, "deliver-milestone.js"), "utf8");
+  assert.match(deliverySource, /completionChangedPaths/);
+  assert.match(deliverySource, /isAllowedMetadataOnlyChange\(completionChangedPaths\)/);
+  assert.equal(isAllowedMetadataOnlyChange(["development/milestone.json"]), true);
+  assert.equal(isAllowedMetadataOnlyChange(["scripts/source.js"]), false);
+  assert.equal(isAllowedMetadataOnlyChange(null), false);
+});
 
 const repo = fs.mkdtempSync(path.join(os.tmpdir(), "locaily-lifecycle-gate-"));
 

@@ -824,9 +824,10 @@ function cmdValidate(args) {
     });
   }
 
-  // Set milestone to validating (only during profile execution)
+  // Keep the transient validating state in memory while profile commands inspect
+  // the clean committed checkout. Persisting it here would make validation dirty
+  // its own working tree before the required checks run.
   milestone.status = "validating";
-  writeMilestone(milestone);
 
   // Run required commands from profile
   for (const check of (profile.required || [])) {
@@ -885,14 +886,7 @@ function cmdValidate(args) {
 
   // Update milestone with latestValidationId
   milestone.latestValidationId = validationId;
-  writeMilestone(milestone);
-
-  // Restore milestone status after validation
-  if (overallStatus === "failed") {
-    milestone.status = previousStatus;
-  } else {
-    milestone.status = previousStatus; // Restore to active (validating is transient)
-  }
+  milestone.status = previousStatus;
   writeMilestone(milestone);
 
   console.log(JSON.stringify({

@@ -1,28 +1,41 @@
 {
-  "work_id": "post-merge-stabilization-20260823",
-  "objective_id": "post-merge-stabilization-20260823",
+  "work_id": "dev-harness-01-agent-operations-contract-20260823",
+  "objective_id": "dev-harness-01-agent-operations-contract",
   "status": "complete",
-  "closed_at": "2026-08-23T14:35:00.000Z",
-  "original_goal": "Restore green validation after PR #35 and reconcile the repository's current-state pointers without starting new feature work.",
+  "closed_at": "2026-08-23T21:14:00.604Z",
+  "original_goal": "Complete the DEV-HARNESS-01 delivery review from current main, index truthful pre-delivery validation, and reconcile the control-plane records without merging.",
   "completed": [
-    "Implemented explicit missing-digest provenance notes for qualification records.",
-    "Blocked implicit replacement of differing qualification records while preserving idempotent regeneration and explicit overwrite.",
-    "Made invalid semantic scorer results fail closed with a stable invalid-result code.",
-    "Made the companion qualification loader fail closed when its schema is unavailable and report qualification checksum verification.",
-    "Removed the date-sensitive assumption from the development-memory retention test.",
-    "Initialized .localbrain/NOW.md and replaced the obsolete M3 delivery instruction in development/project-state.json."
+    "Verified origin/main at merge commit 1f36ce3 after PR #41.",
+    "Reconciled DEV-HARNESS-01 milestone acceptance evidence, project state, session metadata, roadmap tracking, and closeout records.",
+    "Removed the superseded review record that pointed to unreachable commit ee5df0011ececbe55bcfb9d680900748b10c762a.",
+    "Corrected validation so its transient validating state remains in memory until required profile checks finish, preventing the validator from dirtying its own committed checkout.",
+    "Added regression coverage proving required profile checks run before milestone metadata is persisted.",
+    "Updated delivery preflight to accept a completion HEAD advance only when Git proves the recorded completion commit is an ancestor and every intervening change is excluded control-plane metadata.",
+    "Ran focused lifecycle-gate and schema tests and generated zero-finding agent reviews for both lifecycle corrections, including final source commit e02d2d8668b0d0e98316ad4efaf1e98ad7194594.",
+    "Ran the pre-delivery profile from a clean committed checkout; all six required checks, the optional full suite, and both acknowledged manual gates passed."
   ],
-  "remaining": [],
-  "next_required_action": "Review the stabilization pull request and require green GitHub Actions before merge.",
-  "blockers": [],
+  "remaining": [
+    "DEV-LOOP-01 remains planned while PR #30 is open and dirty; a separate owner decision is required before changing that lifecycle state.",
+    "The delivery-review PR remains unmerged pending fresh CI and owner review."
+  ],
+  "next_required_action": "Review fresh CI and connector evidence for PR #38; resolve the separate DEV-LOOP-01 lifecycle decision before claiming the dependency is delivered.",
+  "blockers": [
+    "DEV-LOOP-01 dependency state cannot be changed truthfully in this focused review because PR #30 is open and dirty."
+  ],
   "safe_to_start_unrelated_work": true,
-  "working_branch": "fix/post-merge-stabilization-20260823",
+  "working_branch": "fix/dev-harness-01-delivery-review-20260823",
+  "last_commit": "e02d2d8668b0d0e98316ad4efaf1e98ad7194594",
   "validation": {
     "passed": [
-      "npm run benchmark:test passed, including Benchmark Lab M3's 33 assertions.",
-      "Every component command in npm run test:full passed when run directly; the sandbox blocked the aggregate npm wrapper before it executed.",
-      "node scripts/test-development-memory-events.js passed 13/13 after removing the stale fixture-date dependency.",
-      "node scripts/dev-status.js passed and reports the remaining stale DEV-HARNESS-01 lifecycle records as an explicit warning."
+      "node scripts/test-harness-adapters.js",
+      "node scripts/test-development-schemas.js",
+      "node scripts/test-lifecycle.js",
+      "node scripts/dev-status.js --strict",
+      "node scripts/test-controller-invariants.js",
+      "node scripts/contract-test.js",
+      "node scripts/test-development-lifecycle-gate.js (8 passed)",
+      "node scripts/test-development-schemas.js (29 passed)",
+      "npm.cmd run dev:validate (clean committed checkout; 6 required and 1 optional check passed)"
     ],
     "failed": [],
     "not_run": []

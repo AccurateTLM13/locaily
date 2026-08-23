@@ -188,6 +188,17 @@ test("dev:validate sets milestone to validating during execution", () => {
   assert(content.includes('milestone.status = "validating"'), "Missing validating state");
 });
 
+test("dev:validate runs profile checks before persisting validation metadata", () => {
+  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
+  const validatingIndex = content.indexOf('milestone.status = "validating"');
+  const requiredChecksIndex = content.indexOf("for (const check of (profile.required || []))", validatingIndex);
+  const persistedMilestoneIndex = content.indexOf("writeMilestone(milestone)", validatingIndex);
+  assert(validatingIndex !== -1, "Missing transient validating state");
+  assert(requiredChecksIndex > validatingIndex, "Required checks must follow the transient state change");
+  assert(persistedMilestoneIndex > requiredChecksIndex,
+    "Validation must not dirty the milestone before required profile checks run");
+});
+
 test("dev:validate restores previous state after completion", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
   assert(content.includes("previousStatus"), "Missing previousStatus restore");

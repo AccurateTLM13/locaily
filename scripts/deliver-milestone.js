@@ -23,6 +23,7 @@ const {
   compareValidationGitState,
   computeGitFingerprint,
   getChangedPathsBetweenCommits,
+  isAllowedMetadataOnlyChange,
   validateValidationRecordReference,
 } = require("./development-git-state");
 
@@ -145,10 +146,20 @@ function preflight(slug) {
     errors.push({ code: "BRANCH_MISMATCH", message: `Current branch '${currentBranch}' != milestone branch '${milestone.completionBranch}'` });
   }
 
-  // 3. HEAD matches
+  // 3. Completion HEAD matches, or Git proves that only excluded control-plane
+  // metadata was committed while finalizing the generated completion state.
   const currentHead = gitOk(["rev-parse", "HEAD"]);
   if (milestone.completionHead && currentHead !== milestone.completionHead) {
-    errors.push({ code: "HEAD_MISMATCH", message: `Current HEAD ${currentHead?.slice(0, 8)} != milestone completion HEAD ${milestone.completionHead?.slice(0, 8)}` });
+    const completionChangedPaths = getChangedPathsBetweenCommits({
+      cwd: PROJECT_ROOT,
+      from: milestone.completionHead,
+      to: currentHead,
+    });
+    if (!isAllowedMetadataOnlyChange(completionChangedPaths)) {
+      errors.push({ code: "HEAD_MISMATCH", message: `Current HEAD ${currentHead?.slice(0, 8)} != milestone completion HEAD ${milestone.completionHead?.slice(0, 8)}` });
+    } else {
+      warnings.push("HEAD changed after completion, but only allowed development metadata changed");
+    }
   }
 
   // 4. Before completion, prepared commit must match HEAD. After completion,
