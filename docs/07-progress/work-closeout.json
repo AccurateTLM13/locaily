@@ -2,7 +2,7 @@
   "work_id": "dev-harness-01-agent-operations-contract-20260823",
   "objective_id": "dev-harness-01-agent-operations-contract",
   "status": "complete",
-  "closed_at": "2026-08-23T21:06:09.713Z",
+  "closed_at": "2026-08-23T21:14:00.604Z",
   "original_goal": "Complete the DEV-HARNESS-01 delivery review from current main, index truthful pre-delivery validation, and reconcile the control-plane records without merging.",
   "completed": [
     "Verified origin/main at merge commit 1f36ce3 after PR #41.",
@@ -10,6 +10,7 @@
     "Removed the superseded review record that pointed to unreachable commit ee5df0011ececbe55bcfb9d680900748b10c762a.",
     "Corrected validation so its transient validating state remains in memory until required profile checks finish, preventing the validator from dirtying its own committed checkout.",
     "Added regression coverage proving required profile checks run before milestone metadata is persisted.",
+    "Updated delivery preflight to accept a completion HEAD advance only when Git proves the recorded completion commit is an ancestor and every intervening change is excluded control-plane metadata.",
     "Ran focused lifecycle-gate and schema tests and generated a zero-finding agent review at reachable commit 244f2c58c89126a6e7bd88f1782ad0f2144a20b2.",
     "Ran the pre-delivery profile from a clean committed checkout; all six required checks, the optional full suite, and both acknowledged manual gates passed."
   ],
@@ -32,7 +33,7 @@
       "node scripts/dev-status.js --strict",
       "node scripts/test-controller-invariants.js",
       "node scripts/contract-test.js",
-      "node scripts/test-development-lifecycle-gate.js (7 passed)",
+      "node scripts/test-development-lifecycle-gate.js (8 passed)",
       "node scripts/test-development-schemas.js (29 passed)",
       "npm.cmd run dev:validate (clean committed checkout; 6 required and 1 optional check passed)"
     ],

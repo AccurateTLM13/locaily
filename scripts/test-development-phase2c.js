@@ -325,6 +325,9 @@ test("Preflight checks branch match", () => {
 test("Preflight checks HEAD match", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "deliver-milestone.js"), "utf8");
   assert(content.includes("HEAD_MISMATCH"), "Missing HEAD_MISMATCH");
+  assert(content.includes("completionChangedPaths"), "Missing completion ancestry check");
+  assert(content.includes("isAllowedMetadataOnlyChange(completionChangedPaths)"),
+    "Completion HEAD changes must be limited to proven control-plane metadata");
 });
 
 test("Preflight checks prepared commit match", () => {
