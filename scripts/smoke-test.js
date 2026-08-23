@@ -3,6 +3,7 @@ const EXPECTED_STARTUP_PROVIDER = process.env.SMOKE_STARTUP_PROVIDER || "ollama"
 const path = require("node:path");
 const { cpSync, mkdtempSync, rmSync, existsSync } = require("node:fs");
 const { spawnSync } = require("node:child_process");
+const http = require("node:http");
 const { tmpdir } = require("node:os");
 const { createVaultAdapter, isBlockedPath, isAllowedPath } = require("../companion/memory/vault-adapter");
 const { buildContextPack } = require("../companion/memory/context-pack-builder");
@@ -1773,11 +1774,69 @@ async function ensureStartupProvider() {
   assert(response.body.active_provider === EXPECTED_STARTUP_PROVIDER, `Expected active ${EXPECTED_STARTUP_PROVIDER} provider.`);
 }
 
+function rawRequest(pathname, options = {}) {
+  const { method = "GET", headers = {} } = options;
+  return new Promise((resolve, reject) => {
+    const url = new URL(`${BASE_URL}${pathname}`);
+    const req = http.request({
+      hostname: url.hostname,
+      port: url.port,
+      path: `${url.pathname}${url.search}`,
+      method,
+      headers
+    }, (res) => {
+      let data = "";
+      res.setEncoding("utf8");
+      res.on("data", (chunk) => {
+        data += chunk;
+      });
+      res.on("end", () => {
+        let body = null;
+        try {
+          body = JSON.parse(data);
+        } catch (error) {
+          body = null;
+        }
+        resolve({ status: res.statusCode, body });
+      });
+    });
+    req.on("error", reject);
+    req.end();
+  });
+}
+
+async function checkLoopbackHostStillAccepted() {
+  const { status } = await rawRequest("/health", { headers: { Host: new URL(BASE_URL).host } });
+  assert(status === 200, `Expected 200 for loopback Host header, got ${status}.`);
+}
+
+async function checkUntrustedHostRejected() {
+  const { status, body } = await rawRequest("/health", { headers: { Host: "evil.example" } });
+  assert(status === 403, `Expected 403 for forged Host header, got ${status}.`);
+  assert(body && body.code === "UNTRUSTED_HOST", `Expected UNTRUSTED_HOST code, got ${JSON.stringify(body)}.`);
+}
+
+async function checkForbiddenOriginRejected() {
+  const { status, body } = await rawRequest("/qualifications/dry-run", {
+    method: "POST",
+    headers: {
+      Host: new URL(BASE_URL).host,
+      Origin: "https://evil.example",
+      "Content-Type": "application/json"
+    }
+  });
+  assert(status === 403, `Expected 403 for cross-origin write, got ${status}.`);
+  assert(body && body.code === "FORBIDDEN_ORIGIN", `Expected FORBIDDEN_ORIGIN code, got ${JSON.stringify(body)}.`);
+}
+
 async function main() {
   console.log(`Smoke testing Local AI Platform at ${BASE_URL}`);
 
   await runCheck("startup provider reset", ensureStartupProvider);
   await runCheck("GET /health", checkHealth);
+  await runCheck("loopback Host accepted", checkLoopbackHostStillAccepted);
+  await runCheck("forged Host rejected", checkUntrustedHostRejected);
+  await runCheck("cross-origin write rejected", checkForbiddenOriginRejected);
   await runCheck("GET /benchmark/status", checkBenchmarkStatus);
   await runCheck("GET /tools", checkToolsEndpoint);
   await runCheck("GET /console endpoints", checkConsoleEndpoints);
