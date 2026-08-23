@@ -32,37 +32,65 @@
     {
       "id": "ac-adapter-contract",
       "description": "The adapter and canonical snapshot contracts validate through the repository's schema test path and define explicit supported, unsupported, partial, and error states.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [
+        { "type": "test", "reference": "npm run test:harness" },
+        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+      ]
     },
     {
       "id": "ac-adapter-registry",
       "description": "A deterministic registry selects the correct adapter for Codex, OpenCode, and generic/unknown targets and reports why a target is unsupported when no adapter can open it.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [
+        { "type": "test", "reference": "npm run test:harness" },
+        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+      ]
     },
     {
       "id": "ac-snapshot-normalization",
       "description": "Codex and OpenCode fixtures produce the same canonical snapshot shape for equivalent session facts, while absent facts remain unavailable instead of being guessed.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [
+        { "type": "test", "reference": "npm run test:harness" },
+        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+      ]
     },
     {
       "id": "ac-status-contract",
       "description": "A versioned machine-readable status payload exposes context, tool activity, workers, queue state, checks, risk, cost, and handoff/sync fields with deterministic output and explicit unknown values.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [
+        { "type": "test", "reference": "npm run test:harness" },
+        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+      ]
     },
     {
       "id": "ac-handoff-linkage",
       "description": "A normalized handoff references existing Locaily development session, milestone, work-closeout, and/or memory evidence by stable identifiers without duplicating raw transcripts.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [
+        { "type": "test", "reference": "npm run test:harness" },
+        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+      ]
     },
     {
       "id": "ac-safety",
       "description": "Malformed input, secret-shaped values, path escapes, and unsupported mutating actions are rejected or redacted with stable reason codes and no unauthorized filesystem or network writes.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [
+        { "type": "test", "reference": "npm run test:harness" },
+        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+      ]
     },
     {
       "id": "ac-validation",
       "description": "Targeted adapter/schema tests, lifecycle/control-plane tests, and the relevant offline repository validation profile pass from a clean committed state.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [
+        { "type": "test", "reference": "pre-delivery validation profile" },
+        { "type": "validation-record", "reference": "validation-20260823T174000-issue37" }
+      ]
     }
   ],
   "validationProfile": "pre-delivery",
