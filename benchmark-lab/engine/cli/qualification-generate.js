@@ -9,12 +9,13 @@ async function main() {
     role: {},
     status: {},
     roleStatus: {},
-    note: {}
+    note: {},
+    overwrite: { boolean: true }
   });
 
   if (args.help) {
     printHelp({
-      command: "npm run qualification:generate -- --model <model-id> --evidence <evidence-id> [--role <role> --role-status <status>]",
+      command: "npm run qualification:generate -- --model <model-id> --evidence <evidence-id> [--role <role> --role-status <status>] [--overwrite]",
       description: "Generate a model qualification record from explicitly promoted evidence.",
       options: [
         { flag: "--model <id>", description: "Model manifest id." },
@@ -23,6 +24,7 @@ async function main() {
         { flag: "--role <role>", description: "Optional Locaily model role." },
         { flag: "--role-status <state>", description: "Optional role qualification status." },
         { flag: "--note <text>", description: "Optional note." },
+        { flag: "--overwrite", description: "Explicitly replace a differing qualification record." },
         { flag: "--help", description: "Show this help." }
       ]
     });
@@ -36,7 +38,8 @@ async function main() {
     role: args.role,
     status: args.status || "screening",
     roleStatus: args.roleStatus,
-    notes: args.note ? [args.note] : []
+    notes: args.note ? [args.note] : [],
+    overwrite: args.overwrite === true
   });
 
   console.log(JSON.stringify({

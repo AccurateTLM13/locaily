@@ -176,6 +176,17 @@
                 </div>
                 <div id="benchmarkDiagnostics" class="benchmark-diagnostics__body" aria-live="polite">Not loaded.</div>
                 <a class="btn btn--secondary" href="/#benchmarks">Open Interactive Model Lab</a>
+                <div class="setup-form" aria-labelledby="qualificationCommandTitle">
+                  <h4 id="qualificationCommandTitle">Qualification record command</h4>
+                  <p class="meta-text">Generate the safe CLI command here, then run it from the repository terminal. Replacement remains explicit.</p>
+                  <label for="qualificationModelInput" class="field__label">Model manifest ID</label>
+                  <input id="qualificationModelInput" class="field__input" type="text" autocomplete="off">
+                  <label for="qualificationEvidenceInput" class="field__label">Promoted evidence ID</label>
+                  <input id="qualificationEvidenceInput" class="field__input" type="text" autocomplete="off">
+                  <label><input id="qualificationOverwriteInput" type="checkbox"> Replace a differing existing record</label>
+                  <button id="copyQualificationCommandButton" type="button" class="btn btn--secondary">Copy qualification command</button>
+                  <p id="qualificationCommandMessage" class="form-message" role="status"></p>
+                </div>
               </section>
               <div id="validationEvidence" class="advanced-blocks"></div>
               <pre id="markdownPreview" class="code-block">Run a validation to preview the generated handoff.</pre>

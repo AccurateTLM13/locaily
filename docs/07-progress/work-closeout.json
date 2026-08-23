@@ -1,40 +1,31 @@
 {
-  "work_id": "benchmark-lab-m3-interactive-local-model-lab-20260803",
-  "objective_id": "benchmark-lab-m3-interactive-local-model-lab",
+  "work_id": "post-merge-stabilization-20260823",
+  "objective_id": "post-merge-stabilization-20260823",
   "status": "complete",
-  "closed_at": "2026-08-03T03:30:00.000Z",
-  "original_goal": "Provide an interactive local model lab that discovers available Ollama models, explicitly controls loading, runs cataloged benchmarks, and presents durable credible results through the Locaily frontend and backend.",
+  "closed_at": "2026-08-23T14:35:00.000Z",
+  "original_goal": "Restore green validation after PR #35 and reconcile the repository's current-state pointers without starting new feature work.",
   "completed": [
-    "Created branch codex/benchmark-lab-m3-interactive-local-model-lab after M2 reached ready-for-delivery.",
-    "Added registered Ollama model inventory with separate runtime, installed, loaded, loadable, manifest, exact identity, and qualification states.",
-    "Added explicit bounded per-model load and unload controls without automatic bulk loading or downloads.",
-    "Added an allowlisted summary-safe suite catalog and exact-provenance preflight for quick and qualification modes.",
-    "Added an isolated Benchmark Lab worker with versioned summary-safe JSONL events; companion code does not import benchmark-lab/engine.",
-    "Added durable summary-safe run storage and start, list, detail, live-event, cancellation, duplicate, and server-restart recovery APIs.",
-    "Added unified shell inventory, launcher, live progress, M2 result/provenance/gate display, history, and refresh recovery.",
-    "Added diagnostic model and benchmark status to the legacy console while keeping the unified shell as the primary workflow.",
-    "Added M3 schemas and automated fixture/integration/recovery/privacy/frontend tests.",
-    "Completed a real browser benchmark with llama3.2:latest and exact digest provenance; verified durable refresh recovery.",
-    "Fixed cold-model load timeout handling and responsive desktop layout clipping found during live browser acceptance.",
-    "Hardened development lifecycle tests to snapshot and restore real control-plane state.",
-    "Hardened deterministic milestone review so untracked source files are included in secret and scope checks.",
-    "Kept raw prompts/responses and local run artifacts out of default APIs and Git; no evidence was promoted and no qualification or routing changed."
+    "Implemented explicit missing-digest provenance notes for qualification records.",
+    "Blocked implicit replacement of differing qualification records while preserving idempotent regeneration and explicit overwrite.",
+    "Made invalid semantic scorer results fail closed with a stable invalid-result code.",
+    "Made the companion qualification loader fail closed when its schema is unavailable and report qualification checksum verification.",
+    "Removed the date-sensitive assumption from the development-memory retention test.",
+    "Initialized .localbrain/NOW.md and replaced the obsolete M3 delivery instruction in development/project-state.json."
   ],
   "remaining": [],
-  "next_required_action": "Follow the canonical project state. No follow-on Benchmark Lab milestone is approved.",
+  "next_required_action": "Review the stabilization pull request and require green GitHub Actions before merge.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
-  "working_branch": "codex/benchmark-lab-m3-interactive-local-model-lab",
+  "working_branch": "fix/post-merge-stabilization-20260823",
   "validation": {
     "passed": [
-      "npm.cmd run benchmark:m3:test - 33 assertions passed across contracts, inventory, exact provenance, isolated execution, durable runs, malformed/crash/timeout paths, progress, cancellation, recovery, privacy, and offline behavior.",
-      "npm.cmd run test:full - complete offline repository validation passed with M3 included in the canonical benchmark suite.",
-      "node scripts/test-unified-shell.cjs - 19/19 passed.",
-      "node scripts/test-development-begin-end.js - 35/35 passed with control-plane state preserved and untracked-file review coverage.",
-      "Live browser acceptance - run bench-20260803031401-57923dc6 completed 3/4 cases and recovered after refresh with exact llama3.2:latest digest provenance."
+      "npm run benchmark:test passed, including Benchmark Lab M3's 33 assertions.",
+      "Every component command in npm run test:full passed when run directly; the sandbox blocked the aggregate npm wrapper before it executed.",
+      "node scripts/test-development-memory-events.js passed 13/13 after removing the stale fixture-date dependency.",
+      "node scripts/dev-status.js passed and reports the remaining stale DEV-HARNESS-01 lifecycle records as an explicit warning."
     ],
     "failed": [],
     "not_run": []
   },
-  "recommended_next_agent": "worker"
+  "recommended_next_agent": "reviewer"
 }

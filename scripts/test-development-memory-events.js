@@ -218,7 +218,12 @@ async function run() {
         occurredAt: "2020-01-01T00:00:00.000Z",
         capturedAt: "2020-01-01T00:00:01.000Z"
       });
-      const newEvent = await loadValidEvent({ eventId: "evt_new" });
+      const currentTimestamp = new Date().toISOString();
+      const newEvent = await loadValidEvent({
+        eventId: "evt_new",
+        occurredAt: currentTimestamp,
+        capturedAt: currentTimestamp
+      });
       await store.appendEvent(oldEvent);
       await store.appendEvent(newEvent);
       const purge = await store.purgeExpiredEvents({ keepRawEvents: true, retentionDays: 30 });

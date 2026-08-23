@@ -47,6 +47,25 @@ const elements = {
 
 const refreshBenchmarkDiagnosticsButton = document.getElementById("refreshBenchmarkDiagnosticsButton");
 if (refreshBenchmarkDiagnosticsButton) refreshBenchmarkDiagnosticsButton.addEventListener("click", loadBenchmarkDiagnostics);
+const copyQualificationCommandButton = document.getElementById("copyQualificationCommandButton");
+if (copyQualificationCommandButton) copyQualificationCommandButton.addEventListener("click", copyQualificationCommand);
+
+async function copyQualificationCommand() {
+  const model = document.getElementById("qualificationModelInput").value.trim();
+  const evidence = document.getElementById("qualificationEvidenceInput").value.trim();
+  const overwrite = document.getElementById("qualificationOverwriteInput").checked;
+  const message = document.getElementById("qualificationCommandMessage");
+  if (!model || !evidence) {
+    message.textContent = "Model manifest ID and promoted evidence ID are required.";
+    return;
+  }
+  const quote = (value) => `"${value.replace(/["\\]/g, "\\$&")}"`;
+  const command = `npm run qualification:generate -- --model ${quote(model)} --evidence ${quote(evidence)}${overwrite ? " --overwrite" : ""}`;
+  await navigator.clipboard.writeText(command);
+  message.textContent = overwrite
+    ? "Replacement command copied. Review the existing record before running it."
+    : "Qualification command copied.";
+}
 
 elements.refreshStatusButton.addEventListener("click", loadStatus);
 elements.refreshRunsButton.addEventListener("click", loadRuns);

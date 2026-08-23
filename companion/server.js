@@ -94,6 +94,7 @@ const {
 const PLATFORM_VERSION = "0.1.0";
 const SERVICE_NAME = "local-ai-platform";
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "::1", "0:0:0:0:0:0:0:1", "::ffff:127.0.0.1"]);
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 function isLoopback(host) {
   if (!host) return true;
@@ -123,6 +124,33 @@ function checkLanSecurity(cfg) {
     missing: failures,
     message: `Security gate: refusing startup on non-loopback address '${host}'. ${failures.join("; ")}.`
   };
+}
+
+function validateRequestSource(request) {
+  const hostHeader = request.headers.host || "";
+  let hostname;
+  try {
+    hostname = new URL(`http://${hostHeader}`).hostname;
+  } catch {
+    return { code: "UNTRUSTED_HOST", message: "Request Host header is invalid." };
+  }
+  if (!isLoopback(hostname) && hostname !== String(config.server.host || "").toLowerCase()) {
+    return { code: "UNTRUSTED_HOST", message: "Request Host is not trusted by this Local Brain." };
+  }
+
+  const origin = request.headers.origin;
+  if (origin && !SAFE_METHODS.has(request.method || "GET")) {
+    let originHostname;
+    try {
+      originHostname = new URL(origin).hostname;
+    } catch {
+      return { code: "FORBIDDEN_ORIGIN", message: "Request Origin header is invalid." };
+    }
+    if (originHostname !== hostname) {
+      return { code: "FORBIDDEN_ORIGIN", message: "Cross-origin writes are not allowed." };
+    }
+  }
+  return null;
 }
 
 const DEFAULT_CONFIG = {
@@ -433,6 +461,10 @@ const server = http.createServer(async (request, response) => {
   const identity = createRunIdentity();
 
   try {
+    const sourceError = validateRequestSource(request);
+    if (sourceError) {
+      return sendJson(response, 403, { ok: false, ...sourceError });
+    }
     const url = new URL(request.url, `http://${request.headers.host || "127.0.0.1"}`);
     const consoleRunMatch = url.pathname.match(/^\/console\/runs\/([^/]+)$/);
     const consoleAsset = await consoleController.serveStatic(url.pathname);

@@ -15,7 +15,8 @@ async function generateQualification({
   status = "screening",
   roleStatus = null,
   notes = [],
-  now = () => new Date()
+  now = () => new Date(),
+  overwrite = false
 }) {
   if (!modelId) {
     throw new Error("Qualification generation requires --model.");
@@ -47,6 +48,17 @@ async function generateQualification({
   assertValid(validateSchema(record, qualificationSchema, "qualification"), "Qualification record is invalid.");
 
   const recordPath = path.join(LAB_ROOT, "qualifications", "models", `${record.recordId}.json`);
+  const existingRecord = await readJsonIfExists(recordPath);
+  if (existingRecord && !overwrite) {
+    if (!recordsMatchIgnoringGeneratedAt(existingRecord, record)) {
+      throw new Error(`Qualification record already exists with different content; use --overwrite to replace ${record.recordId}.`);
+    }
+    return {
+      recordPath,
+      checksumPath: path.join(LAB_ROOT, "evidence", "checksums", `${record.recordId}-qualification.json`),
+      record: existingRecord
+    };
+  }
   await writeJson(recordPath, record);
   const checksum = await writeChecksumRecord({
     artifactPath: recordPath,
@@ -59,6 +71,15 @@ async function generateQualification({
     checksumPath: checksum.checksumPath,
     record
   };
+}
+
+function recordsMatchIgnoringGeneratedAt(left, right) {
+  const normalize = (value) => {
+    const copy = { ...value };
+    delete copy.generatedAt;
+    return copy;
+  };
+  return JSON.stringify(normalize(left)) === JSON.stringify(normalize(right));
 }
 
 function buildQualificationRecord({
@@ -76,6 +97,9 @@ function buildQualificationRecord({
     : null;
   assertQualificationEligible({ status, roleStatus: normalizedRoleStatus, evidence });
   const qualifiedFor = [];
+  const provenanceNotes = manifest.digest
+    ? []
+    : ["Model manifest has no digest; exact model provenance is unavailable."];
 
   if (normalizedRole && normalizedRoleStatus) {
     qualifiedFor.push({
@@ -113,10 +137,22 @@ function buildQualificationRecord({
     modelProfileId: manifest.modelId,
     notes: [
       "Generated from explicitly promoted Benchmark Lab evidence.",
+      ...provenanceNotes,
       ...notes
     ],
     generatedAt
   };
+}
+
+async function readJsonIfExists(filePath) {
+  try {
+    return await readJson(filePath);
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
 }
 
 function assertQualificationEligible({ status, roleStatus, evidence }) {

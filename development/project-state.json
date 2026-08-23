@@ -1,19 +1,19 @@
 {
   "schema": "locaily.development.project_state.v1",
   "project": "locaily",
-  "currentMilestone": null,
+  "currentMilestone": "dev-harness-01-agent-operations-contract",
   "activeSession": null,
   "status": "ready-for-delivery",
   "defaultBranch": "main",
-  "activeBranch": "codex/benchmark-lab-m3-interactive-local-model-lab",
+  "activeBranch": "agent/dev-harness-01-agent-operations-contract",
   "lastCompletedMilestone": "benchmark-lab-m3-interactive-local-model-lab",
-  "nextRecommendedAction": "Deliver milestone 'benchmark-lab-m3-interactive-local-model-lab' (deliver-milestone.js --slug benchmark-lab-m3-interactive-local-model-lab --all)",
+  "nextRecommendedAction": "Complete delivery review for DEV-HARNESS-01; PR #36 must pass CI before its stabilization changes are merged",
   "blockers": [],
   "warnings": [],
-  "updatedAt": "2026-08-04T03:05:47.534Z",
+  "updatedAt": "2026-08-23T14:50:00.000Z",
   "updatedBy": {
     "type": "agent",
-    "name": "dev-lifecycle",
-    "platform": "system"
+    "name": "stabilization-review",
+    "platform": "codex"
   }
 }
