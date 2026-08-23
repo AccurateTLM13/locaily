@@ -96,8 +96,9 @@ function buildQualificationRecord({
     ? roleStatus.trim()
     : null;
   assertQualificationEligible({ status, roleStatus: normalizedRoleStatus, evidence });
+  const hasDigest = typeof manifest.digest === "string" && manifest.digest.trim().length > 0;
   const qualifiedFor = [];
-  const provenanceNotes = manifest.digest
+  const provenanceNotes = hasDigest
     ? []
     : ["Model manifest has no digest; exact model provenance is unavailable."];
 
@@ -114,16 +115,21 @@ function buildQualificationRecord({
     });
   }
 
+  const subject = {
+    type: "model",
+    id: manifest.modelId,
+    provider: manifest.runtime,
+    runtimeModelName: manifest.runtimeModelName
+  };
+
+  if (hasDigest) {
+    subject.digest = manifest.digest;
+  }
+
   return {
     schemaVersion: "benchmark.qualification.v1",
     recordId: `${manifest.modelId}-${evidence.evidenceId}`,
-    subject: {
-      type: "model",
-      id: manifest.modelId,
-      provider: manifest.runtime,
-      runtimeModelName: manifest.runtimeModelName,
-      digest: manifest.digest || "unknown"
-    },
+    subject,
     status,
     qualifiedFor,
     evidence: {

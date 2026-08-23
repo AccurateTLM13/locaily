@@ -175,6 +175,18 @@ async function checkConsoleEndpoints() {
   assert(status.body.engine && status.body.engine.running === true, "Expected engine running.");
   assert(status.body.pageSpeed && typeof status.body.pageSpeed.apiKeyConfigured === "boolean", "Expected safe PageSpeed key status.");
   assert(status.body.memory && !Object.prototype.hasOwnProperty.call(status.body.memory, "vaultPath"), "Console status must not expose vaultPath.");
+
+  const benchmarkStatus = await request("/benchmark/status");
+  assert(benchmarkStatus.response.status === 200, "Expected /benchmark/status HTTP 200.");
+  assert(benchmarkStatus.body.benchmark_lab && benchmarkStatus.body.benchmark_lab.checksumVerification, "Expected benchmark checksum verification summary.");
+  assert(typeof benchmarkStatus.body.benchmark_lab.checksumVerification.verified === "number", "Expected verified qualification checksum count.");
+  assert(Array.isArray(benchmarkStatus.body.benchmark_lab.checksumVerification.failures), "Expected checksum failure details array.");
+
+  const consoleAppResponse = await fetch(`${BASE_URL}/console/app.js`);
+  const consoleApp = await consoleAppResponse.text();
+  assert(consoleAppResponse.status === 200, "Expected companion console app JavaScript.");
+  assert(consoleApp.includes("checksumVerification"), "Expected companion console checksum summary rendering.");
+  assert(consoleApp.includes("Qualification checksum failures"), "Expected companion console checksum failure details rendering.");
   assert(!JSON.stringify(status.body).includes("PAGESPEED_API_KEY"), "Console status must not expose API key names or values.");
 
   const runs = await request("/console/runs");

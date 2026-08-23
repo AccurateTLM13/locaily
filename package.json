@@ -30,7 +30,8 @@
     "qualification:generate": "node benchmark-lab/engine/cli/qualification-generate.js",
     "report:generate": "node benchmark-lab/engine/cli/report-generate.js",
     "checksum:verify": "node benchmark-lab/engine/cli/checksum-verify.js",
-    "benchmark:status-smoke": "node scripts/benchmark-status-smoke-test.js",
+      "benchmark:status-smoke": "node scripts/benchmark-status-smoke-test.js",
+      "test:checksum": "node scripts/test-model-qualification-checksums.js",
     "benchmark:test": "node scripts/benchmark-lab-schema-test.js && node scripts/benchmark-lab-run-test.js && node scripts/benchmark-lab-semantic-scorer-test.js && node scripts/benchmark-lab-aggregation-test.js && node scripts/benchmark-lab-requalification-test.js && node scripts/test-benchmark-lab-m3.js",
     "benchmark:m3:test": "node scripts/test-benchmark-lab-m3.js",
     "lighthouse:run": "node scripts/lighthouse-run.js",
@@ -127,6 +128,6 @@
     "test:track-records": "node scripts/track-run-record-schema-test.js && node scripts/crew-track-run-record-test.js",
     "test:human-review": "node scripts/test-human-review-records.js",
     "test:capability-kernel": "node scripts/test-node-roles-capability-capsules.js && node scripts/test-node-event-bus.js && node scripts/test-relay-trust-pairing.js && node scripts/test-lighthouse-product-bridge.js && node scripts/test-dev-loop.js && node scripts/test-development-schemas.js",
-    "test:full": "npm run test:harness && npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && npm run test:development-memory && npm run test:controller && npm run test:capability-kernel"
+      "test:full": "npm run test:harness && npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:checksum && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && npm run test:development-memory && npm run test:controller && npm run test:capability-kernel"
   }
 }

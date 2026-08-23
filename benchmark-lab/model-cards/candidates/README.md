@@ -52,6 +52,7 @@ Hardware-fit statements in unverified cards are hypotheses only. Actual runtime,
 | MiniCPM5 1B Fable5 V2 Thinking GGUF | Tiny generative worker | General bounded worker with tool-use potential | Unverified | Untested |
 | MiniCPM5 1B Agentic Tooluse GGUF | Tiny tool-use worker | Single-action tool router | Unverified | Untested |
 | all-MiniLM-L6-v2 | Embedding model | Semantic retrieval, clustering, deduplication, and routing shortlist | Unverified | Untested |
+| Meta Muse Glimmer 30B | Multimodal generative / agentic-generalist candidate | Heavy-local escalation, general agent, coding and tool-use evaluation | Unverified | Untested |
 
 ## Required Promotion Path
 

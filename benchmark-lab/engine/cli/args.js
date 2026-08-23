@@ -26,7 +26,7 @@ function parseArgs(args, spec = {}) {
       throw new Error(`Unknown option '${arg}'.`);
     }
 
-    if (config.boolean) {
+    if (config.boolean || config.flag) {
       parsed[key] = true;
       continue;
     }

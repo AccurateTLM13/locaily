@@ -899,6 +899,9 @@ input {
 }
 .benchmark-diagnostics { margin-bottom: 20px; }
 .benchmark-diagnostics__body { margin: 12px 0; }
+.benchmark-diagnostics__failures { margin-top: 12px; padding: 10px 12px; background: var(--surface-muted, #f8fafc); color: var(--text, #0f172a); font-size: 12px; }
+.benchmark-diagnostics__failures ul { margin: 8px 0 0; padding-left: 18px; }
+.benchmark-diagnostics__failures li { margin: 5px 0; }
 .benchmark-diagnostics__runs { display: grid; gap: 6px; margin-top: 10px; }
 .benchmark-diagnostics__runs div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--border-color, #e5e7eb); font-size: 12px; }
 .benchmark-diagnostics__runs span { color: var(--text-muted, #64748b); text-align: right; }

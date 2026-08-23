@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "benchmark.model_manifest.v1",
+  "modelId": "meta-muse-glimmer-30b-local",
+  "displayName": "Meta Muse Glimmer 30B Local",
+  "provider": "Meta",
+  "runtime": "ollama",
+  "runtimeModelName": "hf.co/meta-models/Muse-Glimmer-30B-GGUF",
+  "format": "GGUF",
+  "license": {
+    "name": "Apache-2.0",
+    "commercialUse": true,
+    "notes": "Source metadata reports Apache-2.0; review the official license and usage policy before deployment."
+  },
+  "capabilities": [
+    "image-text-to-text",
+    "tool-use-candidate",
+    "agentic-generalist-candidate",
+    "coding-candidate"
+  ],
+  "status": "unavailable",
+  "notes": [
+    "Candidate-only manifest: no Glimmer artifact is installed, loaded, or benchmarked in Locaily.",
+    "The current Benchmark Lab live adapter is Ollama-only. This intended runtime name must be replaced or confirmed with an exact installed runtime artifact before a run.",
+    "Official source artifacts include safetensors and GGUF; no exact local model digest or supported runtime version is verified.",
+    "No capability or role in this manifest is a qualification or routing recommendation."
+  ]
+}

@@ -20,6 +20,7 @@ Structured candidate list for Locaily **Model Lab** evaluation. Entries in `regi
 | `paddlepaddle-paddleocr-vl-1.6-i1-gguf` | [PaddleOCR-VL-1.6-i1-GGUF](./paddlepaddle/paddleocr-vl-1.6-i1.md) | `ocr_worker` | OCR cleanup, document extraction, screenshot text extraction | VL OCR; llama.cpp + mmproj |
 | `qwen-qwen2-vl-2b-instruct-gguf` | [Qwen2-VL-2B-Instruct-GGUF](./qwen/qwen2-vl-2b-instruct.md) | `vision_worker` | screenshot analysis, UI inspection, image-to-text | General local vision lane |
 | `davidau-qwen3-zero-coder-reasoning-v2-0.8b-gguf` | [Qwen3-Zero-Coder-Reasoning-V2-0.8B](./davidau/qwen3-zero-coder-reasoning-v2-0.8b.md) | `coding_worker` | developer task expansion, code drafting, coding brainstorm, handoff enhancement | Tiny coding + reasoning worker |
+| `meta-muse-glimmer-30b` | [Muse Glimmer 30B](./meta/muse-glimmer-30b.md) | `agentic_generalist` | tool use, track planning, developer-task expansion, code drafting | Heavy-local research candidate; not installed, tested, or routed |
 
 ## Evaluated Candidates
 
@@ -38,6 +39,7 @@ These roles extend the current operational set (`fast_worker`, `default_worker`,
 | `ocr_worker` | OCR cleanup and document/screenshot text extraction |
 | `vision_worker` | Screenshot analysis and UI inspection |
 | `coding_worker` | Developer task expansion, code drafting, handoff enhancement |
+| `agentic_generalist` | Heavy-local candidate tier for evaluation alongside deterministic tools and tiny specialists; not wired into runtime routing |
 
 ## Evaluation Status
 
@@ -45,6 +47,7 @@ These roles extend the current operational set (`fast_worker`, `default_worker`,
 |---|---|---|---|---|
 | LiquidAI LFM2.5 family | mixed | Lighthouse Handoff | partial fixture evidence | 2026-06-14 |
 | VibeThinker 3B Q4_K_M | narrow extractor + editorial writer | Operator Log | failed grounding and writing gates | 2026-06-18 |
+| Meta Muse Glimmer 30B | — | — | not installed or measured | 2026-08-11 |
 | Proposed candidates above | — | — | not measured | — |
 
 Use [docs/99-archive/research-notes/model-evaluation-template.md](../docs/99-archive/research-notes/model-evaluation-template.md) when recording runs.
