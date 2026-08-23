@@ -26,6 +26,11 @@ function parseArgs(args, spec = {}) {
       throw new Error(`Unknown option '${arg}'.`);
     }
 
+    if (config.boolean) {
+      parsed[key] = true;
+      continue;
+    }
+
     const value = args[index + 1];
 
     if (!value || value.startsWith("--")) {

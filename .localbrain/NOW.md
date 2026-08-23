@@ -27,6 +27,7 @@ Post-merge stabilization: Benchmark Lab qualification provenance/overwrite behav
 - PR #35 workspace-mobility files are present on `main`.
 - Benchmark Lab qualification generation now surfaces a missing manifest digest and protects differing records from implicit overwrite.
 - Benchmark Lab and the complete set of `test:full` component commands pass in this checkout.
+- Live-server smoke validation passes all 61 checks, including Host and Origin rejection.
 
 ## Blockers
 
@@ -44,7 +45,7 @@ Post-merge stabilization: Benchmark Lab qualification provenance/overwrite behav
 ## Handoff notes
 
 - `development/project-state.json` no longer points agents toward the already-merged M3 delivery step.
-- DEV-HARNESS-01's older milestone/session records remain a separate lifecycle reconciliation item; this stabilization does not rewrite their history.
+- DEV-HARNESS-01's completed implementation session is closed and its milestone is reconciled to `ready-for-delivery`.
 - The sandbox blocked the aggregate `npm run test:full` wrapper before execution; every command it expands to was run directly and passed.
 
 _Last updated: 2026-08-23 09:20 America/Chicago_

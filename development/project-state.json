@@ -1,18 +1,16 @@
 {
   "schema": "locaily.development.project_state.v1",
   "project": "locaily",
-  "currentMilestone": null,
+  "currentMilestone": "dev-harness-01-agent-operations-contract",
   "activeSession": null,
   "status": "ready-for-delivery",
   "defaultBranch": "main",
-  "activeBranch": "fix/post-merge-stabilization-20260823",
+  "activeBranch": "agent/dev-harness-01-agent-operations-contract",
   "lastCompletedMilestone": "benchmark-lab-m3-interactive-local-model-lab",
-  "nextRecommendedAction": "Review the post-merge stabilization pull request and require a green full validation run before merge",
+  "nextRecommendedAction": "Complete delivery review for DEV-HARNESS-01; PR #36 must pass CI before its stabilization changes are merged",
   "blockers": [],
-  "warnings": [
-    "DEV-HARNESS-01 milestone and session records still report active work from 2026-08-02 and require separate lifecycle reconciliation."
-  ],
-  "updatedAt": "2026-08-23T14:20:00.000Z",
+  "warnings": [],
+  "updatedAt": "2026-08-23T14:50:00.000Z",
   "updatedBy": {
     "type": "agent",
     "name": "stabilization-review",

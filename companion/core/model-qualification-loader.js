@@ -194,6 +194,14 @@ function verifyQualificationChecksums(checksumDir) {
     try {
       record = JSON.parse(fs.readFileSync(checksumPath, "utf8"));
     } catch (error) {
+      if (entry.name.endsWith("-qualification.json")) {
+        result.total += 1;
+        result.failures.push({
+          file: checksumPath,
+          code: "QUALIFICATION_CHECKSUM_INVALID_JSON",
+          message: error.message
+        });
+      }
       continue;
     }
     if (record.artifactType !== "qualification_record") {

@@ -180,7 +180,7 @@ async function main() {
     status: "candidate",
     roleStatus: "conditional",
     notes: ["Test-only qualification generation."],
-    now: fixedNow
+    now: () => new Date("2026-06-24T00:00:00.000Z")
   });
 
   const forced = await generateQualification({

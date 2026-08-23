@@ -49,8 +49,15 @@ async function generateQualification({
 
   const recordPath = path.join(LAB_ROOT, "qualifications", "models", `${record.recordId}.json`);
   const existingRecord = await readJsonIfExists(recordPath);
-  if (existingRecord && !overwrite && JSON.stringify(existingRecord) !== JSON.stringify(record)) {
-    throw new Error(`Qualification record already exists with different content; pass overwrite: true to replace ${record.recordId}.`);
+  if (existingRecord && !overwrite) {
+    if (!recordsMatchIgnoringGeneratedAt(existingRecord, record)) {
+      throw new Error(`Qualification record already exists with different content; use --overwrite to replace ${record.recordId}.`);
+    }
+    return {
+      recordPath,
+      checksumPath: path.join(LAB_ROOT, "evidence", "checksums", `${record.recordId}-qualification.json`),
+      record: existingRecord
+    };
   }
   await writeJson(recordPath, record);
   const checksum = await writeChecksumRecord({
@@ -64,6 +71,15 @@ async function generateQualification({
     checksumPath: checksum.checksumPath,
     record
   };
+}
+
+function recordsMatchIgnoringGeneratedAt(left, right) {
+  const normalize = (value) => {
+    const copy = { ...value };
+    delete copy.generatedAt;
+    return copy;
+  };
+  return JSON.stringify(normalize(left)) === JSON.stringify(normalize(right));
 }
 
 function buildQualificationRecord({

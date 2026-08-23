@@ -6,7 +6,7 @@
     "platform": "unknown",
     "model": "unknown"
   },
-  "status": "active",
+  "status": "closed",
   "objective": "Define the read-only normalization boundary between external coding-agent harnesses and Locaily's development control plane.",
   "branch": "agent/dev-harness-01-agent-operations-contract",
   "startingCommit": "2cedf5bbf1fa423d304af1c3c54d30066be9507e",
@@ -16,11 +16,7 @@
     "Full offline repository suite passed after DEV-HARNESS-01 implementation; milestone remains active pending intentional commit boundary and pre-delivery lifecycle validation.",
     "Added checked-in canonical valid/invalid harness schema fixtures and wired test:harness into test:full; final focused and full offline suites pass."
   ],
-  "remainingWork": [
-    "Establish an intentional commit boundary before delivery.",
-    "Run the pre-delivery lifecycle validation against the committed implementation and update milestone acceptance evidence.",
-    "Close the active development session only when the implementation slice is ready for delivery review."
-  ],
+  "remainingWork": [],
   "blockers": [],
   "validationRunIds": [],
   "checks": [
@@ -47,5 +43,5 @@
     }
   ],
   "startedAt": "2026-08-02T00:26:31.268Z",
-  "closedAt": null
+  "closedAt": "2026-08-23T14:45:00.000Z"
 }
