@@ -2,35 +2,34 @@
   "work_id": "dev-harness-01-agent-operations-contract-20260823",
   "objective_id": "dev-harness-01-agent-operations-contract",
   "status": "complete",
-  "closed_at": "2026-08-23T17:33:42.097Z",
+  "closed_at": "2026-08-23T19:57:37.209Z",
   "original_goal": "Complete the DEV-HARNESS-01 delivery review from current main, index truthful pre-delivery validation, and reconcile the control-plane records without merging.",
   "completed": [
-    "Verified origin/main at merge commit f525bb424f5884909df42496724651455026ce9d after PR #36.",
+    "Verified origin/main at merge commit 1f36ce3 after PR #41.",
     "Reconciled DEV-HARNESS-01 milestone acceptance evidence, project state, session metadata, roadmap tracking, and closeout records.",
     "Ran the focused DEV-HARNESS checks and the repository pre-delivery profile from a clean committed branch.",
-    "Indexed the resulting validation record against the committed implementation state."
+    "Indexed the resulting validation record against the committed implementation state after rebasing onto current main."
   ],
   "remaining": [
     "DEV-LOOP-01 remains planned while PR #30 is open and dirty; a separate owner decision is required before changing that lifecycle state.",
-    "The delivery-review PR remains unmerged pending CI and owner review."
+    "The delivery-review PR remains unmerged pending fresh CI and owner review."
   ],
-  "next_required_action": "Review the DEV-HARNESS-01 delivery-review PR and resolve the separate DEV-LOOP-01 lifecycle decision before claiming the dependency is delivered.",
+  "next_required_action": "Review fresh CI and connector evidence for PR #38; resolve the separate DEV-LOOP-01 lifecycle decision before claiming the dependency is delivered.",
   "blockers": [
     "DEV-LOOP-01 dependency state cannot be changed truthfully in this focused review because PR #30 is open and dirty."
   ],
   "safe_to_start_unrelated_work": true,
   "working_branch": "fix/dev-harness-01-delivery-review-20260823",
-  "last_commit": "d550e2f",
+  "last_commit": "d3c418f9874ec81159c3aee89288245d8e436286",
   "validation": {
     "passed": [
       "node scripts/test-harness-adapters.js",
       "node scripts/test-development-schemas.js",
       "node scripts/test-lifecycle.js",
-      "npm run dev:status",
       "node scripts/dev-status.js --strict",
       "node scripts/test-controller-invariants.js",
       "node scripts/contract-test.js",
-      "pre-delivery validation profile (underlying node commands passed; npm wrapper could not start in this runtime)"
+      "npm.cmd run dev:validate (fresh pre-delivery profile; required and optional checks passed)"
     ],
     "failed": [],
     "not_run": [
