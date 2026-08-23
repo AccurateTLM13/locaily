@@ -1,4 +1,5 @@
 const fs = require("node:fs/promises");
+const os = require("node:os");
 const path = require("node:path");
 const {
   runSuite,
@@ -9,7 +10,12 @@ const { reviewRun, promoteRun } = require("../benchmark-lab/engine/review-run");
 const { compareRuns } = require("../benchmark-lab/engine/compare-runs");
 const { runMatrix } = require("../benchmark-lab/engine/matrix-runner");
 const { generateModelCard } = require("../benchmark-lab/engine/model-card");
-const { generateQualification } = require("../benchmark-lab/engine/qualification");
+const {
+  generateQualification,
+  assertQualificationEligible,
+  calculatePassRate
+} = require("../benchmark-lab/engine/qualification");
+const { evaluateSemanticCase } = require("../benchmark-lab/engine/semantic-scorer");
 const { generateBenchmarkReport } = require("../benchmark-lab/engine/report");
 const { verifyChecksumRecord } = require("../benchmark-lab/engine/checksums");
 const { OllamaRuntimeAdapter } = require("../benchmark-lab/engine/adapters/ollama-runtime");
@@ -140,6 +146,54 @@ async function main() {
   assert(!JSON.stringify(qualification.record).includes("Pull the title"), "Qualification must not include prompts.");
   assert(!JSON.stringify(qualification.record).includes("rawText"), "Qualification must not include raw responses.");
   await assertChecksumOk(qualification.checksumPath);
+  assert(
+    qualification.record.notes.some((note) => note.includes("no digest")),
+    "Expected missing manifest digest to be surfaced as an explicit provenance note."
+  );
+
+  testQualificationEligibilityGate();
+  testSemanticCaseEvaluation();
+
+  let overwriteBlocked = null;
+  try {
+    await generateQualification({
+      modelId: "mock-intent-classifier",
+      evidenceId: "evidence-test-intent-classification",
+      role: "fast_worker",
+      status: "candidate",
+      roleStatus: "conditional",
+      notes: ["Conflicting regeneration."],
+      now: fixedNow
+    });
+  } catch (error) {
+    overwriteBlocked = error;
+  }
+  assert(
+    overwriteBlocked && overwriteBlocked.message.includes("overwrite"),
+    "Expected differing regeneration to require explicit overwrite."
+  );
+
+  await generateQualification({
+    modelId: "mock-intent-classifier",
+    evidenceId: "evidence-test-intent-classification",
+    role: "fast_worker",
+    status: "candidate",
+    roleStatus: "conditional",
+    notes: ["Test-only qualification generation."],
+    now: fixedNow
+  });
+
+  const forced = await generateQualification({
+    modelId: "mock-intent-classifier",
+    evidenceId: "evidence-test-intent-classification",
+    role: "fast_worker",
+    status: "candidate",
+    roleStatus: "conditional",
+    notes: ["Forced replacement note."],
+    now: fixedNow,
+    overwrite: true
+  });
+  assert(forced.record.notes.includes("Forced replacement note."), "Expected forced overwrite to replace record content.");
 
   const report = await generateBenchmarkReport({
     reportId: "report-test-intent-classification",
@@ -168,6 +222,18 @@ async function main() {
   });
   assert(modelRecords.some((record) => record.recordId === qualification.record.recordId), "Expected loader to find generated model record.");
   assert(roleMatches.some((match) => match.status === "conditional"), "Expected loader to find conditional role match.");
+
+  const loaderStatus = loader.getStatus();
+  assert(loaderStatus.checksumVerification.total >= 1, "Expected checksum verification to inspect checksum records.");
+  const ownChecksumFailure = loaderStatus.checksumVerification.failures.find((failure) => (
+    failure.file.endsWith("mock-intent-classifier-evidence-test-intent-classification-qualification.json")
+  ));
+  assert(
+    !ownChecksumFailure,
+    `Expected generated qualification checksum to verify: ${JSON.stringify(ownChecksumFailure || null)}`
+  );
+
+  await testLoaderFailsClosedWithoutSchema();
 
   await testOllamaAdapter();
   await testOllamaRuntimeMetadata();
@@ -323,6 +389,135 @@ async function testOllamaRuntimeMetadata() {
     mismatch = error;
   }
   assert(mismatch && mismatch.code === "MODEL_DIGEST_MISMATCH", "Expected digest mismatch to fail closed.");
+}
+
+function testQualificationEligibilityGate() {
+  const gateEvidence = (gate) => ({ aggregation: { qualificationGate: gate } });
+  let allowed = null;
+
+  expectThrows(
+    () => assertQualificationEligible({ status: "qualified", roleStatus: null, evidence: {} }),
+    "repeated-trial aggregation",
+    "qualified status without a gate to be rejected"
+  );
+
+  expectThrows(
+    () => assertQualificationEligible({
+      status: "screening",
+      roleStatus: "qualified",
+      evidence: gateEvidence({ eligible: false, reasons: ["Insufficient trial count."] })
+    }),
+    "Reasons: Insufficient trial count.",
+    "ineligible gate reasons to surface in the rejection"
+  );
+
+  allowed = true;
+  try {
+    assertQualificationEligible({
+      status: "candidate",
+      roleStatus: "conditional",
+      evidence: {}
+    });
+    assertQualificationEligible({
+      status: "candidate",
+      roleStatus: "qualified",
+      evidence: gateEvidence({ eligible: true, reasons: [] })
+    });
+  } catch (error) {
+    allowed = false;
+  }
+  assert(allowed, "Expected eligible gate evidence to allow role qualification.");
+
+  assert(calculatePassRate({ passed: 3, caseCount: 7 }) === 0.4286, "Expected pass rate rounded to four decimals.");
+  assert(calculatePassRate({}) === 0, "Expected empty summary pass rate of zero.");
+}
+
+function testSemanticCaseEvaluation() {
+  const scenarios = new Map([
+    ["c-pass", { id: "c-pass", evaluate: () => ({ pass: true }) }],
+    ["c-verdict", { id: "c-verdict", evaluate: () => ({ verdict: "PASS" }) }],
+    ["c-fail", { id: "c-fail", evaluate: () => ({ pass: false, errors: ["wrong label"] }) }],
+    ["c-throw", { id: "c-throw", evaluate: () => { throw new Error("boom"); } }],
+    ["c-invalid", { id: "c-invalid", evaluate: () => ({}) }]
+  ]);
+  const scorer = { scenariosByCaseId: scenarios };
+  const run = (caseId) => evaluateSemanticCase({
+    scorer,
+    benchmarkCase: { caseId },
+    output: {}
+  });
+
+  const passing = run("c-pass");
+  assert(passing.pass === true && passing.code === "SEMANTIC_PASS", "Expected semantic pass verdict.");
+
+  const byVerdict = run("c-verdict");
+  assert(byVerdict.pass === true && byVerdict.code === "SEMANTIC_PASS", "Expected verdict-style pass to count as semantic pass.");
+
+  const failing = run("c-fail");
+  assert(failing.pass === false, "Expected semantic failure to fail.");
+  assert(failing.code === "SEMANTIC_EXPECTATION_MISMATCH", "Expected expectation-mismatch code.");
+  assert(failing.errors.includes("wrong label"), "Expected scenario errors to propagate.");
+
+  const throwing = run("c-throw");
+  assert(throwing.pass === false && throwing.code === "SEMANTIC_EVALUATOR_ERROR", "Expected evaluator crash to be isolated.");
+  assert(throwing.errors.includes("boom"), "Expected evaluator error message to be captured.");
+
+  const missing = run("c-missing");
+  assert(missing.pass === false && missing.code === "SEMANTIC_SCENARIO_NOT_FOUND", "Expected undeclared case to fail closed.");
+
+  const invalid = run("c-invalid");
+  assert(invalid.pass === false && invalid.code === "SEMANTIC_RESULT_INVALID", "Expected invalid scorer result to fail closed.");
+}
+
+async function testLoaderFailsClosedWithoutSchema() {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "locaily-qualschema-"));
+
+  try {
+    await fs.writeFile(path.join(dir, "record.json"), JSON.stringify({
+      schemaVersion: "benchmark.qualification.v1",
+      recordId: "schemaless-record",
+      subject: {
+        type: "model",
+        id: "mock-model"
+      },
+      status: "screening",
+      evidence: {
+        evidenceIds: ["evidence-1"],
+        summaryPaths: ["benchmark-lab/evidence/summaries/evidence-1.json"]
+      },
+      generatedAt: "2026-06-23T00:00:00.000Z"
+    }, null, 2), "utf8");
+
+    const loader = createModelQualificationLoader({
+      qualificationDir: dir,
+      schemaPath: path.join(dir, "missing.schema.json")
+    });
+
+    assert(loader.list().length === 0, "Expected no records trusted when schema is unavailable.");
+    const status = loader.getStatus();
+    assert(status.records === 0, "Expected zero records when schema is unavailable.");
+    assert(
+      status.errors.some((error) => error.code === "QUALIFICATION_SCHEMA_UNAVAILABLE"),
+      "Expected schema-unavailable error to be reported instead of silent fallback."
+    );
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+}
+
+function expectThrows(fn, messageIncludes, label) {
+  let caught = null;
+
+  try {
+    fn();
+  } catch (error) {
+    caught = error;
+  }
+
+  assert(
+    caught !== null && caught.message.includes(messageIncludes),
+    `Expected ${label}: ${caught ? caught.message : "no error thrown"}`
+  );
 }
 
 function withoutRunId(summary) {
