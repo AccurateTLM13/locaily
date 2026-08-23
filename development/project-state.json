@@ -5,12 +5,14 @@
   "activeSession": null,
   "status": "ready-for-delivery",
   "defaultBranch": "main",
-  "activeBranch": "agent/dev-harness-01-agent-operations-contract",
+  "activeBranch": "fix/dev-harness-01-delivery-review-20260823",
   "lastCompletedMilestone": "benchmark-lab-m3-interactive-local-model-lab",
-  "nextRecommendedAction": "Complete delivery review for DEV-HARNESS-01; PR #36 must pass CI before its stabilization changes are merged",
+  "nextRecommendedAction": "Review the DEV-HARNESS-01 delivery-review PR; do not merge until CI and owner review pass",
   "blockers": [],
-  "warnings": [],
-  "updatedAt": "2026-08-23T14:50:00.000Z",
+  "warnings": [
+    "DEV-LOOP-01 remains planned while PR #30 is open and dirty; do not mark the dependency delivered without a separate lifecycle decision."
+  ],
+  "updatedAt": "2026-08-23T17:33:42.097Z",
   "updatedBy": {
     "type": "agent",
     "name": "stabilization-review",
