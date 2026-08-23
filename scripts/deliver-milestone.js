@@ -17,9 +17,14 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
 const readline = require("node:readline");
+const {
+  compareValidationGitState,
+  computeGitFingerprint,
+  getChangedPathsBetweenCommits,
+  validateValidationRecordReference,
+} = require("./development-git-state");
 
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 const DEVELOPMENT_DIR = path.join(PROJECT_ROOT, "development");
@@ -82,48 +87,6 @@ function now() {
   return new Date().toISOString();
 }
 
-// ---- git fingerprint ----
-
-function computeGitFingerprint() {
-  const branch = gitOk(["rev-parse", "--abbrev-ref", "HEAD"]);
-  const head = gitOk(["rev-parse", "HEAD"]);
-  const treeHash = gitOk(["rev-parse", "HEAD^{tree}"]) || "";
-
-  const statusOutput = (git(["status", "--porcelain"]) || { stdout: "" }).stdout || "";
-  const lines = statusOutput.split(/\r?\n/).filter(Boolean);
-  const excludedPrefixes = ["development/", ".opencode/"];
-  const changedFiles = [];
-  for (const line of lines) {
-    const gitStatus = line.slice(0, 2).trim();
-    const filePath = line.slice(3);
-    const isExcluded = excludedPrefixes.some(p => filePath.startsWith(p));
-    if (!isExcluded) {
-      changedFiles.push({ path: filePath, state: gitStatus || "?" });
-    }
-  }
-
-  const diffHash = (git(["diff", "--", ":(exclude)development/", ":(exclude).opencode/"]) || { stdout: "" }).stdout || "";
-  const indexHash = (git(["diff", "--cached", ":(exclude)development/", ":(exclude).opencode/"]) || { stdout: "" }).stdout || "";
-  const untrackedFiles = ((git(["ls-files", "--others", "--exclude-standard"]) || { stdout: "" }).stdout || "")
-    .split(/\r?\n/)
-    .filter(f => f && !excludedPrefixes.some(p => f.startsWith(p)))
-    .join("\n");
-
-  const fp = crypto.createHash("sha256");
-  fp.update(treeHash);
-  fp.update(diffHash);
-  fp.update(indexHash);
-  fp.update(untrackedFiles);
-
-  return {
-    branch,
-    headCommit: head,
-    treeHash,
-    fingerprint: `sha256:${fp.digest("hex").slice(0, 16)}`,
-    changedFiles,
-  };
-}
-
 // ---- milestone / validation / delivery ----
 
 function readMilestone(slug) {
@@ -137,6 +100,10 @@ function writeMilestone(milestone) {
 function readValidationResult(id) {
   if (!id) return null;
   return readJson(path.join(VALIDATION_RESULTS_DIR, `${id}.json`), null);
+}
+
+function readValidationIndex() {
+  return readJson(path.join(DEVELOPMENT_DIR, "validation-index.json"), null);
 }
 
 function readCloseout() {
@@ -201,25 +168,38 @@ function preflight(slug) {
     errors.push({ code: "DIRTY_TREE", message: "Working tree has uncommitted source changes" });
   }
 
-  // 6. Validation passed and fingerprint matches
+  // 6. Validation passed and source fingerprint matches
   const validation = readValidationResult(milestone.latestValidationId);
-  if (!validation) {
-    errors.push({ code: "NO_VALIDATION", message: "No validation record found" });
+  const validationReference = validateValidationRecordReference({
+    milestoneId: milestone.id,
+    validationId: milestone.latestValidationId,
+    validation,
+    validationIndex: readValidationIndex(),
+  });
+  if (!validationReference.ok) {
+    errors.push({ code: validationReference.code, message: validationReference.message });
   } else if (validation.status !== "passed") {
     errors.push({ code: "VALIDATION_FAILED", message: `Validation status is '${validation.status}'` });
   } else {
-    // Check fingerprint
-    const currentFingerprint = computeGitFingerprint();
-    if (validation.gitState) {
-      if (validation.gitState.branch !== currentFingerprint.branch) {
-        errors.push({ code: "FINGERPRINT_BRANCH", message: "Validation branch != current branch" });
-      }
-      if (validation.gitState.headCommit !== currentFingerprint.headCommit) {
-        errors.push({ code: "FINGERPRINT_HEAD", message: "Validation HEAD != current HEAD" });
-      }
-      if (validation.gitState.fingerprint !== currentFingerprint.fingerprint) {
-        errors.push({ code: "FINGERPRINT_CONTENT", message: "Validation fingerprint != current fingerprint" });
-      }
+    // Check source fingerprint. A changed HEAD is acceptable only when Git
+    // proves that the validation head is an ancestor and only excluded
+    // development metadata changed.
+    const currentFingerprint = computeGitFingerprint({ cwd: PROJECT_ROOT });
+    const changedPaths = getChangedPathsBetweenCommits({
+      cwd: PROJECT_ROOT,
+      from: validation.gitState?.headCommit,
+      to: currentFingerprint.headCommit,
+    });
+    const gitStateErrors = compareValidationGitState(
+      validation.gitState,
+      currentFingerprint,
+      changedPaths
+    );
+    errors.push(...gitStateErrors);
+    if (validation.gitState?.headCommit !== currentFingerprint.headCommit
+      && validation.gitState?.fingerprint === currentFingerprint.fingerprint
+      && !gitStateErrors.some(error => error.code === "FINGERPRINT_HEAD")) {
+      warnings.push("HEAD changed after validation, but only allowed development metadata changed");
     }
     // Check expiration (120 min default)
     if (validation.completedAt) {

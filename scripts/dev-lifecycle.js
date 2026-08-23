@@ -27,6 +27,12 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
+const {
+  compareValidationGitState,
+  computeGitFingerprint,
+  getChangedPathsBetweenCommits,
+  validateValidationRecordReference,
+} = require("./development-git-state");
 
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 const DEVELOPMENT_DIR = path.join(PROJECT_ROOT, "development");
@@ -191,52 +197,8 @@ function findPausedSession() {
   return listSessions().find(s => s.status === "paused") || null;
 }
 
-// ---- git state fingerprint ----
-
-function computeGitFingerprint() {
-  const branch = getCurrentBranch();
-  const head = getCurrentHead();
-
-  // Get list of changed files with their git status
-  // Exclude development/ directory (control plane state, expected to change during validation)
-  const statusResult = gitResult(["status", "--porcelain"]);
-  const statusOutput = statusResult.status === 0 ? (statusResult.stdout || "") : "";
-  const lines = statusOutput.split(/\r?\n/).filter(Boolean);
-
-  const changedFiles = [];
-  const excludedPrefixes = ["development/", ".opencode/"];
-  for (const line of lines) {
-    const gitStatus = line.slice(0, 2).trim();
-    const filePath = line.slice(3);
-    const isExcluded = excludedPrefixes.some(p => filePath.startsWith(p));
-    if (!isExcluded) {
-      changedFiles.push({ path: filePath, state: gitStatus || "?" });
-    }
-  }
-
-  // Compute hash of uncommitted changes to source files (exclude development/ and .opencode/)
-  // Do NOT include treeHash (HEAD^{tree}) — it changes with every commit
-  const diffHash = git(["diff", "--", ":(exclude)development/", ":(exclude).opencode/"]) || "";
-  const indexHash = git(["diff", "--cached", ":(exclude)development/", ":(exclude).opencode/"]) || "";
-  const untrackedFiles = (git(["ls-files", "--others", "--exclude-standard"]) || "")
-    .split(/\r?\n/)
-    .filter(f => f && !excludedPrefixes.some(p => f.startsWith(p)))
-    .join("\n");
-
-  const fingerprint = crypto.createHash("sha256");
-  fingerprint.update(diffHash);
-  fingerprint.update(indexHash);
-  fingerprint.update(untrackedFiles);
-
-  return {
-    branch,
-    headCommit: head,
-    fingerprint: `sha256:${fingerprint.digest("hex").slice(0, 16)}`,
-    changedFiles,
-    computedAt: now(),
-  };
-}
-
+// Legacy helper retained for Phase 2B compatibility; active gates use the
+// shared source-state comparator below.
 function isFingerprintStale(validation, currentFingerprint) {
   if (!validation || !validation.gitState) return true;
   if (validation.gitState.branch !== currentFingerprint.branch) return true;
@@ -822,7 +784,7 @@ function cmdValidate(args) {
   const branch = getCurrentBranch();
   const head = getCurrentHead();
   const dirty = isDirty();
-  const gitState = computeGitFingerprint();
+  const gitState = computeGitFingerprint({ cwd: PROJECT_ROOT });
   const validationId = generateValidationId();
 
   // Save previous milestone status for restore on failure
@@ -1060,35 +1022,41 @@ function cmdComplete(args) {
   const latestValidation = milestone.latestValidationId
     ? readValidationResult(milestone.latestValidationId)
     : null;
-  if (!latestValidation) {
-    addError("NO_VALIDATION", "No validation has been run. Run dev:validate first.");
+  const validationReference = validateValidationRecordReference({
+    milestoneId: milestone.id,
+    validationId: milestone.latestValidationId,
+    validation: latestValidation,
+    validationIndex: readValidationIndex(),
+  });
+  if (!validationReference.ok) {
+    addError(validationReference.code, validationReference.message);
   } else if (latestValidation.status !== "passed") {
     addError("VALIDATION_FAILED", `Validation '${latestValidation.id}' has status '${latestValidation.status}'`);
-  } else if (latestValidation.milestoneId !== milestone.id) {
-    addError("VALIDATION_WRONG_MILESTONE", `Validation is for milestone '${latestValidation.milestoneId}', not '${milestone.id}'`);
   }
 
   // Gate 4: Validation matches current branch, HEAD, and working-tree fingerprint
-  const currentFingerprint = computeGitFingerprint();
-  if (latestValidation && latestValidation.status === "passed") {
-    if (latestValidation.gitState.branch !== currentFingerprint.branch) {
-      addError("VALIDATION_STALE",
-        `Validation branch '${latestValidation.gitState.branch}' != current branch '${currentFingerprint.branch}'`);
+  const currentFingerprint = computeGitFingerprint({ cwd: PROJECT_ROOT });
+  if (validationReference.ok && latestValidation.status === "passed") {
+    const changedPaths = getChangedPathsBetweenCommits({
+      cwd: PROJECT_ROOT,
+      from: latestValidation.gitState?.headCommit,
+      to: currentFingerprint.headCommit,
+    });
+    const gitStateErrors = compareValidationGitState(
+      latestValidation.gitState,
+      currentFingerprint,
+      changedPaths
+    );
+    for (const error of gitStateErrors) {
+      addError(error.code, error.message);
     }
-    // Content fingerprint must match (HEAD may differ if prepare created a commit)
-    if (latestValidation.gitState.fingerprint !== currentFingerprint.fingerprint) {
-      addError("VALIDATION_STALE",
-        `Validation fingerprint ${latestValidation.gitState.fingerprint} != current ${currentFingerprint.fingerprint}`);
-    }
-    // HEAD check: warn if different, but don't block if fingerprint matches
-    if (latestValidation.gitState.headCommit !== currentFingerprint.headCommit) {
-      if (latestValidation.gitState.fingerprint === currentFingerprint.fingerprint) {
-        addWarning("HEAD_CHANGED_AFTER_VALIDATE",
-          `HEAD changed after validation (${latestValidation.gitState.headCommit?.slice(0, 8)} → ${currentFingerprint.headCommit?.slice(0, 8)}) but content fingerprint matches`);
-      } else {
-        addError("VALIDATION_STALE",
-          `Validation HEAD ${latestValidation.gitState.headCommit?.slice(0, 8)} != current ${currentFingerprint.headCommit?.slice(0, 8)}`);
-      }
+    if (
+      latestValidation.gitState.headCommit !== currentFingerprint.headCommit
+      && latestValidation.gitState.fingerprint === currentFingerprint.fingerprint
+      && !gitStateErrors.some(error => error.code === "FINGERPRINT_HEAD")
+    ) {
+      addWarning("HEAD_CHANGED_AFTER_VALIDATE",
+        `HEAD changed after validation (${latestValidation.gitState.headCommit?.slice(0, 8)} → ${currentFingerprint.headCommit?.slice(0, 8)}) but only allowed metadata changed`);
     }
   }
 

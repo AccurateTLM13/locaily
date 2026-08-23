@@ -40,6 +40,7 @@ function createEnforcementPolicyStore(options = {}) {
   let safeFallback = false;
   let enforcementLocked = false;
   let auditHealthy = true;
+  let auditQueue = Promise.resolve();
 
   function createNullAudit() {
     return { record: async () => {} };
@@ -1011,7 +1012,13 @@ function createEnforcementPolicyStore(options = {}) {
     safeAudit(event).catch(() => {});
   }
 
-  async function safeAudit(event) {
+  function safeAudit(event) {
+    const write = auditQueue.then(() => writeAudit(event));
+    auditQueue = write.catch(() => {});
+    return write;
+  }
+
+  async function writeAudit(event) {
     try {
       await audit.record(event);
     } catch (error) {

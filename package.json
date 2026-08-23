@@ -115,6 +115,7 @@
     "dev:prepare": "node scripts/dev-lifecycle.js prepare",
     "dev:milestone:complete": "node scripts/dev-lifecycle.js complete",
     "dev:milestone:merge": "node scripts/dev-lifecycle.js merge",
+    "test:development-lifecycle-gate": "node scripts/test-development-lifecycle-gate.js",
     "dev:dashboard": "node scripts/generate-development-dashboard.js",
     "dev:begin": "node scripts/dev-begin.js",
     "dev:end": "node scripts/dev-end.js",
@@ -128,6 +129,6 @@
     "test:track-records": "node scripts/track-run-record-schema-test.js && node scripts/crew-track-run-record-test.js",
     "test:human-review": "node scripts/test-human-review-records.js",
     "test:capability-kernel": "node scripts/test-node-roles-capability-capsules.js && node scripts/test-node-event-bus.js && node scripts/test-relay-trust-pairing.js && node scripts/test-lighthouse-product-bridge.js && node scripts/test-dev-loop.js && node scripts/test-development-schemas.js",
-      "test:full": "npm run test:harness && npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:checksum && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && npm run test:development-memory && npm run test:controller && npm run test:capability-kernel"
+      "test:full": "npm run test:harness && npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:checksum && npm run test:development-lifecycle-gate && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && npm run test:development-memory && npm run test:controller && npm run test:capability-kernel"
   }
 }
