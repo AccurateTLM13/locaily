@@ -1,44 +1,45 @@
 {
-  "work_id": "dev-harness-01-agent-operations-contract-20260823",
-  "objective_id": "dev-harness-01-agent-operations-contract",
-  "status": "complete",
-  "closed_at": "2026-08-23T21:14:00.604Z",
-  "original_goal": "Complete the DEV-HARNESS-01 delivery review from current main, index truthful pre-delivery validation, and reconcile the control-plane records without merging.",
+  "work_id": "core-01-system-formation-slice1-20260907",
+  "objective_id": "core-01-system-formation",
+  "status": "active",
+  "closed_at": "2026-09-07T18:55:00.000Z",
+  "original_goal": "CORE-01: verify the repository baseline, record the code-true architecture state, and begin system formation with reusable capability contracts plus multi-track workflow composition proven by the Repo Review workflow.",
   "completed": [
-    "Verified origin/main at merge commit 1f36ce3 after PR #41.",
-    "Reconciled DEV-HARNESS-01 milestone acceptance evidence, project state, session metadata, roadmap tracking, and closeout records.",
-    "Removed the superseded review record that pointed to unreachable commit ee5df0011ececbe55bcfb9d680900748b10c762a.",
-    "Corrected validation so its transient validating state remains in memory until required profile checks finish, preventing the validator from dirtying its own committed checkout.",
-    "Added regression coverage proving required profile checks run before milestone metadata is persisted.",
-    "Updated delivery preflight to accept a completion HEAD advance only when Git proves the recorded completion commit is an ancestor and every intervening change is excluded control-plane metadata.",
-    "Ran focused lifecycle-gate and schema tests and generated zero-finding agent reviews for both lifecycle corrections, including final source commit e02d2d8668b0d0e98316ad4efaf1e98ad7194594.",
-    "Ran the pre-delivery profile from a clean committed checkout; all six required checks, the optional full suite, and both acknowledged manual gates passed."
+    "Phase 0: reconciled repo state — main fast-forwarded to 82d2047 (origin), PR #30 confirmed superseded (orphan: test-development-state-guard.js), paused durable-job-state-integrity milestone isolated in stash@{0} + patch backup, lifecycle-docs-reconciliation branch documented as real unmerged work (kept out of CORE-01), legacy remote dead, test:full green on baseline.",
+    "Phase 1-2: verified architecture baseline recorded in docs/07-progress/core01-baseline-20260907.md (4 workflows, 7 tracks, capability classification, tool packs, providers, execution model, gaps).",
+    "Capability contracts: registry/capabilities.json + capability-contract schema + loader + GET /orchestration/capabilities (8 capabilities with honest reusable/infrastructure/workflow-specific statuses).",
+    "Reusable generic core tracks: core.classify, core.summarize, core.extract, core.validate (verification-gate), core.prioritize; deterministic rank.items tool in new core-rank-pack.",
+    "Multi-track composition: workflow.composition schema validation, topological plan_version-2 plans, executor composing the unchanged single-track pipeline with cross-track artifact passing via the existing $input/$artifacts resolver plus {\"$literal\"} escape; on_failure abort|skip semantics; declarative workflow input_requirements.",
+    "Repo Review composed workflow (domain scan/handoff tracks + 3 shared core tracks) and text_qa pure-generic composition proving the same capability tracks serve unrelated workflows unmodified.",
+    "scripts/test-core01-system-formation.js (17 checks) wired as test:core01 into test:full; npm run test:full green; dev validate passed (validation-20260907T184143-2cd3ef56); PR #43 CI verify green.",
+    "Decision record added (composition reuses single-track execution; CTK/NearbyNode deliberately untouched)."
   ],
   "remaining": [
-    "DEV-LOOP-01 remains planned while PR #30 is open and dirty; a separate owner decision is required before changing that lifecycle state.",
-    "The delivery-review PR remains unmerged pending fresh CI and owner review."
+    "Phase 7 in-product Lighthouse reuse: wire a genuinely shared consumption point (e.g., route lighthouse_handoff's verify path through core.validate or share rank.items with priority fixes) without behavior change to Lighthouse output contracts.",
+    "OCR Document Review composition (needs concrete ingestion decision; anydoc only if it fills the need).",
+    "Content OS composition reusing standard-text-pack primitives (transform/publish-prep still workflow-specific).",
+    "Benchmark Lab qualification per reusable capability, then evidence-driven routing/fallback improvements.",
+    "Close or supersede PR #30 and issue #37/#42 bookkeeping; recover scripts/test-development-state-guard.js orphan test if still wanted.",
+    "Resume or formally cancel stashed durable-job-state-integrity-20260905 milestone (stash@{0}); open narrow PR for unmerged lifecycle-docs-reconciliation work.",
+    "Pre-existing: lighthouse-handoff-parity-test.js is stale on main (expects 7 steps, track has 10; not wired into CI) — needs owner review."
   ],
-  "next_required_action": "Review fresh CI and connector evidence for PR #38; resolve the separate DEV-LOOP-01 lifecycle decision before claiming the dependency is delivered.",
-  "blockers": [
-    "DEV-LOOP-01 dependency state cannot be changed truthfully in this focused review because PR #30 is open and dirty."
-  ],
-  "safe_to_start_unrelated_work": true,
-  "working_branch": "fix/dev-harness-01-delivery-review-20260823",
-  "last_commit": "e02d2d8668b0d0e98316ad4efaf1e98ad7194594",
+  "next_required_action": "Continue CORE-01 with Phase 7 shared-consumption proof, then OCR Document Review composition.",
+  "blockers": [],
+  "safe_to_start_unrelated_work": false,
+  "working_branch": "core/core-01-system-formation",
   "validation": {
     "passed": [
-      "node scripts/test-harness-adapters.js",
-      "node scripts/test-development-schemas.js",
-      "node scripts/test-lifecycle.js",
-      "node scripts/dev-status.js --strict",
-      "node scripts/test-controller-invariants.js",
-      "node scripts/contract-test.js",
-      "node scripts/test-development-lifecycle-gate.js (8 passed)",
-      "node scripts/test-development-schemas.js (29 passed)",
-      "npm.cmd run dev:validate (clean committed checkout; 6 required and 1 optional check passed)"
+      "npm.cmd run test:full green including new test:core01 (17 checks).",
+      "node scripts/test-dag/test-jobs/capability-kernel/tool-registry/orchestration-unit/operator suites re-run individually green.",
+      "dev-lifecycle validate status=passed against committed HEAD (clean tree).",
+      "dev-status: no new errors; only pre-existing DEV-LOOP-01/PR #30 warning.",
+      "PR #43 GitHub Actions verify: pass."
     ],
     "failed": [],
-    "not_run": []
+    "not_run": [
+      "Live-server smoke and browser tests (offline changes only; PR left draft until clean-server smoke per convention).",
+      "milestone:complete gates — CORE-01 milestone intentionally remains active after slice 1."
+    ]
   },
-  "recommended_next_agent": "reviewer"
+  "recommended_next_agent": "worker (CORE-01 slice 2)"
 }
