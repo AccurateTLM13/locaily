@@ -1,8 +1,8 @@
 {
-  "work_id": "core-01-system-formation-slice2-20260907",
+  "work_id": "core-01-system-formation-slice3-20260907",
   "objective_id": "core-01-system-formation",
   "status": "active",
-  "closed_at": "2026-09-08T00:10:00.000Z",
+  "closed_at": "2026-09-08T03:30:00.000Z",
   "original_goal": "CORE-01: verify the repository baseline, record the code-true architecture state, and begin system formation with reusable capability contracts plus multi-track workflow composition proven by the Repo Review workflow.",
   "completed": [
     "Phase 0: reconciled repo state — main fast-forwarded to 82d2047 (origin), PR #30 confirmed superseded (orphan: test-development-state-guard.js), paused durable-job-state-integrity milestone isolated in stash@{0} + patch backup, lifecycle-docs-reconciliation branch documented as real unmerged work (kept out of CORE-01), legacy remote dead, test:full green on baseline.",
@@ -11,10 +11,11 @@
     "Slice 2 Phase 7: scripts/test-core01-phase7-reuse.js — shared core.prioritize reproduces the Lighthouse domain ranking EXACTLY on the real PageSpeed fixture; core.classify/summarize/validate exercised on Lighthouse-derived findings; 6 checks.",
     "Slice 2 third problem class: document_review workflow (document-scan deterministic ingestion + report domain track, 4 shared core tracks in one 6-track composition, OCR_ADAPTER_REQUIRED fail-closed for image/PDF, no dependency added without decision); 7 checks.",
     "Slice 2 control-plane fix: dev-lifecycle resume now reopens a session for an active milestone after session:close (multi-session continuation was impossible); guard check added.",
-    "Capability registry evidence arrays updated with all suites; test:core01 chains three suites inside test:full; validate gates passed on both slices."
+    "Slice 3: generic transform capability closed (core-transform-pack deterministic transform.map + core.transform track; capability status transform -> reusable with honest evidence); content_os workflow = 4th problem class, 7-track composition reusing document_review.ingest + 4 core tracks (extract, classify, summarize, transform, validate) + deterministic publish-prep with preflight checklist and fail-closed publish gate; 9-check suite; test:core01 now 40 checks total.",
+    "Capability registry evidence arrays updated with all suites; test:core01 chains four suites inside test:full; validate gates passed on all slices."
   ],
   "remaining": [
-    "Content OS composition (fourth problem class): local documents -> extract/classify/summarize/transform/validate -> publish-prep; requires a generic transform capability (currently workflow-specific) with a concrete provider.",
+    "Fifth unrelated workflow (e.g., action-items/meeting-notes triage) — would also give core.prioritize a second composed consumer.",
     "Decide the OCR ingestion adapter for image/PDF Document Review (anydoc candidate) — currently an honest fail-closed gap.",
     "Benchmark Lab qualification evidence per reusable capability, then evidence-driven routing/fallback improvements.",
     "Close or supersede PR #30; bookkeep issues #37/#42; recover scripts/test-development-state-guard.js orphan test if still wanted.",
@@ -23,15 +24,15 @@
     "Pre-existing: lighthouse-handoff-parity-test.js is stale on main (expects 7 steps, track has 10; not wired into CI) — needs owner review.",
     "PR #43 remains draft until clean-server smoke passes per repo convention."
   ],
-  "next_required_action": "Continue CORE-01 with Content OS composition (generic transform provider) after user review of PR #43 slices 1-2.",
+  "next_required_action": "CORE-01 system-formation bar nearly met (4 distinct workflow classes on shared capabilities). Next: fifth workflow + per-capability Benchmark Lab qualification, then measured routing/fallback.",
   "blockers": [],
   "safe_to_start_unrelated_work": false,
   "working_branch": "core/core-01-system-formation",
   "validation": {
     "passed": [
-      "npm.cmd run test:full green (includes test:core01 = 18 + 6 + 7 checks).",
-      "dev-lifecycle validate status=passed against committed HEAD for both slices.",
-      "PR #43 GitHub Actions verify: pass (slice 1; re-running on slice 2 push).",
+      "npm.cmd run test:full green (includes test:core01 = 18 + 6 + 7 + 9 checks).",
+      "dev-lifecycle validate status=passed against committed HEAD for all three slices.",
+      "PR #43 GitHub Actions verify: pass (re-run per push).",
       "test-development-lifecycle-gate 8/8 after the resume fix; phase2b verified 48/48 against clean baseline worktree (its in-tree failure is the pre-existing active-milestone collision documented above)."
     ],
     "failed": [],
