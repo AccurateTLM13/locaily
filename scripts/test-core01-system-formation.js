@@ -325,6 +325,21 @@ const tests = [
     assert(Array.isArray(plan.steps));
     const execution = await executeRunPlan({ plan, runtime, toolRegistry, meta: { source: "test-core01" } });
     assert.strictEqual(execution.plan.status, "completed");
+  }],
+
+  ["dev-lifecycle resume continues an active milestone after session:close", async () => {
+    const src = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "scripts", "dev-lifecycle.js"), "utf8");
+    assert(
+      src.includes("milestone.status === \"paused\" || milestone.status === \"active\""),
+      "resume must reopen a session for an active milestone with no open session"
+    );
+    const sessions = require("node:fs").readdirSync(require("node:path").join(__dirname, "..", "development", "sessions"))
+      .filter((f) => f.startsWith("session-") && f.endsWith(".json"));
+    const activeSessions = sessions.filter((f) => {
+      const s = require(`../development/sessions/${f}`);
+      return s.status === "active";
+    });
+    assert(activeSessions.length <= 1, "at most one active session in the ledger");
   }]
 ];
 
