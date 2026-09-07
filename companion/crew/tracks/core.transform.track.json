@@ -1,0 +1,18 @@
+{
+  "track_id": "core.transform",
+  "version": "0.1.0",
+  "name": "Transform Payload",
+  "description": "Reusable deterministic transform capability: reshape any source object into a caller-declared target structure via mapping specs (dot-path copy, const, join). Mapping specs are owned by the consuming workflow.",
+  "output_schema": "tool-packs/core-transform-pack/schemas/transform.map.output.schema.json",
+  "result_step": "transform",
+  "steps": [
+    {
+      "id": "transform",
+      "input_map": {
+        "source": "$input.source",
+        "mapping": "$input.mapping"
+      },
+      "executor": { "type": "tool", "tool": "transform.map", "task": "run" }
+    }
+  ]
+}

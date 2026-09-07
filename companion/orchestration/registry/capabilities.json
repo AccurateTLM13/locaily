@@ -19,7 +19,8 @@
       "evidence": [
         "scripts/test-core01-system-formation.js (standalone + composed execution)",
         "companion/crew/tracks/core.extract.track.json",
-        "scripts/test-core01-document-review.js (caller-schema extraction from documents)"
+        "scripts/test-core01-document-review.js (caller-schema extraction from documents)",
+        "scripts/test-core01-content-os.js (content metadata extraction)"
       ],
       "providers": [
         {
@@ -59,7 +60,8 @@
       "evidence": [
         "scripts/test-core01-system-formation.js (same track instance exercised by Repo Review input and Lighthouse-flavored findings input)",
         "companion/crew/tracks/core.classify.track.json",
-        "scripts/test-core01-phase7-reuse.js (Lighthouse-derived findings) + scripts/test-core01-document-review.js (document categories)"
+        "scripts/test-core01-phase7-reuse.js (Lighthouse-derived findings) + scripts/test-core01-document-review.js (document categories)",
+        "scripts/test-core01-content-os.js (content categories)"
       ],
       "providers": [
         {
@@ -99,7 +101,8 @@
       "evidence": [
         "scripts/test-core01-system-formation.js",
         "companion/crew/tracks/core.summarize.track.json",
-        "scripts/test-core01-phase7-reuse.js (Lighthouse findings) + scripts/test-core01-document-review.js (document briefs)"
+        "scripts/test-core01-phase7-reuse.js (Lighthouse findings) + scripts/test-core01-document-review.js (document briefs)",
+        "scripts/test-core01-content-os.js (publish descriptions)"
       ],
       "providers": [
         {
@@ -167,7 +170,8 @@
       "evidence": [
         "scripts/test-core01-system-formation.js (verification gate rejects malformed payload)",
         "companion/crew/tracks/core.validate.track.json",
-        "scripts/test-core01-document-review.js (fail-closed on schema mismatch) + scripts/test-core01-phase7-reuse.js (Lighthouse artifact checks)"
+        "scripts/test-core01-document-review.js (fail-closed on schema mismatch) + scripts/test-core01-phase7-reuse.js (Lighthouse artifact checks)",
+        "scripts/test-core01-content-os.js (publish payload gate)"
       ],
       "providers": [
         {
@@ -229,22 +233,36 @@
     },
     {
       "capability_id": "transform",
-      "purpose": "Rewrite or reshape a payload from one structure to another (e.g. findings to fix plans).",
-      "status": "workflow-specific",
-      "input_contract": "Domain-defined; no generic contract exists yet.",
-      "output_contract": "Domain-defined.",
+      "purpose": "Rewrite or reshape a payload from one structure to another; mapping specs are owned by the consuming workflow.",
+      "status": "reusable",
+      "input_contract": "Deterministic: { source: object, mapping: { 'target.path': 'src.path' | {from} | {const} | {join, separator} } }. Prose rewriting stays available via text.clean.",
+      "output_contract": "{ result, applied[], missing[], strategy: 'deterministic_mapping_v1' }; unresolved source paths are reported in missing[], never fabricated.",
       "required_tools": [
-        "lighthouse.match_fixes"
+        "transform.map"
       ],
-      "model_roles": [
-        "developer_task_writer"
-      ],
-      "validation": "Existing per-track schema validation covers current domain uses.",
-      "failure_behavior": "Per-track step validation.",
+      "model_roles": [],
+      "validation": "Tool output schema validation; pipelines pair the result with core.validate before publication.",
+      "failure_behavior": "INVALID_INPUT on malformed mapping; unresolved paths surface in missing[] so downstream gates decide.",
       "evidence": [
-        "companion/crew/tracks/website_audit.lighthouse_handoff.track.json (match_fixes, developer_task_writer)"
+        "scripts/test-core01-content-os.js (transform.map unit checks + content_os pipeline)",
+        "tool-packs/core-transform-pack/index.js"
       ],
       "providers": [
+        {
+          "kind": "track",
+          "id": "core.transform",
+          "scope": "generic"
+        },
+        {
+          "kind": "tool",
+          "id": "transform.map",
+          "scope": "generic"
+        },
+        {
+          "kind": "tool",
+          "id": "text.clean",
+          "scope": "generic"
+        },
         {
           "kind": "tool",
           "id": "lighthouse.match_fixes",
@@ -252,11 +270,6 @@
           "domains": [
             "website_audit"
           ]
-        },
-        {
-          "kind": "planned",
-          "id": "core.transform",
-          "scope": "generic"
         }
       ]
     },
@@ -268,6 +281,7 @@
       "output_contract": "{ title, sections[]/summary, markdown } deliverable per composing workflow's export track.",
       "required_tools": [
         "repo-scan",
+        "content-publish-prep",
         "lighthouse-handoff"
       ],
       "model_roles": [],
@@ -275,6 +289,7 @@
       "failure_behavior": "Missing required artifact fields fail with INVALID_INPUT; no silent empty exports.",
       "evidence": [
         "scripts/test-core01-system-formation.js (repo_review.handoff consumed through composition)",
+        "scripts/test-core01-content-os.js (content_os.publish consumed through composition)",
         "companion/crew/tracks/repo_review.handoff.track.json"
       ],
       "providers": [
@@ -284,6 +299,14 @@
           "scope": "domain",
           "domains": [
             "repo_review"
+          ]
+        },
+        {
+          "kind": "track",
+          "id": "content_os.publish",
+          "scope": "domain",
+          "domains": [
+            "content"
           ]
         },
         {

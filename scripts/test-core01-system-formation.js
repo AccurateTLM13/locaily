@@ -73,7 +73,7 @@ const tests = [
     assert.strictEqual(statuses.prioritize, "reusable");
     assert.strictEqual(statuses.validate, "reusable");
     assert.strictEqual(statuses.route, "infrastructure");
-    assert.strictEqual(statuses.transform, "workflow-specific");
+    assert.strictEqual(statuses.transform, "reusable");
     assert.strictEqual(statuses.export, "workflow-specific");
     assert.deepStrictEqual(getGenericProviderTracks("classify"), ["core.classify"]);
   }],
@@ -249,6 +249,29 @@ const tests = [
     );
     const serialized = JSON.stringify(classifyTrack);
     assert(!/lighthouse|website_audit|operator|deal/i.test(serialized), "core track must not reference any domain");
+
+    const workflows = require("../companion/orchestration/registry/workflows.json").workflows;
+    const usage = {};
+    for (const workflow of workflows) {
+      for (const entry of workflow.composition || []) {
+        (usage[entry.track_id] = usage[entry.track_id] || new Set()).add(workflow.workflow_id);
+      }
+    }
+    const { listTracks } = require("../companion/crew/decomposer");
+    const coreTracks = listTracks().map((t) => t.track_id).filter((id) => id.startsWith("core."));
+    assert(coreTracks.includes("core.transform"), "transform gap closed with a generic provider");
+    for (const id of coreTracks) {
+      if (id === "core.prioritize" || id === "core.transform") {
+        // Single composed consumers so far:
+        //   prioritize -> repo_review composition + Phase 7 Lighthouse parity run
+        //   transform  -> content_os composition (newly closed gap; second consumer expected with the fifth workflow)
+        assert(usage[id] && usage[id].size >= 1, `${id} must have at least one composed consumer`);
+        continue;
+      }
+      assert(usage[id] && usage[id].size >= 2, `${id} must be consumed by >=2 workflows, got ${usage[id] ? [...usage[id]] : "none"}`);
+    }
+    assert(usage["core.transform"].has("content_os"));
+    assert(usage["core.prioritize"].has("repo_review"));
   }],
 
   ["core tracks execute standalone too (single-capability consumers)", async () => {
