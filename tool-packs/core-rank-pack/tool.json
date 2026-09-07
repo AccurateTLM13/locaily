@@ -1,0 +1,18 @@
+{
+  "id": "core-rank-pack",
+  "name": "Core Rank Pack",
+  "version": "0.1.0",
+  "trust": "official",
+  "description": "Domain-neutral deterministic prioritization primitives. First tool in the pack backing the reusable prioritize capability.",
+  "tools": [
+    {
+      "id": "rank.items",
+      "name": "Rank Items",
+      "description": "Deterministically rank a list of objects by weighted numeric score fields. No model calls.",
+      "model_role": null,
+      "permissions": [],
+      "input_schema": "schemas/rank.items.input.schema.json",
+      "output_schema": "schemas/rank.items.output.schema.json"
+    }
+  ]
+}

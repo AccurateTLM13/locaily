@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/tool-packs/core-transform-pack/transform.map.output.schema.json",
+  "title": "transform.map output",
+  "type": "object",
+  "required": ["result", "applied", "missing"],
+  "properties": {
+    "result": { "type": "object" },
+    "applied": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "missing": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "strategy": { "const": "deterministic_mapping_v1" }
+  },
+  "additionalProperties": false
+}

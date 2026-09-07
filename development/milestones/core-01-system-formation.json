@@ -1,0 +1,23 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "core-01-system-formation",
+  "title": "CORE-01 System Formation: reusable capability contracts + multi-track workflow composition",
+  "status": "active",
+  "type": "feature",
+  "priority": "medium",
+  "purpose": "Prove multiple unrelated workflows can share Locaily capabilities: verified repository baseline, reusable core capability tracks, multi-track composition, and the Repo Review proof workflow.",
+  "scope": {
+    "included": [],
+    "excluded": []
+  },
+  "acceptanceCriteria": [],
+  "validationProfile": null,
+  "dependencies": [],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-09-07T18:12:54.882Z",
+  "startedAt": "2026-09-07T18:12:54.883Z",
+  "completedAt": null,
+  "mergedAt": null,
+  "latestValidationId": "validation-20260907T193008-4b632292"
+}

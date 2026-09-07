@@ -1,0 +1,21 @@
+{
+  "track_id": "content_os.publish",
+  "version": "0.1.0",
+  "name": "Content OS Publish Prep",
+  "description": "Content OS domain export: deterministic assembly of a publish-ready package (slug, front-matter, body, preflight checklist) from upstream shared-capability artifacts.",
+  "output_schema": "companion/schemas/content-publish-package.schema.json",
+  "result_step": "compose",
+  "steps": [
+    {
+      "id": "compose",
+      "input_map": {
+        "document": "$input.document",
+        "transformed": "$input.transformed",
+        "classification": "$input.classification",
+        "summary": "$input.summary",
+        "validation": "$input.validation"
+      },
+      "executor": { "type": "tool", "tool": "content-publish-prep", "task": "compose" }
+    }
+  ]
+}

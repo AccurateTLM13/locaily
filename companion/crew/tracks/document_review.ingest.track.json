@@ -1,0 +1,15 @@
+{
+  "track_id": "document_review.ingest",
+  "version": "0.1.0",
+  "name": "Document Ingestion",
+  "description": "Document-Review domain ingestion: deterministic read-only text-document cleaning and sectioning. Image/PDF text extraction is a deliberate OCR adapter gap (OCR_ADAPTER_REQUIRED), not silent misbehavior.",
+  "output_schema": "companion/schemas/document-ingestion.schema.json",
+  "result_step": "ingest",
+  "steps": [
+    {
+      "id": "ingest",
+      "input_map": "$input",
+      "executor": { "type": "tool", "tool": "document-scan", "task": "ingest" }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/document-ingestion.schema.json",
+  "title": "Document Ingestion Output",
+  "description": "Deterministic output of document-scan task 'ingest'.",
+  "type": "object",
+  "required": ["doc_name", "source_type", "char_count", "word_count", "section_count", "sections", "cleaned_text"],
+  "properties": {
+    "doc_name": { "type": "string", "minLength": 1 },
+    "source_type": { "enum": ["inline", "file"] },
+    "char_count": { "type": "integer", "minimum": 0 },
+    "word_count": { "type": "integer", "minimum": 0 },
+    "section_count": { "type": "integer", "minimum": 0 },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["heading", "text"],
+        "properties": {
+          "heading": { "type": "string" },
+          "text": { "type": "string" }
+        }
+      }
+    },
+    "cleaned_text": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

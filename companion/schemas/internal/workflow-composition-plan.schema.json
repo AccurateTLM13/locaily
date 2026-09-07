@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/workflow-composition-plan.schema.json",
+  "title": "Workflow Composition Plan",
+  "description": "Multi-track execution plan produced by run-plan-builder for workflows that declare a composition. Single-track plans keep using workflow-plan.schema.json.",
+  "type": "object",
+  "required": ["plan_id", "task_id", "workflow_id", "plan_version", "status", "created_at", "input", "tracks", "final_alias"],
+  "properties": {
+    "plan_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "workflow_id": { "type": "string" },
+    "plan_version": { "const": 2 },
+    "status": { "type": "string", "enum": ["pending", "running", "completed", "failed"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "duration_ms": { "type": "number", "minimum": 0 },
+    "input": { "type": "object" },
+    "options": { "type": "object" },
+    "final_alias": { "type": "string" },
+    "execution_order": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tracks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["as", "track_id", "status", "steps"],
+        "properties": {
+          "as": { "type": "string" },
+          "track_id": { "type": "string" },
+          "requires": { "type": "array", "items": { "type": "string" } },
+          "input_map": { "type": "object" },
+          "on_failure": { "enum": ["abort", "skip"] },
+          "status": { "type": "string", "enum": ["pending", "running", "completed", "failed", "skipped"] },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "object", "required": ["step_id", "track_id", "status"] }
+          },
+          "result": { "type": "object" },
+          "error": { "type": "object" },
+          "duration_ms": { "type": "number", "minimum": 0 },
+          "evidence": { "type": "object" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

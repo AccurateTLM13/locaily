@@ -1,0 +1,29 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260907-002",
+  "milestoneId": "core-01-system-formation",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": "Resumed milestone: CORE-01 System Formation: reusable capability contracts + multi-track workflow composition",
+  "branch": "core/core-01-system-formation",
+  "startingCommit": "f5fe8e814b55fa9212b542465117d521a85a5db1",
+  "plannedFiles": [],
+  "completedWork": [
+    "Slice 2 complete: Phase 7 Lighthouse reuse evidence + document_review workflow + dev-lifecycle resume fix; 31 CORE-01 checks, test:full green."
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [],
+  "startedAt": "2026-09-07T19:09:12.073Z",
+  "closedAt": "2026-09-07T19:11:56.651Z",
+  "closingCommit": "c6c082b4aedcf62b114f7223e6d0f40482711b82",
+  "dirtyFiles": [
+    "development/project-state.json",
+    "development/sessions/session-20260907-002.json",
+    "scripts/test-core01-document-review.js"
+  ]
+}

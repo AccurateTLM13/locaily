@@ -1,18 +1,18 @@
 {
   "schema": "locaily.development.project_state.v1",
   "project": "locaily",
-  "currentMilestone": null,
-  "activeSession": null,
-  "status": "ready-for-delivery",
+  "currentMilestone": "core-01-system-formation",
+  "activeSession": "session-20260907-003",
+  "status": "active",
   "defaultBranch": "main",
-  "activeBranch": "fix/dev-harness-01-delivery-review-20260823",
+  "activeBranch": "core/core-01-system-formation",
   "lastCompletedMilestone": "dev-harness-01-agent-operations-contract",
-  "nextRecommendedAction": "Deliver milestone 'dev-harness-01-agent-operations-contract' (deliver-milestone.js --slug dev-harness-01-agent-operations-contract --all)",
+  "nextRecommendedAction": "Working on milestone 'core-01-system-formation' — session 'session-20260907-001'",
   "blockers": [],
   "warnings": [
     "DEV-LOOP-01 remains planned while PR #30 is open and dirty; do not mark the dependency delivered without a separate lifecycle decision."
   ],
-  "updatedAt": "2026-08-23T21:18:18.311Z",
+  "updatedAt": "2026-09-07T19:16:19.638Z",
   "updatedBy": {
     "type": "agent",
     "name": "dev-lifecycle",

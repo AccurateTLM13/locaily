@@ -1,0 +1,19 @@
+{
+  "track_id": "core.validate",
+  "version": "0.1.0",
+  "name": "Validate Payload",
+  "description": "Reusable deterministic validation capability: check any payload against a caller-supplied JSON Schema. Doubles as a verification gate; valid=false fails the step.",
+  "output_schema": "tool-packs/standard-text-pack/schemas/text.validate_schema.output.schema.json",
+  "result_step": "validate",
+  "verification_step": "validate",
+  "steps": [
+    {
+      "id": "validate",
+      "input_map": {
+        "data": "$input.data",
+        "schema": "$input.schema"
+      },
+      "executor": { "type": "tool", "tool": "text.validate_schema", "task": "run" }
+    }
+  ]
+}

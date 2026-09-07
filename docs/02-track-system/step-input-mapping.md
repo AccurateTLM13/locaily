@@ -17,6 +17,11 @@ All catalog tracks declare `input_map` on every step. Steps without `input_map` 
 - `$artifacts.<step_id>` — full prior step output
 - `$artifacts.<step_id>.<path>` — nested field from a prior step artifact
 - Array values — coalesce first non-null/non-undefined reference; final array item is literal default
+- `{ "$literal": <any> }` — single-key escape to embed a literal array/object value inside an `input_map` (added for CORE-01 workflow composition maps; the resolver returns the wrapped value unchanged)
+
+### Composition-level mapping (CORE-01)
+
+Workflows declaring a `composition` array reuse the same resolver at the workflow level: each entry's `input_map` resolves against `{ input: <workflow input>, artifacts: { <alias>: <prior track result> } }`, so `$artifacts.<alias>.<path>` passes artifacts **between tracks** and `$input.<field>` reads the workflow input. Unknown aliases, self-references, and cycles are rejected by `run-plan-builder.js` before anything executes.
 
 ### Lighthouse model steps
 

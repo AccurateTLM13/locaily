@@ -1,0 +1,21 @@
+{
+  "track_id": "core.prioritize",
+  "version": "0.1.0",
+  "name": "Prioritize Items",
+  "description": "Reusable deterministic prioritize capability: rank caller items by weighted numeric score fields. No model call replaces ranking math.",
+  "output_schema": "tool-packs/core-rank-pack/schemas/rank.items.output.schema.json",
+  "result_step": "rank",
+  "steps": [
+    {
+      "id": "rank",
+      "input_map": {
+        "items": "$input.items",
+        "score_fields": "$input.score_fields",
+        "tie_break": "$input.tie_break",
+        "limit": "$input.limit",
+        "ascending": "$input.ascending"
+      },
+      "executor": { "type": "tool", "tool": "rank.items", "task": "run" }
+    }
+  ]
+}

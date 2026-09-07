@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/tool-packs/core-rank-pack/rank.items.output.schema.json",
+  "title": "rank.items output",
+  "type": "object",
+  "required": ["ranked", "scores", "strategy"],
+  "properties": {
+    "ranked": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["score"],
+        "properties": {
+          "score": { "type": "number" }
+        }
+      }
+    },
+    "scores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["index", "score"],
+        "properties": {
+          "index": { "type": "integer", "minimum": 0 },
+          "score": { "type": "number" }
+        }
+      }
+    },
+    "strategy": { "const": "deterministic_score_sum_v1" }
+  },
+  "additionalProperties": false
+}

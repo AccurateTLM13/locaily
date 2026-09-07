@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/tool-packs/core-transform-pack/transform.map.input.schema.json",
+  "title": "transform.map input",
+  "type": "object",
+  "required": ["source", "mapping"],
+  "properties": {
+    "source": { "type": "object" },
+    "mapping": { "type": "object" }
+  },
+  "additionalProperties": false
+}

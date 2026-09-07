@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/internal/capability-contract.schema.json",
+  "title": "Locaily Capability Contract",
+  "description": "One entry in the CORE-01 reusable capability registry. Contracts describe domain-neutral capabilities and their honest implementation status.",
+  "type": "object",
+  "required": [
+    "capability_id",
+    "purpose",
+    "status",
+    "input_contract",
+    "output_contract",
+    "required_tools",
+    "model_roles",
+    "validation",
+    "failure_behavior",
+    "evidence",
+    "providers"
+  ],
+  "properties": {
+    "capability_id": {
+      "type": "string",
+      "enum": ["extract", "classify", "summarize", "prioritize", "validate", "route", "transform", "export"]
+    },
+    "purpose": { "type": "string", "minLength": 8 },
+    "status": {
+      "type": "string",
+      "enum": ["reusable", "infrastructure", "workflow-specific", "planned"],
+      "description": "reusable = domain-neutral track/tool any workflow can compose; infrastructure = shared non-track layer; workflow-specific = domain implementations only; planned = documented, no implementation."
+    },
+    "input_contract": { "type": "string", "minLength": 4 },
+    "output_contract": { "type": "string", "minLength": 4 },
+    "required_tools": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "model_roles": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "validation": { "type": "string", "minLength": 4 },
+    "failure_behavior": { "type": "string", "minLength": 4 },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tests, fixtures, or run records proving the capability works."
+    },
+    "providers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["kind", "id", "scope"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["track", "tool", "infrastructure", "planned"]
+          },
+          "id": { "type": "string" },
+          "scope": {
+            "type": "string",
+            "enum": ["generic", "domain", "infrastructure"]
+          },
+          "domains": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

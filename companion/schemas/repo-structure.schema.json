@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/repo-structure.schema.json",
+  "title": "Repo Structure Scan Output",
+  "description": "Deterministic output of repo-scan task 'scan'. Domain-neutral within repository analysis.",
+  "type": "object",
+  "required": ["repo_name", "file_count", "total_lines", "languages", "directories", "findings", "summary_text"],
+  "properties": {
+    "repo_name": { "type": "string", "minLength": 1 },
+    "file_count": { "type": "integer", "minimum": 0 },
+    "total_lines": { "type": "integer", "minimum": 0 },
+    "capped": { "type": "boolean" },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["language", "files"],
+        "properties": {
+          "language": { "type": "string" },
+          "files": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "directories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "files"],
+        "properties": {
+          "path": { "type": "string" },
+          "files": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "title", "severity", "effort", "area", "evidence"],
+        "properties": {
+          "id": { "type": "string" },
+          "kind": { "type": "string" },
+          "title": { "type": "string" },
+          "severity": { "type": "number" },
+          "effort": { "type": "number" },
+          "area": { "type": "string" },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "summary_text": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

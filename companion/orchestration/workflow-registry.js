@@ -13,7 +13,10 @@ function listWorkflows() {
     workflow_id: workflow.workflow_id,
     name: workflow.name,
     description: workflow.description,
-    track_id: workflow.track_id,
+    track_id: workflow.track_id || null,
+    composition: workflow.composition || null,
+    input_requirements: workflow.input_requirements || null,
+    output_alias: workflow.output_alias || null,
     input_type: workflow.input_type,
     output_type: workflow.output_type,
     status: workflow.status
