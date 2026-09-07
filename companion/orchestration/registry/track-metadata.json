@@ -137,5 +137,29 @@
       "verification_step": null,
       "required_result_sections": ["title", "repo_name", "headline", "priorities", "markdown"]
     }
+  },
+  "document_review.ingest": {
+    "purpose": "Deterministic read-only text-document cleaning and sectioning for the Document Review workflow.",
+    "input_type": "document_request",
+    "output_type": "document_ingestion",
+    "preferred_worker_type": "tool_only",
+    "fallback_behavior": "deterministic_tool_steps_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "companion/schemas/document-ingestion.schema.json",
+      "verification_step": null,
+      "required_result_sections": ["doc_name", "word_count", "sections", "cleaned_text"]
+    }
+  },
+  "document_review.report": {
+    "purpose": "Assemble Document Review upstream artifacts into a review report with markdown.",
+    "input_type": "document_review_artifacts",
+    "output_type": "document_review_report",
+    "preferred_worker_type": "tool_only",
+    "fallback_behavior": "deterministic_tool_steps_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "companion/schemas/document-review-report.schema.json",
+      "verification_step": null,
+      "required_result_sections": ["title", "doc_name", "headline", "sections", "markdown"]
+    }
   }
 }

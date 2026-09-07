@@ -15,13 +15,15 @@ const internalToolRegistryEntrySchema = require("../schemas/internal/internal-to
 
 const trackPlannerTool = require("./track-planner");
 const repoScanTool = require("./repo-scan");
+const documentScanTool = require("./document-scan");
 
 // Built-in compatibility tools
 const BUILT_IN_TOOLS = [
   dealSniperTool,
   lighthouseHandoffTool,
   trackPlannerTool,
-  repoScanTool
+  repoScanTool,
+  documentScanTool
 ];
 
 function createToolRegistry(options = {}) {

@@ -135,6 +135,69 @@
           }
         }
       ]
+    },
+    {
+      "workflow_id": "document_review",
+      "name": "Document Review",
+      "description": "CORE-01 documents/OCR problem-class proof: ingest a local text document (deterministic), then reuse the generic extract, classify, summarize, and validate capability tracks before assembling a review report. Image/PDF ingestion fails closed with OCR_ADAPTER_REQUIRED pending a concrete OCR adapter decision.",
+      "input_type": "document_review_request",
+      "output_type": "document_review_report",
+      "status": "implemented",
+      "output_alias": "report",
+      "input_requirements": [
+        { "field": "path", "type": "string", "required": false, "help": "Local .md/.txt document path — or send inline content instead." },
+        { "field": "content", "type": "string", "required": false, "help": "Inline document text." },
+        { "field": "doc_categories", "type": "array", "required": true, "help": "Caller-defined document categories for the shared classify capability." },
+        { "field": "document_schema", "type": "object", "required": true, "help": "JSON Schema the extracted fields must satisfy (drives shared extract + validate)." }
+      ],
+      "composition": [
+        { "as": "ingest", "track_id": "document_review.ingest" },
+        {
+          "as": "extract",
+          "track_id": "core.extract",
+          "input_map": {
+            "text": "$artifacts.ingest.cleaned_text",
+            "schema": "$input.document_schema"
+          }
+        },
+        {
+          "as": "classify",
+          "track_id": "core.classify",
+          "input_map": {
+            "text": "$artifacts.ingest.cleaned_text",
+            "categories": "$input.doc_categories"
+          }
+        },
+        {
+          "as": "summarize",
+          "track_id": "core.summarize",
+          "input_map": {
+            "text": "$artifacts.ingest.cleaned_text",
+            "style": "review-brief",
+            "max_points": 5
+          }
+        },
+        {
+          "as": "validate",
+          "track_id": "core.validate",
+          "input_map": {
+            "data": "$artifacts.extract.data",
+            "schema": "$input.document_schema"
+          }
+        },
+        {
+          "as": "report",
+          "track_id": "document_review.report",
+          "requires": ["extract", "validate"],
+          "input_map": {
+            "document": "$artifacts.ingest",
+            "extraction": "$artifacts.extract",
+            "classification": "$artifacts.classify",
+            "validation": "$artifacts.validate",
+            "summary": "$artifacts.summarize"
+          }
+        }
+      ]
     }
   ]
 }
