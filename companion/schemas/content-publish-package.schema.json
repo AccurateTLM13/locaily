@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/content-publish-package.schema.json",
+  "title": "Content OS Publish Package",
+  "description": "Deterministic publish-prep package assembled by content-publish-prep from upstream shared-capability artifacts.",
+  "type": "object",
+  "required": ["slug", "title", "description", "front_matter", "body_markdown", "checklist", "ready"],
+  "properties": {
+    "slug": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "front_matter": { "type": "string", "minLength": 1 },
+    "body_markdown": { "type": "string", "minLength": 1 },
+    "checklist": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "ready": { "type": "boolean" }
+  },
+  "additionalProperties": true
+}

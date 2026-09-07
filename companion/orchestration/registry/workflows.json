@@ -198,6 +198,79 @@
           }
         }
       ]
+    },
+    {
+      "workflow_id": "content_os",
+      "name": "Content OS",
+      "description": "CORE-01 content/text problem-class proof: local document -> ingest (shared with Document Review) -> extract -> classify -> summarize -> transform -> validate -> deterministic publish-prep. Five of seven composed tracks are shared capability tracks.",
+      "input_type": "content_publish_request",
+      "output_type": "publish_package",
+      "status": "implemented",
+      "output_alias": "publish",
+      "input_requirements": [
+        { "field": "path", "type": "string", "required": false, "help": "Local .md/.txt document path — or send inline content." },
+        { "field": "content", "type": "string", "required": false, "help": "Inline document text." },
+        { "field": "content_categories", "type": "array", "required": true, "help": "Caller-defined content categories for the shared classify capability." },
+        { "field": "content_schema", "type": "object", "required": true, "help": "JSON Schema describing fields to extract from the document." },
+        { "field": "publish_mapping", "type": "object", "required": true, "help": "Declarative transform.map spec producing publish fields from the extraction." },
+        { "field": "publish_schema", "type": "object", "required": true, "help": "JSON Schema the transformed publish payload must satisfy (shared validate gate)." }
+      ],
+      "composition": [
+        { "as": "ingest", "track_id": "document_review.ingest" },
+        {
+          "as": "extract",
+          "track_id": "core.extract",
+          "input_map": {
+            "text": "$artifacts.ingest.cleaned_text",
+            "schema": "$input.content_schema"
+          }
+        },
+        {
+          "as": "classify",
+          "track_id": "core.classify",
+          "input_map": {
+            "text": "$artifacts.ingest.cleaned_text",
+            "categories": "$input.content_categories"
+          }
+        },
+        {
+          "as": "summarize",
+          "track_id": "core.summarize",
+          "input_map": {
+            "text": "$artifacts.ingest.cleaned_text",
+            "style": "publish-description",
+            "max_points": 4
+          }
+        },
+        {
+          "as": "transform",
+          "track_id": "core.transform",
+          "input_map": {
+            "source": "$artifacts.extract.data",
+            "mapping": "$input.publish_mapping"
+          }
+        },
+        {
+          "as": "validate",
+          "track_id": "core.validate",
+          "input_map": {
+            "data": "$artifacts.transform.result",
+            "schema": "$input.publish_schema"
+          }
+        },
+        {
+          "as": "publish",
+          "track_id": "content_os.publish",
+          "requires": ["validate"],
+          "input_map": {
+            "document": "$artifacts.ingest",
+            "transformed": "$artifacts.transform",
+            "classification": "$artifacts.classify",
+            "summary": "$artifacts.summarize",
+            "validation": "$artifacts.validate"
+          }
+        }
+      ]
     }
   ]
 }

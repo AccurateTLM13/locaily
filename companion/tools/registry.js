@@ -16,6 +16,7 @@ const internalToolRegistryEntrySchema = require("../schemas/internal/internal-to
 const trackPlannerTool = require("./track-planner");
 const repoScanTool = require("./repo-scan");
 const documentScanTool = require("./document-scan");
+const contentPublishPrepTool = require("./content-publish-prep");
 
 // Built-in compatibility tools
 const BUILT_IN_TOOLS = [
@@ -23,7 +24,8 @@ const BUILT_IN_TOOLS = [
   lighthouseHandoffTool,
   trackPlannerTool,
   repoScanTool,
-  documentScanTool
+  documentScanTool,
+  contentPublishPrepTool
 ];
 
 function createToolRegistry(options = {}) {

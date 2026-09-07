@@ -122,7 +122,7 @@ async function main() {
       }
     }
     const coreTracks = listTracks().map((t) => t.track_id).filter((id) => id.startsWith("core."));
-    assert.strictEqual(coreTracks.length, 5, "all five core tracks load");
+    assert(coreTracks.length >= 5 && coreTracks.includes("core.transform"), `core tracks: ${coreTracks.join(",")}`);
     assert(usage["core.classify"].size >= 2, `core.classify reused by: ${[...usage["core.classify"]]}`);
     assert(usage["core.summarize"].size >= 2, `core.summarize reused by: ${[...usage["core.summarize"]]}`);
     assert(usage["core.extract"].size >= 2, `core.extract reused by: ${[...usage["core.extract"]]}`);
