@@ -1,0 +1,18 @@
+{
+  "track_id": "core.extract",
+  "version": "0.1.0",
+  "name": "Extract Structured Data",
+  "description": "Reusable extract capability: pull a caller-defined JSON structure out of text using a caller-supplied schema.",
+  "output_schema": "tool-packs/standard-text-pack/schemas/text.extract_json.output.schema.json",
+  "result_step": "extract",
+  "steps": [
+    {
+      "id": "extract",
+      "input_map": {
+        "text": "$input.text",
+        "schema": "$input.schema"
+      },
+      "executor": { "type": "tool", "tool": "text.extract_json", "task": "run" }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "track_id": "repo_review.handoff",
+  "version": "0.1.0",
+  "name": "Repo Review Developer Handoff",
+  "description": "Repo-Review domain export: deterministically assembles upstream scan, classification, ranking, and summary artifacts into a developer handoff with markdown.",
+  "output_schema": "companion/schemas/repo-review-handoff.schema.json",
+  "result_step": "compose",
+  "steps": [
+    {
+      "id": "compose",
+      "input_map": {
+        "scan": "$input.scan",
+        "classification": "$input.classification",
+        "ranked": "$input.ranked",
+        "summary": "$input.summary"
+      },
+      "executor": { "type": "tool", "tool": "repo-scan", "task": "compose-handoff" }
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/repo-review-handoff.schema.json",
+  "title": "Repo Review Developer Handoff Output",
+  "description": "Developer handoff assembled deterministically by repo-scan task 'compose-handoff'.",
+  "type": "object",
+  "required": ["title", "repo_name", "headline", "priorities", "sections", "markdown"],
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "repo_name": { "type": "string", "minLength": 1 },
+    "headline": { "type": "string", "minLength": 1 },
+    "priorities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "severity": { "type": ["number", "null"] },
+          "effort": { "type": ["number", "null"] },
+          "score": { "type": ["number", "null"] }
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["heading", "items"],
+        "properties": {
+          "heading": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "markdown": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

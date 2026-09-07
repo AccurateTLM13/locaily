@@ -1,0 +1,165 @@
+{
+  "schema": "locaily.orchestration.capability_registry.v1",
+  "updated_at": "2026-09-07",
+  "capabilities": [
+    {
+      "capability_id": "extract",
+      "purpose": "Pull structured data out of unstructured text or artifacts according to a caller-supplied schema.",
+      "status": "reusable",
+      "input_contract": "{ text: string (non-empty), schema: JSON Schema object }",
+      "output_contract": "Object conforming to the caller-supplied schema; track result carries meta.verification.",
+      "required_tools": ["text.extract_json"],
+      "model_roles": ["default_worker"],
+      "validation": "Tool output schema validation via step-output validation; schema argument is caller-owned so the capability stays domain-neutral.",
+      "failure_behavior": "TOOL_NOT_FOUND / INVALID_INPUT fail closed at plan-execution time; composed plans mark the track failed and abort by default.",
+      "evidence": [
+        "scripts/test-core01-system-formation.js (standalone + composed execution)",
+        "companion/crew/tracks/core.extract.track.json"
+      ],
+      "providers": [
+        { "kind": "track", "id": "core.extract", "scope": "generic" },
+        { "kind": "tool", "id": "text.extract_json", "scope": "generic" },
+        { "kind": "tool", "id": "lighthouse.extract_category_audits", "scope": "domain", "domains": ["website_audit"] }
+      ]
+    },
+    {
+      "capability_id": "classify",
+      "purpose": "Assign one caller-defined category to a text payload from a caller-defined category set.",
+      "status": "reusable",
+      "input_contract": "{ text: string (non-empty), categories: string[] (non-empty, caller-defined) }",
+      "output_contract": "{ category: string, confidence?: number, rationale?: string } per text.classify output schema.",
+      "required_tools": ["text.classify"],
+      "model_roles": ["default_worker"],
+      "validation": "Output validated against text.classify output schema; category is constrained to the caller's enum, so no domain taxonomy is baked in.",
+      "failure_behavior": "INVALID_INPUT when categories empty/missing; model/schema failures surface as STEP_SCHEMA_INVALID and abort the composed plan.",
+      "evidence": [
+        "scripts/test-core01-system-formation.js (same track instance exercised by Repo Review input and Lighthouse-flavored findings input)",
+        "companion/crew/tracks/core.classify.track.json"
+      ],
+      "providers": [
+        { "kind": "track", "id": "core.classify", "scope": "generic" },
+        { "kind": "tool", "id": "text.classify", "scope": "generic" },
+        { "kind": "tool", "id": "lighthouse.classify_audits", "scope": "domain", "domains": ["website_audit"] }
+      ]
+    },
+    {
+      "capability_id": "summarize",
+      "purpose": "Compress a text payload into a bounded structured summary.",
+      "status": "reusable",
+      "input_contract": "{ text: string (non-empty), style?: string, max_points?: integer }",
+      "output_contract": "{ summary: string, key_points?: string[] } per text.summarize output schema.",
+      "required_tools": ["text.summarize"],
+      "model_roles": ["default_worker"],
+      "validation": "Tool output schema validation at step level.",
+      "failure_behavior": "INVALID_INPUT on empty text; model failures abort the composed plan by default.",
+      "evidence": [
+        "scripts/test-core01-system-formation.js",
+        "companion/crew/tracks/core.summarize.track.json"
+      ],
+      "providers": [
+        { "kind": "track", "id": "core.summarize", "scope": "generic" },
+        { "kind": "tool", "id": "text.summarize", "scope": "generic" }
+      ]
+    },
+    {
+      "capability_id": "prioritize",
+      "purpose": "Deterministically rank caller-provided items by weighted numeric score fields with optional limit and tie-break key.",
+      "status": "reusable",
+      "input_contract": "{ items: object[], score_fields: [{ field, weight? }], tie_break?: string, limit?: integer, ascending?: boolean }",
+      "output_contract": "{ ranked: object[], strategy: 'deterministic_score_sum_v1', scores: object[] } aligned with input items.",
+      "required_tools": ["rank.items"],
+      "model_roles": [],
+      "validation": "Pure deterministic tool (no model); input validated by rank.items input schema, output by its output schema.",
+      "failure_behavior": "INVALID_INPUT on empty items or unknown score fields; deterministic first per project principle — no model call replaces ranking math.",
+      "evidence": [
+        "scripts/test-core01-system-formation.js (deterministic ordering + limit + tie-break)",
+        "tool-packs/core-rank-pack/index.js"
+      ],
+      "providers": [
+        { "kind": "track", "id": "core.prioritize", "scope": "generic" },
+        { "kind": "tool", "id": "rank.items", "scope": "generic" },
+        { "kind": "tool", "id": "lighthouse.validate_priority_fixes", "scope": "domain", "domains": ["website_audit"] }
+      ]
+    },
+    {
+      "capability_id": "validate",
+      "purpose": "Validate any data object against a caller-supplied JSON Schema and report a structured verdict.",
+      "status": "reusable",
+      "input_contract": "{ data: any, schema: JSON Schema object }",
+      "output_contract": "{ valid: boolean, errors: string[] } shaped as workflow-verification-result for gate use.",
+      "required_tools": ["text.validate_schema"],
+      "model_roles": [],
+      "validation": "Deterministic: wraps companion/core/result-validator; usable as a track verification_step gate (STEP_VERIFICATION_FAILED when valid=false).",
+      "failure_behavior": "valid=false fails the verification gate cleanly; invalid tool input rejected with INVALID_INPUT before execution.",
+      "evidence": [
+        "scripts/test-core01-system-formation.js (verification gate rejects malformed payload)",
+        "companion/crew/tracks/core.validate.track.json"
+      ],
+      "providers": [
+        { "kind": "track", "id": "core.validate", "scope": "generic" },
+        { "kind": "tool", "id": "text.validate_schema", "scope": "generic" },
+        { "kind": "infrastructure", "id": "companion/core/result-validator", "scope": "infrastructure" },
+        { "kind": "infrastructure", "id": "companion/orchestration/run-plan-validator", "scope": "infrastructure" }
+      ]
+    },
+    {
+      "capability_id": "route",
+      "purpose": "Select the execution target for a step: provider, role-to-model resolution, qualification policy, and local-vs-relay placement.",
+      "status": "infrastructure",
+      "input_contract": "Step executor role + options (resolveModelForRole, qualification policy, relay placement plan metadata).",
+      "output_contract": "Resolved model / provider / worker_used metadata recorded on each executed step (describeWorkerUsed).",
+      "required_tools": [],
+      "model_roles": ["*"],
+      "validation": "worker_used metadata + relay placement provenance (planned vs actual target) captured in Track Run Records.",
+      "failure_behavior": "MODEL_UNAVAILABLE / PROVIDER_UNAVAILABLE reported as structured warnings; relay fallback records fallbackReason.",
+      "evidence": [
+        "scripts/test-relay-placement.cjs",
+        "scripts/test-enforcement-routing.js",
+        "scripts/test-shadow-routing.js"
+      ],
+      "providers": [
+        { "kind": "infrastructure", "id": "companion/crew/model-router", "scope": "infrastructure" },
+        { "kind": "infrastructure", "id": "companion/providers/router", "scope": "infrastructure" },
+        { "kind": "infrastructure", "id": "companion/relay/router", "scope": "infrastructure" }
+      ]
+    },
+    {
+      "capability_id": "transform",
+      "purpose": "Rewrite or reshape a payload from one structure to another (e.g. findings to fix plans).",
+      "status": "workflow-specific",
+      "input_contract": "Domain-defined; no generic contract exists yet.",
+      "output_contract": "Domain-defined.",
+      "required_tools": ["lighthouse.match_fixes"],
+      "model_roles": ["developer_task_writer"],
+      "validation": "Existing per-track schema validation covers current domain uses.",
+      "failure_behavior": "Per-track step validation.",
+      "evidence": [
+        "companion/crew/tracks/website_audit.lighthouse_handoff.track.json (match_fixes, developer_task_writer)"
+      ],
+      "providers": [
+        { "kind": "tool", "id": "lighthouse.match_fixes", "scope": "domain", "domains": ["website_audit"] },
+        { "kind": "planned", "id": "core.transform", "scope": "generic" }
+      ]
+    },
+    {
+      "capability_id": "export",
+      "purpose": "Assemble upstream artifacts into a consumer-facing deliverable (developer handoff, report, publish-ready document).",
+      "status": "workflow-specific",
+      "input_contract": "Assembled by composition entry input_map from any upstream track artifacts; export tool declares the artifact fields it requires, not a domain.",
+      "output_contract": "{ title, sections[]/summary, markdown } deliverable per composing workflow's export track.",
+      "required_tools": ["repo-scan", "lighthouse-handoff"],
+      "model_roles": [],
+      "validation": "Export track output_schema validation; handoff documents carry meta.verification from the producing gates.",
+      "failure_behavior": "Missing required artifact fields fail with INVALID_INPUT; no silent empty exports.",
+      "evidence": [
+        "scripts/test-core01-system-formation.js (repo_review.handoff consumed through composition)",
+        "companion/crew/tracks/repo_review.handoff.track.json"
+      ],
+      "providers": [
+        { "kind": "track", "id": "repo_review.handoff", "scope": "domain", "domains": ["repo_review"] },
+        { "kind": "infrastructure", "id": "companion/crew/markdown", "scope": "infrastructure" },
+        { "kind": "planned", "id": "core.export", "scope": "generic" }
+      ]
+    }
+  ]
+}

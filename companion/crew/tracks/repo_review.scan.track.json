@@ -1,0 +1,15 @@
+{
+  "track_id": "repo_review.scan",
+  "version": "0.1.0",
+  "name": "Repository Structure Scan",
+  "description": "Repo-Review domain ingestion: deterministic read-only repository structure extraction and heuristic finding detection. Repo-specific behavior intentionally lives in the repo-scan tool, not in a generic capability.",
+  "output_schema": "companion/schemas/repo-structure.schema.json",
+  "result_step": "scan",
+  "steps": [
+    {
+      "id": "scan",
+      "input_map": "$input",
+      "executor": { "type": "tool", "tool": "repo-scan", "task": "scan" }
+    }
+  ]
+}

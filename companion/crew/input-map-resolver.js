@@ -76,6 +76,16 @@ function resolveInputMapValue(value, context) {
     return resolveInputMapValue(value[value.length - 1], context);
   }
 
+  if (
+    value
+    && typeof value === "object"
+    && !Array.isArray(value)
+    && Object.keys(value).length === 1
+    && Object.prototype.hasOwnProperty.call(value, "$literal")
+  ) {
+    return value.$literal;
+  }
+
   if (typeof value === "string" && value.startsWith("$")) {
     return resolveReference(value, context);
   }
