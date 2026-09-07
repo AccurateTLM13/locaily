@@ -2,7 +2,7 @@
   "schema": "locaily.development.project_state.v1",
   "project": "locaily",
   "currentMilestone": "core-01-system-formation",
-  "activeSession": "session-20260907-001",
+  "activeSession": "session-20260907-002",
   "status": "active",
   "defaultBranch": "main",
   "activeBranch": "core/core-01-system-formation",
@@ -12,7 +12,7 @@
   "warnings": [
     "DEV-LOOP-01 remains planned while PR #30 is open and dirty; do not mark the dependency delivered without a separate lifecycle decision."
   ],
-  "updatedAt": "2026-09-07T18:12:54.885Z",
+  "updatedAt": "2026-09-07T19:09:12.075Z",
   "updatedBy": {
     "type": "agent",
     "name": "dev-lifecycle",
