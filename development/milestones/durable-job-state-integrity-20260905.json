@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "durable-job-state-integrity-20260905",
   "title": "Durable job state integrity",
-  "status": "active",
+  "status": "ready-for-delivery",
   "type": "bugfix",
   "priority": "medium",
   "purpose": "Harden durable job state and validation correctness; fix defects found during the user-authorized continuing codebase improvement pass.",
@@ -95,6 +95,9 @@
   "lifecycleRef": null,
   "createdAt": "2026-09-05T00:28:32.673Z",
   "startedAt": "2026-09-05T00:28:32.673Z",
-  "completedAt": null,
-  "mergedAt": null
+  "completedAt": "2026-09-30T23:25:56.363Z",
+  "mergedAt": null,
+  "latestValidationId": "validation-20260930T232551-3b868577",
+  "completionBranch": "feat/durable-job-state-integrity",
+  "completionHead": "5e0566ef4993bdfcef0d2950623defed3d1a63e3"
 }
