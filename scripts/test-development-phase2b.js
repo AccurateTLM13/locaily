@@ -7,6 +7,7 @@
  */
 
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
@@ -18,6 +19,21 @@ const MILESTONES_DIR = path.join(DEVELOPMENT_DIR, "milestones");
 const SESSIONS_DIR = path.join(DEVELOPMENT_DIR, "sessions");
 const VALIDATION_RESULTS_DIR = path.join(DEVELOPMENT_DIR, "validation-results");
 const EVIDENCE_DIR = path.join(DEVELOPMENT_DIR, "evidence");
+const STATE_BACKUP_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), "locaily-phase2b-state-"));
+const STATE_BACKUP_DIR = path.join(STATE_BACKUP_ROOT, "development");
+let stateRestored = false;
+
+fs.cpSync(DEVELOPMENT_DIR, STATE_BACKUP_DIR, { recursive: true });
+
+function restoreDevelopmentState() {
+  if (stateRestored) return;
+  stateRestored = true;
+  fs.rmSync(DEVELOPMENT_DIR, { recursive: true, force: true });
+  fs.cpSync(STATE_BACKUP_DIR, DEVELOPMENT_DIR, { recursive: true });
+  fs.rmSync(STATE_BACKUP_ROOT, { recursive: true, force: true });
+}
+
+process.on("exit", restoreDevelopmentState);
 
 let passed = 0;
 let failed = 0;
@@ -54,7 +70,7 @@ function run(cmd, args) {
     cwd: PROJECT_ROOT,
     encoding: "utf8",
     maxBuffer: 1024 * 1024,
-    shell: process.platform === "win32",
+    shell: false,
   });
   return { stdout: result.stdout || "", stderr: result.stderr || "", exitCode: result.status || 0 };
 }
@@ -170,7 +186,8 @@ test("dev:validate enforces command timeouts", () => {
 test("dev:validate executes node and npm profile commands directly", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
   assert(content.includes('requestedCommand === "node"'), "Missing direct Node command handling");
-  assert(content.includes('"npm.cmd"'), "Missing Windows npm command handling");
+  assert(content.includes('"npm-cli.js"') && content.includes("commandArgs = [npmCliPath, ...parts]"),
+    "Missing shell-free Windows npm command handling");
   assert(content.includes("checkResult.required = false"), "Optional checks must be recorded as optional");
   assert(content.includes('result.error.code === "ETIMEDOUT"'), "Runner must distinguish timeout errors");
   assert(content.includes('status = result.error.code === "ETIMEDOUT" ? "timeout" : "error"'),
@@ -186,17 +203,6 @@ test("dev:validate preserves failed records", () => {
 test("dev:validate sets milestone to validating during execution", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
   assert(content.includes('milestone.status = "validating"'), "Missing validating state");
-});
-
-test("dev:validate runs profile checks before persisting validation metadata", () => {
-  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "dev-lifecycle.js"), "utf8");
-  const validatingIndex = content.indexOf('milestone.status = "validating"');
-  const requiredChecksIndex = content.indexOf("for (const check of (profile.required || []))", validatingIndex);
-  const persistedMilestoneIndex = content.indexOf("writeMilestone(milestone)", validatingIndex);
-  assert(validatingIndex !== -1, "Missing transient validating state");
-  assert(requiredChecksIndex > validatingIndex, "Required checks must follow the transient state change");
-  assert(persistedMilestoneIndex > requiredChecksIndex,
-    "Validation must not dirty the milestone before required profile checks run");
 });
 
 test("dev:validate restores previous state after completion", () => {

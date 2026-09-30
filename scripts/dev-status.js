@@ -44,7 +44,7 @@ function git(args) {
     cwd: PROJECT_ROOT,
     encoding: "utf8",
     maxBuffer: 1024 * 1024,
-    shell: process.platform === "win32",
+    shell: false,
   });
   return result.status === 0 ? (result.stdout || "").trim() : null;
 }
@@ -620,7 +620,7 @@ function main() {
 
   const criticalCount = contradictions.filter(c => c.severity === "critical").length;
   const errorCount = contradictions.filter(c => c.severity === "error").length;
-  const warningCount = contradictions.filter(c => c.severity === "warning").length;
+  const warningCount = contradictions.filter(c => c.severity === "warning").length + warnings.length;
   const infoCount = contradictions.filter(c => c.severity === "info").length;
 
   const result = {

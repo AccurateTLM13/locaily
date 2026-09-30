@@ -10,7 +10,7 @@ function runGit(cwd, args) {
     cwd,
     encoding: "utf8",
     maxBuffer: 4 * 1024 * 1024,
-    shell: process.platform === "win32",
+    shell: false,
   });
 }
 

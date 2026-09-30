@@ -94,7 +94,7 @@ test("dev-status produces JSON output", () => {
   const result = spawnSync("node", [
     path.join(PROJECT_ROOT, "scripts", "dev-status.js"),
     "--json"
-  ], { cwd: PROJECT_ROOT, encoding: "utf8", shell: process.platform === "win32" });
+  ], { cwd: PROJECT_ROOT, encoding: "utf8", shell: false });
   assert(result.status === 0, `Exit code was ${result.status}, expected 0`);
   const output = JSON.parse(result.stdout);
   assert(output.schema === "locaily.development.status.v1", "Wrong schema");
@@ -130,7 +130,7 @@ test("dev-status --strict exits non-zero for warnings", () => {
   const result = spawnSync("node", [
     path.join(PROJECT_ROOT, "scripts", "dev-status.js"),
     "--strict"
-  ], { cwd: PROJECT_ROOT, encoding: "utf8", shell: process.platform === "win32" });
+  ], { cwd: PROJECT_ROOT, encoding: "utf8", shell: false });
 
   // Restore original state
   if (originalState) {
@@ -144,7 +144,7 @@ test("dev-status without --strict exits 0 for warnings only", () => {
   const { spawnSync } = require("node:child_process");
   const result = spawnSync("node", [
     path.join(PROJECT_ROOT, "scripts", "dev-status.js")
-  ], { cwd: PROJECT_ROOT, encoding: "utf8", shell: process.platform === "win32" });
+  ], { cwd: PROJECT_ROOT, encoding: "utf8", shell: false });
   assert(result.status === 0, `Expected exit 0 without --strict, got ${result.status}`);
 });
 

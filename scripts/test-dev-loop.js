@@ -80,7 +80,7 @@ try {
     const statusRes = spawnSync("node", [path.join(__dirname, "dev-loop.js"), "--status"], {
       cwd: path.join(__dirname, ".."),
       encoding: "utf8",
-      shell: process.platform === "win32"
+    shell: false
     });
     assert.strictEqual(statusRes.status, 0);
     assert.ok(statusRes.stdout.includes("Development Job Queue Status"));
@@ -89,7 +89,7 @@ try {
     const enqueueRes = spawnSync("node", [path.join(__dirname, "dev-loop.js"), "--enqueue", "--slug", "ctk-02-node-roles-capability-capsules", "--desc", "CLI test"], {
       cwd: path.join(__dirname, ".."),
       encoding: "utf8",
-      shell: process.platform === "win32"
+    shell: false
     });
     assert.strictEqual(enqueueRes.status, 0);
     assert.ok(enqueueRes.stdout.includes("Enqueued milestone task job:"));
@@ -98,7 +98,7 @@ try {
     const runRes = spawnSync("node", [path.join(__dirname, "dev-loop.js"), "--run-next"], {
       cwd: path.join(__dirname, ".."),
       encoding: "utf8",
-      shell: process.platform === "win32"
+    shell: false
     });
     assert.strictEqual(runRes.status, 0);
     assert.ok(runRes.stdout.includes("Executed dev job:"));

@@ -37,7 +37,7 @@ function git(args) {
     cwd: PROJECT_ROOT,
     encoding: "utf8",
     maxBuffer: 1024 * 1024,
-    shell: process.platform === "win32",
+    shell: false,
   });
   return result.status === 0 ? (result.stdout || "").trim() : null;
 }

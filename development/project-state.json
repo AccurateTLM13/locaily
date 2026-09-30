@@ -3,15 +3,13 @@
   "project": "locaily",
   "currentMilestone": null,
   "activeSession": null,
-  "status": "ready-for-delivery",
+  "status": "idle",
   "defaultBranch": "main",
-  "activeBranch": "core/core-01-system-formation",
+  "activeBranch": "main",
   "lastCompletedMilestone": "core-01-system-formation",
-  "nextRecommendedAction": "Deliver milestone 'core-01-system-formation' (deliver-milestone.js --slug core-01-system-formation --all)",
+  "nextRecommendedAction": "Select and start next milestone",
   "blockers": [],
-  "warnings": [
-    "DEV-LOOP-01 remains planned while PR #30 is open and dirty; do not mark the dependency delivered without a separate lifecycle decision."
-  ],
+  "warnings": [],
   "updatedAt": "2026-09-30T23:20:59.795Z",
   "updatedBy": {
     "type": "agent",

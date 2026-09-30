@@ -24,7 +24,7 @@ function readJson(p, fallback) {
 }
 
 function git(args) {
-  const r = spawnSync("git", args, { cwd: PROJECT_ROOT, encoding: "utf8", maxBuffer: 1024 * 1024, shell: process.platform === "win32" });
+  const r = spawnSync("git", args, { cwd: PROJECT_ROOT, encoding: "utf8", maxBuffer: 1024 * 1024, shell: false });
   return r.status === 0 ? (r.stdout || "").trim() : null;
 }
 

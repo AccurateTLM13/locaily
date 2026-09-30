@@ -59,7 +59,7 @@ function git(args) {
     cwd: PROJECT_ROOT,
     encoding: "utf8",
     maxBuffer: 1024 * 1024,
-    shell: process.platform === "win32",
+    shell: false,
   });
   return result.status === 0 ? (result.stdout || "").trim() : null;
 }
@@ -69,7 +69,7 @@ function gitResult(args) {
     cwd: PROJECT_ROOT,
     encoding: "utf8",
     maxBuffer: 1024 * 1024,
-    shell: process.platform === "win32",
+    shell: false,
   });
 }
 
@@ -915,18 +915,27 @@ function runValidationCommand(check) {
   try {
     const parts = check.command.trim().split(/\s+/);
     const requestedCommand = parts.shift();
-    const command = requestedCommand === "node"
-      ? process.execPath
-      : (
-          requestedCommand === "npm" && process.platform === "win32"
-            ? "npm.cmd"
-            : requestedCommand
-        );
-    const result = spawnSync(command, parts, {
+    let command = requestedCommand === "node" ? process.execPath : requestedCommand;
+    let commandArgs = parts;
+
+    if (requestedCommand === "npm" && process.platform === "win32") {
+      const npmCliCandidates = [
+        process.env.npm_execpath,
+        path.join(path.dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js"),
+      ].filter(Boolean);
+      const npmCliPath = npmCliCandidates.find(candidate => fs.existsSync(candidate));
+      if (!npmCliPath) {
+        throw new Error("Unable to locate npm-cli.js for Windows validation command.");
+      }
+      command = process.execPath;
+      commandArgs = [npmCliPath, ...parts];
+    }
+
+    const result = spawnSync(command, commandArgs, {
       cwd: PROJECT_ROOT,
       encoding: "utf8",
       maxBuffer: 1024 * 1024,
-      shell: process.platform === "win32" && requestedCommand === "npm",
+      shell: false,
       timeout,
     });
 
@@ -1208,7 +1217,7 @@ function runDevStatus() {
     const result = spawnSync("node", [
       path.join(PROJECT_ROOT, "scripts", "dev-status.js"),
       "--json"
-    ], { cwd: PROJECT_ROOT, encoding: "utf8", shell: process.platform === "win32" });
+    ], { cwd: PROJECT_ROOT, encoding: "utf8", shell: false });
     return JSON.parse(result.stdout || "{}");
   } catch {
     return { contradictions: [] };
@@ -1537,7 +1546,7 @@ function cmdMerge(args) {
     const dashResult = spawnSync("node", [path.join(PROJECT_ROOT, "scripts", "generate-development-dashboard.js")], {
       cwd: PROJECT_ROOT,
       encoding: "utf8",
-      shell: process.platform === "win32",
+      shell: false,
       timeout: 30000,
     });
     if (dashResult.status !== 0) {

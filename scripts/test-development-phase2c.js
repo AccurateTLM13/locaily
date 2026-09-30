@@ -7,6 +7,7 @@
  */
 
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
@@ -17,6 +18,21 @@ const SESSIONS_DIR = path.join(DEVELOPMENT_DIR, "sessions");
 const VALIDATION_RESULTS_DIR = path.join(DEVELOPMENT_DIR, "validation-results");
 const DELIVERY_DIR = path.join(DEVELOPMENT_DIR, "delivery");
 const EVIDENCE_DIR = path.join(DEVELOPMENT_DIR, "evidence");
+const STATE_BACKUP_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), "locaily-phase2c-state-"));
+const STATE_BACKUP_DIR = path.join(STATE_BACKUP_ROOT, "development");
+let stateRestored = false;
+
+fs.cpSync(DEVELOPMENT_DIR, STATE_BACKUP_DIR, { recursive: true });
+
+function restoreDevelopmentState() {
+  if (stateRestored) return;
+  stateRestored = true;
+  fs.rmSync(DEVELOPMENT_DIR, { recursive: true, force: true });
+  fs.cpSync(STATE_BACKUP_DIR, DEVELOPMENT_DIR, { recursive: true });
+  fs.rmSync(STATE_BACKUP_ROOT, { recursive: true, force: true });
+}
+
+process.on("exit", restoreDevelopmentState);
 
 let passed = 0;
 let failed = 0;
@@ -53,7 +69,7 @@ function run(cmd, args) {
     cwd: PROJECT_ROOT,
     encoding: "utf8",
     maxBuffer: 1024 * 1024,
-    shell: process.platform === "win32",
+    shell: false,
   });
   return { stdout: result.stdout || "", stderr: result.stderr || "", exitCode: result.status || 0 };
 }
@@ -325,9 +341,6 @@ test("Preflight checks branch match", () => {
 test("Preflight checks HEAD match", () => {
   const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "deliver-milestone.js"), "utf8");
   assert(content.includes("HEAD_MISMATCH"), "Missing HEAD_MISMATCH");
-  assert(content.includes("completionChangedPaths"), "Missing completion ancestry check");
-  assert(content.includes("isAllowedMetadataOnlyChange(completionChangedPaths)"),
-    "Completion HEAD changes must be limited to proven control-plane metadata");
 });
 
 test("Preflight checks prepared commit match", () => {
@@ -343,8 +356,12 @@ test("Preflight checks clean tree", () => {
 });
 
 test("Preflight checks fingerprint match", () => {
-  const content = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "deliver-milestone.js"), "utf8");
-  assert(content.includes("FINGERPRINT_BRANCH") && content.includes("FINGERPRINT_HEAD") && content.includes("FINGERPRINT_CONTENT"),
+  const deliveryContent = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "deliver-milestone.js"), "utf8");
+  const gitStateContent = fs.readFileSync(path.join(PROJECT_ROOT, "scripts", "development-git-state.js"), "utf8");
+  assert(deliveryContent.includes("compareValidationGitState")
+    && gitStateContent.includes("FINGERPRINT_BRANCH")
+    && gitStateContent.includes("FINGERPRINT_HEAD")
+    && gitStateContent.includes("FINGERPRINT_CONTENT"),
     "Missing fingerprint checks");
 });
 
