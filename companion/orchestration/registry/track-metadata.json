@@ -53,5 +53,137 @@
       "verification_step": "verify_draft",
       "required_result_sections": ["headline", "slug", "html", "sitemapEntry"]
     }
+  },
+  "core.classify": {
+    "purpose": "Assign one caller-defined category to a text payload (reusable classify capability).",
+    "input_type": "text_classification_request",
+    "output_type": "classification",
+    "preferred_worker_type": "default_worker",
+    "fallback_behavior": "fail_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "tool-packs/standard-text-pack/schemas/text.classify.output.schema.json",
+      "verification_step": null,
+      "required_result_sections": ["category", "confidence", "reason"]
+    }
+  },
+  "core.summarize": {
+    "purpose": "Compress caller-supplied text into a bounded structured summary (reusable summarize capability).",
+    "input_type": "summarization_request",
+    "output_type": "summary",
+    "preferred_worker_type": "default_worker",
+    "fallback_behavior": "fail_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "tool-packs/standard-text-pack/schemas/text.summarize.output.schema.json",
+      "verification_step": null,
+      "required_result_sections": ["summary", "key_points"]
+    }
+  },
+  "core.extract": {
+    "purpose": "Extract a caller-defined JSON structure from text (reusable extract capability).",
+    "input_type": "extraction_request",
+    "output_type": "extraction",
+    "preferred_worker_type": "default_worker",
+    "fallback_behavior": "fail_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "tool-packs/standard-text-pack/schemas/text.extract_json.output.schema.json",
+      "verification_step": null,
+      "required_result_sections": ["data", "missing_fields", "confidence"]
+    }
+  },
+  "core.validate": {
+    "purpose": "Validate any payload against a caller-supplied JSON Schema (reusable deterministic validation capability and verification gate).",
+    "input_type": "validation_request",
+    "output_type": "verification",
+    "preferred_worker_type": "tool_only",
+    "fallback_behavior": "deterministic_tool_steps_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "tool-packs/standard-text-pack/schemas/text.validate_schema.output.schema.json",
+      "verification_step": "validate",
+      "required_result_sections": ["valid", "errors"]
+    }
+  },
+  "core.prioritize": {
+    "purpose": "Rank caller items by weighted numeric score fields deterministically (reusable prioritize capability).",
+    "input_type": "ranking_request",
+    "output_type": "ranked_items",
+    "preferred_worker_type": "tool_only",
+    "fallback_behavior": "deterministic_tool_steps_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": null,
+      "verification_step": null,
+      "required_result_sections": ["ranked", "scores", "strategy"]
+    }
+  },
+  "core.transform": {
+    "purpose": "Reshape a source object into a caller-declared target structure deterministically (reusable transform capability).",
+    "input_type": "transform_request",
+    "output_type": "transformed_payload",
+    "preferred_worker_type": "tool_only",
+    "fallback_behavior": "deterministic_tool_steps_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": null,
+      "verification_step": null,
+      "required_result_sections": ["result", "applied", "missing", "strategy"]
+    }
+  },
+  "content_os.publish": {
+    "purpose": "Assemble Content OS upstream artifacts into a publish-ready package with front-matter and preflight checklist.",
+    "input_type": "content_os_artifacts",
+    "output_type": "publish_package",
+    "preferred_worker_type": "tool_only",
+    "fallback_behavior": "deterministic_tool_steps_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "companion/schemas/content-publish-package.schema.json",
+      "verification_step": null,
+      "required_result_sections": ["slug", "title", "front_matter", "body_markdown", "checklist", "ready"]
+    }
+  },
+  "repo_review.scan": {
+    "purpose": "Deterministic read-only repository structure extraction for the Repo Review workflow.",
+    "input_type": "repository_request",
+    "output_type": "repo_structure",
+    "preferred_worker_type": "tool_only",
+    "fallback_behavior": "deterministic_tool_steps_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "companion/schemas/repo-structure.schema.json",
+      "verification_step": null,
+      "required_result_sections": ["repo_name", "file_count", "findings", "summary_text"]
+    }
+  },
+  "repo_review.handoff": {
+    "purpose": "Assemble Repo Review upstream artifacts into a developer handoff with markdown.",
+    "input_type": "repo_review_artifacts",
+    "output_type": "developer_handoff",
+    "preferred_worker_type": "tool_only",
+    "fallback_behavior": "deterministic_tool_steps_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "companion/schemas/repo-review-handoff.schema.json",
+      "verification_step": null,
+      "required_result_sections": ["title", "repo_name", "headline", "priorities", "markdown"]
+    }
+  },
+  "document_review.ingest": {
+    "purpose": "Deterministic read-only text-document cleaning and sectioning for the Document Review workflow.",
+    "input_type": "document_request",
+    "output_type": "document_ingestion",
+    "preferred_worker_type": "tool_only",
+    "fallback_behavior": "deterministic_tool_steps_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "companion/schemas/document-ingestion.schema.json",
+      "verification_step": null,
+      "required_result_sections": ["doc_name", "word_count", "sections", "cleaned_text"]
+    }
+  },
+  "document_review.report": {
+    "purpose": "Assemble Document Review upstream artifacts into a review report with markdown.",
+    "input_type": "document_review_artifacts",
+    "output_type": "document_review_report",
+    "preferred_worker_type": "tool_only",
+    "fallback_behavior": "deterministic_tool_steps_when_runtime_unavailable",
+    "validation_expectations": {
+      "output_schema": "companion/schemas/document-review-report.schema.json",
+      "verification_step": null,
+      "required_result_sections": ["title", "doc_name", "headline", "sections", "markdown"]
+    }
   }
 }

@@ -1,0 +1,18 @@
+{
+  "track_id": "core.classify",
+  "version": "0.1.0",
+  "name": "Classify Text",
+  "description": "Reusable classify capability: assign one caller-defined category to a text payload. Category sets are supplied by the consuming workflow, never baked in.",
+  "output_schema": "tool-packs/standard-text-pack/schemas/text.classify.output.schema.json",
+  "result_step": "classify",
+  "steps": [
+    {
+      "id": "classify",
+      "input_map": {
+        "text": "$input.text",
+        "categories": "$input.categories"
+      },
+      "executor": { "type": "tool", "tool": "text.classify", "task": "run" }
+    }
+  ]
+}

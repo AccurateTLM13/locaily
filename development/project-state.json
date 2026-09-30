@@ -5,14 +5,14 @@
   "activeSession": null,
   "status": "ready-for-delivery",
   "defaultBranch": "main",
-  "activeBranch": "fix/dev-harness-01-delivery-review-20260823",
-  "lastCompletedMilestone": "dev-harness-01-agent-operations-contract",
-  "nextRecommendedAction": "Deliver milestone 'dev-harness-01-agent-operations-contract' (deliver-milestone.js --slug dev-harness-01-agent-operations-contract --all)",
+  "activeBranch": "core/core-01-system-formation",
+  "lastCompletedMilestone": "core-01-system-formation",
+  "nextRecommendedAction": "Deliver milestone 'core-01-system-formation' (deliver-milestone.js --slug core-01-system-formation --all)",
   "blockers": [],
   "warnings": [
     "DEV-LOOP-01 remains planned while PR #30 is open and dirty; do not mark the dependency delivered without a separate lifecycle decision."
   ],
-  "updatedAt": "2026-08-23T21:18:18.311Z",
+  "updatedAt": "2026-09-30T23:20:59.795Z",
   "updatedBy": {
     "type": "agent",
     "name": "dev-lifecycle",

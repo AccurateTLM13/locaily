@@ -1,0 +1,21 @@
+{
+  "track_id": "document_review.report",
+  "version": "0.1.0",
+  "name": "Document Review Report",
+  "description": "Document-Review domain export: deterministically assembles upstream ingestion, extraction, classification, validation, and summary artifacts into a review report with markdown.",
+  "output_schema": "companion/schemas/document-review-report.schema.json",
+  "result_step": "compose",
+  "steps": [
+    {
+      "id": "compose",
+      "input_map": {
+        "document": "$input.document",
+        "extraction": "$input.extraction",
+        "classification": "$input.classification",
+        "validation": "$input.validation",
+        "summary": "$input.summary"
+      },
+      "executor": { "type": "tool", "tool": "document-scan", "task": "compose-report" }
+    }
+  ]
+}

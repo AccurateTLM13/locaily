@@ -1912,3 +1912,26 @@ Confirmed
 ### Notes
 
 - Deterministic milestone review now combines the tracked diff with untracked files so new source is included in secret, scope, and coverage checks.
+
+
+---
+
+## 2026-09-07 - CORE-01 composition reuses single-track execution instead of a new engine
+
+### Decision
+
+Multi-track workflows execute as ordered compositions of the existing single-track pipeline: `buildCompositionRunPlan` validates the declaration (schema, aliases, topology) and `executeCompositionPlan` runs each composed track through the unchanged `executeRunPlan`, passing track results through the same `input-map-resolver` used for step maps (with a new `{"$literal": ...}` escape for embedding literal values). Composition plans are `plan_version: 2` under a separate schema; v1 single-track plans are untouched. Reusable capabilities are declared in `companion/orchestration/registry/capabilities.json` with honest status values (reusable / infrastructure / workflow-specific) and are backed by thin domain-neutral tracks (`core.classify`, `core.summarize`, `core.extract`, `core.validate`, `core.prioritize`) that wrap existing tool-pack primitives rather than new frameworks.
+
+### Why
+
+Proving composition required zero changes to step execution, step validation, relay routing, or evidence code paths; keeps single-track behavior regression-free; and preserves deterministic-first ranking and validation. The capability kernel (CTK) and NearbyNode remain separate subsystems and are deliberately not used as the workflow composition layer.
+
+### Status
+
+Confirmed
+
+### Notes
+
+- Repo Review (`repo_review`) is the first composed workflow: 2 domain tracks + 3 shared generic tracks; `text_qa` is a 100%-generic composition proving the same capability tracks serve unrelated workflows unchanged.
+- Composition failure semantics: `on_failure: "abort"` (default) fails the plan with the underlying step error code; `"skip"` records a structured warning and continues.
+- Validated by `scripts/test-core01-system-formation.js` and the preserved `npm run test:full` suite.

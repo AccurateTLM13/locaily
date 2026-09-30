@@ -704,8 +704,9 @@ function cmdResume(args) {
     return;
   }
 
-  // Resume milestone only (no paused session)
-  if (milestone && milestone.status === "paused") {
+  // Resume milestone only (no paused session), including continuation of an
+  // active milestone whose previous session was closed via session:close.
+  if (milestone && !session && (milestone.status === "paused" || milestone.status === "active")) {
     milestone.status = "active";
     milestone.startedAt = milestone.startedAt || now();
     writeMilestone(milestone);

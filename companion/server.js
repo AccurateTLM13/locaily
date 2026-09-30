@@ -40,6 +40,7 @@ const { recordFailedExecution } = require("./crew/runtime-track-run-recorder");
 const {
   listTrackRegistry,
   listWorkflows,
+  listCapabilities,
   buildRunPlan,
   executeRunPlan,
   recordOrchestrationRun
@@ -1230,6 +1231,13 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, 200, {
         ok: true,
         workflows: listWorkflows()
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/orchestration/capabilities") {
+      return sendJson(response, 200, {
+        ok: true,
+        capabilities: listCapabilities()
       });
     }
 
@@ -3681,6 +3689,12 @@ function buildRelayOptions(bodyOptions = {}, localCapable = true) {
 
 function applyRelayPlacement(relayOptions, trackId, localCapable) {
   if (!relayOptions || relayOptions.policy !== "distribute") {
+    return relayOptions;
+  }
+
+  if (!trackId) {
+    // Composition plans (plan_version 2) place relay assignments per embedded track step
+    // execution; there is no single plan-level track to assign.
     return relayOptions;
   }
 

@@ -1,0 +1,19 @@
+{
+  "id": "core-transform-pack",
+  "name": "Core Transform Pack",
+  "version": "0.1.0",
+  "trust": "official",
+  "description": "Domain-neutral deterministic data reshaping primitives. Backs the reusable transform capability (mapping specs come from the consuming workflow).",
+  "tools": [
+    {
+      "id": "transform.map",
+      "name": "Transform Map",
+      "description": "Deterministically reshape an object into a new structure using a caller-declared mapping spec (dot-path copy, constant, and join operations). No model calls.",
+      "model_role": null,
+      "permissions": [],
+      "tasks": ["run"],
+      "input_schema": "schemas/transform.map.input.schema.json",
+      "output_schema": "schemas/transform.map.output.schema.json"
+    }
+  ]
+}

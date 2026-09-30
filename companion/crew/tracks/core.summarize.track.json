@@ -1,0 +1,19 @@
+{
+  "track_id": "core.summarize",
+  "version": "0.1.0",
+  "name": "Summarize Text",
+  "description": "Reusable summarize capability: compress any caller-supplied text into a bounded structured summary.",
+  "output_schema": "tool-packs/standard-text-pack/schemas/text.summarize.output.schema.json",
+  "result_step": "summarize",
+  "steps": [
+    {
+      "id": "summarize",
+      "input_map": {
+        "text": "$input.text",
+        "style": "$input.style",
+        "max_points": "$input.max_points"
+      },
+      "executor": { "type": "tool", "tool": "text.summarize", "task": "run" }
+    }
+  ]
+}

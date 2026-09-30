@@ -1,7 +1,7 @@
 {
   "schema": "locaily.development.roadmap.v1",
   "project": "locaily",
-  "updatedAt": "2026-08-03T02:42:32.539Z",
+  "updatedAt": "2026-09-07T18:40:05.561Z",
   "areas": [
     {
       "id": "local-brain",
@@ -339,6 +339,23 @@
           "maturity": "active",
           "milestoneIds": [
             "px9-remaining-milestones-second-pass"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "uncategorized",
+      "title": "Uncategorized",
+      "description": "Auto-generated area for unmapped milestones",
+      "maturity": "planned",
+      "initiatives": [
+        {
+          "id": "unmapped-milestones",
+          "title": "Unmapped Milestones",
+          "description": "Milestones found on disk but not in roadmap",
+          "maturity": "planned",
+          "milestoneIds": [
+            "core-01-system-formation"
           ]
         }
       ]

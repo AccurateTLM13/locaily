@@ -1,0 +1,34 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260907-001",
+  "milestoneId": "core-01-system-formation",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": "Prove multiple unrelated workflows can share Locaily capabilities: verified repository baseline, reusable core capability tracks, multi-track composition, and the Repo Review proof workflow.",
+  "branch": "core/core-01-system-formation",
+  "startingCommit": "82d20477bbfa90a56be0683778d940d1fdcfd12b",
+  "plannedFiles": [],
+  "completedWork": [
+    "CORE-01: repo audit done (baseline 82d2047; PR30 superseded; WIP milestone stashed; test:full green); verified architecture baseline doc written",
+    "CORE-01 slice 1 delivered: capability contracts, generic core tracks, multi-track composition, Repo Review + text_qa workflows, 17-test suite; test:full green."
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-09-07T18:14:25.353Z",
+      "message": "CORE-01: repo audit done (baseline 82d2047; PR30 superseded; WIP milestone stashed; test:full green); verified architecture baseline doc written",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-09-07T18:12:54.884Z",
+  "closedAt": "2026-09-07T18:41:34.456Z",
+  "closingCommit": "684760c92a735e329f4dd4a4c94ff4fa92b1fdff",
+  "dirtyFiles": []
+}
