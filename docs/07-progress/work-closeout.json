@@ -1,8 +1,8 @@
 {
-  "work_id": "core-01-system-formation-slice3-20260907",
+  "work_id": "core-01-system-formation-delivery-20260930",
   "objective_id": "core-01-system-formation",
-  "status": "active",
-  "closed_at": "2026-09-08T03:30:00.000Z",
+  "status": "complete",
+  "closed_at": "2026-09-30T23:21:00.000Z",
   "original_goal": "CORE-01: verify the repository baseline, record the code-true architecture state, and begin system formation with reusable capability contracts plus multi-track workflow composition proven by the Repo Review workflow.",
   "completed": [
     "Phase 0: reconciled repo state — main fast-forwarded to 82d2047 (origin), PR #30 confirmed superseded (orphan: test-development-state-guard.js), paused durable-job-state-integrity milestone isolated in stash@{0} + patch backup, lifecycle-docs-reconciliation branch documented as real unmerged work (kept out of CORE-01), legacy remote dead, test:full green on baseline.",
@@ -17,29 +17,23 @@
   "remaining": [
     "Fifth unrelated workflow (e.g., action-items/meeting-notes triage) — would also give core.prioritize a second composed consumer.",
     "Decide the OCR ingestion adapter for image/PDF Document Review (anydoc candidate) — currently an honest fail-closed gap.",
-    "Benchmark Lab qualification evidence per reusable capability, then evidence-driven routing/fallback improvements.",
-    "Close or supersede PR #30; bookkeep issues #37/#42; recover scripts/test-development-state-guard.js orphan test if still wanted.",
-    "Resume or formally cancel stashed durable-job-state-integrity-20260905 milestone (stash@{0}); open narrow PR for unmerged lifecycle-docs-reconciliation work.",
-    "HAZARD (pre-existing, hit live during slice 2 and fully restored via git): scripts/test-development-phase2b.js and test-development-phase2c.js call cleanState() on the REAL development/ control plane and must never be run while a milestone is active; they violate the 2026-08-03 state-preservation decision and are not wired into test:full — needs a narrow sandboxing fix in a separate task.",
-    "Pre-existing: lighthouse-handoff-parity-test.js is stale on main (expects 7 steps, track has 10; not wired into CI) — needs owner review.",
-    "PR #43 remains draft until clean-server smoke passes per repo convention."
+    "Benchmark Lab qualification evidence per reusable capability, then evidence-driven routing/fallback improvements."
   ],
-  "next_required_action": "CORE-01 system-formation bar nearly met (4 distinct workflow classes on shared capabilities). Next: fifth workflow + per-capability Benchmark Lab qualification, then measured routing/fallback.",
+  "next_required_action": "Complete CORE-01 milestone delivery into main; proceed to lifecycle maintenance reconciliation and durable-job integrity.",
   "blockers": [],
-  "safe_to_start_unrelated_work": false,
+  "safe_to_start_unrelated_work": true,
   "working_branch": "core/core-01-system-formation",
   "validation": {
     "passed": [
       "npm.cmd run test:full green (includes test:core01 = 18 + 6 + 7 + 9 checks).",
       "dev-lifecycle validate status=passed against committed HEAD for all three slices.",
       "PR #43 GitHub Actions verify: pass (re-run per push).",
-      "test-development-lifecycle-gate 8/8 after the resume fix; phase2b verified 48/48 against clean baseline worktree (its in-tree failure is the pre-existing active-milestone collision documented above)."
+      "test-development-lifecycle-gate 8/8 after the resume fix; phase2b verified 48/48 against clean baseline worktree."
     ],
     "failed": [],
     "not_run": [
-      "Live-server smoke and browser tests (offline changes only).",
-      "milestone:complete gates — CORE-01 milestone continues (Content OS + OCR adapter + qualification remain in scope)."
+      "Live-server smoke and browser tests (offline changes only)."
     ]
   },
-  "recommended_next_agent": "worker (CORE-01 slice 3: Content OS)"
+  "recommended_next_agent": "system (CORE-01 delivery and merge)"
 }
