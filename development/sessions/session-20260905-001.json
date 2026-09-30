@@ -6,7 +6,7 @@
     "platform": "unknown",
     "model": "unknown"
   },
-  "status": "paused",
+  "status": "closed",
   "objective": "Fix rejected job mutations and caller-owned payload references corrupting in-memory job state; add regression coverage while preserving existing local edits.",
   "branch": "main",
   "startingCommit": "1f36ce3a3de61886d3607723f6fb714a1aaafa80",

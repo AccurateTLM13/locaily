@@ -1,7 +1,7 @@
 {
   "schema": "locaily.development.roadmap.v1",
   "project": "locaily",
-  "updatedAt": "2026-09-07T18:40:05.561Z",
+  "updatedAt": "2026-09-30T23:26:55.142Z",
   "areas": [
     {
       "id": "local-brain",
@@ -355,7 +355,8 @@
           "description": "Milestones found on disk but not in roadmap",
           "maturity": "planned",
           "milestoneIds": [
-            "core-01-system-formation"
+            "core-01-system-formation",
+            "durable-job-state-integrity-20260905"
           ]
         }
       ]
