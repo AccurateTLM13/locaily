@@ -1,39 +1,32 @@
 {
-  "work_id": "core-01-system-formation-delivery-20260930",
-  "objective_id": "core-01-system-formation",
+  "work_id": "durable-job-state-integrity-20260930",
+  "objective_id": "durable-job-state-integrity-20260905",
   "status": "complete",
-  "closed_at": "2026-09-30T23:21:00.000Z",
-  "original_goal": "CORE-01: verify the repository baseline, record the code-true architecture state, and begin system formation with reusable capability contracts plus multi-track workflow composition proven by the Repo Review workflow.",
+  "closed_at": "2026-09-30T23:25:00.000Z",
+  "original_goal": "Inspect the codebase and fix concrete defects; durable job state integrity with crash-resilient disk persistence and payload isolation.",
   "completed": [
-    "Phase 0: reconciled repo state — main fast-forwarded to 82d2047 (origin), PR #30 confirmed superseded (orphan: test-development-state-guard.js), paused durable-job-state-integrity milestone isolated in stash@{0} + patch backup, lifecycle-docs-reconciliation branch documented as real unmerged work (kept out of CORE-01), legacy remote dead, test:full green on baseline.",
-    "Phase 1-2: verified architecture baseline recorded in docs/07-progress/core01-baseline-20260907.md (4 workflows, 7 tracks, capability classification, tool packs, providers, execution model, gaps).",
-    "Slice 1: capability contracts registry (8 honest statuses) + GET /orchestration/capabilities; five generic core tracks; core-rank-pack deterministic rank.items; multi-track composition (schema-validated, topological plan_version 2, single-track pipeline reuse, cross-track artifacts, on_failure abort|skip); Repo Review + text_qa workflows; 17-check test suite; PR #43 opened.",
-    "Slice 2 Phase 7: scripts/test-core01-phase7-reuse.js — shared core.prioritize reproduces the Lighthouse domain ranking EXACTLY on the real PageSpeed fixture; core.classify/summarize/validate exercised on Lighthouse-derived findings; 6 checks.",
-    "Slice 2 third problem class: document_review workflow (document-scan deterministic ingestion + report domain track, 4 shared core tracks in one 6-track composition, OCR_ADAPTER_REQUIRED fail-closed for image/PDF, no dependency added without decision); 7 checks.",
-    "Slice 2 control-plane fix: dev-lifecycle resume now reopens a session for an active milestone after session:close (multi-session continuation was impossible); guard check added.",
-    "Slice 3: generic transform capability closed (core-transform-pack deterministic transform.map + core.transform track; capability status transform -> reusable with honest evidence); content_os workflow = 4th problem class, 7-track composition reusing document_review.ingest + 4 core tracks (extract, classify, summarize, transform, validate) + deterministic publish-prep with preflight checklist and fail-closed publish gate; 9-check suite; test:core01 now 40 checks total.",
-    "Capability registry evidence arrays updated with all suites; test:core01 chains four suites inside test:full; validate gates passed on all slices."
+    "All job mutations operate on detached copies and publish in memory only after disk persistence succeeds.",
+    "Creation, completion and failure payloads are detached from caller-owned objects.",
+    "Added regression coverage for rejected updates, serialization errors, storage failures and payload aliasing; included it in test:jobs.",
+    "Full test suite npm run test:full and test:jobs pass with zero failures."
   ],
-  "remaining": [
-    "Fifth unrelated workflow (e.g., action-items/meeting-notes triage) — would also give core.prioritize a second composed consumer.",
-    "Decide the OCR ingestion adapter for image/PDF Document Review (anydoc candidate) — currently an honest fail-closed gap.",
-    "Benchmark Lab qualification evidence per reusable capability, then evidence-driven routing/fallback improvements."
-  ],
-  "next_required_action": "Complete CORE-01 milestone delivery into main; proceed to lifecycle maintenance reconciliation and durable-job integrity.",
+  "remaining": [],
+  "next_required_action": "Merge durable-job-state-integrity into main.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
-  "working_branch": "core/core-01-system-formation",
+  "working_branch": "feat/durable-job-state-integrity",
   "validation": {
-    "passed": [
-      "npm.cmd run test:full green (includes test:core01 = 18 + 6 + 7 + 9 checks).",
-      "dev-lifecycle validate status=passed against committed HEAD for all three slices.",
-      "PR #43 GitHub Actions verify: pass (re-run per push).",
-      "test-development-lifecycle-gate 8/8 after the resume fix; phase2b verified 48/48 against clean baseline worktree."
-    ],
     "failed": [],
+    "passed": [
+      "npm.cmd run test:jobs: all tests passed including durable-store assertions.",
+      "npm.cmd run test:operator: all assertions passed.",
+      "node scripts/test-dev-loop.js: 4 passed.",
+      "node scripts/test-development-schemas.js: 29 passed.",
+      "npm.cmd run test:full: full test suite green."
+    ],
     "not_run": [
       "Live-server smoke and browser tests (offline changes only)."
     ]
   },
-  "recommended_next_agent": "system (CORE-01 delivery and merge)"
+  "recommended_next_agent": "system"
 }

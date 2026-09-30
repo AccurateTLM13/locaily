@@ -11,7 +11,8 @@ function parseArgs(argv) {
     project: "locaily",
     title: "",
     reason: "",
-    dataDir: path.join(ROOT, "data", "memory", "development-events")
+    dataDir: path.join(ROOT, "data", "memory", "development-events"),
+    sessionsRoot: path.join(ROOT, "data", "memory", "development-sessions")
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -27,6 +28,9 @@ function parseArgs(argv) {
       index += 1;
     } else if (token === "--data-dir" && argv[index + 1]) {
       parsed.dataDir = path.resolve(argv[index + 1]);
+      index += 1;
+    } else if (token === "--sessions-root" && argv[index + 1]) {
+      parsed.sessionsRoot = path.resolve(argv[index + 1]);
       index += 1;
     }
   }
@@ -45,6 +49,7 @@ async function main() {
   capture.init({
     project: args.project,
     dataDir: args.dataDir,
+    sessionsRoot: args.sessionsRoot,
     failureLogPath: path.join(args.dataDir, "capture-failures.jsonl")
   });
 

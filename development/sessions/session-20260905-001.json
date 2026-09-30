@@ -1,0 +1,48 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260905-001",
+  "milestoneId": "durable-job-state-integrity-20260905",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "paused",
+  "objective": "Fix rejected job mutations and caller-owned payload references corrupting in-memory job state; add regression coverage while preserving existing local edits.",
+  "branch": "main",
+  "startingCommit": "1f36ce3a3de61886d3607723f6fb714a1aaafa80",
+  "plannedFiles": [],
+  "completedWork": [
+    "Fixed atomic job updates and detached payload ownership. Added regressions to test:jobs. Jobs: 365 assertions; operator: 45; dev queue: 4; development schemas: 29; all passed. Existing four modified files preserved."
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-09-05T00:32:25.787Z",
+      "message": "Fixed atomic job updates and detached payload ownership. Added regressions to test:jobs. Jobs: 365 assertions; operator: 45; dev queue: 4; development schemas: 29; all passed. Existing four modified files preserved.",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-09-05T00:28:32.675Z",
+  "closedAt": "2026-09-05T00:32:29.935Z",
+  "closingCommit": "1f36ce3a3de61886d3607723f6fb714a1aaafa80",
+  "dirtyFiles": [
+    "companion/core/durable-job-store.js",
+    "companion/server.js",
+    "development/project-state.json",
+    "package.json",
+    "scripts/memory-decision.js",
+    "scripts/test-development-memory-capture.js",
+    "scripts/test-development-memory-e2e-second-project.js",
+    "scripts/test-durable-job-store.js",
+    "development/milestones/durable-job-state-integrity-20260905.json",
+    "development/sessions/session-20260905-001.json"
+  ],
+  "risks": [
+    "Implementation and targeted tests pass locally. Changes remain uncommitted alongside four preserved pre-existing edits; prepare, committed-HEAD validation and delivery gates remain pending."
+  ],
+  "nextRecommendedAction": "Implementation and targeted tests pass locally. Changes remain uncommitted alongside four preserved pre-existing edits; prepare, committed-HEAD validation and delivery gates remain pending."
+}

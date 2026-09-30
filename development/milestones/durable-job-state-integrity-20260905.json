@@ -1,0 +1,103 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "durable-job-state-integrity-20260905",
+  "title": "Durable job state integrity",
+  "status": "ready-for-delivery",
+  "type": "bugfix",
+  "priority": "medium",
+  "purpose": "Harden durable job state and validation correctness; fix defects found during the user-authorized continuing codebase improvement pass.",
+  "scope": {
+    "included": [
+      "Atomic in-memory job updates after successful validation and persistence",
+      "Detach caller-owned payloads from stored jobs",
+      "Regression tests and lifecycle closeout",
+      "Enforce nullable container constraints in runtime and Benchmark Lab validators",
+      "Reject non-finite numbers and enforce oneOf sibling constraints in runtime validation",
+      "Expose actionable schema failure evidence in the existing validation console",
+      "Preserve explicit failed results and zero scores in console history; identify demo runs correctly"
+    ],
+    "excluded": [
+      "Pre-existing memory and server edits",
+      "New product features, benchmark qualification, and delivery",
+      "Roadmap changes; this is an ad hoc maintenance slice authorized by the user"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "atomic-updates",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "scripts/test-durable-job-store.js",
+          "note": "166 assertions pass including validation, serialization and persistence failure regressions across every mutation."
+        }
+      ],
+      "description": "Rejected or unpersisted updates preserve the previous job in memory and on disk",
+      "status": "satisfied"
+    },
+    {
+      "id": "payload-isolation",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "scripts/test-durable-job-store.js",
+          "note": "Nested input, context, options, completion result and failure details remain detached and match reloaded records."
+        }
+      ],
+      "description": "Caller mutations cannot alter stored payloads",
+      "status": "satisfied"
+    },
+    {
+      "id": "integration",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "package.json",
+          "note": "npm.cmd run test:jobs: 365 passed. npm.cmd run test:operator: 45 passed. Development queue: 4 passed."
+        }
+      ],
+      "description": "Durable store and affected jobs suites pass",
+      "status": "satisfied"
+    },
+    {
+      "description": "Invalid nullable containers, non-finite numbers and oneOf sibling violations fail with useful diagnostics while valid records still pass",
+      "status": "satisfied",
+      "id": "validation-hardening",
+      "evidence": [
+        {
+          "reference": "scripts/test-schema-validator-edge-cases.js",
+          "type": "test",
+          "note": "44 regression cases pass across runtime and Benchmark Lab validators."
+        }
+      ]
+    },
+    {
+      "description": "Console retains and displays schema validation failure details",
+      "status": "satisfied",
+      "id": "console-evidence",
+      "evidence": [
+        {
+          "reference": "scripts/test-console-validation-failures.js",
+          "type": "test",
+          "note": "Failure evidence survives split and bundle mode reloads; history preserves false and zero."
+        },
+        {
+          "reference": "companion/console/app.js",
+          "type": "manual-verification",
+          "note": "Isolated localhost browser fixture showed field-level failure details and Demo history label. No live model execution."
+        }
+      ]
+    }
+  ],
+  "validationProfile": null,
+  "dependencies": [],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-09-05T00:28:32.673Z",
+  "startedAt": "2026-09-05T00:28:32.673Z",
+  "completedAt": "2026-09-30T23:25:56.363Z",
+  "mergedAt": null,
+  "latestValidationId": "validation-20260930T232551-3b868577",
+  "completionBranch": "feat/durable-job-state-integrity",
+  "completionHead": "5e0566ef4993bdfcef0d2950623defed3d1a63e3"
+}

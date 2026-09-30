@@ -54,11 +54,15 @@ function createDurableJobStore(options = {}) {
   }
 
   function atomicWriteJob(job) {
+    // Publish the same detached snapshot to disk and memory only after persistence succeeds.
+    const serialized = JSON.stringify(job, null, 2);
+    const snapshot = JSON.parse(serialized);
     ensureJobsDir();
     const filePath = jobFilePath(job.jobId);
     const tmpPath = filePath + ".tmp." + randomUUID().replace(/-/g, "").slice(0, 12);
-    writeFileSync(tmpPath, JSON.stringify(job, null, 2), { encoding: "utf8" });
+    writeFileSync(tmpPath, serialized, { encoding: "utf8" });
     renameSync(tmpPath, filePath);
+    jobs.set(job.jobId, snapshot);
   }
 
   function validateJob(job) {
@@ -151,7 +155,6 @@ function createDurableJobStore(options = {}) {
     }
 
     atomicWriteJob(job);
-    jobs.set(jobId, job);
 
     return { ok: true, job: deepClone(job) };
   }
@@ -165,7 +168,7 @@ function createDurableJobStore(options = {}) {
       };
     }
 
-    const job = jobs.get(jobId);
+    const job = getJob(jobId);
     if (!job) {
       return {
         ok: false,
@@ -241,7 +244,7 @@ function createDurableJobStore(options = {}) {
   }
 
   function startJob(jobId) {
-    const job = jobs.get(jobId);
+    const job = getJob(jobId);
     if (!job) {
       return {
         ok: false,
@@ -278,7 +281,7 @@ function createDurableJobStore(options = {}) {
   }
 
   function completeJob(jobId, result = null) {
-    const job = jobs.get(jobId);
+    const job = getJob(jobId);
     if (!job) {
       return {
         ok: false,
@@ -317,7 +320,7 @@ function createDurableJobStore(options = {}) {
   }
 
   function failJob(jobId, error = null) {
-    const job = jobs.get(jobId);
+    const job = getJob(jobId);
     if (!job) {
       return {
         ok: false,
@@ -361,7 +364,7 @@ function createDurableJobStore(options = {}) {
   }
 
   function cancelJob(jobId) {
-    const job = jobs.get(jobId);
+    const job = getJob(jobId);
     if (!job) {
       return {
         ok: false,
@@ -399,7 +402,7 @@ function createDurableJobStore(options = {}) {
   }
 
   function retryJob(jobId) {
-    const job = jobs.get(jobId);
+    const job = getJob(jobId);
     if (!job) {
       return {
         ok: false,
@@ -447,7 +450,7 @@ function createDurableJobStore(options = {}) {
   }
 
   function reviewJob(jobId, action, reviewPayload = {}) {
-    const job = jobs.get(jobId);
+    const job = getJob(jobId);
     if (!job) {
       return {
         ok: false,

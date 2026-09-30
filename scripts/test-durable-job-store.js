@@ -1,4 +1,4 @@
-const { mkdir, rm } = require("node:fs/promises");
+const { mkdir, rm, rename, writeFile, unlink } = require("node:fs/promises");
 const { join } = require("node:path");
 const { tmpdir } = require("node:os");
 const { createDurableJobStore } = require("../companion/core/durable-job-store");
@@ -773,6 +773,108 @@ function testCannotRetryCancelledJob() {
 
 // ==================== Run All Tests ====================
 
+async function testRejectedMutationsPreserveState() {
+  console.log("TEST: rejected mutations preserve memory and disk state");
+  await withTempDir(async (dir) => {
+    const store = createDurableJobStore({ dataDir: dir });
+    const { job } = store.createJob({ executionType: "track", trackId: "test.track" });
+    store.claimJob(job.jobId, "worker-1");
+    store.startJob(job.jobId);
+    const before = JSON.stringify(store.getJob(job.jobId));
+
+    for (const mutate of [
+      () => store.failJob(job.jobId, "invalid error payload"),
+      () => store.failJob(job.jobId, []),
+      () => store.failJob(job.jobId, { code: "INVALID" }),
+      () => store.reviewJob(job.jobId, "request_review", { reviewedBy: 42 })
+    ]) {
+      const result = mutate();
+      assert(!result.ok && result.code === "JOB_VALIDATION_FAILED", "invalid update is rejected");
+      assert(JSON.stringify(store.getJob(job.jobId)) === before, "rejected update preserves memory");
+      const reloaded = createDurableJobStore({ dataDir: dir });
+      assert(JSON.stringify(reloaded.getJob(job.jobId)) === before, "rejected update preserves disk");
+    }
+
+    let threw = false;
+    try { store.completeJob(job.jobId, { value: 1n }); } catch { threw = true; }
+    assert(threw, "non-serializable result is rejected");
+    assert(JSON.stringify(store.getJob(job.jobId)) === before, "serialization failure preserves memory");
+    assert(store.completeJob(job.jobId, { value: "recovered" }).ok, "valid completion still succeeds after rejected updates");
+  });
+}
+
+async function testPersistenceFailuresPreserveState() {
+  console.log("TEST: persistence failures preserve every job transition");
+  const transitions = [
+    { name: "create", status: "queued", mutate: (s) => s.createJob({ executionType: "track", trackId: "new.track" }) },
+    { name: "claim", status: "queued", mutate: (s, id) => s.claimJob(id, "worker-2") },
+    { name: "reclaim", status: "expired", mutate: (s, id) => s.claimJob(id, "worker-2") },
+    { name: "start", status: "claimed", mutate: (s, id) => s.startJob(id) },
+    { name: "complete", status: "running", mutate: (s, id) => s.completeJob(id, {}) },
+    { name: "fail", status: "running", mutate: (s, id) => s.failJob(id) },
+    { name: "cancel", status: "queued", mutate: (s, id) => s.cancelJob(id) },
+    { name: "retry", status: "failed", mutate: (s, id) => s.retryJob(id) },
+    { name: "review", status: "running", mutate: (s, id) => s.reviewJob(id, "request_review") }
+  ];
+  for (const transition of transitions) {
+    await withTempDir(async (dir) => {
+      const store = createDurableJobStore({ dataDir: dir });
+      const { job } = store.createJob({ executionType: "track", trackId: "test.track" });
+      if (transition.status !== "queued") store.claimJob(job.jobId, "worker-1", transition.status === "expired" ? -1 : 60000);
+      if (["running", "failed"].includes(transition.status)) store.startJob(job.jobId);
+      if (transition.status === "failed") store.failJob(job.jobId);
+      const before = JSON.stringify(store.listJobs());
+      const jobsDir = join(dir, "jobs");
+      const savedDir = join(dir, "saved-jobs");
+      await rename(jobsDir, savedDir);
+      await writeFile(jobsDir, "Block job writes for this isolated test.");
+      let threw = false;
+      try { transition.mutate(store, job.jobId); } catch { threw = true; }
+      finally {
+        await unlink(jobsDir);
+        await rename(savedDir, jobsDir);
+      }
+      assert(threw, `${transition.name}: persistence failure surfaces`);
+      assert(JSON.stringify(store.listJobs()) === before, `${transition.name}: memory is unchanged`);
+      assert(JSON.stringify(createDurableJobStore({ dataDir: dir }).listJobs()) === before, `${transition.name}: disk is unchanged`);
+      assert(transition.mutate(store, job.jobId).ok, `${transition.name}: succeeds after storage recovers`);
+    });
+  }
+}
+
+async function testCallerPayloadIsolation() {
+  console.log("TEST: caller-owned payloads cannot mutate stored jobs");
+  await withTempDir(async (dir) => {
+    const store = createDurableJobStore({ dataDir: dir });
+    const params = { executionType: "track", trackId: "test.track", input: { nested: { value: "original" } }, context: { tag: "original" }, options: { tag: "original" } };
+    const { job } = store.createJob(params);
+    const before = JSON.stringify(store.getJob(job.jobId));
+    params.input.nested.value = "changed";
+    params.context.tag = "changed";
+    params.options.tag = "changed";
+    assert(JSON.stringify(store.getJob(job.jobId)) === before, "creation detaches input, context and options");
+
+    store.claimJob(job.jobId, "worker-1");
+    store.startJob(job.jobId);
+    const result = { nested: { value: "original" } };
+    store.completeJob(job.jobId, result);
+    result.nested.value = "changed";
+    assert(store.getJob(job.jobId).result.nested.value === "original", "completion detaches result payload");
+
+    const failed = store.createJob({ executionType: "track", trackId: "test.track" }).job;
+    store.claimJob(failed.jobId, "worker-1");
+    store.startJob(failed.jobId);
+    const error = { code: "ERROR", message: "failure", retryable: true, details: { value: "original" } };
+    store.failJob(failed.jobId, error);
+    error.details.value = "changed";
+    assert(store.getJob(failed.jobId).error.details.value === "original", "failure detaches error payload");
+    const reloaded = createDurableJobStore({ dataDir: dir });
+    for (const stored of store.listJobs()) {
+      assert(JSON.stringify(stored) === JSON.stringify(reloaded.getJob(stored.jobId)), "memory matches persisted record after caller mutations");
+    }
+  });
+}
+
 async function runAllTests() {
   console.log("=== Durable Job Store Tests ===\n");
 
@@ -810,6 +912,9 @@ async function runAllTests() {
   await testCannotClaimCompletedJob();
   await testCannotRetryCompletedJob();
   await testCannotRetryCancelledJob();
+  await testRejectedMutationsPreserveState();
+  await testPersistenceFailuresPreserveState();
+  await testCallerPayloadIsolation();
 
   console.log(`\n=== Results: ${passed} passed, ${failed} failed ===`);
   if (failed > 0) {
