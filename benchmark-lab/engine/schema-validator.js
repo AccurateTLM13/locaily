@@ -44,11 +44,11 @@ function validateValue(value, schema, path, errors) {
     }
   }
 
-  if (schema.type === "object" && isPlainObject(value)) {
+  if (isPlainObject(value)) {
     validateObject(value, schema, path, errors);
   }
 
-  if (schema.type === "array" && Array.isArray(value)) {
+  if (Array.isArray(value)) {
     if (typeof schema.minItems === "number" && value.length < schema.minItems) {
       errors.push(`${path} must contain at least ${schema.minItems} item(s).`);
     }
@@ -89,6 +89,7 @@ function validateType(value, type, path, errors) {
   if (Array.isArray(type)) {
     const matched = type.some((t) => {
       if (t === "null") return value === null;
+      if (t === "number") return Number.isFinite(value);
       if (t === "array") return Array.isArray(value);
       if (t === "integer") return Number.isInteger(value);
       if (t === "object") return isPlainObject(value);
@@ -104,6 +105,16 @@ function validateType(value, type, path, errors) {
     if (!Array.isArray(value)) {
       errors.push(`${path} must be an array.`);
     }
+    return;
+  }
+
+  if (type === "null") {
+    if (value !== null) errors.push(`${path} must be null.`);
+    return;
+  }
+
+  if (type === "number") {
+    if (!Number.isFinite(value)) errors.push(`${path} must be a finite number.`);
     return;
   }
 

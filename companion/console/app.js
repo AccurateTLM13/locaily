@@ -500,6 +500,7 @@ function renderResults(run) {
   const warningLines = uniqueStrings([...(run.warnings || []), ...(result.warnings || [])]);
 
   elements.validationEvidence.replaceChildren(
+    ...(run.error ? [advancedBlock("Failure details", run.error.detail || run.error.message || "Validation failed.")] : []),
     advancedBlock("Validation ID", run.runId),
     advancedBlock("Mode", formatMode(run.mode)),
     advancedBlock("URL", run.url),
@@ -911,6 +912,10 @@ function formatStepLabel(label) {
 }
 
 function formatMode(mode) {
+  if (mode === "demo") {
+    return "Demo";
+  }
+
   if (mode === "l2_ollama") {
     return "Local AI";
   }

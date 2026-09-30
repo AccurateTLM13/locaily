@@ -390,7 +390,8 @@ async function testJobMutationEndpoints() {
     const claimResult = store.claimJob(failedResult.job.jobId, "test-worker");
     if (claimResult.ok) {
       store.startJob(failedResult.job.jobId, "test-worker");
-      store.failJob(failedResult.job.jobId, { code: "TEST_ERROR", message: "Test fail" });
+      const failure = store.failJob(failedResult.job.jobId, { code: "TEST_ERROR", message: "Test fail", retryable: true });
+      assert(failure.ok, "Failed-job fixture satisfies the durable job schema");
     }
     const retryRes = await makeRequest(server.url, "POST", `/jobs/${failedResult.job.jobId}/retry`);
     assert(retryRes.status === 200, "Retry returns 200");

@@ -400,6 +400,32 @@ function getActiveDevelopmentMemory() {
   return developmentMemoryServices.forActiveProject();
 }
 
+function getContextPackMemory(requestBody = {}) {
+  const project = developmentProjectRegistry.getProject(requestBody.project);
+
+  if (!project || !project.vaultPath) {
+    return {
+      adapter: vaultAdapter,
+      retrieval: null
+    };
+  }
+
+  return {
+    adapter: createVaultAdapter({
+      ...config.memoryBridge,
+      enabled: true,
+      vaultPath: project.vaultPath,
+      readPolicy: "allowlist",
+      writebackMode: "proposal_only",
+      rawAccess: false,
+      allowApply: false,
+      allowedPaths: project.allowedPaths,
+      blockedPaths: project.blockedPaths
+    }),
+    retrieval: developmentMemoryServices.forProject(project.slug).retrieval
+  };
+}
+
 let developmentCaptureWorker = null;
 const developmentCaptureProcessor = createDevelopmentCaptureProcessor({
   projectRegistry: developmentProjectRegistry,
@@ -1676,7 +1702,11 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 400, responseBody);
       }
 
-      const packResult = buildContextPack(vaultAdapter, bodyResult.body);
+      const memory = getContextPackMemory(bodyResult.body);
+      const packResult = buildContextPack(memory.adapter, {
+        ...bodyResult.body,
+        retrieval: memory.retrieval || undefined
+      });
       const responseBody = buildMemoryActionResponse({
         identity,
         startedAt,

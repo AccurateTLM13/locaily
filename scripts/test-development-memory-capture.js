@@ -5,6 +5,7 @@ const { join } = require("node:path");
 const { spawnSync } = require("node:child_process");
 const capture = require("../companion/memory/events/capture");
 const { createDevelopmentEventStore } = require("../companion/memory/events/event-store");
+const { createDevelopmentSessionManager } = require("../companion/memory/events/session-manager");
 const { buildStableEventId } = require("../companion/memory/events/capture/event-id");
 
 const ROOT = join(__dirname, "..");
@@ -127,6 +128,14 @@ async function run() {
     ["memory:decision CLI records decision_recorded", async () => {
       const dir = mkdtempSync(join(tmpdir(), "locaily-dm-decision-"));
       const dataDir = join(dir, "events");
+      const sessionsRoot = join(dir, "sessions");
+      const sessionManager = createDevelopmentSessionManager({
+        project: "locaily",
+        eventsDir: dataDir,
+        sessionsRoot
+      });
+      const session = sessionManager.startSession({ objectiveId: "decision-cli-test" });
+      assert.strictEqual(session.ok, true);
 
       const script = spawnSync(
         process.execPath,
@@ -134,6 +143,7 @@ async function run() {
           join(ROOT, "scripts", "memory-decision.js"),
           "--project", "locaily",
           "--data-dir", dataDir,
+          "--sessions-root", sessionsRoot,
           "--title", "Keep proposal-only writeback as default",
           "--reason", "Protect user-controlled memory"
         ],
@@ -148,6 +158,7 @@ async function run() {
       const result = await store.queryEvents({ eventType: "decision_recorded", limit: 20 });
       const match = (result.result.events || []).find((event) => event.summary.includes("Keep proposal-only writeback"));
       assert.ok(match, "decision event not found");
+      assert.strictEqual(match.correlation.sessionId, session.result.sessionId);
       rmSync(dir, { recursive: true, force: true });
     }],
     ["capture failures are logged without throwing", async () => {

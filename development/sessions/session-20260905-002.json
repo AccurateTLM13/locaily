@@ -1,0 +1,31 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20260905-002",
+  "milestoneId": "durable-job-state-integrity-20260905",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "active",
+  "objective": "Resumed: Fix rejected job mutations and caller-owned payload references corrupting in-memory job state; add regression coverage while preserving existing local edits.",
+  "branch": "main",
+  "startingCommit": "1f36ce3a3de61886d3607723f6fb714a1aaafa80",
+  "plannedFiles": [],
+  "completedWork": [
+    "Hardened both validators for nullable containers and finite numbers; runtime oneOf now preserves sibling constraints. Added 44 validator regressions and console restart/history tests. Console exposes field-level failure details and labels demos correctly; browser fixture verified. Full suite running after fixing invalid operator fixture and order-sensitive regression."
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-09-05T00:43:33.452Z",
+      "message": "Hardened both validators for nullable containers and finite numbers; runtime oneOf now preserves sibling constraints. Added 44 validator regressions and console restart/history tests. Console exposes field-level failure details and labels demos correctly; browser fixture verified. Full suite running after fixing invalid operator fixture and order-sensitive regression.",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-09-05T00:34:06.294Z",
+  "closedAt": null
+}

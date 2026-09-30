@@ -167,6 +167,11 @@ function createValidationRunner({ runStore, runTask, getStatusSnapshot, listAudi
       currentStep = "schema_validation";
       await startStep(runId, currentStep, { routingReason: "Validate against lighthouse-handoff schema (deterministic rule)" });
       const schemaEvidence = await validateHandoffSchema(composeEnvelope.body.result);
+      await runStore.recordJsonArtifact(runId, "schema-validation", schemaEvidence);
+      await runStore.updateRun(runId, (run) => {
+        run.evidence = { ...run.evidence, schema: schemaEvidence };
+        return run;
+      });
       const verifyEnvelope = await runVerifyHandoff(composeEnvelope.body.result);
       assertEnvelopeOk(verifyEnvelope, "verify-handoff");
       await runStore.recordJsonArtifact(runId, "verify-handoff", verifyEnvelope.body);

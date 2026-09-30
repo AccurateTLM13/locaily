@@ -20,7 +20,6 @@ const { createDevelopmentMemoryServices } = require("../companion/memory/project
 const { runProjectSetupStep } = require("../companion/memory/projects/project-setup");
 const { createDevelopmentSessionManager } = require("../companion/memory/events/session-manager");
 const { createDevelopmentCandidateManager } = require("../companion/memory/events/candidate-manager");
-const { createDevelopmentMemoryRetrieval } = require("../companion/memory/retrieval/index");
 const { getLegacyMemoryPaths } = require("../companion/memory/projects/project-paths");
 
 const SECOND_PROJECT_SLUG = "pilot-workspace";
@@ -60,6 +59,22 @@ function buildVaultAdapter(vaultPath, project) {
     allowedPaths: project.allowedPaths,
     blockedPaths: project.blockedPaths || []
   });
+}
+
+function buildProjectContextPackMemory(project, services) {
+  return {
+    adapter: createVaultAdapter({
+      enabled: true,
+      vaultPath: project.vaultPath,
+      readPolicy: "allowlist",
+      writebackMode: "proposal_only",
+      rawAccess: false,
+      allowApply: false,
+      allowedPaths: project.allowedPaths,
+      blockedPaths: project.blockedPaths || []
+    }),
+    retrieval: services.retrieval
+  };
 }
 
 async function runProofScenario(root) {
@@ -192,17 +207,13 @@ async function runProofScenario(root) {
   assert.strictEqual(approved.ok, true);
   assert.strictEqual(approved.result.review.status, "approved");
 
-  const retrieval = createDevelopmentMemoryRetrieval({
-    candidatesRoot: paths.candidatesRoot,
-    maintainerRoot: paths.maintainerRoot
-  });
-
-  const contextPack = buildContextPack(adapter, {
+  const contextMemory = buildProjectContextPackMemory(project, services);
+  const contextPack = buildContextPack(contextMemory.adapter, {
     project: SECOND_PROJECT_SLUG,
     task: "Continue development with accepted project memory",
     maxFiles: 8,
     include: ["current_state", "known_decisions"],
-    retrieval
+    retrieval: contextMemory.retrieval
   });
 
   assert.strictEqual(contextPack.ok, true);

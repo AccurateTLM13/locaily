@@ -101,7 +101,6 @@ function validateValue(value, schema, path, errors, rootSchema) {
 
   if (Array.isArray(schema.oneOf) && schema.oneOf.length > 0) {
     validateOneOf(value, schema, path, errors, rootSchema);
-    return;
   }
 
   if (Object.prototype.hasOwnProperty.call(schema, "const") && value !== schema.const) {
@@ -154,11 +153,11 @@ function validateValue(value, schema, path, errors, rootSchema) {
     }
   }
 
-  if (schema.type === "object" && value && typeof value === "object" && !Array.isArray(value)) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
     validateObject(value, schema, path, errors, rootSchema);
   }
 
-  if (schema.type === "array" && Array.isArray(value)) {
+  if (Array.isArray(value)) {
     if (typeof schema.minItems === "number" && value.length < schema.minItems) {
       errors.push(`${path} must contain at least ${schema.minItems} item(s).`);
     }
@@ -281,6 +280,13 @@ function validateType(value, schema, path, errors) {
     return;
   }
 
+  if (schema.type === "number") {
+    if (!Number.isFinite(value)) {
+      errors.push(`${path} must be a finite number.`);
+    }
+    return;
+  }
+
   if (schema.type === "object") {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
       errors.push(`${path} must be an object.`);
@@ -295,6 +301,9 @@ function validateType(value, schema, path, errors) {
 }
 
 function matchesJsonType(value, typeName) {
+  if (typeName === "number") {
+    return Number.isFinite(value);
+  }
   if (typeName === "null") {
     return value === null;
   }
