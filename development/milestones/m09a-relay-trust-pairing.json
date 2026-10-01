@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "m09a-relay-trust-pairing",
   "title": "M09A Relay Trust and Node Pairing Ceremony",
-  "status": "planned",
+  "status": "completed",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Implement Node identity pairing ceremony, HMAC-SHA256 request signing, node trust allowlists, and node revocation for secure inter-node execution.",
@@ -25,22 +25,26 @@
     {
       "id": "ac-pairing-ceremony",
       "description": "Nodes successfully complete the 4-step challenge-response pairing ceremony and acquire trust tokens",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-relay-trust-pairing.js" }]
     },
     {
       "id": "ac-signed-requests",
       "description": "Inter-node requests are signed with HMAC-SHA256 and verified against node secret tokens",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-relay-trust-pairing.js" }]
     },
     {
       "id": "ac-untrusted-rejection",
       "description": "Requests from untrusted, unpaired, or expired nodes are explicitly rejected with code UNTRUSTED_NODE",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-relay-trust-pairing.js" }]
     },
     {
       "id": "ac-node-revocation",
       "description": "Revoked nodes are immediately rejected from inter-node execution and bus subscriptions",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-relay-trust-pairing.js" }]
     }
   ],
   "validationProfile": "pre-delivery",
@@ -51,6 +55,6 @@
   "lifecycleRef": null,
   "createdAt": "2026-08-01T18:00:00.000Z",
   "startedAt": "2026-08-01T18:01:00.000Z",
-  "completedAt": null,
-  "mergedAt": null
+  "completedAt": "2026-08-01T18:30:00.000Z",
+  "mergedAt": "2026-08-01T19:00:00.000Z"
 }

@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "dev-loop-01-canonical-queue-safe-runner",
   "title": "DEV-LOOP-01 Canonical Queue and Safe Runner Integration",
-  "status": "planned",
+  "status": "completed",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Connect the agent-neutral Development Control Plane with the canonical Durable Job Store and background worker polling loop to enable safe, isolated background task execution.",
@@ -25,27 +25,32 @@
     {
       "id": "ac-queue-enqueue",
       "description": "Development session tasks can be enqueued as schema-valid durable jobs into Durable Job Store",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-dev-loop.js" }]
     },
     {
       "id": "ac-worker-claim",
       "description": "Background worker polling loop claims and executes queued dev jobs safely",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-dev-loop.js" }]
     },
     {
       "id": "ac-safe-runner",
       "description": "Safe runner enforces timeout limits and dirty-tree safety checks before task execution",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-dev-loop.js" }]
     },
     {
       "id": "ac-durable-record",
       "description": "Job completion and failure outcomes are durably recorded in job store and session metadata",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-dev-loop.js" }]
     },
     {
       "id": "ac-cli-control",
       "description": "CLI entry point scripts/dev-loop.js supports --enqueue, --run-next, and --status commands",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-dev-loop.js" }]
     }
   ],
   "validationProfile": "pre-delivery",
@@ -57,6 +62,6 @@
   "lifecycleRef": null,
   "createdAt": "2026-08-01T17:50:00.000Z",
   "startedAt": "2026-08-01T17:51:00.000Z",
-  "completedAt": null,
-  "mergedAt": null
+  "completedAt": "2026-08-01T18:30:00.000Z",
+  "mergedAt": "2026-08-01T19:00:00.000Z"
 }

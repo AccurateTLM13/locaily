@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "dm10-multi-project-template",
   "title": "DM10 Multi-Project Template and Vault Importer",
-  "status": "planned",
+  "status": "completed",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Provide multi-project memory starter template generation and automated vault importing across external codebases with namespaced storage health validation.",
@@ -24,17 +24,20 @@
     {
       "id": "ac-template-gen",
       "description": "memory:project:generate-template creates a valid starter memory vault for a new project slug",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-development-memory-multi-project.js" }]
     },
     {
       "id": "ac-vault-import",
       "description": "memory:project:import-vault imports external Markdown pages into namespaced project storage",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-development-memory-multi-project.js" }]
     },
     {
       "id": "ac-health-val",
       "description": "Project health validator verifies vault structure, page links, and schema integrity",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-development-memory-multi-project.js" }]
     }
   ],
   "validationProfile": "pre-delivery",
@@ -46,6 +49,6 @@
   "lifecycleRef": null,
   "createdAt": "2026-08-01T18:00:00.000Z",
   "startedAt": "2026-08-01T18:05:00.000Z",
-  "completedAt": null,
-  "mergedAt": null
+  "completedAt": "2026-08-01T18:30:00.000Z",
+  "mergedAt": "2026-08-01T19:00:00.000Z"
 }

@@ -36,7 +36,9 @@
           "title": "Track Runner",
           "description": "Pipeline and DAG execution modes",
           "maturity": "operational",
-          "milestoneIds": []
+          "milestoneIds": [
+            "core-01-system-formation"
+          ]
         },
         {
           "id": "track-planner",
@@ -180,7 +182,9 @@
           "title": "Job Management",
           "description": "Durable job store, background worker, mutations",
           "maturity": "operational",
-          "milestoneIds": []
+          "milestoneIds": [
+            "durable-job-state-integrity-20260905"
+          ]
         }
       ]
     },
@@ -342,24 +346,6 @@
           ]
         }
       ]
-    },
-    {
-      "id": "uncategorized",
-      "title": "Uncategorized",
-      "description": "Auto-generated area for unmapped milestones",
-      "maturity": "planned",
-      "initiatives": [
-        {
-          "id": "unmapped-milestones",
-          "title": "Unmapped Milestones",
-          "description": "Milestones found on disk but not in roadmap",
-          "maturity": "planned",
-          "milestoneIds": [
-            "core-01-system-formation",
-            "durable-job-state-integrity-20260905"
-          ]
-        }
-      ]
     }
   ],
   "milestoneDependencies": {
@@ -387,10 +373,34 @@
     "ctk-02-node-roles-capability-capsules": [
       "ctk-01-capability-trigger-kernel"
     ],
+    "ctk-03-node-event-bus-transport": [
+      "ctk-01-capability-trigger-kernel",
+      "ctk-02-node-roles-capability-capsules"
+    ],
+    "m09a-relay-trust-pairing": [
+      "ctk-02-node-roles-capability-capsules"
+    ],
+    "lh-product-bridge": [
+      "ctk-01-capability-trigger-kernel",
+      "ctk-02-node-roles-capability-capsules"
+    ],
+    "dev-loop-01-canonical-queue-safe-runner": [
+      "ctk-01-capability-trigger-kernel",
+      "ctk-02-node-roles-capability-capsules"
+    ],
+    "dm10-multi-project-template": [
+      "ctk-01-capability-trigger-kernel",
+      "ctk-02-node-roles-capability-capsules"
+    ],
+    "dev-harness-01-agent-operations-contract": [
+      "dev-loop-01-canonical-queue-safe-runner"
+    ],
     "benchmark-lab-m2-reproducible-semantic-qualification": [],
     "benchmark-lab-m3-interactive-local-model-lab": [
       "benchmark-lab-m2-reproducible-semantic-qualification"
     ],
+    "core-01-system-formation": [],
+    "durable-job-state-integrity-20260905": [],
     "px8-audit-second-pass": [
       "px1-canonical-product-status",
       "px3-golden-path-run-inspector",

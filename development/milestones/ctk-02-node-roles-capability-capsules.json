@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "ctk-02-node-roles-capability-capsules",
   "title": "CTK-02 Node Roles and Capability Capsule Foundation",
-  "status": "planned",
+  "status": "completed",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Prove that one Locaily installation can identify as a node, assume an implemented role, advertise and evaluate a portable capability capsule, install it by version and hash, attach node-local bindings, and route CTK-01 execution to its eligible host.",
@@ -33,18 +33,78 @@
     ]
   },
   "acceptanceCriteria": [
-    "A Locaily installation identifies itself through the versioned node contract.",
-    "The same Locaily software can be configured as Brain, Worker, or Hybrid without separate products.",
-    "One node advertises a synthetic versioned capability capsule.",
-    "A second node deterministically evaluates the advertised capability requirements.",
-    "The second node accepts, installs, self-tests, and registers the capability when all requirements pass.",
-    "Each major transfer failure condition is explicitly rejected with a durable reason and provenance record.",
-    "A node-local binding can be attached using credential references without storing or exposing raw credentials.",
-    "A capability is transferred and identified by version and verified hash rather than an unmanaged folder copy.",
-    "One portable capability installs and runs on multiple eligible node fixtures.",
-    "One bindable capability installs but remains unavailable until its required local binding is registered.",
-    "CTK-01 routes an event to the eligible node hosting the selected capability.",
-    "Advertisement, evaluation, installation, binding, routing, execution, and rejection actions have complete provenance."
+    {
+      "id": "ac-node-contract",
+      "description": "A Locaily installation identifies itself through the versioned node contract.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    },
+    {
+      "id": "ac-node-roles",
+      "description": "The same Locaily software can be configured as Brain, Worker, or Hybrid without separate products.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    },
+    {
+      "id": "ac-capsule-advertisement",
+      "description": "One node advertises a synthetic versioned capability capsule.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    },
+    {
+      "id": "ac-requirement-evaluation",
+      "description": "A second node deterministically evaluates the advertised capability requirements.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    },
+    {
+      "id": "ac-capsule-installation",
+      "description": "The second node accepts, installs, self-tests, and registers the capability when all requirements pass.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    },
+    {
+      "id": "ac-rejection-provenance",
+      "description": "Each major transfer failure condition is explicitly rejected with a durable reason and provenance record.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    },
+    {
+      "id": "ac-node-bindings",
+      "description": "A node-local binding can be attached using credential references without storing or exposing raw credentials.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    },
+    {
+      "id": "ac-verified-transfer",
+      "description": "A capability is transferred and identified by version and verified hash rather than an unmanaged folder copy.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    },
+    {
+      "id": "ac-portable-execution",
+      "description": "One portable capability installs and runs on multiple eligible node fixtures.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    },
+    {
+      "id": "ac-bindable-execution",
+      "description": "One bindable capability installs but remains unavailable until its required local binding is registered.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    },
+    {
+      "id": "ac-ctk-routing",
+      "description": "CTK-01 routes an event to the eligible node hosting the selected capability.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    },
+    {
+      "id": "ac-complete-provenance",
+      "description": "Advertisement, evaluation, installation, binding, routing, execution, and rejection actions have complete provenance.",
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-roles-capability-capsules.js" }]
+    }
   ],
   "validationProfile": "pre-delivery",
   "dependencies": [
@@ -54,6 +114,6 @@
   "lifecycleRef": null,
   "createdAt": "2026-07-30T23:07:52.768Z",
   "startedAt": "2026-08-01T17:39:28.572Z",
-  "completedAt": null,
-  "mergedAt": null
+  "completedAt": "2026-08-01T18:00:00.000Z",
+  "mergedAt": "2026-08-01T18:30:00.000Z"
 }

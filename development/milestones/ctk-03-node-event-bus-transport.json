@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "ctk-03-node-event-bus-transport",
   "title": "CTK-03 Local Node Event Bus and Transport Adapter",
-  "status": "planned",
+  "status": "completed",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Provide a pub/sub event bus and transport adapter abstraction connecting Locaily Node instances for event routing, topic subscriptions, and inter-node event envelope delivery.",
@@ -24,22 +24,26 @@
     {
       "id": "ac-topic-sub",
       "description": "Event bus supports topic subscriptions with wildcard pattern matching (*, #)",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-event-bus.js" }]
     },
     {
       "id": "ac-transport-dispatch",
       "description": "Transport adapter delivers event envelopes across node boundaries to registered subscribers",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-event-bus.js" }]
     },
     {
       "id": "ac-delivery-provenance",
       "description": "Event bus records delivery provenance (published_at, delivered_to, latency_ms)",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-event-bus.js" }]
     },
     {
       "id": "ac-failure-safety",
       "description": "Subscriber execution errors or transport timeouts are caught and recorded without crashing event bus",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-node-event-bus.js" }]
     }
   ],
   "validationProfile": "pre-delivery",
@@ -51,6 +55,6 @@
   "lifecycleRef": null,
   "createdAt": "2026-08-01T18:00:00.000Z",
   "startedAt": "2026-08-01T18:01:00.000Z",
-  "completedAt": null,
-  "mergedAt": null
+  "completedAt": "2026-08-01T18:30:00.000Z",
+  "mergedAt": "2026-08-01T19:00:00.000Z"
 }

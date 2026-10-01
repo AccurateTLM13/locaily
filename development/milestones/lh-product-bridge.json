@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "lh-product-bridge",
   "title": "Lighthouse Handoff Product Bridge",
-  "status": "planned",
+  "status": "completed",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Provide Chrome extension discovery, CORS allowlist policy enforcement, PageSpeed payload transformation, Local AI report enhancement mode, and coding-agent-ready Markdown export.",
@@ -24,17 +24,20 @@
     {
       "id": "ac-cors-policy",
       "description": "Bridge enforces CORS allowlist policy rejecting unauthorized remote origins",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-lighthouse-product-bridge.js" }]
     },
     {
       "id": "ac-payload-convert",
       "description": "PageSpeed JSON payloads are transformed into structured, coding-agent-ready Markdown reports",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-lighthouse-product-bridge.js" }]
     },
     {
       "id": "ac-local-ai-mode",
       "description": "Local AI enhancement mode adds prioritized recommendation summaries to report output",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [{ "type": "test", "reference": "node scripts/test-lighthouse-product-bridge.js" }]
     }
   ],
   "validationProfile": "pre-delivery",
@@ -46,6 +49,6 @@
   "lifecycleRef": null,
   "createdAt": "2026-08-01T18:00:00.000Z",
   "startedAt": "2026-08-01T18:05:00.000Z",
-  "completedAt": null,
-  "mergedAt": null
+  "completedAt": "2026-08-01T18:30:00.000Z",
+  "mergedAt": "2026-08-01T19:00:00.000Z"
 }
