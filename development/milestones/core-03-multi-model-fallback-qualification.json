@@ -30,32 +30,38 @@
     {
       "id": "ac-lfm25-classify",
       "description": "Benchmark Lab suite core-classify-v1 evaluates lfm25-1p2b-thinking-local, passes semantic evaluation across strata, and generates approved evidence.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": "benchmark-lab/evidence/summaries/lfm25-1p2b-core-classify-v1.json and benchmark-lab/evidence/approved/lfm25-1p2b-core-classify-v1.json generated and verified 3/3 passed."
     },
     {
       "id": "ac-lfm25-summarize",
       "description": "Benchmark Lab suite core-summarize-v1 evaluates lfm25-1p2b-thinking-local, passes semantic evaluation across strata, and generates approved evidence.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": "benchmark-lab/evidence/summaries/lfm25-1p2b-core-summarize-v1.json and benchmark-lab/evidence/approved/lfm25-1p2b-core-summarize-v1.json generated and verified 3/3 passed."
     },
     {
       "id": "ac-lfm25-qualification",
       "description": "Qualification records for lfm25-1p2b-thinking-local with canonical checksums are loaded into Local Brain for core.classify and core.summarize.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-*.json with verified checksums in benchmark-lab/evidence/checksums/ loaded by model-qualification-loader."
     },
     {
       "id": "ac-shadow-routing-fallback",
       "description": "Shadow router computes recommendations with valid fallback recommendation when multiple qualified models exist.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": "companion/core/shadow-routing.js populates fallbackRecommendation for multiple qualified capabilities and breaks ties for currentModelId; verified in test:core03."
     },
     {
       "id": "ac-runtime-fallback-execution",
       "description": "Execution automatically falls back to secondary qualified model when primary fails, emitting Track Run Records with fallback metadata.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": "tool-router and model-router automatically retry on secondary qualified fallback model and emit Track Run Records with fallback metadata; verified in test:core03."
     },
     {
       "id": "ac-regression-clean",
       "description": "All existing repository validation commands (npm run test:full) remain 100% green.",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": "npm run test:full executed and passed 100% green across all test suites."
     }
   ],
   "validationProfile": "pre-delivery",
@@ -70,5 +76,6 @@
   "mergedAt": null,
   "preparedCommit": "6e0f34334cd1a1050cf9aab2668f751aced81792",
   "preparedBranch": "milestone/core-03-multi-model-fallback-qualification",
-  "preparedAt": "2026-10-01T02:48:03.133Z"
+  "preparedAt": "2026-10-01T02:48:03.133Z",
+  "latestValidationId": "validation-20261001T024808-615d773c"
 }
