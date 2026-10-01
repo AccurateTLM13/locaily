@@ -1,0 +1,85 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "core-04-complete-generic-matrix-qualification",
+  "title": "CORE-04 Complete Generic Capability Matrix: Full Fallback & Multi-Tier Model Qualification",
+  "status": "ready-for-delivery",
+  "type": "feature",
+  "priority": "high",
+  "purpose": "Complete 100% dual-fallback coverage for generic extraction (core.extract on lfm25-1p2b-thinking-local), establish fast-worker qualification (lfm25-1p2b-instruct-local across classify/summarize/extract), and edge-worker qualification (lfm25-350m-local on classify).",
+  "problem": "core.extract lacks a secondary qualified fallback, and lightweight edge/fast tiers are unqualified, limiting local-first tiering across high-throughput and constrained hardware.",
+  "scope": {
+    "included": [
+      "benchmark-lab/",
+      "companion/",
+      "scripts/",
+      "package.json",
+      "development/",
+      "Benchmark Lab evaluation of lfm25-1p2b-thinking-local on core-extract-v1",
+      "Benchmark Lab evaluation of lfm25-1p2b-instruct-local on core-classify-v1, core-summarize-v1, core-extract-v1",
+      "Benchmark Lab evaluation of lfm25-350m-local on core-classify-v1",
+      "Evidence promotion and qualification records with canonical checksums",
+      "Model manifest updates for lfm25-1p2b-thinking-local, lfm25-1p2b-instruct-local, and lfm25-350m-local",
+      "Routing and runtime fallback verification for core.extract",
+      "Acceptance test suite scripts/test-core04-generic-matrix-qualification.js"
+    ],
+    "excluded": [
+      "Modifying existing completed Lighthouse, DealSniper, or llama3.2 qualification evidence",
+      "Remote cloud model qualification",
+      "Hardware-specific kernel modifications"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "ac-lfm25-thinking-extract",
+      "description": "Benchmark Lab suite core-extract-v1 evaluates lfm25-1p2b-thinking-local, passes semantic evaluation across strata, and generates approved evidence.",
+      "status": "satisfied",
+      "evidence": "benchmark-lab/evidence/approved/lfm25-1p2b-thinking-local_core-extract-v1.json"
+    },
+    {
+      "id": "ac-lfm25-instruct-generic",
+      "description": "Benchmark Lab suites core-classify-v1, core-summarize-v1, and core-extract-v1 evaluate lfm25-1p2b-instruct-local, pass semantic evaluation across strata, and generate approved evidence.",
+      "status": "satisfied",
+      "evidence": "benchmark-lab/evidence/approved/lfm25-1p2b-instruct-local_core-classify-v1.json"
+    },
+    {
+      "id": "ac-lfm25-350m-classify",
+      "description": "Benchmark Lab suite core-classify-v1 evaluates lfm25-350m-local, passes semantic evaluation across strata, and generates approved evidence.",
+      "status": "satisfied",
+      "evidence": "benchmark-lab/evidence/approved/lfm25-350m-local_core-classify-v1.json"
+    },
+    {
+      "id": "ac-matrix-qualifications",
+      "description": "Qualification records with canonical checksums are loaded into Local Brain for all new model roles, updating model manifests.",
+      "status": "satisfied",
+      "evidence": "benchmark-lab/qualifications/models/"
+    },
+    {
+      "id": "ac-extract-runtime-fallback",
+      "description": "Execution of core.extract automatically falls back to secondary qualified model when primary fails, emitting Track Run Records with fallback metadata.",
+      "status": "satisfied",
+      "evidence": "scripts/test-core04-generic-matrix-qualification.js"
+    },
+    {
+      "id": "ac-regression-clean",
+      "description": "All existing repository validation commands (npm run test:full) remain 100% green.",
+      "status": "satisfied",
+      "evidence": "package.json"
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [
+    "core-03-multi-model-fallback-qualification"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-10-01T03:32:00.000Z",
+  "startedAt": "2026-10-01T04:32:20.466Z",
+  "completedAt": "2026-10-01T04:38:24.466Z",
+  "mergedAt": null,
+  "preparedCommit": "f67d8e910b446e0ed1b6866541e797ae0f912258",
+  "preparedBranch": "milestone/core-04-complete-generic-matrix-qualification",
+  "preparedAt": "2026-10-01T04:37:11.555Z",
+  "latestValidationId": "validation-20261001T043715-9cd0f7ea",
+  "completionBranch": "milestone/core-04-complete-generic-matrix-qualification",
+  "completionHead": "e696d3c4bb811146d61103b28ab5cf207a8ea12b"
+}

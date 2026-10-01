@@ -152,7 +152,10 @@ async function main() {
     assert.equal(recAgree.comparison, "agree");
     assert.equal(recAgree.recommendedCapabilityId, "llama3.2-local");
     assert(recAgree.fallbackRecommendation !== null, "Fallback recommendation should not be null when multiple qualified models exist");
-    assert.equal(recAgree.fallbackRecommendation, "lfm25-1p2b-thinking-local", "Should recommend lfm25-1p2b-thinking-local as fallback");
+    assert(
+      recAgree.fallbackRecommendation === "lfm25-1p2b-thinking-local" || recAgree.fallbackRecommendation === "lfm25-1p2b-instruct-local",
+      "Should recommend a qualified secondary fallback"
+    );
 
     // When primary is an untested or different model
     const recDisagree = shadowRouter.computeShadowRecommendation({
@@ -163,10 +166,13 @@ async function main() {
     });
 
     assert.equal(recDisagree.comparison, "disagree");
-    assert(recDisagree.recommendedCapabilityId === "llama3.2-local" || recDisagree.recommendedCapabilityId === "lfm25-1p2b-thinking-local");
+    assert(
+      ["llama3.2-local", "lfm25-1p2b-thinking-local", "lfm25-1p2b-instruct-local"].includes(recDisagree.recommendedCapabilityId),
+      "Recommended capability should be one of the qualified models"
+    );
     assert(recDisagree.fallbackRecommendation !== null, "Fallback recommendation should be present");
     assert(
-      recDisagree.fallbackRecommendation === "lfm25-1p2b-thinking-local" || recDisagree.fallbackRecommendation === "llama3.2-local",
+      ["lfm25-1p2b-thinking-local", "llama3.2-local", "lfm25-1p2b-instruct-local"].includes(recDisagree.fallbackRecommendation),
       "Fallback should be one of the qualified models"
     );
   });
@@ -197,6 +203,7 @@ async function main() {
 
     const routingOptionsWithFallback = {
       model: "llama3.2-local",
+      fallbackModel: "lfm25-1p2b-thinking-local",
       resolveModelForRole: (role) => ({ ok: true, model: "llama3.2-local" }),
       shadowRouter: (params) => shadowRouter.computeShadowRecommendation(params),
       getModelQualificationEvidence

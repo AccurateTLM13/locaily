@@ -1,0 +1,92 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20261001-003",
+  "milestoneId": "core-04-complete-generic-matrix-qualification",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": "Complete 100% dual-fallback coverage for generic extraction (core.extract on lfm25-1p2b-thinking-local), establish fast-worker qualification (lfm25-1p2b-instruct-local across classify/summarize/extract), and edge-worker qualification (lfm25-350m-local on classify).",
+  "branch": "milestone/core-04-complete-generic-matrix-qualification",
+  "startingCommit": "61b93fb5cba8c6d82c20c19e265a3ce842b9cea5",
+  "plannedFiles": [
+    "benchmark-lab/models/manifests/lfm25-1p2b-thinking-local.json",
+    "benchmark-lab/models/manifests/lfm25-1p2b-instruct-local.json",
+    "benchmark-lab/models/manifests/lfm25-350m-local.json",
+    "scripts/qualify-matrix-core-models.js",
+    "scripts/test-core03-multi-model-qualification.js",
+    "scripts/test-core04-generic-matrix-qualification.js",
+    "package.json"
+  ],
+  "completedWork": [
+    "Evaluated and approved evidence for lfm25-1p2b-thinking-local on core-extract-v1 completing 100% generic fallback matrix",
+    "Evaluated and approved evidence for lfm25-1p2b-instruct-local on core-classify-v1, core-summarize-v1, and core-extract-v1",
+    "Evaluated and approved evidence for lfm25-350m-local on core-classify-v1 (edge worker tier)",
+    "Generated qualification records with canonical SHA-256 checksums for all 5 new matrix qualifications",
+    "Updated model manifests for lfm25-1p2b-thinking-local, lfm25-1p2b-instruct-local, and lfm25-350m-local",
+    "Added test-core04-generic-matrix-qualification.js and wired into package.json test:full",
+    "All tests passing 100% green across test:full",
+    "CORE-04: Qualified generic matrix models",
+    "Session closed"
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-10-01T04:36:59.764Z",
+      "message": "CORE-04: Qualified generic matrix models",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-10-01T04:32:20.468Z",
+  "closedAt": "2026-10-01T04:37:02.780Z",
+  "closingCommit": "61b93fb5cba8c6d82c20c19e265a3ce842b9cea5",
+  "dirtyFiles": [
+    "benchmark-lab/models/manifests/lfm25-1p2b-instruct-local.json",
+    "benchmark-lab/models/manifests/lfm25-1p2b-thinking-local.json",
+    "benchmark-lab/models/manifests/lfm25-350m-local.json",
+    "development/project-state.json",
+    "development/roadmap.json",
+    "docs/07-progress/work-closeout.json",
+    "package.json",
+    "scripts/test-core03-multi-model-qualification.js",
+    "benchmark-lab/evidence/approved/lfm25-1p2b-core-extract-v1.json",
+    "benchmark-lab/evidence/approved/lfm25-1p2b-instruct-core-classify-v1.json",
+    "benchmark-lab/evidence/approved/lfm25-1p2b-instruct-core-extract-v1.json",
+    "benchmark-lab/evidence/approved/lfm25-1p2b-instruct-core-summarize-v1.json",
+    "benchmark-lab/evidence/approved/lfm25-350m-core-classify-v1.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-core-extract-v1-approved-summary.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-core-extract-v1-promoted-evidence.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-instruct-core-classify-v1-approved-summary.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-instruct-core-classify-v1-promoted-evidence.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-instruct-core-extract-v1-approved-summary.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-instruct-core-extract-v1-promoted-evidence.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-instruct-core-summarize-v1-approved-summary.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-instruct-core-summarize-v1-promoted-evidence.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-instruct-local-lfm25-1p2b-instruct-core-classify-v1-qualification.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-instruct-local-lfm25-1p2b-instruct-core-extract-v1-qualification.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-instruct-local-lfm25-1p2b-instruct-core-summarize-v1-qualification.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-local-lfm25-1p2b-core-extract-v1-qualification.json",
+    "benchmark-lab/evidence/checksums/lfm25-350m-core-classify-v1-approved-summary.json",
+    "benchmark-lab/evidence/checksums/lfm25-350m-core-classify-v1-promoted-evidence.json",
+    "benchmark-lab/evidence/checksums/lfm25-350m-local-lfm25-350m-core-classify-v1-qualification.json",
+    "benchmark-lab/evidence/summaries/lfm25-1p2b-core-extract-v1.json",
+    "benchmark-lab/evidence/summaries/lfm25-1p2b-instruct-core-classify-v1.json",
+    "benchmark-lab/evidence/summaries/lfm25-1p2b-instruct-core-extract-v1.json",
+    "benchmark-lab/evidence/summaries/lfm25-1p2b-instruct-core-summarize-v1.json",
+    "benchmark-lab/evidence/summaries/lfm25-350m-core-classify-v1.json",
+    "benchmark-lab/qualifications/models/lfm25-1p2b-instruct-local-lfm25-1p2b-instruct-core-classify-v1.json",
+    "benchmark-lab/qualifications/models/lfm25-1p2b-instruct-local-lfm25-1p2b-instruct-core-extract-v1.json",
+    "benchmark-lab/qualifications/models/lfm25-1p2b-instruct-local-lfm25-1p2b-instruct-core-summarize-v1.json",
+    "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-core-extract-v1.json",
+    "benchmark-lab/qualifications/models/lfm25-350m-local-lfm25-350m-core-classify-v1.json",
+    "development/milestones/core-04-complete-generic-matrix-qualification.json",
+    "development/sessions/session-20261001-003.json",
+    "scripts/qualify-matrix-core-models.js",
+    "scripts/test-core04-generic-matrix-qualification.js"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "lfm25-350m-core-classify-v1-promoted-evidence",
+  "artifactType": "promoted_evidence",
+  "artifactPath": "benchmark-lab/evidence/summaries/lfm25-350m-core-classify-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:5d3c7ce0c09940b808cd8f94ffd2a2916bac4b971aa8b704dc6d603a7a71debb",
+  "generatedAt": "2026-10-01T04:32:57.007Z"
+}

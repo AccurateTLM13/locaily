@@ -10,7 +10,8 @@
     "structured-output",
     "intent-classification",
     "generic-classification",
-    "generic-summarization"
+    "generic-summarization",
+    "generic-extraction"
   ],
   "qualifications": {
     "website_audit.lighthouse_handoff": {
@@ -23,10 +24,14 @@
     "core.summarize": {
       "default_worker": "qualified",
       "fast_worker": "qualified"
+    },
+    "core.extract": {
+      "default_worker": "qualified",
+      "fast_worker": "qualified"
     }
   },
   "notes": [
     "Local Ollama manifest generated from installed Hugging Face GGUF model.",
-    "Qualified on core.classify and core.summarize generic capabilities as secondary fallback and fast worker."
+    "Qualified on core.classify, core.summarize, and core.extract generic capabilities as secondary fallback and fast worker."
   ]
 }

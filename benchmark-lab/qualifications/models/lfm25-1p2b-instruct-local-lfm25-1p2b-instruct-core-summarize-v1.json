@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "lfm25-1p2b-instruct-local-lfm25-1p2b-instruct-core-summarize-v1",
+  "subject": {
+    "type": "model",
+    "id": "lfm25-1p2b-instruct-local",
+    "provider": "ollama",
+    "runtimeModelName": "hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF:latest",
+    "digest": "unknown"
+  },
+  "status": "qualified",
+  "qualifiedFor": [
+    {
+      "role": "fast_worker",
+      "trackId": "core.summarize",
+      "contractId": "core-summarize-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": []
+    },
+    {
+      "role": "default_worker",
+      "trackId": "core.summarize",
+      "contractId": "core-summarize-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": []
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "lfm25-1p2b-instruct-core-summarize-v1"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/evidence/summaries/lfm25-1p2b-instruct-core-summarize-v1.json"
+    ]
+  },
+  "modelProfileId": "lfm25-1p2b-instruct-local",
+  "notes": [
+    "Generated from explicitly promoted Benchmark Lab evidence.",
+    "Qualified for core.summarize fast_worker role. 3/3 scenario strata PASS (100%).",
+    "Semantic scorer core-summarize-semantic-v1 verified."
+  ],
+  "generatedAt": "2026-10-01T04:32:56.809Z"
+}
