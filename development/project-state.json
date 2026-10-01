@@ -3,17 +3,20 @@
   "project": "locaily",
   "currentMilestone": null,
   "activeSession": null,
-  "status": "ready-for-delivery",
+  "status": "idle",
   "defaultBranch": "main",
   "activeBranch": "milestone/core-02-generic-model-qualification",
   "lastCompletedMilestone": "core-02-generic-model-qualification",
-  "nextRecommendedAction": "Deliver milestone 'core-02-generic-model-qualification' (deliver-milestone.js --slug core-02-generic-model-qualification --all)",
+  "nextRecommendedAction": "Milestone 'core-02-generic-model-qualification' merged. Run dev:dashboard to refresh.",
   "blockers": [],
   "warnings": [],
-  "updatedAt": "2026-10-01T02:08:59.988Z",
+  "updatedAt": "2026-10-01T02:09:44.049Z",
   "updatedBy": {
     "type": "agent",
     "name": "dev-lifecycle",
     "platform": "system"
-  }
+  },
+  "mergedMilestone": "core-02-generic-model-qualification",
+  "mergedAt": "2026-10-01T02:09:44.049Z",
+  "mergedCommit": "8e780d96d009f8769bb826647d1cc2a36664972c"
 }

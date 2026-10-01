@@ -1,6 +1,6 @@
 {
   "schema": "locaily.development.dashboard.v1",
-  "generatedAt": "2026-07-25T03:54:22.226Z",
+  "generatedAt": "2026-10-01T02:09:44.310Z",
   "projectState": {
     "schema": "locaily.development.project_state.v1",
     "project": "locaily",
@@ -8,21 +8,24 @@
     "activeSession": null,
     "status": "idle",
     "defaultBranch": "main",
-    "activeBranch": null,
-    "lastCompletedMilestone": null,
-    "nextRecommendedAction": "Start ready milestone px1-canonical-product-status (or px2-lan-security-hard-gate in parallel). Run: node scripts/dev-begin.js --slug px1-canonical-product-status",
+    "activeBranch": "milestone/core-02-generic-model-qualification",
+    "lastCompletedMilestone": "core-02-generic-model-qualification",
+    "nextRecommendedAction": "Milestone 'core-02-generic-model-qualification' merged. Run dev:dashboard to refresh.",
     "blockers": [],
     "warnings": [],
-    "updatedAt": "2026-07-25T03:53:40.372Z",
+    "updatedAt": "2026-10-01T02:09:44.049Z",
     "updatedBy": {
       "type": "agent",
-      "name": "opencode",
-      "platform": "opencode"
-    }
+      "name": "dev-lifecycle",
+      "platform": "system"
+    },
+    "mergedMilestone": "core-02-generic-model-qualification",
+    "mergedAt": "2026-10-01T02:09:44.049Z",
+    "mergedCommit": "8e780d96d009f8769bb826647d1cc2a36664972c"
   },
   "git": {
-    "branch": "feat/development-memory-second-project-proof",
-    "head": "9e44b36",
+    "branch": "main",
+    "head": "8e780d9",
     "dirty": true
   },
   "subsystemMaturity": [
@@ -82,6 +85,11 @@
       "title": "Relay Nodes",
       "maturity": "tested",
       "initiatives": [
+        {
+          "id": "capability-trigger-kernel",
+          "title": "Capability Trigger Kernel",
+          "maturity": "tested"
+        },
         {
           "id": "relay-protocol",
           "title": "Relay Protocol",
@@ -209,37 +217,47 @@
         {
           "id": "truth-surfaces",
           "title": "Canonical Truth Surfaces",
-          "maturity": "designed"
+          "maturity": "operational"
         },
         {
           "id": "lan-security",
           "title": "LAN Security Hard Gate",
-          "maturity": "designed"
+          "maturity": "operational"
         },
         {
           "id": "golden-path",
           "title": "Golden Path Run Inspector",
-          "maturity": "designed"
+          "maturity": "operational"
         },
         {
           "id": "unified-shell",
           "title": "Unified Application Shell",
-          "maturity": "designed"
+          "maturity": "operational"
         },
         {
           "id": "tester-package",
           "title": "Tester Package",
-          "maturity": "designed"
+          "maturity": "operational"
         },
         {
           "id": "external-validation",
           "title": "External Validation Program",
-          "maturity": "designed"
+          "maturity": "active"
         },
         {
           "id": "organic-discovery",
           "title": "Organic Discovery Loop",
-          "maturity": "designed"
+          "maturity": "completed"
+        },
+        {
+          "id": "audit-second-pass",
+          "title": "PX Audit Second Pass",
+          "maturity": "implemented"
+        },
+        {
+          "id": "remaining-milestones-second-pass",
+          "title": "PX Remaining Milestones Second Pass",
+          "maturity": "active"
         }
       ]
     }
@@ -248,40 +266,103 @@
     "idea": [],
     "planned": [
       {
-        "id": "px3-golden-path-run-inspector",
-        "title": "Golden Path Run Inspector",
+        "id": "px6-external-validation-program",
+        "title": "External Validation Readiness",
+        "type": "validation",
+        "priority": "high"
+      }
+    ],
+    "ready": [],
+    "active": [],
+    "paused": [],
+    "blocked": [],
+    "validating": [],
+    "ready-for-delivery": [],
+    "delivered": [],
+    "merged": [
+      {
+        "id": "core-02-generic-model-qualification",
+        "title": "CORE-02 Generic Model Qualification: Benchmark Lab Suites and Qualified Routing for Core Capabilities",
         "type": "feature",
-        "priority": "critical"
+        "priority": "high"
+      }
+    ],
+    "completed": [
+      {
+        "id": "benchmark-lab-m2-reproducible-semantic-qualification",
+        "title": "Benchmark Lab M2 — Reproducible Semantic Qualification",
+        "type": "feature",
+        "priority": "medium"
       },
       {
-        "id": "px4-unified-locaily-shell",
-        "title": "Unified Locaily Application Shell",
+        "id": "benchmark-lab-m3-interactive-local-model-lab",
+        "title": "Benchmark Lab M3 — Interactive Local Model Lab",
         "type": "feature",
         "priority": "high"
       },
       {
-        "id": "px5-tester-package",
-        "title": "Windows-First Tester Package",
+        "id": "core-01-system-formation",
+        "title": "CORE-01 System Formation: reusable capability contracts + multi-track workflow composition",
+        "type": "feature",
+        "priority": "medium"
+      },
+      {
+        "id": "ctk-01-capability-trigger-kernel",
+        "title": "CTK-01 Capability Trigger Kernel",
         "type": "infrastructure",
         "priority": "high"
       },
       {
-        "id": "px6-external-validation-program",
-        "title": "External Validation Program",
-        "type": "validation",
+        "id": "ctk-02-node-roles-capability-capsules",
+        "title": "CTK-02 Node Roles and Capability Capsule Foundation",
+        "type": "infrastructure",
         "priority": "high"
       },
       {
-        "id": "px7-organic-discovery-loop",
-        "title": "Organic Discovery and Evidence Content Loop",
-        "type": "documentation",
+        "id": "ctk-03-node-event-bus-transport",
+        "title": "CTK-03 Local Node Event Bus and Transport Adapter",
+        "type": "infrastructure",
+        "priority": "high"
+      },
+      {
+        "id": "dev-harness-01-agent-operations-contract",
+        "title": "DEV-HARNESS-01 Harness-Neutral Agent Operations Contract",
+        "type": "infrastructure",
         "priority": "medium"
-      }
-    ],
-    "ready": [
+      },
+      {
+        "id": "dev-loop-01-canonical-queue-safe-runner",
+        "title": "DEV-LOOP-01 Canonical Queue and Safe Runner Integration",
+        "type": "infrastructure",
+        "priority": "high"
+      },
+      {
+        "id": "dm10-multi-project-template",
+        "title": "DM10 Multi-Project Template and Vault Importer",
+        "type": "infrastructure",
+        "priority": "high"
+      },
+      {
+        "id": "durable-job-state-integrity-20260905",
+        "title": "Durable job state integrity",
+        "type": "bugfix",
+        "priority": "medium"
+      },
+      {
+        "id": "lh-product-bridge",
+        "title": "Lighthouse Handoff Product Bridge",
+        "type": "infrastructure",
+        "priority": "high"
+      },
+      {
+        "id": "m09a-relay-trust-pairing",
+        "title": "M09A Relay Trust and Node Pairing Ceremony",
+        "type": "infrastructure",
+        "priority": "high"
+      },
       {
         "id": "px1-canonical-product-status",
-        "title": "Canonical Product Status and Truth Surfaces",
+        "title": "Canonical",
         "type": "governance",
         "priority": "critical"
       },
@@ -290,230 +371,852 @@
         "title": "LAN Security Hard Gate for Relay Exposure",
         "type": "infrastructure",
         "priority": "critical"
+      },
+      {
+        "id": "px3-golden-path-run-inspector",
+        "title": "Golden Path Run Inspector",
+        "type": "feature",
+        "priority": "critical"
+      },
+      {
+        "id": "px4-unified-locaily-shell",
+        "title": "Unified Locaily Application Shell",
+        "type": "feature",
+        "priority": "high"
+      },
+      {
+        "id": "px5-tester-package",
+        "title": "Windows-First Tester Package",
+        "type": "infrastructure",
+        "priority": "high"
+      },
+      {
+        "id": "px7-organic-discovery-loop",
+        "title": "Organic Discovery and Evidence Content Loop",
+        "type": "documentation",
+        "priority": "medium"
+      },
+      {
+        "id": "px8-audit-second-pass",
+        "title": "PX Audit Second Pass — Documentation Corrections, Run Inspector Enrichment, and Shell Structured UI",
+        "type": "remediation",
+        "priority": "critical"
+      },
+      {
+        "id": "px9-remaining-milestones-second-pass",
+        "title": "PX Remaining Milestones Second Pass — Evidence Execution and Canonical Fixes",
+        "type": "remediation",
+        "priority": "critical"
       }
     ],
-    "active": [],
-    "paused": [],
-    "blocked": [],
-    "validating": [],
-    "ready-for-delivery": [],
-    "delivered": [],
-    "merged": [],
-    "completed": [],
     "cancelled": []
   },
-  "validationScoreboard": [],
-  "recentActivity": [],
+  "validationScoreboard": [
+    {
+      "id": "validation-20260726T193805-abd72fb5",
+      "milestoneId": "px1-canonical-product-status",
+      "status": "failed",
+      "profileId": "pre-delivery",
+      "branch": "main",
+      "completedAt": "2026-07-26T19:38:08.056Z",
+      "requiredPassed": 5,
+      "requiredFailed": 2
+    },
+    {
+      "id": "validation-20260726T193814-1c6a4d38",
+      "milestoneId": "px1-canonical-product-status",
+      "status": "failed",
+      "profileId": "pre-delivery",
+      "branch": "main",
+      "completedAt": "2026-07-26T19:38:16.485Z",
+      "requiredPassed": 5,
+      "requiredFailed": 2
+    },
+    {
+      "id": "validation-20260726T193822-682b4aac",
+      "milestoneId": "px1-canonical-product-status",
+      "status": "failed",
+      "profileId": "pre-delivery",
+      "branch": "main",
+      "completedAt": "2026-07-26T19:38:25.355Z",
+      "requiredPassed": 5,
+      "requiredFailed": 2
+    },
+    {
+      "id": "validation-20260726T193904-f068ea75",
+      "milestoneId": "px1-canonical-product-status",
+      "status": "failed",
+      "profileId": "pre-delivery",
+      "branch": "main",
+      "completedAt": "2026-07-26T19:39:06.895Z",
+      "requiredPassed": 5,
+      "requiredFailed": 2
+    },
+    {
+      "id": "validation-20260726T193946-d77283c5",
+      "milestoneId": "px1-canonical-product-status",
+      "status": "failed",
+      "profileId": "pre-delivery",
+      "branch": "main",
+      "completedAt": "2026-07-26T19:39:48.977Z",
+      "requiredPassed": 5,
+      "requiredFailed": 2
+    },
+    {
+      "id": "validation-20260726T194012-6848fec5",
+      "milestoneId": "px1-canonical-product-status",
+      "status": "failed",
+      "profileId": "pre-delivery",
+      "branch": "main",
+      "completedAt": "2026-07-26T19:40:14.971Z",
+      "requiredPassed": 5,
+      "requiredFailed": 2
+    },
+    {
+      "id": "validation-20260731T012126-adab70b6",
+      "milestoneId": "ctk-01-capability-trigger-kernel",
+      "status": "failed",
+      "profileId": "pre-delivery",
+      "branch": "codex/ctk-01-completion",
+      "completedAt": "2026-07-31T01:21:28.801Z",
+      "requiredPassed": 5,
+      "requiredFailed": 2
+    },
+    {
+      "id": "validation-20260731T012351-67f4276c",
+      "milestoneId": "ctk-01-capability-trigger-kernel",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/ctk-01-completion",
+      "completedAt": "2026-07-31T01:23:53.755Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260731T012502-3e424fff",
+      "milestoneId": "ctk-01-capability-trigger-kernel",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/ctk-01-completion",
+      "completedAt": "2026-07-31T01:25:49.507Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260801T161108-4465cafc",
+      "milestoneId": "px6-external-validation-program",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/ctk-01-completion",
+      "completedAt": "2026-08-01T16:11:53.450Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260801T161223-cc81739b",
+      "milestoneId": "ctk-01-capability-trigger-kernel",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/ctk-01-completion",
+      "completedAt": "2026-08-01T16:12:23.263Z",
+      "requiredPassed": 3,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260801T161231-77bc9e23",
+      "milestoneId": "ctk-01-capability-trigger-kernel",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/ctk-01-completion",
+      "completedAt": "2026-08-01T16:12:31.510Z",
+      "requiredPassed": 3,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260803T023227-6fab1834",
+      "milestoneId": "benchmark-lab-m2-reproducible-semantic-qualification",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/benchmark-lab-m2-reproducible-semantic-qualification",
+      "completedAt": "2026-08-03T02:33:17.976Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260803T023410-3563bd82",
+      "milestoneId": "benchmark-lab-m2-reproducible-semantic-qualification",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/benchmark-lab-m2-reproducible-semantic-qualification",
+      "completedAt": "2026-08-03T02:35:03.348Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260803T023624-a84bb3ad",
+      "milestoneId": "benchmark-lab-m2-reproducible-semantic-qualification",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/benchmark-lab-m2-reproducible-semantic-qualification",
+      "completedAt": "2026-08-03T02:37:15.331Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260803T023959-bd677b49",
+      "milestoneId": "benchmark-lab-m2-reproducible-semantic-qualification",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/benchmark-lab-m2-reproducible-semantic-qualification",
+      "completedAt": "2026-08-03T02:40:50.054Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260803T033939-6f1c2b76",
+      "milestoneId": "benchmark-lab-m3-interactive-local-model-lab",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/benchmark-lab-m3-interactive-local-model-lab",
+      "completedAt": "2026-08-03T03:40:32.643Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260804T030328-9dfffbe6",
+      "milestoneId": "benchmark-lab-m3-interactive-local-model-lab",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/benchmark-lab-m3-interactive-local-model-lab",
+      "completedAt": "2026-08-04T03:04:22.329Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260804T030446-0b281076",
+      "milestoneId": "benchmark-lab-m3-interactive-local-model-lab",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "codex/benchmark-lab-m3-interactive-local-model-lab",
+      "completedAt": "2026-08-04T03:05:38.209Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260823T211614-13b4ddad",
+      "milestoneId": "dev-harness-01-agent-operations-contract",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "fix/dev-harness-01-delivery-review-20260823",
+      "completedAt": "2026-08-23T21:17:14.266Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260907T184143-2cd3ef56",
+      "milestoneId": "core-01-system-formation",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "core/core-01-system-formation",
+      "completedAt": "2026-09-07T18:41:44.748Z",
+      "requiredPassed": 3,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260907T191223-c83e1580",
+      "milestoneId": "core-01-system-formation",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "core/core-01-system-formation",
+      "completedAt": "2026-09-07T19:12:24.824Z",
+      "requiredPassed": 3,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260907T193008-4b632292",
+      "milestoneId": "core-01-system-formation",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "core/core-01-system-formation",
+      "completedAt": "2026-09-07T19:30:09.014Z",
+      "requiredPassed": 3,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260930T232052-d2d7f38e",
+      "milestoneId": "core-01-system-formation",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "core/core-01-system-formation",
+      "completedAt": "2026-09-30T23:20:53.397Z",
+      "requiredPassed": 3,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20260930T232551-3b868577",
+      "milestoneId": "durable-job-state-integrity-20260905",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "feat/durable-job-state-integrity",
+      "completedAt": "2026-09-30T23:25:52.285Z",
+      "requiredPassed": 3,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20261001T020555-b3197f9a",
+      "milestoneId": "core-02-generic-model-qualification",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "milestone/core-02-generic-model-qualification",
+      "completedAt": "2026-10-01T02:06:57.189Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20261001T020757-c32b8132",
+      "milestoneId": "core-02-generic-model-qualification",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "milestone/core-02-generic-model-qualification",
+      "completedAt": "2026-10-01T02:08:55.372Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    }
+  ],
+  "recentActivity": [
+    {
+      "type": "validation",
+      "id": "validation-20261001T020757-c32b8132",
+      "milestoneId": "core-02-generic-model-qualification",
+      "status": "passed",
+      "timestamp": "2026-10-01T02:08:55.372Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20261001T020555-b3197f9a",
+      "milestoneId": "core-02-generic-model-qualification",
+      "status": "passed",
+      "timestamp": "2026-10-01T02:06:57.189Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20261001-001",
+      "milestoneId": "core-02-generic-model-qualification",
+      "timestamp": "2026-10-01T02:04:21.468Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20261001-001",
+      "milestoneId": "core-02-generic-model-qualification",
+      "status": "closed",
+      "timestamp": "2026-10-01T01:47:08.804Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20260930T232551-3b868577",
+      "milestoneId": "durable-job-state-integrity-20260905",
+      "status": "passed",
+      "timestamp": "2026-09-30T23:25:52.285Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20260905-002",
+      "milestoneId": "durable-job-state-integrity-20260905",
+      "timestamp": "2026-09-30T23:25:47.664Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20260930T232052-d2d7f38e",
+      "milestoneId": "core-01-system-formation",
+      "status": "passed",
+      "timestamp": "2026-09-30T23:20:53.397Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20260907T193008-4b632292",
+      "milestoneId": "core-01-system-formation",
+      "status": "passed",
+      "timestamp": "2026-09-07T19:30:09.014Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20260907-003",
+      "milestoneId": "core-01-system-formation",
+      "timestamp": "2026-09-07T19:30:07.325Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20260907-003",
+      "milestoneId": "core-01-system-formation",
+      "status": "closed",
+      "timestamp": "2026-09-07T19:16:19.636Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20260907T191223-c83e1580",
+      "milestoneId": "core-01-system-formation",
+      "status": "passed",
+      "timestamp": "2026-09-07T19:12:24.824Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20260907-002",
+      "milestoneId": "core-01-system-formation",
+      "timestamp": "2026-09-07T19:11:56.651Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20260907-002",
+      "milestoneId": "core-01-system-formation",
+      "status": "closed",
+      "timestamp": "2026-09-07T19:09:12.073Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20260907T184143-2cd3ef56",
+      "milestoneId": "core-01-system-formation",
+      "status": "passed",
+      "timestamp": "2026-09-07T18:41:44.748Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20260907-001",
+      "milestoneId": "core-01-system-formation",
+      "timestamp": "2026-09-07T18:41:34.456Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20260907-001",
+      "milestoneId": "core-01-system-formation",
+      "status": "closed",
+      "timestamp": "2026-09-07T18:12:54.884Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20260905-002",
+      "milestoneId": "durable-job-state-integrity-20260905",
+      "status": "closed",
+      "timestamp": "2026-09-05T00:34:06.294Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20260905-001",
+      "milestoneId": "durable-job-state-integrity-20260905",
+      "timestamp": "2026-09-05T00:32:29.935Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20260905-001",
+      "milestoneId": "durable-job-state-integrity-20260905",
+      "status": "closed",
+      "timestamp": "2026-09-05T00:28:32.675Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20260823-002",
+      "milestoneId": "dev-harness-01-agent-operations-contract",
+      "timestamp": "2026-08-23T21:17:14.266Z"
+    }
+  ],
   "nextMilestone": {
     "reason": "next_planned",
     "milestone": {
       "schema": "locaily.development.milestone.v1",
-      "id": "px1-canonical-product-status",
-      "title": "Canonical Product Status and Truth Surfaces",
-      "status": "ready",
-      "type": "governance",
-      "priority": "critical",
-      "purpose": "Restore one coherent version of reality across version numbers, docs, blockers, dashboards, and UI claims so Locaily can be trusted as an evidence-first project.",
-      "problem": "Truth surfaces contradict each other: package.json vs RELEASE.md versions, blockers vs current-state, Relay claimed unimplemented while code/UI exist, operator vs console docs, LOCAL_AI_BIND vs LOCAL_AI_HOST, generated dashboard vs open issues.",
+      "id": "px6-external-validation-program",
+      "title": "External Validation Readiness",
+      "status": "planned",
+      "type": "validation",
+      "priority": "high",
+      "purpose": "Prove Locaily externally with three programs: five unassisted developer testers on Lighthouse Handoff, authenticated two-device Relay pilot, and one second real workflow used for actual work.",
+      "problem": "Internal architecture confidence exceeds external proof. Need real usage to expose setup friction, output quality, and repeat-use value.",
       "scope": {
         "included": [
-          "Single authoritative release version across package.json, RELEASE.md, README, and generated status",
-          "Reconcile README, RELEASE, current-state, roadmap, blockers, tester-feedback, and ux-principles",
-          "Generate status sections from canonical development JSON where practical",
-          "CI or offline checks for stale milestone references and contradictory feature-state claims",
-          "Fix /operator vs /console documentation mismatch",
-          "Fix LOCAL_AI_BIND vs LOCAL_AI_HOST documentation and examples",
-          "Verify console logo asset path and repair if broken",
-          "Remove obsolete claims that Relay Nodes are unimplemented",
-          "Decision record for whether /console and /operator stay separate routes or become one shell (implement decision only if trivial; otherwise document deferred to px4)"
+          "Tester protocol and feedback template for 5 developers completing Lighthouse Handoff without maintainer help",
+          "Physical two-device Relay pilot runbook execution with authenticated LAN (using px2 gates)",
+          "Select and implement or harden one second real workflow for repeated work (e.g. a11y/SEO/repo analysis/test triage) — minimal viable, not a platform",
+          "Publish successes and failures as evidence artifacts under docs/04-validation or data/validation",
+          "Capture metrics: time to first output, completion rate, blockers, repeat-use intent"
         ],
         "excluded": [
-          "Building the unified application shell (px4)",
-          "LAN security hard-gate implementation (px2)",
-          "New product features or Golden Path Run Inspector UI",
-          "Rewriting Benchmark Lab or Relay protocol",
-          "Publishing marketing/SEO content pages"
+          "Paid user research firm",
+          "Public launch marketing campaign",
+          "More than one additional workflow beyond the chosen second wedge",
+          "Changing core architecture based on single anecdote without evidence record"
         ]
       },
       "acceptanceCriteria": [
         {
-          "id": "ac-version",
-          "description": "One release version is authoritative and consistent across package.json, RELEASE.md, and README",
-          "status": "pending"
+          "id": "ac-five-testers",
+          "description": "Protocol + materials exist; at least dry-run internally; results template ready for 5 external testers",
+          "status": "satisfied"
         },
         {
-          "id": "ac-no-contradict-relay",
-          "description": "No active doc claims Relay Nodes are unimplemented when protocol/UI/tests exist",
-          "status": "pending"
+          "id": "ac-relay-pilot",
+          "description": "Authenticated two-device pilot completed or blocked with explicit evidence and residual risks",
+          "status": "satisfied"
         },
         {
-          "id": "ac-console-operator-docs",
-          "description": "Operator guide and related docs correctly distinguish /console vs /operator routes and launchers",
-          "status": "pending"
+          "id": "ac-second-workflow",
+          "description": "Second workflow runnable and used at least once for a non-demo task with evidence",
+          "status": "satisfied"
         },
         {
-          "id": "ac-env-bind",
-          "description": "All docs and examples use LOCAL_AI_HOST (not LOCAL_AI_BIND) matching companion/server.js",
-          "status": "pending"
-        },
-        {
-          "id": "ac-logo",
-          "description": "Console logo asset resolves without 404",
-          "status": "pending"
-        },
-        {
-          "id": "ac-status-check",
-          "description": "An automated check fails when known contradictory feature-state claims or missing milestone records are detected",
-          "status": "pending"
-        },
-        {
-          "id": "ac-decision",
-          "description": "Decision recorded in docs/06-decisions for console/operator shell strategy",
-          "status": "pending"
-        },
-        {
-          "id": "ac-schemas",
-          "description": "node scripts/test-development-schemas.js and npm run dev:status pass without ERROR-level product-status contradictions introduced by this work",
-          "status": "pending"
+          "id": "ac-published",
+          "description": "Successes and failures published as validation evidence, not only chat notes",
+          "status": "satisfied"
         }
       ],
       "validationProfile": "pre-delivery",
-      "dependencies": [],
+      "dependencies": [
+        "px2-lan-security-hard-gate",
+        "px5-tester-package"
+      ],
       "blockers": [],
       "lifecycleRef": null,
       "createdAt": "2026-07-25T03:53:40.372Z",
-      "startedAt": null,
-      "completedAt": null,
+      "startedAt": "2026-07-26T00:00:00.000Z",
+      "completedAt": "2026-08-01T17:51:35.000Z",
       "mergedAt": null
     }
   },
-  "staleness": [],
+  "staleness": [
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260726T193805-abd72fb5' is 66 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260726T193814-1c6a4d38' is 66 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260726T193822-682b4aac' is 66 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260726T193904-f068ea75' is 66 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260726T193946-d77283c5' is 66 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260726T194012-6848fec5' is 66 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260731T012126-adab70b6' is 62 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260731T012351-67f4276c' is 62 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260731T012502-3e424fff' is 62 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260801T161108-4465cafc' is 60 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260801T161223-cc81739b' is 60 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260801T161231-77bc9e23' is 60 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260803T023227-6fab1834' is 58 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260803T023410-3563bd82' is 58 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260803T023624-a84bb3ad' is 58 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260803T023959-bd677b49' is 58 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260803T033939-6f1c2b76' is 58 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260804T030328-9dfffbe6' is 57 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260804T030446-0b281076' is 57 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260823T211614-13b4ddad' is 38 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260907T184143-2cd3ef56' is 23 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260907T191223-c83e1580' is 23 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260907T193008-4b632292' is 23 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_GENERATED",
+      "message": "Generated file 'next-agent-handoff.md' may be stale"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_GENERATED",
+      "message": "Generated file 'roadmap-data.json' may be stale"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_GENERATED",
+      "message": "Generated file 'roadmap.html' may be stale"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_GENERATED",
+      "message": "Generated file 'status-summary.md' may be stale"
+    }
+  ],
   "drift": [
     {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "06-trusted-relay-execution",
-      "message": "Roadmap references milestone '06-trusted-relay-execution' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "09-physical-multi-device-pilot",
-      "message": "Roadmap references milestone '09-physical-multi-device-pilot' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "09a-relay-trust",
-      "message": "Roadmap references milestone '09a-relay-trust' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "dm10-multi-project-template",
-      "message": "Roadmap references milestone 'dm10-multi-project-template' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "08-operator-control-plane",
-      "message": "Roadmap references milestone '08-operator-control-plane' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "10-track-learning-evidence-loop",
-      "message": "Roadmap references milestone '10-track-learning-evidence-loop' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "objective-lifecycle-hardening",
-      "message": "Roadmap references milestone 'objective-lifecycle-hardening' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "development-control-plane-v1",
-      "message": "Roadmap references milestone 'development-control-plane-v1' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "dcp-v1",
-      "message": "Roadmap references milestone 'dcp-v1' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "milestone-completion-delivery-workflow",
-      "message": "Roadmap references milestone 'milestone-completion-delivery-workflow' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "dcp-phase3a",
-      "message": "Roadmap references milestone 'dcp-phase3a' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "dcp-phase3b",
-      "message": "Roadmap references milestone 'dcp-phase3b' but no milestone record exists"
-    },
-    {
-      "type": "roadmap-not-in-records",
-      "severity": "info",
-      "milestoneId": "10-locaily-v1-packaging",
-      "message": "Roadmap references milestone '10-locaily-v1-packaging' but no milestone record exists"
+      "type": "maturity-lag",
+      "severity": "warning",
+      "areaId": "relay-nodes",
+      "initiativeId": "relay-trust",
+      "message": "Initiative 'Relay Trust and Pairing' has completed milestone(s) but maturity is still 'designed'"
     }
   ],
   "milestoneDependencyGraph": {
     "nodes": [
       {
+        "id": "benchmark-lab-m2-reproducible-semantic-qualification",
+        "status": "completed",
+        "title": "Benchmark Lab M2 — Reproducible Semantic Qualification",
+        "type": "feature"
+      },
+      {
+        "id": "benchmark-lab-m3-interactive-local-model-lab",
+        "status": "completed",
+        "title": "Benchmark Lab M3 — Interactive Local Model Lab",
+        "type": "feature"
+      },
+      {
+        "id": "core-01-system-formation",
+        "status": "completed",
+        "title": "CORE-01 System Formation: reusable capability contracts + multi-track workflow composition",
+        "type": "feature"
+      },
+      {
+        "id": "core-02-generic-model-qualification",
+        "status": "merged",
+        "title": "CORE-02 Generic Model Qualification: Benchmark Lab Suites and Qualified Routing for Core Capabilities",
+        "type": "feature"
+      },
+      {
+        "id": "ctk-01-capability-trigger-kernel",
+        "status": "completed",
+        "title": "CTK-01 Capability Trigger Kernel",
+        "type": "infrastructure"
+      },
+      {
+        "id": "ctk-02-node-roles-capability-capsules",
+        "status": "completed",
+        "title": "CTK-02 Node Roles and Capability Capsule Foundation",
+        "type": "infrastructure"
+      },
+      {
+        "id": "ctk-03-node-event-bus-transport",
+        "status": "completed",
+        "title": "CTK-03 Local Node Event Bus and Transport Adapter",
+        "type": "infrastructure"
+      },
+      {
+        "id": "dev-harness-01-agent-operations-contract",
+        "status": "completed",
+        "title": "DEV-HARNESS-01 Harness-Neutral Agent Operations Contract",
+        "type": "infrastructure"
+      },
+      {
+        "id": "dev-loop-01-canonical-queue-safe-runner",
+        "status": "completed",
+        "title": "DEV-LOOP-01 Canonical Queue and Safe Runner Integration",
+        "type": "infrastructure"
+      },
+      {
+        "id": "dm10-multi-project-template",
+        "status": "completed",
+        "title": "DM10 Multi-Project Template and Vault Importer",
+        "type": "infrastructure"
+      },
+      {
+        "id": "durable-job-state-integrity-20260905",
+        "status": "completed",
+        "title": "Durable job state integrity",
+        "type": "bugfix"
+      },
+      {
+        "id": "lh-product-bridge",
+        "status": "completed",
+        "title": "Lighthouse Handoff Product Bridge",
+        "type": "infrastructure"
+      },
+      {
+        "id": "m09a-relay-trust-pairing",
+        "status": "completed",
+        "title": "M09A Relay Trust and Node Pairing Ceremony",
+        "type": "infrastructure"
+      },
+      {
         "id": "px1-canonical-product-status",
-        "status": "ready",
-        "title": "Canonical Product Status and Truth Surfaces",
+        "status": "completed",
+        "title": "Canonical",
         "type": "governance"
       },
       {
         "id": "px2-lan-security-hard-gate",
-        "status": "ready",
+        "status": "completed",
         "title": "LAN Security Hard Gate for Relay Exposure",
         "type": "infrastructure"
       },
       {
         "id": "px3-golden-path-run-inspector",
-        "status": "planned",
+        "status": "completed",
         "title": "Golden Path Run Inspector",
         "type": "feature"
       },
       {
         "id": "px4-unified-locaily-shell",
-        "status": "planned",
+        "status": "completed",
         "title": "Unified Locaily Application Shell",
         "type": "feature"
       },
       {
         "id": "px5-tester-package",
-        "status": "planned",
+        "status": "completed",
         "title": "Windows-First Tester Package",
         "type": "infrastructure"
       },
       {
         "id": "px6-external-validation-program",
         "status": "planned",
-        "title": "External Validation Program",
+        "title": "External Validation Readiness",
         "type": "validation"
       },
       {
         "id": "px7-organic-discovery-loop",
-        "status": "planned",
+        "status": "completed",
         "title": "Organic Discovery and Evidence Content Loop",
         "type": "documentation"
+      },
+      {
+        "id": "px8-audit-second-pass",
+        "status": "completed",
+        "title": "PX Audit Second Pass — Documentation Corrections, Run Inspector Enrichment, and Shell Structured UI",
+        "type": "remediation"
+      },
+      {
+        "id": "px9-remaining-milestones-second-pass",
+        "status": "completed",
+        "title": "PX Remaining Milestones Second Pass — Evidence Execution and Canonical Fixes",
+        "type": "remediation"
       }
     ],
     "edges": [
+      {
+        "from": "benchmark-lab-m2-reproducible-semantic-qualification",
+        "to": "benchmark-lab-m3-interactive-local-model-lab"
+      },
+      {
+        "from": "core-01-system-formation",
+        "to": "core-02-generic-model-qualification"
+      },
+      {
+        "from": "benchmark-lab-m2-reproducible-semantic-qualification",
+        "to": "core-02-generic-model-qualification"
+      },
+      {
+        "from": "ctk-01-capability-trigger-kernel",
+        "to": "ctk-02-node-roles-capability-capsules"
+      },
+      {
+        "from": "ctk-01-capability-trigger-kernel",
+        "to": "ctk-03-node-event-bus-transport"
+      },
+      {
+        "from": "ctk-02-node-roles-capability-capsules",
+        "to": "ctk-03-node-event-bus-transport"
+      },
+      {
+        "from": "dev-loop-01-canonical-queue-safe-runner",
+        "to": "dev-harness-01-agent-operations-contract"
+      },
+      {
+        "from": "ctk-01-capability-trigger-kernel",
+        "to": "dev-loop-01-canonical-queue-safe-runner"
+      },
+      {
+        "from": "ctk-02-node-roles-capability-capsules",
+        "to": "dev-loop-01-canonical-queue-safe-runner"
+      },
+      {
+        "from": "ctk-01-capability-trigger-kernel",
+        "to": "dm10-multi-project-template"
+      },
+      {
+        "from": "ctk-02-node-roles-capability-capsules",
+        "to": "dm10-multi-project-template"
+      },
+      {
+        "from": "ctk-01-capability-trigger-kernel",
+        "to": "lh-product-bridge"
+      },
+      {
+        "from": "ctk-02-node-roles-capability-capsules",
+        "to": "lh-product-bridge"
+      },
+      {
+        "from": "ctk-02-node-roles-capability-capsules",
+        "to": "m09a-relay-trust-pairing"
+      },
       {
         "from": "px1-canonical-product-status",
         "to": "px3-golden-path-run-inspector"
@@ -545,19 +1248,43 @@
       {
         "from": "px3-golden-path-run-inspector",
         "to": "px7-organic-discovery-loop"
+      },
+      {
+        "from": "px1-canonical-product-status",
+        "to": "px8-audit-second-pass"
+      },
+      {
+        "from": "px3-golden-path-run-inspector",
+        "to": "px8-audit-second-pass"
+      },
+      {
+        "from": "px4-unified-locaily-shell",
+        "to": "px8-audit-second-pass"
+      },
+      {
+        "from": "px5-tester-package",
+        "to": "px9-remaining-milestones-second-pass"
+      },
+      {
+        "from": "px6-external-validation-program",
+        "to": "px9-remaining-milestones-second-pass"
+      },
+      {
+        "from": "px7-organic-discovery-loop",
+        "to": "px9-remaining-milestones-second-pass"
       }
     ]
   },
   "humanDecisions": [],
   "stats": {
-    "totalMilestones": 7,
+    "totalMilestones": 22,
     "active": 0,
-    "completed": 0,
-    "totalSessions": 0,
-    "totalValidations": 0,
+    "completed": 21,
+    "totalSessions": 16,
+    "totalValidations": 27,
     "totalDeliveries": 0,
     "totalIssues": 4,
-    "openIssues": 3
+    "openIssues": 0
   },
   "_activeSession": null,
   "_lastPausedSession": null
