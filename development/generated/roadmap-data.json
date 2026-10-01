@@ -1,6 +1,6 @@
 {
   "schema": "locaily.development.dashboard.v1",
-  "generatedAt": "2026-10-01T04:39:01.525Z",
+  "generatedAt": "2026-10-01T23:05:55.731Z",
   "projectState": {
     "schema": "locaily.development.project_state.v1",
     "project": "locaily",
@@ -8,24 +8,24 @@
     "activeSession": null,
     "status": "idle",
     "defaultBranch": "main",
-    "activeBranch": "milestone/core-04-complete-generic-matrix-qualification",
-    "lastCompletedMilestone": "core-04-complete-generic-matrix-qualification",
-    "nextRecommendedAction": "Milestone 'core-04-complete-generic-matrix-qualification' merged. Run dev:dashboard to refresh.",
+    "activeBranch": "milestone/core-05-workflow-console-matrix-explorer",
+    "lastCompletedMilestone": "core-05-workflow-console-matrix-explorer",
+    "nextRecommendedAction": "Milestone 'core-05-workflow-console-matrix-explorer' merged. Run dev:dashboard to refresh.",
     "blockers": [],
     "warnings": [],
-    "updatedAt": "2026-10-01T04:39:01.161Z",
+    "updatedAt": "2026-10-01T23:05:55.424Z",
     "updatedBy": {
       "type": "agent",
       "name": "dev-lifecycle",
       "platform": "system"
     },
-    "mergedMilestone": "core-04-complete-generic-matrix-qualification",
-    "mergedAt": "2026-10-01T04:39:01.161Z",
-    "mergedCommit": "effb0b7d5cf5b7b35eaf1642d40568d9243694d3"
+    "mergedMilestone": "core-05-workflow-console-matrix-explorer",
+    "mergedAt": "2026-10-01T23:05:55.424Z",
+    "mergedCommit": "488019518efaa5e9ef54f6448d2b7b80b8237847"
   },
   "git": {
     "branch": "main",
-    "head": "effb0b7",
+    "head": "4880195",
     "dirty": true
   },
   "subsystemMaturity": [
@@ -295,6 +295,12 @@
       {
         "id": "core-04-complete-generic-matrix-qualification",
         "title": "CORE-04 Complete Generic Capability Matrix: Full Fallback & Multi-Tier Model Qualification",
+        "type": "feature",
+        "priority": "high"
+      },
+      {
+        "id": "core-05-workflow-console-matrix-explorer",
+        "title": "CORE-05 Generic Workflows & Model Qualification Matrix Explorer in Companion Console",
         "type": "feature",
         "priority": "high"
       }
@@ -723,9 +729,39 @@
       "completedAt": "2026-10-01T04:38:20.447Z",
       "requiredPassed": 6,
       "requiredFailed": 0
+    },
+    {
+      "id": "validation-20261001T230429-f7d31a6b",
+      "milestoneId": "core-05-workflow-console-matrix-explorer",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "milestone/core-05-workflow-console-matrix-explorer",
+      "completedAt": "2026-10-01T23:05:30.973Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
     }
   ],
   "recentActivity": [
+    {
+      "type": "validation",
+      "id": "validation-20261001T230429-f7d31a6b",
+      "milestoneId": "core-05-workflow-console-matrix-explorer",
+      "status": "passed",
+      "timestamp": "2026-10-01T23:05:30.973Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20261001-004",
+      "milestoneId": "core-05-workflow-console-matrix-explorer",
+      "timestamp": "2026-10-01T23:04:03.575Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20261001-004",
+      "milestoneId": "core-05-workflow-console-matrix-explorer",
+      "status": "closed",
+      "timestamp": "2026-10-01T22:57:30.581Z"
+    },
     {
       "type": "validation",
       "id": "validation-20261001T043715-9cd0f7ea",
@@ -839,26 +875,6 @@
       "milestoneId": "core-01-system-formation",
       "status": "closed",
       "timestamp": "2026-09-07T19:16:19.636Z"
-    },
-    {
-      "type": "validation",
-      "id": "validation-20260907T191223-c83e1580",
-      "milestoneId": "core-01-system-formation",
-      "status": "passed",
-      "timestamp": "2026-09-07T19:12:24.824Z"
-    },
-    {
-      "type": "session-closed",
-      "id": "session-20260907-002",
-      "milestoneId": "core-01-system-formation",
-      "timestamp": "2026-09-07T19:11:56.651Z"
-    },
-    {
-      "type": "session",
-      "id": "session-20260907-002",
-      "milestoneId": "core-01-system-formation",
-      "status": "closed",
-      "timestamp": "2026-09-07T19:09:12.073Z"
     }
   ],
   "nextMilestone": {
@@ -926,32 +942,32 @@
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193805-abd72fb5' is 66 days old"
+      "message": "Validation 'validation-20260726T193805-abd72fb5' is 67 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193814-1c6a4d38' is 66 days old"
+      "message": "Validation 'validation-20260726T193814-1c6a4d38' is 67 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193822-682b4aac' is 66 days old"
+      "message": "Validation 'validation-20260726T193822-682b4aac' is 67 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193904-f068ea75' is 66 days old"
+      "message": "Validation 'validation-20260726T193904-f068ea75' is 67 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193946-d77283c5' is 66 days old"
+      "message": "Validation 'validation-20260726T193946-d77283c5' is 67 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T194012-6848fec5' is 66 days old"
+      "message": "Validation 'validation-20260726T194012-6848fec5' is 67 days old"
     },
     {
       "severity": "info",
@@ -971,17 +987,17 @@
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260801T161108-4465cafc' is 60 days old"
+      "message": "Validation 'validation-20260801T161108-4465cafc' is 61 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260801T161223-cc81739b' is 60 days old"
+      "message": "Validation 'validation-20260801T161223-cc81739b' is 61 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260801T161231-77bc9e23' is 60 days old"
+      "message": "Validation 'validation-20260801T161231-77bc9e23' is 61 days old"
     },
     {
       "severity": "info",
@@ -1021,22 +1037,22 @@
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260823T211614-13b4ddad' is 38 days old"
+      "message": "Validation 'validation-20260823T211614-13b4ddad' is 39 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260907T184143-2cd3ef56' is 23 days old"
+      "message": "Validation 'validation-20260907T184143-2cd3ef56' is 24 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260907T191223-c83e1580' is 23 days old"
+      "message": "Validation 'validation-20260907T191223-c83e1580' is 24 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260907T193008-4b632292' is 23 days old"
+      "message": "Validation 'validation-20260907T193008-4b632292' is 24 days old"
     }
   ],
   "drift": [
@@ -1084,6 +1100,12 @@
         "id": "core-04-complete-generic-matrix-qualification",
         "status": "merged",
         "title": "CORE-04 Complete Generic Capability Matrix: Full Fallback & Multi-Tier Model Qualification",
+        "type": "feature"
+      },
+      {
+        "id": "core-05-workflow-console-matrix-explorer",
+        "status": "merged",
+        "title": "CORE-05 Generic Workflows & Model Qualification Matrix Explorer in Companion Console",
         "type": "feature"
       },
       {
@@ -1209,6 +1231,10 @@
         "to": "core-02-generic-model-qualification"
       },
       {
+        "from": "core-04-complete-generic-matrix-qualification",
+        "to": "core-05-workflow-console-matrix-explorer"
+      },
+      {
         "from": "ctk-01-capability-trigger-kernel",
         "to": "ctk-02-node-roles-capability-capsules"
       },
@@ -1312,11 +1338,11 @@
   },
   "humanDecisions": [],
   "stats": {
-    "totalMilestones": 24,
+    "totalMilestones": 25,
     "active": 0,
-    "completed": 23,
-    "totalSessions": 18,
-    "totalValidations": 30,
+    "completed": 24,
+    "totalSessions": 19,
+    "totalValidations": 31,
     "totalDeliveries": 0,
     "totalIssues": 4,
     "openIssues": 0

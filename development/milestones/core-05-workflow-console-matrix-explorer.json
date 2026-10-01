@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "core-05-workflow-console-matrix-explorer",
   "title": "CORE-05 Generic Workflows & Model Qualification Matrix Explorer in Companion Console",
-  "status": "ready-for-delivery",
+  "status": "merged",
   "type": "feature",
   "priority": "high",
   "purpose": "Activate the Workflows and Model Qualification Matrix Explorer views in the Companion Console UI (and update Unified Shell), allowing operators to view, configure, and trigger all 4 core generic workflows (repo_review, text_qa, document_review, content_os), inspect multi-tier qualified local models across generic capabilities, and test shadow routing with fallback recommendations live from the browser.",
@@ -74,11 +74,12 @@
   "createdAt": "2026-10-01T18:00:00.000Z",
   "startedAt": "2026-10-01T22:57:30.579Z",
   "completedAt": "2026-10-01T23:05:36.388Z",
-  "mergedAt": null,
+  "mergedAt": "2026-10-01T23:05:55.421Z",
   "preparedCommit": "23287f21dd4020325616cb276fabfe9afe5ffda7",
   "preparedBranch": "milestone/core-05-workflow-console-matrix-explorer",
   "preparedAt": "2026-10-01T23:04:24.010Z",
   "latestValidationId": "validation-20261001T230429-f7d31a6b",
   "completionBranch": "milestone/core-05-workflow-console-matrix-explorer",
-  "completionHead": "d0456197a994c2f7b5f83e2666a37fa6b139d3dc"
+  "completionHead": "d0456197a994c2f7b5f83e2666a37fa6b139d3dc",
+  "mergedCommit": "488019518efaa5e9ef54f6448d2b7b80b8237847"
 }

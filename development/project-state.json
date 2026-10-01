@@ -3,20 +3,20 @@
   "project": "locaily",
   "currentMilestone": null,
   "activeSession": null,
-  "status": "ready-for-delivery",
+  "status": "idle",
   "defaultBranch": "main",
   "activeBranch": "milestone/core-05-workflow-console-matrix-explorer",
   "lastCompletedMilestone": "core-05-workflow-console-matrix-explorer",
-  "nextRecommendedAction": "Deliver milestone 'core-05-workflow-console-matrix-explorer' (deliver-milestone.js --slug core-05-workflow-console-matrix-explorer --all)",
+  "nextRecommendedAction": "Milestone 'core-05-workflow-console-matrix-explorer' merged. Run dev:dashboard to refresh.",
   "blockers": [],
   "warnings": [],
-  "updatedAt": "2026-10-01T23:05:36.390Z",
+  "updatedAt": "2026-10-01T23:05:55.424Z",
   "updatedBy": {
     "type": "agent",
     "name": "dev-lifecycle",
     "platform": "system"
   },
-  "mergedMilestone": "core-04-complete-generic-matrix-qualification",
-  "mergedAt": "2026-10-01T04:39:01.161Z",
-  "mergedCommit": "effb0b7d5cf5b7b35eaf1642d40568d9243694d3"
+  "mergedMilestone": "core-05-workflow-console-matrix-explorer",
+  "mergedAt": "2026-10-01T23:05:55.424Z",
+  "mergedCommit": "488019518efaa5e9ef54f6448d2b7b80b8237847"
 }
