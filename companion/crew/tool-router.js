@@ -57,17 +57,79 @@ async function executeToolStep({ step, context, toolRegistry, runtime, options, 
     }
   }
 
+  let shadowRouting = null;
+  if (role && typeof options?.shadowRouter === "function") {
+    try {
+      shadowRouting = options.shadowRouter({
+        role,
+        trackId: options.track_id || null,
+        contractId: executor.contract || null,
+        currentModelId: resolvedModel,
+        currentQualification: qualification
+      });
+    } catch (shadowError) {
+      console.warn("[Shadow Routing] Failed in tool-router:", shadowError.message);
+    }
+  }
+
+  let fallbackModel = options?.fallbackModel || null;
+  if (!fallbackModel && options?.enableFallback !== false && shadowRouting?.fallbackRecommendation) {
+    fallbackModel = shadowRouting.fallbackRecommendation;
+  }
+  if (!fallbackModel && typeof options?.getFallbackModelForRole === "function") {
+    fallbackModel = options.getFallbackModelForRole(role, resolvedModel);
+  }
+
   const handleOptions = resolvedModel
     ? { ...options, model: resolvedModel }
     : options;
 
-  const output = await tool.handle({
-    task,
-    input: stepInput,
-    runtime,
-    options: handleOptions,
-    meta
-  });
+  let output;
+  let fallbackUsed = false;
+  let fallbackReason = null;
+  let fallbackOriginalError = null;
+
+  try {
+    output = await tool.handle({
+      task,
+      input: stepInput,
+      runtime,
+      options: handleOptions,
+      meta
+    });
+  } catch (toolErr) {
+    if (fallbackModel && fallbackModel !== resolvedModel) {
+      try {
+        const fallbackHandleOptions = {
+          ...options,
+          model: fallbackModel
+        };
+        output = await tool.handle({
+          task,
+          input: stepInput,
+          runtime,
+          options: fallbackHandleOptions,
+          meta
+        });
+        fallbackUsed = true;
+        fallbackReason = `Primary model '${resolvedModel}' failed: ${toolErr.message}`;
+        fallbackOriginalError = { message: toolErr.message, code: toolErr.code || "EXECUTION_ERROR" };
+        resolvedModel = fallbackModel;
+        if (typeof options?.getModelQualificationEvidence === "function") {
+          qualification = options.getModelQualificationEvidence({
+            model: fallbackModel,
+            role,
+            trackId: options.track_id || null,
+            contractId: executor.contract || null
+          });
+        }
+      } catch (fallbackErr) {
+        throw toolErr;
+      }
+    } else {
+      throw toolErr;
+    }
+  }
 
   return {
     output,
@@ -79,6 +141,11 @@ async function executeToolStep({ step, context, toolRegistry, runtime, options, 
       role: role || null,
       model: resolvedModel || null,
       qualification,
+      shadowRouting,
+      fallback: fallbackUsed,
+      fallbackUsed,
+      fallbackReason,
+      fallbackOriginalError,
       durationMs: Date.now() - stepStart
     }
   };

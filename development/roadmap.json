@@ -70,7 +70,8 @@
           "milestoneIds": [
             "benchmark-lab-m2-reproducible-semantic-qualification",
             "benchmark-lab-m3-interactive-local-model-lab",
-            "core-02-generic-model-qualification"
+            "core-02-generic-model-qualification",
+            "core-03-multi-model-fallback-qualification"
           ]
         }
       ]

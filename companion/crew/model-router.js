@@ -142,16 +142,21 @@ async function executeModelStep({ step, context, runtime, options }) {
       temperature: 0.2
     });
   } catch (execErr) {
-    if (enforcementDecision && enforcementDecision.applied && originalModel !== modelResolution.model) {
+    const candidateFallback = (enforcementDecision && enforcementDecision.applied && originalModel !== modelResolution.model)
+      ? originalModel
+      : (options.fallbackModel || (options.enableFallback !== false && shadowRouting?.fallbackRecommendation) || (typeof options.getFallbackModelForRole === "function" ? options.getFallbackModelForRole(modelResolution.role, modelResolution.model) : null));
+
+    if (candidateFallback && candidateFallback !== modelResolution.model) {
       executionError = execErr;
-      fallbackCapabilityId = originalModel;
+      fallbackCapabilityId = candidateFallback;
       try {
         output = await runtime.generateJson(prompt, schema, {
           ...options,
-          model: originalModel,
+          model: candidateFallback,
           temperature: 0.2
         });
         fallbackSucceeded = true;
+        fallbackExecution = true;
         if (enforcementDecision) {
           enforcementDecision.fallbackTriggered = true;
           enforcementDecision.fallbackCapabilityId = fallbackCapabilityId;
@@ -161,8 +166,16 @@ async function executeModelStep({ step, context, runtime, options }) {
             code: execErr.code || "EXECUTION_ERROR"
           };
         }
-        modelResolution.model = originalModel;
-        modelResolution.source = "fallback";
+        modelResolution.model = candidateFallback;
+        modelResolution.source = enforcementDecision?.applied ? "fallback" : "runtime_fallback";
+        if (typeof options.getModelQualificationEvidence === "function") {
+          qualification = options.getModelQualificationEvidence({
+            model: candidateFallback,
+            role: modelResolution.role,
+            trackId: options.track_id || null,
+            contractId: executor.contract || executor.contract_id || null
+          });
+        }
       } catch (fallbackErr) {
         if (enforcementDecision) {
           enforcementDecision.fallbackTriggered = true;
@@ -193,6 +206,10 @@ async function executeModelStep({ step, context, runtime, options }) {
       qualification,
       shadowRouting,
       enforcementDecision,
+      fallback: fallbackExecution,
+      fallbackUsed: fallbackExecution,
+      fallbackReason: fallbackExecution ? `Primary model failed: ${executionError?.message || "Execution error"}` : null,
+      fallbackCapabilityId: fallbackExecution ? fallbackCapabilityId : null,
       durationMs: Date.now() - stepStart
     }
   };

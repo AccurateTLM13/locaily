@@ -8,9 +8,25 @@
   "status": "available",
   "capabilities": [
     "structured-output",
-    "intent-classification"
+    "intent-classification",
+    "generic-classification",
+    "generic-summarization"
   ],
+  "qualifications": {
+    "website_audit.lighthouse_handoff": {
+      "priority_helper": "qualified"
+    },
+    "core.classify": {
+      "default_worker": "qualified",
+      "fast_worker": "qualified"
+    },
+    "core.summarize": {
+      "default_worker": "qualified",
+      "fast_worker": "qualified"
+    }
+  },
   "notes": [
-    "Local Ollama manifest generated from installed Hugging Face GGUF model."
+    "Local Ollama manifest generated from installed Hugging Face GGUF model.",
+    "Qualified on core.classify and core.summarize generic capabilities as secondary fallback and fast worker."
   ]
 }

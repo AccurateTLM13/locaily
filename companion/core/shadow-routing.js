@@ -11,7 +11,13 @@ function createShadowRouter({ resolver }) {
 
     const qualifiedCaps = relevantCaps
       .filter((c) => c.state === "qualified")
-      .sort((a, b) => (b.score || 0) - (a.score || 0));
+      .sort((a, b) => {
+        const diff = (b.score || 0) - (a.score || 0);
+        if (diff !== 0) return diff;
+        if (a.modelId === currentModelId || a.runtimeModelName === currentModelId) return -1;
+        if (b.modelId === currentModelId || b.runtimeModelName === currentModelId) return 1;
+        return 0;
+      });
 
     const currentCap = relevantCaps.find((c) => c.modelId === currentModelId || c.runtimeModelName === currentModelId);
     const currentState = currentCap ? currentCap.state : "untested";
@@ -42,9 +48,10 @@ function createShadowRouter({ resolver }) {
         recommendedScore = best.score;
         reason = `Qualification recommends '${best.modelId}' (score: ${best.score || "N/A"}) over current '${currentModelId}' (state: ${currentState}).`;
 
-        if (qualifiedCaps.length > 1) {
-          fallbackRecommendation = qualifiedCaps[1].modelId;
-        }
+      }
+
+      if (qualifiedCaps.length > 1) {
+        fallbackRecommendation = qualifiedCaps[1].modelId;
       }
 
       if (currentState === "unqualified") {

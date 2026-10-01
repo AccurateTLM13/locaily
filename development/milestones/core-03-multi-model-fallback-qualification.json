@@ -1,0 +1,83 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "core-03-multi-model-fallback-qualification",
+  "title": "CORE-03 Multi-Model Fallback Qualification: Secondary Qualified Models & Fallback Routing for Generic Capabilities",
+  "status": "ready-for-delivery",
+  "type": "feature",
+  "priority": "high",
+  "purpose": "Qualify lfm25-1p2b-thinking-local on core.classify and core.summarize via Benchmark Lab evaluation suites, evidence promotion, and qualification records with canonical checksums to establish secondary qualified fallbacks and activate multi-model shadow routing.",
+  "problem": "Only a single local model (llama3.2-local) is qualified on generic capabilities. If the primary model fails or is unavailable on edge devices, workflows fail closed without an eligible qualified fallback.",
+  "scope": {
+    "included": [
+      "benchmark-lab/",
+      "companion/",
+      "scripts/",
+      "package.json",
+      "development/",
+      "Benchmark Lab evaluation of lfm25-1p2b-thinking-local on core-classify-v1 and core-summarize-v1",
+      "Evidence promotion and qualification records for lfm25-1p2b-thinking-local on core.classify and core.summarize with canonical checksums",
+      "Shadow routing multi-model comparison and fallback recommendation computation",
+      "Automated runtime fallback execution in tool-router and run-plan-executor with fallback Track Run Records",
+      "Acceptance test suite scripts/test-core03-multi-model-qualification.js"
+    ],
+    "excluded": [
+      "Modifying existing completed Lighthouse, DealSniper, or llama3.2 qualification evidence",
+      "Remote cloud model qualification",
+      "Hardware-specific kernel modifications"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "ac-lfm25-classify",
+      "description": "Benchmark Lab suite core-classify-v1 evaluates lfm25-1p2b-thinking-local, passes semantic evaluation across strata, and generates approved evidence.",
+      "status": "satisfied",
+      "evidence": "benchmark-lab/evidence/summaries/lfm25-1p2b-core-classify-v1.json and benchmark-lab/evidence/approved/lfm25-1p2b-core-classify-v1.json generated and verified 3/3 passed."
+    },
+    {
+      "id": "ac-lfm25-summarize",
+      "description": "Benchmark Lab suite core-summarize-v1 evaluates lfm25-1p2b-thinking-local, passes semantic evaluation across strata, and generates approved evidence.",
+      "status": "satisfied",
+      "evidence": "benchmark-lab/evidence/summaries/lfm25-1p2b-core-summarize-v1.json and benchmark-lab/evidence/approved/lfm25-1p2b-core-summarize-v1.json generated and verified 3/3 passed."
+    },
+    {
+      "id": "ac-lfm25-qualification",
+      "description": "Qualification records for lfm25-1p2b-thinking-local with canonical checksums are loaded into Local Brain for core.classify and core.summarize.",
+      "status": "satisfied",
+      "evidence": "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-*.json with verified checksums in benchmark-lab/evidence/checksums/ loaded by model-qualification-loader."
+    },
+    {
+      "id": "ac-shadow-routing-fallback",
+      "description": "Shadow router computes recommendations with valid fallback recommendation when multiple qualified models exist.",
+      "status": "satisfied",
+      "evidence": "companion/core/shadow-routing.js populates fallbackRecommendation for multiple qualified capabilities and breaks ties for currentModelId; verified in test:core03."
+    },
+    {
+      "id": "ac-runtime-fallback-execution",
+      "description": "Execution automatically falls back to secondary qualified model when primary fails, emitting Track Run Records with fallback metadata.",
+      "status": "satisfied",
+      "evidence": "tool-router and model-router automatically retry on secondary qualified fallback model and emit Track Run Records with fallback metadata; verified in test:core03."
+    },
+    {
+      "id": "ac-regression-clean",
+      "description": "All existing repository validation commands (npm run test:full) remain 100% green.",
+      "status": "satisfied",
+      "evidence": "npm run test:full executed and passed 100% green across all test suites."
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [
+    "core-02-generic-model-qualification"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-10-01T02:30:00.000Z",
+  "startedAt": "2026-10-01T02:37:55.405Z",
+  "completedAt": "2026-10-01T02:50:55.358Z",
+  "mergedAt": null,
+  "preparedCommit": "a4795a730d45db8549b9906129571095a92eb57e",
+  "preparedBranch": "milestone/core-03-multi-model-fallback-qualification",
+  "preparedAt": "2026-10-01T02:49:46.772Z",
+  "latestValidationId": "validation-20261001T024952-cbe5b823",
+  "completionBranch": "milestone/core-03-multi-model-fallback-qualification",
+  "completionHead": "0fddbaee55213f5b3d5de9798aefac84a11b78ef"
+}

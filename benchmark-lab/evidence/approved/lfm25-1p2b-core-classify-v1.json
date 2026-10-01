@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "benchmark.approved_evidence_summary.v1",
+  "evidenceId": "lfm25-1p2b-core-classify-v1",
+  "sourceRunId": "run-20261001T024151Z",
+  "approvedAt": "2026-10-01T02:41:51.671Z",
+  "approvedBy": "locaily-operator",
+  "summaryPath": "benchmark-lab/evidence/summaries/lfm25-1p2b-core-classify-v1.json",
+  "claims": [
+    "lfm25-1p2b-thinking-local satisfies default_worker and fast_worker roles on core.classify across easy, medium, and adversarial strata.",
+    "Produces structured classification output with valid label, category, confidence, and reason."
+  ]
+}

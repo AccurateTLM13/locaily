@@ -7,6 +7,7 @@
     "benchmark-lab-m3-interactive-local-model-lab": "validation-20260804T030446-0b281076",
     "core-01-system-formation": "validation-20260930T232052-d2d7f38e",
     "durable-job-state-integrity-20260905": "validation-20260930T232551-3b868577",
-    "core-02-generic-model-qualification": "validation-20261001T020757-c32b8132"
+    "core-02-generic-model-qualification": "validation-20261001T020757-c32b8132",
+    "core-03-multi-model-fallback-qualification": "validation-20261001T024952-cbe5b823"
   }
 }

@@ -1,0 +1,78 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20261001-002",
+  "milestoneId": "core-03-multi-model-fallback-qualification",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": "Qualify lfm25-1p2b-thinking-local on core.classify and core.summarize via Benchmark Lab evaluation suites, evidence promotion, and qualification records with canonical checksums to establish secondary qualified fallbacks and activate multi-model shadow routing.",
+  "branch": "milestone/core-03-multi-model-fallback-qualification",
+  "startingCommit": "a47ad98efbaa4361506278ef14f67dec819385bc",
+  "plannedFiles": [
+    "benchmark-lab/models/manifests/lfm25-1p2b-thinking-local.json",
+    "scripts/qualify-lfm25-core-models.js",
+    "companion/core/shadow-routing.js",
+    "companion/crew/tool-router.js",
+    "companion/crew/model-router.js",
+    "companion/orchestration/run-plan-executor.js",
+    "companion/crew/runtime-track-run-recorder.js",
+    "scripts/test-core03-multi-model-qualification.js",
+    "package.json"
+  ],
+  "completedWork": [
+    "Evaluated lfm25-1p2b-thinking-local on core-classify-v1 and core-summarize-v1 Benchmark Lab suites (3/3 passed each).",
+    "Promoted evidence summaries and approved summaries for lfm25-1p2b-thinking-local.",
+    "Generated qualification records with canonical sha256 checksums in benchmark-lab/qualifications/models/.",
+    "Updated lfm25-1p2b-thinking-local model manifest with generic capabilities and qualifications.",
+    "Updated shadow router to consistently populate fallback recommendations when multiple qualified candidates exist.",
+    "Added automated runtime fallback in tool-router and model-router when primary models fail, switching to qualified fallback and emitting Track Run Records with fallback metadata.",
+    "Created acceptance test suite scripts/test-core03-multi-model-qualification.js and wired test:core03 into test:full (100% green).",
+    "CORE-03: Qualify lfm25-1p2b-thinking-local on core.classify and core.summarize with automated fallback",
+    "Session closed"
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-10-01T02:47:50.527Z",
+      "message": "CORE-03: Qualify lfm25-1p2b-thinking-local on core.classify and core.summarize with automated fallback",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-10-01T02:37:55.406Z",
+  "closedAt": "2026-10-01T02:47:54.732Z",
+  "closingCommit": "a47ad98efbaa4361506278ef14f67dec819385bc",
+  "dirtyFiles": [
+    "benchmark-lab/models/manifests/lfm25-1p2b-thinking-local.json",
+    "companion/core/shadow-routing.js",
+    "companion/crew/model-router.js",
+    "companion/crew/runtime-track-run-recorder.js",
+    "companion/crew/tool-router.js",
+    "companion/orchestration/run-plan-executor.js",
+    "development/project-state.json",
+    "development/roadmap.json",
+    "docs/07-progress/work-closeout.json",
+    "package.json",
+    "benchmark-lab/evidence/approved/lfm25-1p2b-core-classify-v1.json",
+    "benchmark-lab/evidence/approved/lfm25-1p2b-core-summarize-v1.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-core-classify-v1-approved-summary.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-core-classify-v1-promoted-evidence.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-core-summarize-v1-approved-summary.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-core-summarize-v1-promoted-evidence.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-local-lfm25-1p2b-core-classify-v1-qualification.json",
+    "benchmark-lab/evidence/checksums/lfm25-1p2b-thinking-local-lfm25-1p2b-core-summarize-v1-qualification.json",
+    "benchmark-lab/evidence/summaries/lfm25-1p2b-core-classify-v1.json",
+    "benchmark-lab/evidence/summaries/lfm25-1p2b-core-summarize-v1.json",
+    "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-core-classify-v1.json",
+    "benchmark-lab/qualifications/models/lfm25-1p2b-thinking-local-lfm25-1p2b-core-summarize-v1.json",
+    "development/milestones/core-03-multi-model-fallback-qualification.json",
+    "development/sessions/session-20261001-002.json",
+    "scripts/qualify-lfm25-core-models.js",
+    "scripts/test-core03-multi-model-qualification.js"
+  ]
+}
