@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "llama3.2-local-llama3.2-core-extract-v1",
+  "subject": {
+    "type": "model",
+    "id": "llama3.2-local",
+    "provider": "ollama",
+    "runtimeModelName": "llama3.2:latest",
+    "digest": "sha256:a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72"
+  },
+  "status": "qualified",
+  "qualifiedFor": [
+    {
+      "role": "default_worker",
+      "trackId": "core.extract",
+      "contractId": "core-extract-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": []
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "llama3.2-core-extract-v1"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/evidence/summaries/llama3.2-core-extract-v1.json"
+    ]
+  },
+  "modelProfileId": "llama3.2-local",
+  "notes": [
+    "Generated from explicitly promoted Benchmark Lab evidence.",
+    "Qualified for core.extract default_worker role. 3/3 scenario strata PASS (100%).",
+    "Semantic scorer core-extract-semantic-v1 verified."
+  ],
+  "generatedAt": "2026-10-01T01:59:31.811Z"
+}

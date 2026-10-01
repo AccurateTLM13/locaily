@@ -1,0 +1,38 @@
+[
+  {
+    "caseId": "classify-001",
+    "trackId": "core.classify",
+    "difficulty": "easy",
+    "responseMode": "json",
+    "input": {
+      "text": "Classify the text into exactly one category: bug, feature_request, documentation, question. Return JSON only.\n\nText: App crashes with null pointer exception when clicking submit button without entering email"
+    },
+    "expected": {
+      "label": "classify"
+    }
+  },
+  {
+    "caseId": "classify-002",
+    "trackId": "core.classify",
+    "difficulty": "medium",
+    "responseMode": "json",
+    "input": {
+      "text": "Classify the text into exactly one category: bug, feature_request, documentation, question. Return JSON only.\n\nText: Could we add dark mode support and custom themes to the settings page in the next release?"
+    },
+    "expected": {
+      "label": "classify"
+    }
+  },
+  {
+    "caseId": "classify-003",
+    "trackId": "core.classify",
+    "difficulty": "adversarial",
+    "responseMode": "json",
+    "input": {
+      "text": "Classify the text into exactly one category: bug, feature_request, documentation, question. Return JSON only.\n\nText: The docs mention authentication works with OAuth2, but is there an example repo showing PKCE with React?"
+    },
+    "expected": {
+      "label": "classify"
+    }
+  }
+]

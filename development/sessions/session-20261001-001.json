@@ -1,0 +1,75 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20261001-001",
+  "milestoneId": "core-02-generic-model-qualification",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": "Qualify local models on CORE-01 generic capabilities (classify, summarize, extract) via Benchmark Lab evaluation suites, evidence promotion, and qualification records to enable qualification-driven routing in multi-track workflows.",
+  "branch": "main",
+  "startingCommit": "a23ccd8482796d31aef7b004aae0d54784b188f6",
+  "plannedFiles": [],
+  "completedWork": [
+    "Qualify local models on CORE-01 generic capabilities (classify, summarize, extract) with Benchmark Lab suites and qualified routing",
+    "Session closed"
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-10-01T02:04:17.469Z",
+      "message": "Qualify local models on CORE-01 generic capabilities (classify, summarize, extract) with Benchmark Lab suites and qualified routing",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-10-01T01:47:08.804Z",
+  "closedAt": "2026-10-01T02:04:21.468Z",
+  "closingCommit": "a23ccd8482796d31aef7b004aae0d54784b188f6",
+  "dirtyFiles": [
+    "benchmark-lab/models/manifests/llama3.2-local.json",
+    "companion/crew/tool-router.js",
+    "companion/orchestration/run-plan-executor.js",
+    "development/project-state.json",
+    "development/roadmap.json",
+    "package.json",
+    "benchmark-lab/evidence/approved/llama3.2-core-classify-v1.json",
+    "benchmark-lab/evidence/approved/llama3.2-core-extract-v1.json",
+    "benchmark-lab/evidence/approved/llama3.2-core-summarize-v1.json",
+    "benchmark-lab/evidence/checksums/llama3.2-core-classify-v1-approved-summary.json",
+    "benchmark-lab/evidence/checksums/llama3.2-core-classify-v1-promoted-evidence.json",
+    "benchmark-lab/evidence/checksums/llama3.2-core-extract-v1-approved-summary.json",
+    "benchmark-lab/evidence/checksums/llama3.2-core-extract-v1-promoted-evidence.json",
+    "benchmark-lab/evidence/checksums/llama3.2-core-summarize-v1-approved-summary.json",
+    "benchmark-lab/evidence/checksums/llama3.2-core-summarize-v1-promoted-evidence.json",
+    "benchmark-lab/evidence/checksums/llama3.2-local-llama3.2-core-classify-v1-qualification.json",
+    "benchmark-lab/evidence/checksums/llama3.2-local-llama3.2-core-extract-v1-qualification.json",
+    "benchmark-lab/evidence/checksums/llama3.2-local-llama3.2-core-summarize-v1-qualification.json",
+    "benchmark-lab/evidence/summaries/llama3.2-core-classify-v1.json",
+    "benchmark-lab/evidence/summaries/llama3.2-core-extract-v1.json",
+    "benchmark-lab/evidence/summaries/llama3.2-core-summarize-v1.json",
+    "benchmark-lab/locaily/tracks/core-classify/cases.json",
+    "benchmark-lab/locaily/tracks/core-classify/mock-responses.json",
+    "benchmark-lab/locaily/tracks/core-classify/scenarios.js",
+    "benchmark-lab/locaily/tracks/core-classify/suite.json",
+    "benchmark-lab/locaily/tracks/core-extract/cases.json",
+    "benchmark-lab/locaily/tracks/core-extract/mock-responses.json",
+    "benchmark-lab/locaily/tracks/core-extract/scenarios.js",
+    "benchmark-lab/locaily/tracks/core-extract/suite.json",
+    "benchmark-lab/locaily/tracks/core-summarize/cases.json",
+    "benchmark-lab/locaily/tracks/core-summarize/mock-responses.json",
+    "benchmark-lab/locaily/tracks/core-summarize/scenarios.js",
+    "benchmark-lab/locaily/tracks/core-summarize/suite.json",
+    "benchmark-lab/qualifications/models/llama3.2-local-llama3.2-core-classify-v1.json",
+    "benchmark-lab/qualifications/models/llama3.2-local-llama3.2-core-extract-v1.json",
+    "benchmark-lab/qualifications/models/llama3.2-local-llama3.2-core-summarize-v1.json",
+    "development/milestones/core-02-generic-model-qualification.json",
+    "development/sessions/session-20261001-001.json",
+    "scripts/qualify-core-models.js",
+    "scripts/test-core02-model-qualification.js"
+  ]
+}

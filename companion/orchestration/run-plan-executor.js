@@ -168,6 +168,7 @@ async function executeCompositionPlan({ plan, runtime, options = {}, toolRegistr
 
     trackPlan.status = "completed";
     trackPlan.result = execution.result;
+    trackPlan.evidence = execution.evidence;
     aliasResults[trackPlan.as] = execution.result;
   }
 
@@ -257,6 +258,9 @@ function describeWorkerUsed(stepResult, trackStep) {
     type: "tool",
     tool: stepResult.meta.tool || trackStep.executor.tool,
     task: stepResult.meta.task || trackStep.executor.task,
+    role: stepResult.meta?.role || null,
+    model: stepResult.meta?.model || null,
+    qualification: stepResult.meta?.qualification || null,
     node_id: stepResult.meta.nodeId || null,
     routed_via: stepResult.meta.relay ? "relay" : "local"
   };

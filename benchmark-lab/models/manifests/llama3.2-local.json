@@ -13,7 +13,10 @@
     "a11y-analysis",
     "budget-analysis",
     "seo-analysis",
-    "deal-analysis"
+    "deal-analysis",
+    "generic-classification",
+    "generic-summarization",
+    "generic-extraction"
   ],
   "qualifications": {
     "website_audit.accessibility_deep": {
@@ -29,6 +32,15 @@
       "seo_recommender": "screening"
     },
     "marketplace.dealsniper": {
+      "default_worker": "qualified"
+    },
+    "core.classify": {
+      "default_worker": "qualified"
+    },
+    "core.summarize": {
+      "default_worker": "qualified"
+    },
+    "core.extract": {
       "default_worker": "qualified"
     }
   },

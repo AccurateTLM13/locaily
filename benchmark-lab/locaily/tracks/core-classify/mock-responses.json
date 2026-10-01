@@ -1,0 +1,26 @@
+{
+  "classify-001": {
+    "output": {
+      "label": "classify",
+      "category": "bug",
+      "confidence": 0.98,
+      "reason": "Text describes an application crash due to null pointer exception."
+    }
+  },
+  "classify-002": {
+    "output": {
+      "label": "classify",
+      "category": "feature_request",
+      "confidence": 0.95,
+      "reason": "User is requesting new functionality: dark mode and custom themes."
+    }
+  },
+  "classify-003": {
+    "output": {
+      "label": "classify",
+      "category": "question",
+      "confidence": 0.92,
+      "reason": "User is asking for clarification and code examples regarding PKCE with React."
+    }
+  }
+}

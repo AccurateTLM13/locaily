@@ -1,0 +1,38 @@
+[
+  {
+    "caseId": "summarize-001",
+    "trackId": "core.summarize",
+    "difficulty": "easy",
+    "responseMode": "json",
+    "input": {
+      "text": "Summarize the text and extract key points. Return JSON only with summary and key_points.\n\nText: Locaily v1.2 release notes: Added support for deterministic tools in The Crew orchestrator. Improved SQLite job persistence and fixed memory leak in event listener. Node 24 support verified."
+    },
+    "expected": {
+      "label": "summarize"
+    }
+  },
+  {
+    "caseId": "summarize-002",
+    "trackId": "core.summarize",
+    "difficulty": "medium",
+    "responseMode": "json",
+    "input": {
+      "text": "Summarize the text and extract key points. Return JSON only with summary and key_points.\n\nText: Architecture RFC: Relay nodes communicate over local network with cryptographic trust tokens. Each node pair completes a 4-step challenge-response ceremony. HMAC-SHA256 signatures protect all step execution requests. Replay protection enforces 5-minute timestamp validity windows. Unpaired nodes are rejected with UNTRUSTED_NODE."
+    },
+    "expected": {
+      "label": "summarize"
+    }
+  },
+  {
+    "caseId": "summarize-003",
+    "trackId": "core.summarize",
+    "difficulty": "adversarial",
+    "responseMode": "json",
+    "input": {
+      "text": "Summarize the text and extract key points. Return JSON only with summary and key_points.\n\nText: Performance evaluation report: The team tested 10 local models across 50 benchmark cases. Model A achieved 94% pass rate with 120ms latency. Model B achieved 82% pass rate with 45ms latency. Although Model B was 2.5x faster, Model A had zero hallucination on critical schema constraints. The recommendation is to use Model A for verification tasks and Model B for draft generation."
+    },
+    "expected": {
+      "label": "summarize"
+    }
+  }
+]

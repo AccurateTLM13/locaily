@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "core-extract-v1",
+  "name": "Core Extract Generic Benchmark V1",
+  "mode": "qualification",
+  "trackId": "core.extract",
+  "contractId": "core-extract-v1",
+  "runtime": {
+    "provider": "mock",
+    "modelManifest": "llama3.2-local",
+    "responsesPath": "mock-responses.json"
+  },
+  "caseFiles": ["cases.json"],
+  "prompt": {
+    "id": "core-extract-prompt-v1",
+    "version": "1.0.0"
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["data", "missing_fields", "confidence"],
+    "properties": {
+      "label": { "enum": ["extract"] },
+      "data": { "type": "object" },
+      "missing_fields": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      }
+    }
+  },
+  "semanticScorer": {
+    "id": "core-extract-semantic-v1",
+    "version": "1.0.0",
+    "module": "scenarios.js"
+  },
+  "validators": ["json-parse", "json-schema", "semantic-scorer"]
+}

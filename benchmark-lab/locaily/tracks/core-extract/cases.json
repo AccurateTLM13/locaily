@@ -1,0 +1,38 @@
+[
+  {
+    "caseId": "extract-001",
+    "trackId": "core.extract",
+    "difficulty": "easy",
+    "responseMode": "json",
+    "input": {
+      "text": "Extract user profile into JSON. Required fields: name (string), email (string), role (string). Return data, missing_fields, and confidence.\n\nText: Sarah Connor (sarah@resistance.org), Lead Engineer at Cyberdyne."
+    },
+    "expected": {
+      "label": "extract"
+    }
+  },
+  {
+    "caseId": "extract-002",
+    "trackId": "core.extract",
+    "difficulty": "medium",
+    "responseMode": "json",
+    "input": {
+      "text": "Extract repo stats into JSON. Required fields: repo_name (string), stars (integer), open_issues (integer), license (string). Return data, missing_fields, and confidence.\n\nText: locaily has 1240 stars and 14 open issues under the MIT license."
+    },
+    "expected": {
+      "label": "extract"
+    }
+  },
+  {
+    "caseId": "extract-003",
+    "trackId": "core.extract",
+    "difficulty": "adversarial",
+    "responseMode": "json",
+    "input": {
+      "text": "Extract server hardware profile into JSON. Required fields: hostname (string), cores (integer), ram_gb (integer). Optional fields: gpu (string). Return data, missing_fields, and confidence.\n\nText: Node worker-03 has 16 CPU cores and 64 GB of RAM. No discrete GPU detected."
+    },
+    "expected": {
+      "label": "extract"
+    }
+  }
+]

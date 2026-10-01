@@ -1,0 +1,37 @@
+{
+  "summarize-001": {
+    "output": {
+      "label": "summarize",
+      "summary": "Locaily v1.2 introduces deterministic tools for The Crew orchestrator, enhances SQLite job persistence, fixes memory leaks, and verifies Node 24 support.",
+      "key_points": [
+        "Deterministic tools added to The Crew orchestrator",
+        "SQLite job persistence reliability improved",
+        "Event listener memory leak resolved",
+        "Node 24 runtime support verified"
+      ]
+    }
+  },
+  "summarize-002": {
+    "output": {
+      "label": "summarize",
+      "summary": "The Relay Node architecture enforces mutual authentication via a 4-step pairing ceremony, HMAC-SHA256 signed requests, and a 5-minute replay protection window.",
+      "key_points": [
+        "4-step challenge-response ceremony pairs relay nodes",
+        "HMAC-SHA256 signatures verify all execution requests",
+        "5-minute timestamp validity prevents replay attacks",
+        "Unpaired nodes rejected with UNTRUSTED_NODE code"
+      ]
+    }
+  },
+  "summarize-003": {
+    "output": {
+      "label": "summarize",
+      "summary": "Benchmark evaluation shows Model A excels at accuracy and schema constraint satisfaction (94%), while Model B offers superior latency (45ms), prompting a tiered routing strategy.",
+      "key_points": [
+        "Model A achieved 94% pass rate with zero hallucination on constraints",
+        "Model B achieved 82% pass rate with 2.5x faster latency (45ms)",
+        "Recommend Model A for verification tasks and Model B for draft generation"
+      ]
+    }
+  }
+}

@@ -69,7 +69,8 @@
           "maturity": "operational",
           "milestoneIds": [
             "benchmark-lab-m2-reproducible-semantic-qualification",
-            "benchmark-lab-m3-interactive-local-model-lab"
+            "benchmark-lab-m3-interactive-local-model-lab",
+            "core-02-generic-model-qualification"
           ]
         }
       ]
@@ -400,6 +401,10 @@
       "benchmark-lab-m2-reproducible-semantic-qualification"
     ],
     "core-01-system-formation": [],
+    "core-02-generic-model-qualification": [
+      "core-01-system-formation",
+      "benchmark-lab-m2-reproducible-semantic-qualification"
+    ],
     "durable-job-state-integrity-20260905": [],
     "px8-audit-second-pass": [
       "px1-canonical-product-status",

@@ -1,0 +1,39 @@
+{
+  "extract-001": {
+    "output": {
+      "label": "extract",
+      "data": {
+        "name": "Sarah Connor",
+        "email": "sarah@resistance.org",
+        "role": "Lead Engineer"
+      },
+      "missing_fields": [],
+      "confidence": 0.98
+    }
+  },
+  "extract-002": {
+    "output": {
+      "label": "extract",
+      "data": {
+        "repo_name": "locaily",
+        "stars": 1240,
+        "open_issues": 14,
+        "license": "MIT"
+      },
+      "missing_fields": [],
+      "confidence": 0.96
+    }
+  },
+  "extract-003": {
+    "output": {
+      "label": "extract",
+      "data": {
+        "hostname": "worker-03",
+        "cores": 16,
+        "ram_gb": 64
+      },
+      "missing_fields": [],
+      "confidence": 0.94
+    }
+  }
+}

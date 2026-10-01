@@ -31,11 +31,41 @@ async function executeToolStep({ step, context, toolRegistry, runtime, options, 
     throw error;
   }
 
+  const role = tool.modelRole || executor.role || null;
+  let resolvedModel = null;
+  let qualification = null;
+
+  if (role) {
+    if (typeof options?.resolveModelForRole === "function") {
+      const res = options.resolveModelForRole(role);
+      resolvedModel = res && res.ok ? res.model : (typeof res === "string" ? res : null);
+    }
+    if (!resolvedModel && typeof options?.model === "string" && options.model.trim()) {
+      resolvedModel = options.model.trim();
+    }
+    if (!resolvedModel && tool.requiresRuntime) {
+      resolvedModel = "llama3.2-local";
+    }
+
+    if (resolvedModel && typeof options?.getModelQualificationEvidence === "function") {
+      qualification = options.getModelQualificationEvidence({
+        model: resolvedModel,
+        role,
+        trackId: options.track_id || null,
+        contractId: executor.contract || null
+      });
+    }
+  }
+
+  const handleOptions = resolvedModel
+    ? { ...options, model: resolvedModel }
+    : options;
+
   const output = await tool.handle({
     task,
     input: stepInput,
     runtime,
-    options,
+    options: handleOptions,
     meta
   });
 
@@ -46,6 +76,9 @@ async function executeToolStep({ step, context, toolRegistry, runtime, options, 
       executor_type: "tool",
       tool: toolId,
       task,
+      role: role || null,
+      model: resolvedModel || null,
+      qualification,
       durationMs: Date.now() - stepStart
     }
   };

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "core-classify-v1",
+  "name": "Core Classify Generic Benchmark V1",
+  "mode": "qualification",
+  "trackId": "core.classify",
+  "contractId": "core-classify-v1",
+  "runtime": {
+    "provider": "mock",
+    "modelManifest": "llama3.2-local",
+    "responsesPath": "mock-responses.json"
+  },
+  "caseFiles": ["cases.json"],
+  "prompt": {
+    "id": "core-classify-prompt-v1",
+    "version": "1.0.0"
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["category", "confidence", "reason"],
+    "properties": {
+      "label": { "enum": ["classify"] },
+      "category": { "type": "string" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+      "reason": { "type": "string" }
+    }
+  },
+  "semanticScorer": {
+    "id": "core-classify-semantic-v1",
+    "version": "1.0.0",
+    "module": "scenarios.js"
+  },
+  "validators": ["json-parse", "json-schema", "semantic-scorer"]
+}

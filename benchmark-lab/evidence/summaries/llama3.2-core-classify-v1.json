@@ -1,0 +1,187 @@
+{
+  "schemaVersion": "benchmark.promoted_evidence.v1",
+  "evidenceId": "llama3.2-core-classify-v1",
+  "sourceRunId": "run-20261001T015931Z",
+  "suiteId": "core-classify-v1",
+  "trackId": "core.classify",
+  "contractId": "core-classify-v1",
+  "approvedAt": "2026-10-01T01:59:31.811Z",
+  "approvedBy": "locaily-operator",
+  "summary": {
+    "schemaVersion": "benchmark.run_summary.v1",
+    "runId": "run-20261001T015931Z",
+    "suiteId": "core-classify-v1",
+    "trackId": "core.classify",
+    "contractId": "core-classify-v1",
+    "provenance": {
+      "schemaVersion": "benchmark.provenance.v1",
+      "model": {
+        "modelId": "llama3.2-local",
+        "provider": "Meta",
+        "runtimeModelName": "llama3.2:latest",
+        "manifestDigest": "sha256:b1436b8401d023ec3c0d990a09be60a3cec8a7687c1f2394f05abb6ee74bfee1",
+        "declaredModelDigest": "sha256:a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+        "runtimeModelDigest": null
+      },
+      "runtime": {
+        "provider": "mock",
+        "adapterId": "mock-runtime",
+        "adapterVersion": "1.0.0",
+        "version": "mock-runtime-v1",
+        "versionSource": "adapter-declared"
+      },
+      "suite": {
+        "suiteId": "core-classify-v1",
+        "trackId": "core.classify",
+        "contractId": "core-classify-v1",
+        "mode": "qualification",
+        "configDigest": "sha256:d03dba1c91d174e0f5c72c28b6c86ec191faa80bd3cdb60bf961a9d9f6a86120"
+      },
+      "prompt": {
+        "id": "core-classify-prompt-v1",
+        "version": "1.0.0",
+        "declared": true,
+        "inputDigest": "sha256:ce100806680350c2a756ef1cb30c87e9a40b86335f8983064ccd6c8e89d7abe1"
+      },
+      "scorer": {
+        "id": "core-classify-semantic-v1",
+        "version": "1.0.0",
+        "module": "scenarios.js"
+      },
+      "cases": {
+        "caseCount": 3,
+        "caseSetDigest": "sha256:8c0c47d816868c72dbff54fe80388b8df9768404719cecf03d26598179a00ec2",
+        "caseIdsDigest": "sha256:5a29418a1fc4104d9e8bff7acf1e8d7aa42e136977cfc8dcee87d664e664b984",
+        "difficultyStrata": [
+          "adversarial",
+          "easy",
+          "medium"
+        ],
+        "difficultyStrataCount": 3,
+        "difficultyStrataDigest": "sha256:5ac132ee1f72ddbcc877b276b8394b3d3f55604190d8bcc88c560158874879aa"
+      },
+      "hardware": {
+        "profileId": null,
+        "captured": false,
+        "source": "not-captured"
+      }
+    },
+    "runtime": {
+      "provider": "mock",
+      "modelId": "llama3.2-local",
+      "runtimeModelName": "llama3.2:latest"
+    },
+    "startedAt": "2026-10-01T01:59:31.811Z",
+    "completedAt": "2026-10-01T01:59:31.811Z",
+    "caseCount": 3,
+    "passed": 3,
+    "failed": 0,
+    "errors": 0,
+    "timeouts": 0,
+    "malformed": 0,
+    "caseResults": [
+      {
+        "caseId": "classify-001",
+        "difficulty": "easy",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "classify",
+            "actual": "classify"
+          },
+          {
+            "validator": "semantic-scorer",
+            "status": "pass",
+            "code": "SEMANTIC_PASS",
+            "scorerId": "core-classify-semantic-v1",
+            "scorerVersion": "1.0.0",
+            "errors": [],
+            "details": null
+          }
+        ]
+      },
+      {
+        "caseId": "classify-002",
+        "difficulty": "medium",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "classify",
+            "actual": "classify"
+          },
+          {
+            "validator": "semantic-scorer",
+            "status": "pass",
+            "code": "SEMANTIC_PASS",
+            "scorerId": "core-classify-semantic-v1",
+            "scorerVersion": "1.0.0",
+            "errors": [],
+            "details": null
+          }
+        ]
+      },
+      {
+        "caseId": "classify-003",
+        "difficulty": "adversarial",
+        "verdict": "PASS",
+        "checks": [
+          {
+            "validator": "json-parse",
+            "status": "pass"
+          },
+          {
+            "validator": "json-schema",
+            "status": "pass",
+            "errors": []
+          },
+          {
+            "validator": "expected-label",
+            "status": "pass",
+            "expected": "classify",
+            "actual": "classify"
+          },
+          {
+            "validator": "semantic-scorer",
+            "status": "pass",
+            "code": "SEMANTIC_PASS",
+            "scorerId": "core-classify-semantic-v1",
+            "scorerVersion": "1.0.0",
+            "errors": [],
+            "details": null
+          }
+        ]
+      }
+    ],
+    "semanticScorer": {
+      "id": "core-classify-semantic-v1",
+      "version": "1.0.0",
+      "module": "scenarios.js"
+    }
+  },
+  "notes": [
+    "Qualified for core.classify default_worker role. 3/3 scenario strata PASS (100%).",
+    "Semantic scorer core-classify-semantic-v1 verified."
+  ]
+}

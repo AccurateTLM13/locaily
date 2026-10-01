@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "benchmark.suite.v1",
+  "suiteId": "core-summarize-v1",
+  "name": "Core Summarize Generic Benchmark V1",
+  "mode": "qualification",
+  "trackId": "core.summarize",
+  "contractId": "core-summarize-v1",
+  "runtime": {
+    "provider": "mock",
+    "modelManifest": "llama3.2-local",
+    "responsesPath": "mock-responses.json"
+  },
+  "caseFiles": ["cases.json"],
+  "prompt": {
+    "id": "core-summarize-prompt-v1",
+    "version": "1.0.0"
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["summary", "key_points"],
+    "properties": {
+      "label": { "enum": ["summarize"] },
+      "summary": { "type": "string" },
+      "key_points": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  },
+  "semanticScorer": {
+    "id": "core-summarize-semantic-v1",
+    "version": "1.0.0",
+    "module": "scenarios.js"
+  },
+  "validators": ["json-parse", "json-schema", "semantic-scorer"]
+}
