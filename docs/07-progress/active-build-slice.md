@@ -1,16 +1,16 @@
 # Active Build Slice
 
-**Updated:** 2026-08-03 (Benchmark Lab M3 live acceptance complete)
+**Updated:** 2026-10-01 (post-merge reconciliation)
 
 ## Current Slice
 
-**Benchmark Lab M3 — Interactive Local Model Lab is implementation-complete with live acceptance** on `codex/benchmark-lab-m3-interactive-local-model-lab`. The localhost shell now discovers registered installed Ollama models, exposes explicit load/unload controls, launches only cataloged suites through an isolated worker, streams summary-safe progress, stores durable result history, and restores completed runs after refresh. Canonical lifecycle state in `development/project-state.json` determines delivery readiness.
+**CORE-04 — Generic Capability Matrix Qualification** is merged and validated on `main`. The current slice is reconciliation of lifecycle records, generated status surfaces, and evidence references after the overnight delivery wave.
 
 The live browser run used exact `llama3.2:latest` digest provenance and completed 3/4 cases. It correctly remained below the M2 qualification gate because the sample had only four scored trials and one independent run. No approved evidence artifacts or qualification records were modified.
 
 ## Most Recently Completed Slice
 
-**PX6 External Validation Program**
+**CORE-04 — Generic Capability Matrix Qualification**
 
 The last completed milestone recorded by the development control plane is `px6-external-validation-program`.
 
@@ -28,7 +28,7 @@ Defined in [maintenance-objective-lifecycle-closeout.md](./maintenance-objective
 
 ## Next Slice
 
-Complete the canonical M3 review, prepare, validate, and complete gates. Do not begin a follow-on Benchmark Lab milestone without an explicitly supplied objective.
+Review the reconciled dashboard and obtain JP approval before beginning PX6 external validation. Do not start a follow-on milestone automatically.
 
 ### Deferred (requires specific conditions)
 
