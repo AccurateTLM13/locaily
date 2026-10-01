@@ -80,7 +80,7 @@ function buildStepChildRecord({ step, trackId, correlationId, parentRunId, optio
       target: step.actualTarget || null,
       nodeId: step.actualNodeId || null
     } : null,
-    fallbackUsed: step.fallback === true,
+    fallbackUsed: step.fallback === true || step.fallbackUsed === true,
     fallbackReason: step.fallbackReason || undefined
   };
 
@@ -228,6 +228,10 @@ async function recordDirectTrackRun({
       parentRecordId: record.recordId,
       childRecordIds: stepRecordIds,
       childRecordRefs: stepRecordRefs,
+      record,
+      fallbackUsed: record.execution.fallbackUsed,
+      fallbackReason: record.execution.fallbackReason,
+      childRuns: record.childRuns,
       storeResult
     };
   }
@@ -323,6 +327,8 @@ async function recordWorkflowRun({
     const stepExecutorType = stepWorker.type || "tool";
     const stepStatus = step.status === "completed" ? "success" : step.status === "running" ? "failure" : step.status || "failure";
     const isModel = stepExecutorType === "model";
+    const isFallback = step.fallback === true || step.fallbackUsed === true || stepWorker.fallback === true || stepWorker.fallbackUsed === true;
+    const stepFallbackReason = step.fallbackReason || stepWorker.fallbackReason || undefined;
 
     const childOptions = {
       recordIdPrefix: isModel ? "wf-step-model" : "wf-step-tool",
@@ -334,7 +340,10 @@ async function recordWorkflowRun({
       durationMs: step.duration_ms || null,
       capabilityId: stepWorker.tool || stepWorker.model || stepWorker.role || stepExecutorType,
       provider: options.provider || null,
-      qualificationRecordId: stepWorker.qualification?.recordId || null,
+      qualificationRecordId: stepWorker.qualification?.recordId || step.qualification?.recordId || null,
+      shadowRecommendation: step.shadowRouting || stepWorker.shadowRouting || undefined,
+      fallbackUsed: isFallback,
+      fallbackReason: stepFallbackReason,
       startedAt: startedAt.toISOString(),
       completedAt: now.toISOString()
     };
@@ -374,6 +383,12 @@ async function recordWorkflowRun({
   const executorType = hasModel && hasTool ? "hybrid" : hasModel ? "model" : "tool";
   const execStatus = error ? "failure" : planResult?.status === "completed" ? "success" : "partial";
 
+  const anyFallback = planStepArray.some((s) => s.fallback === true || s.fallbackUsed === true || s.worker_used?.fallback === true || s.worker_used?.fallbackUsed === true);
+  const parentFallbackReason = anyFallback
+    ? (planStepArray.find((s) => s.fallbackReason || s.worker_used?.fallbackReason)?.fallbackReason ||
+       planStepArray.find((s) => s.worker_used?.fallbackReason)?.worker_used?.fallbackReason || undefined)
+    : undefined;
+
   const record = buildTrackRunRecord({
     recordId: parentRecordId,
     trackId,
@@ -386,7 +401,8 @@ async function recordWorkflowRun({
     durationMs,
     startedAt: startedAt.toISOString(),
     completedAt: now.toISOString(),
-    fallbackUsed: false,
+    fallbackUsed: anyFallback,
+    fallbackReason: parentFallbackReason,
     retryCount: 0,
     request: {
       requester: "companion-server",
@@ -422,6 +438,10 @@ async function recordWorkflowRun({
   return {
     parentRecordId: record.recordId,
     childRecordIds,
+    record,
+    fallbackUsed: record.execution.fallbackUsed,
+    fallbackReason: record.execution.fallbackReason,
+    childRuns: record.childRuns,
     storeResult
   };
 }

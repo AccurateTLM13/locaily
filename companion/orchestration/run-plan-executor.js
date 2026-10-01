@@ -207,13 +207,22 @@ async function executeCompositionPlan({ plan, runtime, options = {}, toolRegistr
         workflowId: plan.workflow_id,
         trackId: `${plan.workflow_id}#composition`,
         input: plan.input,
-        planSteps: plan.tracks.map((entry) => ({
-          step_id: entry.as,
-          status: entry.status,
-          output: entry.result ? { track_id: entry.track_id } : null,
-          duration_ms: entry.duration_ms || 0,
-          error: entry.error || null
-        })),
+        planSteps: plan.tracks.map((entry) => {
+          const firstStep = (entry.steps && entry.steps[0]) || {};
+          const isFallback = Boolean(entry.steps?.some(s => s.fallback || s.fallbackUsed));
+          const fallbackReason = entry.steps?.find(s => s.fallbackReason)?.fallbackReason;
+          return {
+            step_id: entry.as,
+            status: entry.status,
+            output: entry.result ? { track_id: entry.track_id } : null,
+            duration_ms: entry.duration_ms || 0,
+            error: entry.error || null,
+            fallback: isFallback,
+            fallbackUsed: isFallback,
+            fallbackReason,
+            worker_used: firstStep.worker_used || null
+          };
+        }),
         planResult: { composition_result: result },
         durationMs: plan.duration_ms,
         schemaValid: true,
@@ -250,7 +259,11 @@ function describeWorkerUsed(stepResult, trackStep) {
       profile_id: stepResult.meta.profile_id || null,
       qualification: stepResult.meta.qualification || null,
       node_id: stepResult.meta.nodeId || null,
-      routed_via: stepResult.meta.relay ? "relay" : "local"
+      routed_via: stepResult.meta.relay ? "relay" : "local",
+      fallback: stepResult.meta?.fallback || false,
+      fallbackUsed: stepResult.meta?.fallbackUsed || stepResult.meta?.fallback || false,
+      fallbackReason: stepResult.meta?.fallbackReason || null,
+      shadowRouting: stepResult.meta?.shadowRouting || null
     };
   }
 
@@ -262,7 +275,11 @@ function describeWorkerUsed(stepResult, trackStep) {
     model: stepResult.meta?.model || null,
     qualification: stepResult.meta?.qualification || null,
     node_id: stepResult.meta.nodeId || null,
-    routed_via: stepResult.meta.relay ? "relay" : "local"
+    routed_via: stepResult.meta.relay ? "relay" : "local",
+    fallback: stepResult.meta?.fallback || false,
+    fallbackUsed: stepResult.meta?.fallbackUsed || stepResult.meta?.fallback || false,
+    fallbackReason: stepResult.meta?.fallbackReason || null,
+    shadowRouting: stepResult.meta?.shadowRouting || null
   };
 }
 
@@ -361,6 +378,10 @@ async function runSinglePlanStep({
     planStep.output = stepResult.output;
     planStep.duration_ms = Date.now() - stepStartedAt;
     planStep.worker_used = describeWorkerUsed(stepResult, trackStep);
+    planStep.fallback = stepResult.meta?.fallback || false;
+    planStep.fallbackUsed = stepResult.meta?.fallbackUsed || stepResult.meta?.fallback || false;
+    planStep.fallbackReason = stepResult.meta?.fallbackReason || null;
+    planStep.shadowRouting = stepResult.meta?.shadowRouting || null;
   } catch (error) {
     if (planStep.status !== "failed") {
       planStep.duration_ms = Date.now() - stepStartedAt;
