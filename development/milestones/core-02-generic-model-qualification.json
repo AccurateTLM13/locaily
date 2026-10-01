@@ -77,5 +77,8 @@
   "createdAt": "2026-09-30T23:50:00.000Z",
   "startedAt": "2026-10-01T01:47:08.802Z",
   "completedAt": null,
-  "mergedAt": null
+  "mergedAt": null,
+  "preparedCommit": "9f79ea23eaa207b0b240040310ef9be1d3625cad",
+  "preparedBranch": "milestone/core-02-generic-model-qualification",
+  "preparedAt": "2026-10-01T02:05:51.090Z"
 }
