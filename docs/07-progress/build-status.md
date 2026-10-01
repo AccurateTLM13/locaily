@@ -1,12 +1,12 @@
 # Build Status
 
-**Updated:** 2026-08-03 (Benchmark Lab M3 live acceptance complete)
+**Updated:** 2026-10-01 (post-merge reconciliation)
 
 ## Current Stage
 
-Pipeline-stage **Local Brain** with **Crew track runner**, JSON-first internal contracts, workflow orchestration, Memory Bridge v0, Benchmark Lab M2 reproducible qualification, and the M3 interactive local model workflow implemented. M9 physical multi-device pilot infrastructure is prepared (not yet executed on hardware).
+Pipeline-stage **Local Brain** with CORE-02 through CORE-04 generic model qualification delivered to `main`. The current maintenance slice is post-merge lifecycle/status reconciliation before the next product decision.
 
-North Star direction is now documented as a local capability network: route track contracts to the smallest qualified capability, validate results, and preserve structured evidence for future routing and track improvement.
+North Star direction remains a local capability network: route track contracts to the smallest qualified capability, validate results, and preserve structured evidence.
 
 ## Milestones
 
