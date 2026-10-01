@@ -74,5 +74,8 @@
   "createdAt": "2026-10-01T18:00:00.000Z",
   "startedAt": "2026-10-01T22:57:30.579Z",
   "completedAt": null,
-  "mergedAt": null
+  "mergedAt": null,
+  "preparedCommit": "23287f21dd4020325616cb276fabfe9afe5ffda7",
+  "preparedBranch": "milestone/core-05-workflow-console-matrix-explorer",
+  "preparedAt": "2026-10-01T23:04:24.010Z"
 }
