@@ -3,20 +3,20 @@
   "project": "locaily",
   "currentMilestone": null,
   "activeSession": null,
-  "status": "ready-for-delivery",
+  "status": "idle",
   "defaultBranch": "main",
   "activeBranch": "milestone/core-04-complete-generic-matrix-qualification",
   "lastCompletedMilestone": "core-04-complete-generic-matrix-qualification",
-  "nextRecommendedAction": "Deliver milestone 'core-04-complete-generic-matrix-qualification' (deliver-milestone.js --slug core-04-complete-generic-matrix-qualification --all)",
+  "nextRecommendedAction": "Milestone 'core-04-complete-generic-matrix-qualification' merged. Run dev:dashboard to refresh.",
   "blockers": [],
   "warnings": [],
-  "updatedAt": "2026-10-01T04:38:24.468Z",
+  "updatedAt": "2026-10-01T04:39:01.161Z",
   "updatedBy": {
     "type": "agent",
     "name": "dev-lifecycle",
     "platform": "system"
   },
-  "mergedMilestone": "core-03-multi-model-fallback-qualification",
-  "mergedAt": "2026-10-01T02:51:18.435Z",
-  "mergedCommit": "054fe978a9342835e154a0737fed5a34736859d5"
+  "mergedMilestone": "core-04-complete-generic-matrix-qualification",
+  "mergedAt": "2026-10-01T04:39:01.161Z",
+  "mergedCommit": "effb0b7d5cf5b7b35eaf1642d40568d9243694d3"
 }

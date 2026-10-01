@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "core-04-complete-generic-matrix-qualification",
   "title": "CORE-04 Complete Generic Capability Matrix: Full Fallback & Multi-Tier Model Qualification",
-  "status": "ready-for-delivery",
+  "status": "merged",
   "type": "feature",
   "priority": "high",
   "purpose": "Complete 100% dual-fallback coverage for generic extraction (core.extract on lfm25-1p2b-thinking-local), establish fast-worker qualification (lfm25-1p2b-instruct-local across classify/summarize/extract), and edge-worker qualification (lfm25-350m-local on classify).",
@@ -75,11 +75,12 @@
   "createdAt": "2026-10-01T03:32:00.000Z",
   "startedAt": "2026-10-01T04:32:20.466Z",
   "completedAt": "2026-10-01T04:38:24.466Z",
-  "mergedAt": null,
+  "mergedAt": "2026-10-01T04:39:01.158Z",
   "preparedCommit": "f67d8e910b446e0ed1b6866541e797ae0f912258",
   "preparedBranch": "milestone/core-04-complete-generic-matrix-qualification",
   "preparedAt": "2026-10-01T04:37:11.555Z",
   "latestValidationId": "validation-20261001T043715-9cd0f7ea",
   "completionBranch": "milestone/core-04-complete-generic-matrix-qualification",
-  "completionHead": "e696d3c4bb811146d61103b28ab5cf207a8ea12b"
+  "completionHead": "e696d3c4bb811146d61103b28ab5cf207a8ea12b",
+  "mergedCommit": "effb0b7d5cf5b7b35eaf1642d40568d9243694d3"
 }

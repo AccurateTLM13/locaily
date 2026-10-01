@@ -1,6 +1,6 @@
 {
   "schema": "locaily.development.dashboard.v1",
-  "generatedAt": "2026-10-01T02:51:18.661Z",
+  "generatedAt": "2026-10-01T04:39:01.525Z",
   "projectState": {
     "schema": "locaily.development.project_state.v1",
     "project": "locaily",
@@ -8,24 +8,24 @@
     "activeSession": null,
     "status": "idle",
     "defaultBranch": "main",
-    "activeBranch": "milestone/core-03-multi-model-fallback-qualification",
-    "lastCompletedMilestone": "core-03-multi-model-fallback-qualification",
-    "nextRecommendedAction": "Milestone 'core-03-multi-model-fallback-qualification' merged. Run dev:dashboard to refresh.",
+    "activeBranch": "milestone/core-04-complete-generic-matrix-qualification",
+    "lastCompletedMilestone": "core-04-complete-generic-matrix-qualification",
+    "nextRecommendedAction": "Milestone 'core-04-complete-generic-matrix-qualification' merged. Run dev:dashboard to refresh.",
     "blockers": [],
     "warnings": [],
-    "updatedAt": "2026-10-01T02:51:18.435Z",
+    "updatedAt": "2026-10-01T04:39:01.161Z",
     "updatedBy": {
       "type": "agent",
       "name": "dev-lifecycle",
       "platform": "system"
     },
-    "mergedMilestone": "core-03-multi-model-fallback-qualification",
-    "mergedAt": "2026-10-01T02:51:18.435Z",
-    "mergedCommit": "054fe978a9342835e154a0737fed5a34736859d5"
+    "mergedMilestone": "core-04-complete-generic-matrix-qualification",
+    "mergedAt": "2026-10-01T04:39:01.161Z",
+    "mergedCommit": "effb0b7d5cf5b7b35eaf1642d40568d9243694d3"
   },
   "git": {
     "branch": "main",
-    "head": "054fe97",
+    "head": "effb0b7",
     "dirty": true
   },
   "subsystemMaturity": [
@@ -289,6 +289,12 @@
       {
         "id": "core-03-multi-model-fallback-qualification",
         "title": "CORE-03 Multi-Model Fallback Qualification: Secondary Qualified Models & Fallback Routing for Generic Capabilities",
+        "type": "feature",
+        "priority": "high"
+      },
+      {
+        "id": "core-04-complete-generic-matrix-qualification",
+        "title": "CORE-04 Complete Generic Capability Matrix: Full Fallback & Multi-Tier Model Qualification",
         "type": "feature",
         "priority": "high"
       }
@@ -707,9 +713,39 @@
       "completedAt": "2026-10-01T02:50:49.217Z",
       "requiredPassed": 6,
       "requiredFailed": 0
+    },
+    {
+      "id": "validation-20261001T043715-9cd0f7ea",
+      "milestoneId": "core-04-complete-generic-matrix-qualification",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "milestone/core-04-complete-generic-matrix-qualification",
+      "completedAt": "2026-10-01T04:38:20.447Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
     }
   ],
   "recentActivity": [
+    {
+      "type": "validation",
+      "id": "validation-20261001T043715-9cd0f7ea",
+      "milestoneId": "core-04-complete-generic-matrix-qualification",
+      "status": "passed",
+      "timestamp": "2026-10-01T04:38:20.447Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20261001-003",
+      "milestoneId": "core-04-complete-generic-matrix-qualification",
+      "timestamp": "2026-10-01T04:37:02.780Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20261001-003",
+      "milestoneId": "core-04-complete-generic-matrix-qualification",
+      "status": "closed",
+      "timestamp": "2026-10-01T04:32:20.468Z"
+    },
     {
       "type": "validation",
       "id": "validation-20261001T024952-cbe5b823",
@@ -823,26 +859,6 @@
       "milestoneId": "core-01-system-formation",
       "status": "closed",
       "timestamp": "2026-09-07T19:09:12.073Z"
-    },
-    {
-      "type": "validation",
-      "id": "validation-20260907T184143-2cd3ef56",
-      "milestoneId": "core-01-system-formation",
-      "status": "passed",
-      "timestamp": "2026-09-07T18:41:44.748Z"
-    },
-    {
-      "type": "session-closed",
-      "id": "session-20260907-001",
-      "milestoneId": "core-01-system-formation",
-      "timestamp": "2026-09-07T18:41:34.456Z"
-    },
-    {
-      "type": "session",
-      "id": "session-20260907-001",
-      "milestoneId": "core-01-system-formation",
-      "status": "closed",
-      "timestamp": "2026-09-07T18:12:54.884Z"
     }
   ],
   "nextMilestone": {
@@ -990,17 +1006,17 @@
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T033939-6f1c2b76' is 58 days old"
+      "message": "Validation 'validation-20260803T033939-6f1c2b76' is 59 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260804T030328-9dfffbe6' is 57 days old"
+      "message": "Validation 'validation-20260804T030328-9dfffbe6' is 58 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260804T030446-0b281076' is 57 days old"
+      "message": "Validation 'validation-20260804T030446-0b281076' is 58 days old"
     },
     {
       "severity": "info",
@@ -1062,6 +1078,12 @@
         "id": "core-03-multi-model-fallback-qualification",
         "status": "merged",
         "title": "CORE-03 Multi-Model Fallback Qualification: Secondary Qualified Models & Fallback Routing for Generic Capabilities",
+        "type": "feature"
+      },
+      {
+        "id": "core-04-complete-generic-matrix-qualification",
+        "status": "merged",
+        "title": "CORE-04 Complete Generic Capability Matrix: Full Fallback & Multi-Tier Model Qualification",
         "type": "feature"
       },
       {
@@ -1290,11 +1312,11 @@
   },
   "humanDecisions": [],
   "stats": {
-    "totalMilestones": 23,
+    "totalMilestones": 24,
     "active": 0,
-    "completed": 22,
-    "totalSessions": 17,
-    "totalValidations": 29,
+    "completed": 23,
+    "totalSessions": 18,
+    "totalValidations": 30,
     "totalDeliveries": 0,
     "totalIssues": 4,
     "openIssues": 0
