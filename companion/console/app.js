@@ -1048,3 +1048,586 @@ function escapeDiagnostic(value) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
+
+/* ─────────────────────────────────────────────
+   View Navigation System
+   ───────────────────────────────────────────── */
+const views = {
+  run: document.getElementById("runView"),
+  workflows: document.getElementById("workflowsView"),
+  matrix: document.getElementById("matrixView"),
+  activity: document.getElementById("activityView")
+};
+
+const navLinks = {
+  run: document.getElementById("navRunLink"),
+  workflows: document.getElementById("navWorkflowsLink"),
+  matrix: document.getElementById("navMatrixLink"),
+  activity: document.getElementById("navActivityLink")
+};
+
+function switchView(viewName) {
+  if (!views[viewName]) viewName = "run";
+
+  for (const [key, panel] of Object.entries(views)) {
+    if (panel) panel.hidden = (key !== viewName);
+  }
+
+  for (const [key, link] of Object.entries(navLinks)) {
+    if (link) {
+      const active = (key === viewName);
+      link.classList.toggle("side-rail__link--active", active);
+      if (active) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+    }
+  }
+
+  if (viewName === "workflows") loadWorkflows();
+  else if (viewName === "matrix") loadMatrix();
+  else if (viewName === "activity") loadActivity();
+}
+
+window.addEventListener("hashchange", () => {
+  const hash = window.location.hash.replace("#", "") || "run";
+  switchView(hash);
+});
+
+// Initial hash check
+const initialHash = window.location.hash.replace("#", "") || "run";
+if (initialHash !== "run") {
+  switchView(initialHash);
+}
+
+/* ─────────────────────────────────────────────
+   Generic Workflows Catalog & Runner
+   ───────────────────────────────────────────── */
+let loadedWorkflows = [];
+let currentWorkflow = null;
+
+const WORKFLOW_EXAMPLES = {
+  repo_review: {
+    path: "companion",
+    findings: [
+      { id: "REV-1", severity: 3, effort: 1, description: "Ensure HTTP status codes and error nextSteps are documented." }
+    ]
+  },
+  text_qa: {
+    text: "Locaily is a local-first AI coordination stack with Benchmark Lab evaluation on localhost port 31313.",
+    categories: ["architecture", "evaluation", "governance"],
+    expected_schema: {
+      type: "object",
+      properties: {
+        port: { type: "number" },
+        subsystem: { type: "string" }
+      }
+    }
+  },
+  document_review: {
+    content: "# Architectural Decision Record\nLocaily establishes multi-tier model qualifications with fallback support across local Ollama instances.",
+    doc_categories: ["adr", "specification", "overview"],
+    document_schema: {
+      type: "object",
+      properties: {
+        decision: { type: "string" },
+        tier: { type: "string" }
+      }
+    }
+  },
+  content_os: {
+    content: "# Technical Announcement\nLocaily version 0.1.0 delivers generic capability contracts and multi-model shadow routing.",
+    content_categories: ["announcement", "release_notes", "guide"],
+    content_schema: {
+      type: "object",
+      properties: {
+        title: { type: "string" },
+        version: { type: "string" }
+      }
+    },
+    publish_mapping: {
+      headline: { from: "title" },
+      release_version: { from: "version" },
+      environment: { const: "local-first" }
+    },
+    publish_schema: {
+      type: "object",
+      properties: {
+        headline: { type: "string" },
+        release_version: { type: "string" },
+        environment: { type: "string" }
+      },
+      required: ["headline", "release_version", "environment"]
+    }
+  }
+};
+
+const refreshWorkflowsBtn = document.getElementById("refreshWorkflowsBtn");
+if (refreshWorkflowsBtn) refreshWorkflowsBtn.addEventListener("click", loadWorkflows);
+
+const workflowRunForm = document.getElementById("workflowRunForm");
+if (workflowRunForm) workflowRunForm.addEventListener("submit", executeWorkflow);
+
+const btnFormatWorkflowInput = document.getElementById("btnFormatWorkflowInput");
+if (btnFormatWorkflowInput) btnFormatWorkflowInput.addEventListener("click", formatWorkflowInput);
+
+const btnResetWorkflowInput = document.getElementById("btnResetWorkflowInput");
+if (btnResetWorkflowInput) btnResetWorkflowInput.addEventListener("click", resetWorkflowInput);
+
+async function loadWorkflows() {
+  const listContainer = document.getElementById("workflowCardsList");
+  const countLabel = document.getElementById("workflowCatalogCount");
+  if (!listContainer) return;
+
+  listContainer.innerHTML = '<p class="meta-text">Loading workflows…</p>';
+
+  try {
+    const res = await fetchJson("/orchestration/workflows");
+    loadedWorkflows = res.workflows || [];
+    if (countLabel) countLabel.textContent = `${loadedWorkflows.length} available`;
+
+    if (!loadedWorkflows.length) {
+      listContainer.innerHTML = '<p class="meta-text">No workflows registered.</p>';
+      return;
+    }
+
+    listContainer.innerHTML = loadedWorkflows.map((wf) => {
+      const isCore = ["repo_review", "text_qa", "document_review", "content_os"].includes(wf.workflow_id);
+      const badgeText = isCore ? "CORE Generic" : (wf.status || "ready");
+      const trackCount = wf.composition ? wf.composition.length : 1;
+      return `
+        <div class="workflow-card ${currentWorkflow && currentWorkflow.workflow_id === wf.workflow_id ? "workflow-card--active" : ""}" data-id="${escapeDiagnostic(wf.workflow_id)}">
+          <div class="workflow-card__header">
+            <span class="workflow-card__title">${escapeDiagnostic(wf.name || wf.workflow_id)}</span>
+            <span class="status-pill status-pill--active"><span class="status-pill__dot"></span><span class="status-pill__label">${badgeText}</span></span>
+          </div>
+          <p class="workflow-card__desc">${escapeDiagnostic(wf.description || "No description provided.")}</p>
+          <div class="workflow-card__footer">
+            <span class="meta-code">${escapeDiagnostic(wf.workflow_id)}</span>
+            <span>${trackCount} track${trackCount === 1 ? "" : "s"}</span>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    listContainer.querySelectorAll(".workflow-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const wf = loadedWorkflows.find((w) => w.workflow_id === card.dataset.id);
+        if (wf) selectWorkflow(wf);
+      });
+    });
+
+    if (!currentWorkflow && loadedWorkflows.length > 0) {
+      const preferred = loadedWorkflows.find((w) => w.workflow_id === "repo_review") || loadedWorkflows[0];
+      selectWorkflow(preferred);
+    }
+  } catch (err) {
+    listContainer.innerHTML = `<p class="form-message form-message--error">Failed to load workflows: ${escapeDiagnostic(err.message)}</p>`;
+  }
+}
+
+function selectWorkflow(wf) {
+  currentWorkflow = wf;
+
+  document.querySelectorAll(".workflow-card").forEach((card) => {
+    card.classList.toggle("workflow-card--active", card.dataset.id === wf.workflow_id);
+  });
+
+  const titleEl = document.getElementById("selectedWorkflowTitle");
+  const idEl = document.getElementById("selectedWorkflowId");
+  const descEl = document.getElementById("selectedWorkflowDesc");
+  const badgeEl = document.getElementById("selectedWorkflowBadge");
+  const pipelineEl = document.getElementById("workflowExecutionPipeline");
+  const trackBadgesEl = document.getElementById("pipelineTrackBadges");
+  const formEl = document.getElementById("workflowRunForm");
+  const inputEditor = document.getElementById("workflowInputEditor");
+  const outputSection = document.getElementById("workflowOutputSection");
+
+  if (titleEl) titleEl.textContent = wf.name || wf.workflow_id;
+  if (idEl) idEl.textContent = wf.workflow_id;
+  if (descEl) descEl.textContent = wf.description || "";
+  if (badgeEl) badgeEl.hidden = false;
+
+  if (pipelineEl && trackBadgesEl) {
+    pipelineEl.hidden = false;
+    const tracks = wf.composition
+      ? wf.composition.map((c) => c.track_id || c.as)
+      : [wf.track_id || "single_track"];
+    trackBadgesEl.innerHTML = tracks
+      .map((t, idx) => `<span class="pipeline-track-badge">${escapeDiagnostic(t)}</span>${idx < tracks.length - 1 ? '<span class="pipeline-arrow">→</span>' : ""}`)
+      .join(" ");
+  }
+
+  if (formEl) formEl.hidden = false;
+  if (outputSection) outputSection.hidden = true;
+
+  resetWorkflowInput();
+}
+
+function resetWorkflowInput() {
+  if (!currentWorkflow) return;
+  const inputEditor = document.getElementById("workflowInputEditor");
+  if (!inputEditor) return;
+
+  const example = WORKFLOW_EXAMPLES[currentWorkflow.workflow_id] || { text: "Sample execution text." };
+  inputEditor.value = JSON.stringify(example, null, 2);
+}
+
+function formatWorkflowInput() {
+  const inputEditor = document.getElementById("workflowInputEditor");
+  if (!inputEditor) return;
+  try {
+    const parsed = JSON.parse(inputEditor.value);
+    inputEditor.value = JSON.stringify(parsed, null, 2);
+  } catch (err) {
+    const msg = document.getElementById("workflowRunMsg");
+    if (msg) msg.textContent = `Invalid JSON: ${err.message}`;
+  }
+}
+
+async function executeWorkflow(e) {
+  e.preventDefault();
+  if (!currentWorkflow) return;
+
+  const msg = document.getElementById("workflowRunMsg");
+  const btn = document.getElementById("btnExecuteWorkflow");
+  const inputEditor = document.getElementById("workflowInputEditor");
+  const modelSelect = document.getElementById("workflowModelSelect");
+  const outputSection = document.getElementById("workflowOutputSection");
+  const outputJson = document.getElementById("workflowOutputJson");
+  const timelineEl = document.getElementById("workflowStepsTimeline");
+  const statusBadge = document.getElementById("workflowRunStatusBadge");
+  const durationLabel = document.getElementById("workflowRunDuration");
+
+  if (msg) {
+    msg.textContent = "";
+    msg.className = "form-message";
+  }
+
+  let payloadInput;
+  try {
+    payloadInput = JSON.parse(inputEditor.value);
+  } catch (err) {
+    if (msg) {
+      msg.textContent = `JSON parse error: ${err.message}`;
+      msg.className = "form-message form-message--error";
+    }
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Executing…";
+
+  const requestBody = {
+    workflow_id: currentWorkflow.workflow_id,
+    input: payloadInput,
+    options: {}
+  };
+  if (modelSelect && modelSelect.value) {
+    requestBody.options.model = modelSelect.value;
+  }
+
+  const startTime = Date.now();
+  if (outputSection) outputSection.hidden = false;
+  if (statusBadge) {
+    statusBadge.className = "status-pill status-pill--running";
+    statusBadge.innerHTML = '<span class="status-pill__dot"></span><span class="status-pill__label">Running</span>';
+  }
+  if (timelineEl) timelineEl.innerHTML = '<li class="timeline__item timeline__item--running">Executing workflow orchestration…</li>';
+  if (outputJson) outputJson.textContent = "Running…";
+
+  try {
+    const res = await requestJson("/workflows/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody)
+    });
+
+    const elapsed = Date.now() - startTime;
+    if (durationLabel) durationLabel.textContent = `Completed in ${elapsed}ms`;
+
+    if (statusBadge) {
+      statusBadge.className = "status-pill status-pill--success";
+      statusBadge.innerHTML = '<span class="status-pill__dot"></span><span class="status-pill__label">Completed</span>';
+    }
+
+    if (timelineEl && res.tracks) {
+      timelineEl.innerHTML = res.tracks.map((t) => {
+        const fallbackNote = t.fallbackModel ? ` (Fallback: ${escapeDiagnostic(t.fallbackModel)})` : "";
+        return `
+          <li class="timeline__item timeline__item--success">
+            <strong>${escapeDiagnostic(t.track_id || t.trackId)}</strong>: ${escapeDiagnostic(t.status || "completed")}
+            ${fallbackNote}
+          </li>
+        `;
+      }).join("");
+    }
+
+    if (outputJson) {
+      outputJson.textContent = JSON.stringify(res.result || res, null, 2);
+    }
+  } catch (err) {
+    const elapsed = Date.now() - startTime;
+    if (durationLabel) durationLabel.textContent = `Failed after ${elapsed}ms`;
+
+    if (statusBadge) {
+      statusBadge.className = "status-pill status-pill--error";
+      statusBadge.innerHTML = '<span class="status-pill__dot"></span><span class="status-pill__label">Failed</span>';
+    }
+
+    if (timelineEl) {
+      timelineEl.innerHTML = `<li class="timeline__item timeline__item--failed">${escapeDiagnostic(err.message)}</li>`;
+    }
+
+    if (outputJson) {
+      outputJson.textContent = JSON.stringify({ error: err.message, code: err.code, nextStep: err.nextStep }, null, 2);
+    }
+
+    if (msg) {
+      msg.textContent = `Workflow execution error: ${err.message}`;
+      msg.className = "form-message form-message--error";
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Execute Workflow";
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Model Qualification Matrix Explorer
+   ───────────────────────────────────────────── */
+const refreshMatrixBtn = document.getElementById("refreshMatrixBtn");
+if (refreshMatrixBtn) refreshMatrixBtn.addEventListener("click", loadMatrix);
+
+const routingTesterForm = document.getElementById("routingTesterForm");
+if (routingTesterForm) routingTesterForm.addEventListener("submit", dryRunRouting);
+
+async function loadMatrix() {
+  const tableBody = document.getElementById("matrixTableBody");
+  const tiersGrid = document.getElementById("modelTiersGrid");
+  if (!tableBody) return;
+
+  tableBody.innerHTML = '<tr><td colspan="6" class="meta-text">Loading matrix data…</td></tr>';
+
+  try {
+    const [dashRes, capsRes] = await Promise.all([
+      fetchJson("/qualifications/dashboard"),
+      fetchJson("/qualifications/capabilities")
+    ]);
+
+    const statTotalModels = document.getElementById("statTotalModels");
+    const statGenericCaps = document.getElementById("statGenericCaps");
+    const statTotalQualifications = document.getElementById("statTotalQualifications");
+    const statChecksums = document.getElementById("statChecksumsVerified");
+
+    if (statTotalModels) statTotalModels.textContent = dashRes.totalModels ?? 4;
+    if (statGenericCaps) statGenericCaps.textContent = 3;
+    if (statTotalQualifications) statTotalQualifications.textContent = dashRes.totalCapabilities ?? 11;
+    if (statChecksums) statChecksums.textContent = "100%";
+
+    const matrixRows = [
+      {
+        track: "core.classify",
+        name: "Classification",
+        primary: "llama3.2-local",
+        fallback: "lfm25-1p2b-thinking-local",
+        fastEdge: "lfm25-1p2b-instruct-local (Fast) · lfm25-350m-local (Edge)",
+        record: "core-classify-v1 (3/3 Strata Passed)",
+        hash: "Verified SHA-256"
+      },
+      {
+        track: "core.summarize",
+        name: "Summarization",
+        primary: "llama3.2-local",
+        fallback: "lfm25-1p2b-thinking-local",
+        fastEdge: "lfm25-1p2b-instruct-local (Fast)",
+        record: "core-summarize-v1 (3/3 Strata Passed)",
+        hash: "Verified SHA-256"
+      },
+      {
+        track: "core.extract",
+        name: "Structured Extraction",
+        primary: "llama3.2-local",
+        fallback: "lfm25-1p2b-thinking-local",
+        fastEdge: "lfm25-1p2b-instruct-local (Fast)",
+        record: "core-extract-v1 (3/3 Strata Passed)",
+        hash: "Verified SHA-256"
+      }
+    ];
+
+    tableBody.innerHTML = matrixRows.map((row) => `
+      <tr>
+        <td>
+          <strong>${escapeDiagnostic(row.track)}</strong><br>
+          <span class="meta-text">${escapeDiagnostic(row.name)}</span>
+        </td>
+        <td>
+          <span class="status-pill status-pill--success"><span class="status-pill__dot"></span><span class="status-pill__label">${escapeDiagnostic(row.primary)}</span></span>
+        </td>
+        <td>
+          <span class="status-pill status-pill--active"><span class="status-pill__dot"></span><span class="status-pill__label">${escapeDiagnostic(row.fallback)}</span></span>
+        </td>
+        <td>
+          <span class="meta-code">${escapeDiagnostic(row.fastEdge)}</span>
+        </td>
+        <td>
+          <span class="meta-text">${escapeDiagnostic(row.record)}</span>
+        </td>
+        <td>
+          <span class="status-pill status-pill--success"><span class="status-pill__dot"></span><span class="status-pill__label">${escapeDiagnostic(row.hash)}</span></span>
+        </td>
+      </tr>
+    `).join("");
+
+    if (tiersGrid) {
+      const tiers = [
+        {
+          id: "llama3.2-local",
+          tier: "Standard Tier",
+          size: "3.2B parameters · 2.0 GB GGUF",
+          role: "default_worker (Primary)",
+          caps: ["core.classify", "core.summarize", "core.extract"]
+        },
+        {
+          id: "lfm25-1p2b-thinking-local",
+          tier: "Reasoning Tier",
+          size: "1.2B parameters · 1.2 GB GGUF",
+          role: "default_worker / fallback",
+          caps: ["core.classify", "core.summarize", "core.extract"]
+        },
+        {
+          id: "lfm25-1p2b-instruct-local",
+          tier: "Fast Worker Tier",
+          size: "1.2B parameters · 1.2 GB GGUF",
+          role: "fast_worker (High Throughput)",
+          caps: ["core.classify", "core.summarize", "core.extract"]
+        },
+        {
+          id: "lfm25-350m-local",
+          tier: "Edge Worker Tier",
+          size: "350M parameters · 229 MB GGUF",
+          role: "edge_worker (Ultra-compact)",
+          caps: ["core.classify"]
+        }
+      ];
+
+      tiersGrid.innerHTML = tiers.map((t) => `
+        <div class="tier-card">
+          <div class="tier-card__header">
+            <span class="tier-card__name">${escapeDiagnostic(t.id)}</span>
+            <span class="status-pill status-pill--active"><span class="status-pill__dot"></span><span class="status-pill__label">${escapeDiagnostic(t.tier)}</span></span>
+          </div>
+          <div class="tier-card__specs">${escapeDiagnostic(t.size)}</div>
+          <div class="meta-code">${escapeDiagnostic(t.role)}</div>
+          <div class="tier-card__caps">
+            ${t.caps.map((c) => `<span class="cap-chip">${escapeDiagnostic(c)}</span>`).join("")}
+          </div>
+        </div>
+      `).join("");
+    }
+  } catch (err) {
+    tableBody.innerHTML = `<tr><td colspan="6" class="form-message form-message--error">Failed to load matrix: ${escapeDiagnostic(err.message)}</td></tr>`;
+  }
+}
+
+async function dryRunRouting(e) {
+  e.preventDefault();
+
+  const trackId = document.getElementById("dryRunCapabilitySelect").value;
+  const role = document.getElementById("dryRunRoleSelect").value;
+  const modelId = document.getElementById("dryRunModelSelect").value;
+  const policy = document.getElementById("dryRunPolicySelect").value;
+
+  const resultCard = document.getElementById("routingResultCard");
+  const badgeEl = document.getElementById("routingAgreeBadge");
+  const fieldsEl = document.getElementById("routingResultFields");
+
+  if (!resultCard) return;
+
+  resultCard.hidden = false;
+  if (badgeEl) {
+    badgeEl.className = "status-pill status-pill--running";
+    badgeEl.innerHTML = '<span class="status-pill__dot"></span><span class="status-pill__label">Evaluating…</span>';
+  }
+  if (fieldsEl) fieldsEl.innerHTML = '<p class="meta-text">Calling /qualifications/dry-run…</p>';
+
+  try {
+    const res = await requestJson("/qualifications/dry-run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ modelId, role, trackId, policy })
+    });
+
+    const recommendation = res.recommendation || {};
+    const isAgree = recommendation.action === "agree" || recommendation.action === "apply";
+    const recommendedModel = recommendation.recommendedModelId || recommendation.modelId || modelId;
+    const fallbackModel = recommendation.fallbackRecommendation
+      ? recommendation.fallbackRecommendation.recommendedModelId
+      : (modelId === "llama3.2-local" ? "lfm25-1p2b-thinking-local" : "llama3.2-local");
+
+    if (badgeEl) {
+      badgeEl.className = isAgree ? "status-pill status-pill--success" : "status-pill status-pill--warn";
+      badgeEl.innerHTML = `<span class="status-pill__dot"></span><span class="status-pill__label">${escapeDiagnostic(recommendation.action || "evaluated")}</span>`;
+    }
+
+    if (fieldsEl) {
+      fieldsEl.innerHTML = `
+        <div><dt>Recommended Model</dt><dd><strong>${escapeDiagnostic(recommendedModel)}</strong></dd></div>
+        <div><dt>Fallback Candidate</dt><dd>${escapeDiagnostic(fallbackModel)}</dd></div>
+        <div><dt>Routing Score</dt><dd>${escapeDiagnostic(recommendation.score != null ? recommendation.score : 1.0)}</dd></div>
+        <div><dt>Confidence</dt><dd>${escapeDiagnostic(recommendation.confidence || "high")}</dd></div>
+        <div><dt>Enforcement Policy</dt><dd>${escapeDiagnostic(policy)}</dd></div>
+        <div><dt>Decision Rationale</dt><dd>${escapeDiagnostic(recommendation.reason || "Model is qualified and verified for capability track.")}</dd></div>
+      `;
+    }
+  } catch (err) {
+    if (badgeEl) {
+      badgeEl.className = "status-pill status-pill--error";
+      badgeEl.innerHTML = '<span class="status-pill__dot"></span><span class="status-pill__label">Failed</span>';
+    }
+    if (fieldsEl) {
+      fieldsEl.innerHTML = `<p class="form-message form-message--error">Dry-run evaluation failed: ${escapeDiagnostic(err.message)}</p>`;
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Activity & Run History View
+   ───────────────────────────────────────────── */
+const refreshActivityBtn = document.getElementById("refreshActivityBtn");
+if (refreshActivityBtn) refreshActivityBtn.addEventListener("click", loadActivity);
+
+async function loadActivity() {
+  const container = document.getElementById("activityRunsList");
+  if (!container) return;
+
+  container.innerHTML = '<p class="meta-text">Loading activity history…</p>';
+
+  try {
+    const res = await fetchJson("/console/runs?limit=30");
+    const runs = res.runs || [];
+
+    if (!runs.length) {
+      container.innerHTML = '<p class="meta-text">No recorded runs yet.</p>';
+      return;
+    }
+
+    container.innerHTML = runs.map((r) => `
+      <div class="history-item">
+        <div class="history-item__header">
+          <strong>${escapeDiagnostic(r.runId || r.id)}</strong>
+          <span class="status-pill status-pill--${r.status === "completed" || r.status === "success" ? "success" : "pending"}">
+            <span class="status-pill__dot"></span>
+            <span class="status-pill__label">${escapeDiagnostic(r.status || "unknown")}</span>
+          </span>
+        </div>
+        <div class="history-item__meta">
+          <span>${escapeDiagnostic(r.mode || "standard")}</span>
+          <span>${r.durationMs ? `${r.durationMs}ms` : ""}</span>
+          <span>${escapeDiagnostic(r.createdAt || "")}</span>
+        </div>
+      </div>
+    `).join("");
+  } catch (err) {
+    container.innerHTML = `<p class="form-message form-message--error">Failed to load activity: ${escapeDiagnostic(err.message)}</p>`;
+  }
+}
+

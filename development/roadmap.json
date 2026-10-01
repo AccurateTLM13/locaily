@@ -1,7 +1,7 @@
 {
   "schema": "locaily.development.roadmap.v1",
   "project": "locaily",
-  "updatedAt": "2026-09-30T23:26:55.142Z",
+  "updatedAt": "2026-10-01T22:57:22.672Z",
   "areas": [
     {
       "id": "local-brain",
@@ -177,7 +177,8 @@
           "description": "Dashboard, jobs, relay nodes, enqueue",
           "maturity": "implemented",
           "milestoneIds": [
-            "lh-product-bridge"
+            "lh-product-bridge",
+            "core-05-workflow-console-matrix-explorer"
           ]
         },
         {
@@ -417,6 +418,9 @@
       "px5-tester-package",
       "px6-external-validation-program",
       "px7-organic-discovery-loop"
+    ],
+    "core-05-workflow-console-matrix-explorer": [
+      "core-04-complete-generic-matrix-qualification"
     ]
   }
 }

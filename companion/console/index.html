@@ -32,173 +32,394 @@
       <div class="app-shell__body">
         <nav class="side-rail" aria-label="Primary navigation">
           <ul class="side-rail__list">
-            <li><a class="side-rail__link side-rail__link--active" href="/console" aria-current="page">Run</a></li>
-            <li><span class="side-rail__link side-rail__link--disabled">Workflows</span></li>
-            <li><span class="side-rail__link side-rail__link--disabled">Activity</span></li>
-            <li><span class="side-rail__link side-rail__link--disabled">System</span></li>
-            <li><span class="side-rail__link side-rail__link--disabled">Engine Room</span></li>
+            <li><a class="side-rail__link side-rail__link--active" href="#run" id="navRunLink" aria-current="page">Run</a></li>
+            <li><a class="side-rail__link" href="#workflows" id="navWorkflowsLink">Workflows</a></li>
+            <li><a class="side-rail__link" href="#matrix" id="navMatrixLink">Model Matrix</a></li>
+            <li><a class="side-rail__link" href="#activity" id="navActivityLink">Activity</a></li>
+            <li><a class="side-rail__link" href="/#benchmarks" target="_blank" rel="noopener">Benchmark Lab ↗</a></li>
           </ul>
         </nav>
 
         <main class="main-work-area">
-          <div class="workflow-grid">
-            <section class="surface workflow-launcher" aria-labelledby="launcherTitle">
-              <h2 id="launcherTitle" class="section-title">Lighthouse Handoff</h2>
-              <p class="section-subtitle">Turn PageSpeed data into an agent-ready handoff.</p>
+          <div id="runView" class="view-panel">
+            <div class="workflow-grid">
+              <section class="surface workflow-launcher" aria-labelledby="launcherTitle">
+                <h2 id="launcherTitle" class="section-title">Lighthouse Handoff</h2>
+                <p class="section-subtitle">Turn PageSpeed data into an agent-ready handoff.</p>
 
-              <form id="runForm" class="launcher-form">
-                <div class="field">
-                  <label for="urlInput" class="field__label">URL</label>
-                  <input id="urlInput" name="url" type="url" class="field__input" placeholder="https://example.com/" required>
-                </div>
-
-                <fieldset class="mode-selector">
-                  <legend class="field__label">Mode</legend>
-                  <div class="mode-selector__options" role="radiogroup" aria-label="Workflow mode">
-                    <button type="button" class="mode-option mode-option--active" data-mode="standard" aria-pressed="true">Standard</button>
-                    <button type="button" class="mode-option" data-mode="l2_ollama" aria-pressed="false">Local AI</button>
-                    <button type="button" class="mode-option" data-mode="l2_ollama_memory" aria-pressed="false">Local AI + Memory</button>
+                <form id="runForm" class="launcher-form">
+                  <div class="field">
+                    <label for="urlInput" class="field__label">URL</label>
+                    <input id="urlInput" name="url" type="url" class="field__input" placeholder="https://example.com/" required>
                   </div>
-                  <input type="hidden" name="mode" id="modeInput" value="standard">
-                </fieldset>
 
-                <div class="field" id="modelField">
-                  <label for="modelInput" class="field__label">Ollama model override</label>
-                  <input
-                    id="modelInput"
-                    name="model"
-                    type="text"
-                    class="field__input"
-                    placeholder="llama3.2 or hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF"
-                    autocomplete="off"
-                  >
-                  <p class="field__hint">Optional. Used for Local AI modes only. Leave blank to use server default (<code>llama3.2</code>).</p>
+                  <fieldset class="mode-selector">
+                    <legend class="field__label">Mode</legend>
+                    <div class="mode-selector__options" role="radiogroup" aria-label="Workflow mode">
+                      <button type="button" class="mode-option mode-option--active" data-mode="standard" aria-pressed="true">Standard</button>
+                      <button type="button" class="mode-option" data-mode="l2_ollama" aria-pressed="false">Local AI</button>
+                      <button type="button" class="mode-option" data-mode="l2_ollama_memory" aria-pressed="false">Local AI + Memory</button>
+                    </div>
+                    <input type="hidden" name="mode" id="modeInput" value="standard">
+                  </fieldset>
+
+                  <div class="field" id="modelField">
+                    <label for="modelInput" class="field__label">Ollama model override</label>
+                    <input
+                      id="modelInput"
+                      name="model"
+                      type="text"
+                      class="field__input"
+                      placeholder="llama3.2 or hf.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF"
+                      autocomplete="off"
+                    >
+                    <p class="field__hint">Optional. Used for Local AI modes only. Leave blank to use server default (<code>llama3.2</code>).</p>
+                  </div>
+
+                  <div class="setup-actions">
+                    <button id="setupPageSpeedButton" type="button" class="btn btn--setup">Add PageSpeed API key</button>
+                    <button id="setupMemoryButton" type="button" class="btn btn--setup">Add Memory vault path</button>
+                  </div>
+
+                  <div class="launcher-actions">
+                    <button id="runButton" type="submit" class="btn btn--primary">Run Validation</button>
+                    <button id="demoButton" type="button" class="btn btn--demo">Run Demo</button>
+                    <button id="pasteReportButton" type="button" class="btn btn--secondary">Use pasted report</button>
+                  </div>
+                  <p id="runnerMessage" class="form-message" role="status"></p>
+                </form>
+              </section>
+
+              <section class="surface readiness-checklist" aria-labelledby="readinessTitle">
+                <div class="section-header">
+                  <h2 id="readinessTitle" class="section-title">Readiness</h2>
+                  <span id="statusTimestamp" class="meta-text">Not loaded</span>
                 </div>
+                <ul id="readinessList" class="readiness-list" aria-live="polite"></ul>
+                <div id="preflightWarnings" class="readiness-warnings" aria-live="polite"></div>
+              </section>
 
-                <div class="setup-actions">
-                  <button id="setupPageSpeedButton" type="button" class="btn btn--setup">Add PageSpeed API key</button>
-                  <button id="setupMemoryButton" type="button" class="btn btn--setup">Add Memory vault path</button>
+              <section class="surface run-timeline" aria-labelledby="timelineTitle">
+                <div class="section-header">
+                  <h2 id="timelineTitle" class="section-title">Run Timeline</h2>
+                  <span id="activeRunLabel" class="meta-text">No active run</span>
                 </div>
+                <ol id="pipelineSteps" class="timeline" aria-live="polite"></ol>
+              </section>
 
+              <section class="surface result-summary" aria-labelledby="resultTitle">
+                <div class="section-header">
+                  <h2 id="resultTitle" class="section-title">Result</h2>
+                  <span id="resultStatus" class="status-pill status-pill--pending">
+                    <span class="status-pill__dot" aria-hidden="true"></span>
+                    <span class="status-pill__label">Waiting</span>
+                  </span>
+                </div>
+                <dl id="resultsSummary" class="result-fields"></dl>
+              </section>
+
+              <section class="surface run-inspector" aria-labelledby="inspectorTitle" hidden>
+                <div class="section-header">
+                  <h2 id="inspectorTitle" class="section-title">Run Inspector</h2>
+                  <span id="inspectorStatus" class="meta-text">Inspecting run…</span>
+                </div>
+                <div id="inspectorSteps" class="inspector-steps"></div>
+                <div id="inspectorActions" class="inspector-actions">
+                  <button id="exportArtifactButton" type="button" class="btn btn--primary" hidden>Export Artifact</button>
+                  <button id="humanGateLink" type="button" class="btn btn--secondary" hidden>Review Required</button>
+                </div>
+              </section>
+            </div>
+
+            <details id="advancedDisclosure" class="advanced-disclosure">
+              <summary>Advanced details</summary>
+              <div class="advanced-disclosure__body">
+                <div id="setupPanels" class="setup-panels">
+                  <section id="pasteReportPanel" class="setup-panel" hidden>
+                    <h3>Pasted PageSpeed report</h3>
+                    <p class="meta-text">Paste raw PageSpeed JSON to skip live capture when the API key is missing or quota is limited.</p>
+                    <label for="pastedReportInput" class="field__label">Report JSON</label>
+                    <textarea id="pastedReportInput" class="field__textarea" rows="8" placeholder="{ &quot;lighthouseResult&quot;: ... }"></textarea>
+                    <div class="launcher-actions">
+                      <button id="runPastedReportButton" type="button" class="btn btn--primary">Run with pasted report</button>
+                      <button id="clearPastedReportButton" type="button" class="btn btn--secondary">Clear</button>
+                    </div>
+                    <p id="pasteReportMessage" class="form-message" role="status"></p>
+                  </section>
+                  <section id="pageSpeedSetupPanel" class="setup-panel" hidden>
+                    <h3>PageSpeed API key</h3>
+                    <p class="meta-text">Saved locally for this machine only. The key is never shown after save.</p>
+                    <form id="pageSpeedSetupForm" class="setup-form">
+                      <label for="pageSpeedKeyInput" class="field__label">API key</label>
+                      <input id="pageSpeedKeyInput" type="password" class="field__input" autocomplete="off" placeholder="Enter PageSpeed Insights API key">
+                      <button type="submit" class="btn btn--primary">Save key</button>
+                    </form>
+                    <p id="pageSpeedSetupMessage" class="form-message" role="status"></p>
+                  </section>
+                  <section id="memorySetupPanel" class="setup-panel" hidden>
+                    <h3>Memory vault path</h3>
+                    <p class="meta-text">Local path for validation memory. Only configured/not configured is shown in the main view.</p>
+                    <form id="memorySetupForm" class="setup-form">
+                      <label for="memoryPathInput" class="field__label">Vault path</label>
+                      <input id="memoryPathInput" type="text" class="field__input" autocomplete="off" placeholder="Path to memory vault">
+                      <button type="submit" class="btn btn--primary">Save path</button>
+                    </form>
+                    <p id="memorySetupMessage" class="form-message" role="status"></p>
+                  </section>
+                </div>
+                <section class="setup-panel benchmark-diagnostics" aria-labelledby="benchmarkDiagnosticsTitle">
+                  <div class="section-header">
+                    <div>
+                      <h3 id="benchmarkDiagnosticsTitle">Benchmark Lab diagnostics</h3>
+                      <p class="meta-text">Read-only model and run state. Launch benchmarks from the unified workspace.</p>
+                    </div>
+                    <button id="refreshBenchmarkDiagnosticsButton" type="button" class="btn btn--ghost">Refresh</button>
+                  </div>
+                  <div id="benchmarkDiagnostics" class="benchmark-diagnostics__body" aria-live="polite">Not loaded.</div>
+                  <a class="btn btn--secondary" href="/#benchmarks">Open Interactive Model Lab</a>
+                  <div class="setup-form" aria-labelledby="qualificationCommandTitle">
+                    <h4 id="qualificationCommandTitle">Qualification record command</h4>
+                    <p class="meta-text">Generate the safe CLI command here, then run it from the repository terminal. Replacement remains explicit.</p>
+                    <label for="qualificationModelInput" class="field__label">Model manifest ID</label>
+                    <input id="qualificationModelInput" class="field__input" type="text" autocomplete="off">
+                    <label for="qualificationEvidenceInput" class="field__label">Promoted evidence ID</label>
+                    <input id="qualificationEvidenceInput" class="field__input" type="text" autocomplete="off">
+                    <label><input id="qualificationOverwriteInput" type="checkbox"> Replace a differing existing record</label>
+                    <button id="copyQualificationCommandButton" type="button" class="btn btn--secondary">Copy qualification command</button>
+                    <p id="qualificationCommandMessage" class="form-message" role="status"></p>
+                  </div>
+                </section>
+                <div id="validationEvidence" class="advanced-blocks"></div>
+                <pre id="markdownPreview" class="code-block">Run a validation to preview the generated handoff.</pre>
+                <div id="historySection" class="history-section">
+                  <div class="section-header">
+                    <h3>Run history</h3>
+                    <button id="refreshRunsButton" type="button" class="btn btn--ghost">Refresh</button>
+                  </div>
+                  <div id="historyList" class="history-list" aria-live="polite"></div>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- Workflows View Panel -->
+          <div id="workflowsView" class="view-panel" hidden>
+            <div class="view-header">
+              <div>
+                <h2 class="section-title">Generic Multi-Track Workflows</h2>
+                <p class="section-subtitle">Compose, configure, and execute core capability tracks with local model routing and fallback protection.</p>
+              </div>
+              <button id="refreshWorkflowsBtn" type="button" class="btn btn--ghost">Refresh Workflows</button>
+            </div>
+
+            <div class="workflow-catalog-grid">
+              <div class="workflow-cards-col">
+                <div class="section-header">
+                  <h3 class="section-title">Workflow Catalog</h3>
+                  <span id="workflowCatalogCount" class="meta-text">Loading…</span>
+                </div>
+                <div id="workflowCardsList" class="workflow-cards-list"></div>
+              </div>
+
+              <div class="workflow-runner-col">
+                <section class="surface workflow-runner-surface">
+                  <div class="section-header">
+                    <div>
+                      <h3 id="selectedWorkflowTitle" class="section-title">Select a Workflow</h3>
+                      <span id="selectedWorkflowId" class="meta-code"></span>
+                    </div>
+                    <span id="selectedWorkflowBadge" class="status-pill status-pill--pending" hidden>
+                      <span class="status-pill__dot"></span>
+                      <span class="status-pill__label">Ready</span>
+                    </span>
+                  </div>
+                  <p id="selectedWorkflowDesc" class="meta-text">Choose a workflow from the catalog on the left to configure input and execute.</p>
+                  
+                  <div id="workflowExecutionPipeline" class="pipeline-flow" hidden>
+                    <div class="field__label">Track Execution Pipeline</div>
+                    <div id="pipelineTrackBadges" class="pipeline-track-badges"></div>
+                  </div>
+
+                  <form id="workflowRunForm" class="workflow-run-form" hidden>
+                    <div class="field">
+                      <div class="field-header">
+                        <label for="workflowInputEditor" class="field__label">Input Payload (JSON)</label>
+                        <button id="btnFormatWorkflowInput" type="button" class="btn btn--xs btn--ghost">Format JSON</button>
+                      </div>
+                      <textarea id="workflowInputEditor" class="field__textarea field__textarea--code" rows="9" spellcheck="false"></textarea>
+                      <p class="field__hint" id="workflowInputHelp">Valid JSON matching the workflow input contract.</p>
+                    </div>
+
+                    <div class="field">
+                      <label for="workflowModelSelect" class="field__label">Primary Model Execution Mode</label>
+                      <select id="workflowModelSelect" class="field__input">
+                        <option value="">Auto-Route (Qualified Primary with Automatic Fallback)</option>
+                        <option value="llama3.2-local">llama3.2-local (3B · Qualified Primary)</option>
+                        <option value="lfm25-1p2b-thinking-local">lfm25-1p2b-thinking-local (1.2B · Qualified Reasoning / Fallback)</option>
+                        <option value="lfm25-1p2b-instruct-local">lfm25-1p2b-instruct-local (1.2B · Qualified Fast Worker)</option>
+                        <option value="lfm25-350m-local">lfm25-350m-local (350M · Qualified Edge Worker)</option>
+                      </select>
+                    </div>
+
+                    <div class="launcher-actions">
+                      <button id="btnExecuteWorkflow" type="submit" class="btn btn--primary">Execute Workflow</button>
+                      <button id="btnResetWorkflowInput" type="button" class="btn btn--secondary">Reset Example Input</button>
+                    </div>
+                    <p id="workflowRunMsg" class="form-message" role="status"></p>
+                  </form>
+
+                  <div id="workflowOutputSection" class="workflow-output-section" hidden>
+                    <div class="section-header">
+                      <div>
+                        <h4>Execution Results</h4>
+                        <span id="workflowRunDuration" class="meta-text"></span>
+                      </div>
+                      <span id="workflowRunStatusBadge" class="status-pill">
+                        <span class="status-pill__dot"></span>
+                        <span class="status-pill__label"></span>
+                      </span>
+                    </div>
+                    <div id="workflowStepsTimeline" class="timeline"></div>
+                    <div class="field__label">Result Artifacts</div>
+                    <pre id="workflowOutputJson" class="code-block"></pre>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+
+          <!-- Model Qualification Matrix View Panel -->
+          <div id="matrixView" class="view-panel" hidden>
+            <div class="view-header">
+              <div>
+                <h2 class="section-title">Model Qualification Matrix & Shadow Router Explorer</h2>
+                <p class="section-subtitle">Local models qualified across generic capabilities, cryptographic checksum integrity, and shadow routing evaluation.</p>
+              </div>
+              <button id="refreshMatrixBtn" type="button" class="btn btn--ghost">Refresh Matrix</button>
+            </div>
+
+            <div class="matrix-stats-grid">
+              <div class="surface stat-card">
+                <div class="stat-card__number" id="statTotalModels">4</div>
+                <div class="stat-card__label">Qualified Local Models</div>
+              </div>
+              <div class="surface stat-card">
+                <div class="stat-card__number" id="statGenericCaps">3</div>
+                <div class="stat-card__label">Generic Core Tracks</div>
+              </div>
+              <div class="surface stat-card">
+                <div class="stat-card__number" id="statTotalQualifications">11</div>
+                <div class="stat-card__label">Qualification Records</div>
+              </div>
+              <div class="surface stat-card">
+                <div class="stat-card__number stat-card__number--success" id="statChecksumsVerified">100%</div>
+                <div class="stat-card__label">SHA-256 Checksums Verified</div>
+              </div>
+            </div>
+
+            <section class="surface matrix-table-surface">
+              <div class="section-header">
+                <div>
+                  <h3 class="section-title">Generic Capabilities Matrix</h3>
+                  <p class="section-subtitle">Verified multi-tier coverage across all generic capabilities.</p>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="matrix-table" id="matrixTable">
+                  <thead>
+                    <tr>
+                      <th>Capability Track</th>
+                      <th>Primary Model</th>
+                      <th>Fallback Model</th>
+                      <th>Fast / Edge Worker Tier</th>
+                      <th>Qualification Record</th>
+                      <th>SHA-256 Integrity</th>
+                    </tr>
+                  </thead>
+                  <tbody id="matrixTableBody"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <div class="model-tiers-section">
+              <h3 class="section-title">Local Model Tiers</h3>
+              <p class="section-subtitle">Architectural tiers matching hardware constraints and throughput requirements.</p>
+              <div class="model-tiers-grid" id="modelTiersGrid"></div>
+            </div>
+
+            <section class="surface routing-tester-surface">
+              <div class="section-header">
+                <div>
+                  <h3 class="section-title">Interactive Shadow Routing & Fallback Tester</h3>
+                  <p class="section-subtitle">Test capability routing decisions, inspect agreement confidence, and preview fallback candidates in real time.</p>
+                </div>
+              </div>
+              <form id="routingTesterForm" class="routing-tester-form">
+                <div class="fields-row">
+                  <div class="field">
+                    <label for="dryRunCapabilitySelect" class="field__label">Capability Track</label>
+                    <select id="dryRunCapabilitySelect" class="field__input">
+                      <option value="core.classify">core.classify (Classification)</option>
+                      <option value="core.summarize">core.summarize (Summarization)</option>
+                      <option value="core.extract">core.extract (Structured Extraction)</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="dryRunRoleSelect" class="field__label">Role</label>
+                    <select id="dryRunRoleSelect" class="field__input">
+                      <option value="default_worker">default_worker (Standard Execution)</option>
+                      <option value="fast_worker">fast_worker (High Throughput)</option>
+                      <option value="edge_worker">edge_worker (Ultra-compact / Edge)</option>
+                      <option value="reasoning_worker">reasoning_worker (Deep Reasoning)</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="dryRunModelSelect" class="field__label">Current Candidate Model</label>
+                    <select id="dryRunModelSelect" class="field__input">
+                      <option value="llama3.2-local">llama3.2-local (3B)</option>
+                      <option value="lfm25-1p2b-thinking-local">lfm25-1p2b-thinking-local (1.2B)</option>
+                      <option value="lfm25-1p2b-instruct-local">lfm25-1p2b-instruct-local (1.2B)</option>
+                      <option value="lfm25-350m-local">lfm25-350m-local (350M)</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="dryRunPolicySelect" class="field__label">Policy Mode</label>
+                    <select id="dryRunPolicySelect" class="field__input">
+                      <option value="shadow">shadow (Recommendation / No Blocking)</option>
+                      <option value="enforce">enforce (Strict Qualification Gate)</option>
+                    </select>
+                  </div>
+                </div>
                 <div class="launcher-actions">
-                  <button id="runButton" type="submit" class="btn btn--primary">Run Validation</button>
-                  <button id="demoButton" type="button" class="btn btn--demo">Run Demo</button>
-                  <button id="pasteReportButton" type="button" class="btn btn--secondary">Use pasted report</button>
+                  <button id="btnDryRunRouting" type="submit" class="btn btn--primary">Evaluate Routing</button>
                 </div>
-                <p id="runnerMessage" class="form-message" role="status"></p>
               </form>
-            </section>
-
-            <section class="surface readiness-checklist" aria-labelledby="readinessTitle">
-              <div class="section-header">
-                <h2 id="readinessTitle" class="section-title">Readiness</h2>
-                <span id="statusTimestamp" class="meta-text">Not loaded</span>
-              </div>
-              <ul id="readinessList" class="readiness-list" aria-live="polite"></ul>
-              <div id="preflightWarnings" class="readiness-warnings" aria-live="polite"></div>
-            </section>
-
-            <section class="surface run-timeline" aria-labelledby="timelineTitle">
-              <div class="section-header">
-                <h2 id="timelineTitle" class="section-title">Run Timeline</h2>
-                <span id="activeRunLabel" class="meta-text">No active run</span>
-              </div>
-              <ol id="pipelineSteps" class="timeline" aria-live="polite"></ol>
-            </section>
-
-            <section class="surface result-summary" aria-labelledby="resultTitle">
-              <div class="section-header">
-                <h2 id="resultTitle" class="section-title">Result</h2>
-                <span id="resultStatus" class="status-pill status-pill--pending">
-                  <span class="status-pill__dot" aria-hidden="true"></span>
-                  <span class="status-pill__label">Waiting</span>
-                </span>
-              </div>
-              <dl id="resultsSummary" class="result-fields"></dl>
-            </section>
-
-            <section class="surface run-inspector" aria-labelledby="inspectorTitle" hidden>
-              <div class="section-header">
-                <h2 id="inspectorTitle" class="section-title">Run Inspector</h2>
-                <span id="inspectorStatus" class="meta-text">Inspecting run…</span>
-              </div>
-              <div id="inspectorSteps" class="inspector-steps"></div>
-              <div id="inspectorActions" class="inspector-actions">
-                <button id="exportArtifactButton" type="button" class="btn btn--primary" hidden>Export Artifact</button>
-                <button id="humanGateLink" type="button" class="btn btn--secondary" hidden>Review Required</button>
+              <div id="routingResultCard" class="routing-result-card" hidden>
+                <div class="section-header">
+                  <h4>Routing Evaluation Decision</h4>
+                  <span id="routingAgreeBadge" class="status-pill">
+                    <span class="status-pill__dot"></span>
+                    <span class="status-pill__label"></span>
+                  </span>
+                </div>
+                <dl id="routingResultFields" class="result-fields"></dl>
               </div>
             </section>
           </div>
 
-          <details id="advancedDisclosure" class="advanced-disclosure">
-            <summary>Advanced details</summary>
-            <div class="advanced-disclosure__body">
-              <div id="setupPanels" class="setup-panels">
-                <section id="pasteReportPanel" class="setup-panel" hidden>
-                  <h3>Pasted PageSpeed report</h3>
-                  <p class="meta-text">Paste raw PageSpeed JSON to skip live capture when the API key is missing or quota is limited.</p>
-                  <label for="pastedReportInput" class="field__label">Report JSON</label>
-                  <textarea id="pastedReportInput" class="field__textarea" rows="8" placeholder="{ &quot;lighthouseResult&quot;: ... }"></textarea>
-                  <div class="launcher-actions">
-                    <button id="runPastedReportButton" type="button" class="btn btn--primary">Run with pasted report</button>
-                    <button id="clearPastedReportButton" type="button" class="btn btn--secondary">Clear</button>
-                  </div>
-                  <p id="pasteReportMessage" class="form-message" role="status"></p>
-                </section>
-                <section id="pageSpeedSetupPanel" class="setup-panel" hidden>
-                  <h3>PageSpeed API key</h3>
-                  <p class="meta-text">Saved locally for this machine only. The key is never shown after save.</p>
-                  <form id="pageSpeedSetupForm" class="setup-form">
-                    <label for="pageSpeedKeyInput" class="field__label">API key</label>
-                    <input id="pageSpeedKeyInput" type="password" class="field__input" autocomplete="off" placeholder="Enter PageSpeed Insights API key">
-                    <button type="submit" class="btn btn--primary">Save key</button>
-                  </form>
-                  <p id="pageSpeedSetupMessage" class="form-message" role="status"></p>
-                </section>
-                <section id="memorySetupPanel" class="setup-panel" hidden>
-                  <h3>Memory vault path</h3>
-                  <p class="meta-text">Local path for validation memory. Only configured/not configured is shown in the main view.</p>
-                  <form id="memorySetupForm" class="setup-form">
-                    <label for="memoryPathInput" class="field__label">Vault path</label>
-                    <input id="memoryPathInput" type="text" class="field__input" autocomplete="off" placeholder="Path to memory vault">
-                    <button type="submit" class="btn btn--primary">Save path</button>
-                  </form>
-                  <p id="memorySetupMessage" class="form-message" role="status"></p>
-                </section>
+          <!-- Activity View Panel -->
+          <div id="activityView" class="view-panel" hidden>
+            <div class="view-header">
+              <div>
+                <h2 class="section-title">Activity & Run History</h2>
+                <p class="section-subtitle">Chronological ledger of workflow executions, validations, and orchestration runs.</p>
               </div>
-              <section class="setup-panel benchmark-diagnostics" aria-labelledby="benchmarkDiagnosticsTitle">
-                <div class="section-header">
-                  <div>
-                    <h3 id="benchmarkDiagnosticsTitle">Benchmark Lab diagnostics</h3>
-                    <p class="meta-text">Read-only model and run state. Launch benchmarks from the unified workspace.</p>
-                  </div>
-                  <button id="refreshBenchmarkDiagnosticsButton" type="button" class="btn btn--ghost">Refresh</button>
-                </div>
-                <div id="benchmarkDiagnostics" class="benchmark-diagnostics__body" aria-live="polite">Not loaded.</div>
-                <a class="btn btn--secondary" href="/#benchmarks">Open Interactive Model Lab</a>
-                <div class="setup-form" aria-labelledby="qualificationCommandTitle">
-                  <h4 id="qualificationCommandTitle">Qualification record command</h4>
-                  <p class="meta-text">Generate the safe CLI command here, then run it from the repository terminal. Replacement remains explicit.</p>
-                  <label for="qualificationModelInput" class="field__label">Model manifest ID</label>
-                  <input id="qualificationModelInput" class="field__input" type="text" autocomplete="off">
-                  <label for="qualificationEvidenceInput" class="field__label">Promoted evidence ID</label>
-                  <input id="qualificationEvidenceInput" class="field__input" type="text" autocomplete="off">
-                  <label><input id="qualificationOverwriteInput" type="checkbox"> Replace a differing existing record</label>
-                  <button id="copyQualificationCommandButton" type="button" class="btn btn--secondary">Copy qualification command</button>
-                  <p id="qualificationCommandMessage" class="form-message" role="status"></p>
-                </div>
-              </section>
-              <div id="validationEvidence" class="advanced-blocks"></div>
-              <pre id="markdownPreview" class="code-block">Run a validation to preview the generated handoff.</pre>
-              <div id="historySection" class="history-section">
-                <div class="section-header">
-                  <h3>Run history</h3>
-                  <button id="refreshRunsButton" type="button" class="btn btn--ghost">Refresh</button>
-                </div>
-                <div id="historyList" class="history-list" aria-live="polite"></div>
-              </div>
+              <button id="refreshActivityBtn" type="button" class="btn btn--ghost">Refresh Activity</button>
             </div>
-          </details>
+            <section class="surface activity-surface">
+              <div id="activityRunsList" class="history-list">Loading runs…</div>
+            </section>
+          </div>
         </main>
       </div>
     </div>

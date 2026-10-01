@@ -621,42 +621,47 @@ async function renderSystem() {
 // WORKFLOWS
 // ─────────────────────────────────────────────
 async function renderWorkflows() {
+  let workflows = [];
+  try {
+    const res = await fetchJson("/orchestration/workflows");
+    workflows = res.workflows || [];
+  } catch {
+    workflows = [];
+  }
+
+  const defaultRoutes = [
+    { id: "website_audit.lighthouse_handoff", title: "Website Accessibility & SEO Audit", desc: "Run Lighthouse handoff audit, prioritize WCAG AA contrast, and export agent markdown.", badge: "Tested · Local" },
+    { id: "lighthouse_handoff.accessibility_deep", title: "Deep Accessibility Scan", desc: "Full WCAG 2.1 AA check including headings, ARIA, keyboard navigation, and color contrast.", badge: "Tested · Local" },
+    { id: "website_audit.seo_audit", title: "SEO Audit", desc: "Structured SEO audit covering title, meta, canonical, structured data, and link health.", badge: "Tested · Local" },
+    { id: "website_audit.performance_budget", title: "Performance Budget Check", desc: "Verify FCP, LCP, CLS, and TBT against a performance budget envelope.", badge: "Tested · Local" },
+    { id: "status-handoff", title: "Capability Status Handoff", desc: "Evaluate project status events and emit structured handoff run records.", badge: "Tested · Kernel" },
+    { id: "operator-log-discovery", title: "Operator Log Discovery", desc: "Scan operator logs for patterns, anomalies, and actionable signals.", badge: "Tested · Operator" }
+  ];
+
+  const coreCards = workflows.filter(w => ["repo_review", "text_qa", "document_review", "content_os"].includes(w.workflow_id)).map(wf => ({
+    id: wf.workflow_id,
+    title: wf.name || wf.workflow_id,
+    desc: wf.description || "",
+    badge: "CORE · Generic"
+  }));
+
+  const allItems = [...coreCards, ...defaultRoutes];
+
+  const cardsHtml = allItems.map(item => `
+    <div class="route-card" onclick="openTaskModalWithRoute('${escapeHtml(item.id)}')">
+      <div class="route-card__title">${escapeHtml(item.title)}</div>
+      <div class="route-card__desc">${escapeHtml(item.desc)}</div>
+      <div class="route-card__badge">${escapeHtml(item.badge)}</div>
+    </div>
+  `).join("");
+
   setContent(`
     <div class="workbench-page">
       <div class="page-category">BUILD</div>
       <h1 class="page-title">Workflows & Recipes</h1>
-      <p class="page-desc">Registered execution workflows and track pipelines. Click to queue a run.</p>
+      <p class="page-desc">Registered execution workflows and composite track pipelines. Click to configure and run.</p>
       <div class="routes-grid">
-        <div class="route-card" onclick="openTaskModalWithRoute('website_audit.lighthouse_handoff')">
-          <div class="route-card__title">Website Accessibility & SEO Audit</div>
-          <div class="route-card__desc">Run Lighthouse handoff audit, prioritize WCAG AA contrast, and export agent markdown.</div>
-          <div class="route-card__badge">Tested · Local</div>
-        </div>
-        <div class="route-card" onclick="openTaskModalWithRoute('lighthouse_handoff.accessibility_deep')">
-          <div class="route-card__title">Deep Accessibility Scan</div>
-          <div class="route-card__desc">Full WCAG 2.1 AA check including headings, ARIA, keyboard navigation, and color contrast.</div>
-          <div class="route-card__badge">Tested · Local</div>
-        </div>
-        <div class="route-card" onclick="openTaskModalWithRoute('website_audit.seo_audit')">
-          <div class="route-card__title">SEO Audit</div>
-          <div class="route-card__desc">Structured SEO audit covering title, meta, canonical, structured data, and link health.</div>
-          <div class="route-card__badge">Tested · Local</div>
-        </div>
-        <div class="route-card" onclick="openTaskModalWithRoute('website_audit.performance_budget')">
-          <div class="route-card__title">Performance Budget Check</div>
-          <div class="route-card__desc">Verify FCP, LCP, CLS, and TBT against a performance budget envelope.</div>
-          <div class="route-card__badge">Tested · Local</div>
-        </div>
-        <div class="route-card" onclick="openTaskModalWithRoute('status-handoff')">
-          <div class="route-card__title">Capability Status Handoff</div>
-          <div class="route-card__desc">Evaluate project status events and emit structured handoff run records.</div>
-          <div class="route-card__badge">Tested · Kernel</div>
-        </div>
-        <div class="route-card" onclick="openTaskModalWithRoute('operator-log-discovery')">
-          <div class="route-card__title">Operator Log Discovery</div>
-          <div class="route-card__desc">Scan operator logs for patterns, anomalies, and actionable signals.</div>
-          <div class="route-card__badge">Tested · Operator</div>
-        </div>
+        ${cardsHtml}
       </div>
     </div>
   `);
@@ -1059,7 +1064,16 @@ window.openTaskModal = function() {
 
 window.openTaskModalWithRoute = function(routeId) {
   const select = qs("taskRoute");
-  if (select) select.value = routeId;
+  if (select) {
+    let opt = Array.from(select.options).find(o => o.value === routeId);
+    if (!opt) {
+      opt = document.createElement("option");
+      opt.value = routeId;
+      opt.textContent = routeId;
+      select.appendChild(opt);
+    }
+    select.value = routeId;
+  }
   const el = qs("taskModal");
   if (el) el.classList.remove("is-hidden");
 };

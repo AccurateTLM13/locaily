@@ -1,0 +1,65 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20261001-004",
+  "milestoneId": "core-05-workflow-console-matrix-explorer",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": "Activate the Workflows and Model Qualification Matrix Explorer views in the Companion Console UI (and update Unified Shell), allowing operators to view, configure, and trigger all 4 core generic workflows (repo_review, text_qa, document_review, content_os), inspect multi-tier qualified local models across generic capabilities, and test shadow routing with fallback recommendations live from the browser.",
+  "branch": "milestone/core-05-workflow-console-matrix-explorer",
+  "startingCommit": "af11add54b01e52d79aede21361a1c2b28c6a6be",
+  "plannedFiles": [
+    "companion/console/index.html",
+    "companion/console/app.js",
+    "companion/console/styles.css",
+    "companion/core/capability-registry.js",
+    "companion/shell/app.js",
+    "scripts/test-core05-console-matrix-explorer.js",
+    "package.json"
+  ],
+  "completedWork": [
+    "Activated Workflows, Model Matrix, and Activity navigation links in companion/console/index.html",
+    "Implemented view panel switching system in companion/console/app.js",
+    "Implemented generic workflows catalog and interactive workflow runner in companion/console/app.js with example payloads",
+    "Implemented Model Qualification Matrix table and model tier cards in companion/console/app.js",
+    "Implemented interactive shadow routing & fallback tester in companion/console/app.js",
+    "Integrated shadow router recommendations into capability-registry.js dryRunRecommendation",
+    "Updated companion/shell/app.js renderWorkflows to dynamically fetch from /orchestration/workflows and support generic workflows",
+    "Added styles for workflow cards, track pipelines, matrix tables, tier cards, and tester forms in companion/console/styles.css",
+    "Created acceptance test suite scripts/test-core05-console-matrix-explorer.js and wired test:core05 into test:full",
+    "Full repository test suite npm run test:full passing 100% green",
+    "CORE-05: Implemented Generic Workflows and Model Matrix Explorer in Console",
+    "Session closed"
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-10-01T23:03:59.365Z",
+      "message": "CORE-05: Implemented Generic Workflows and Model Matrix Explorer in Console",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-10-01T22:57:30.581Z",
+  "closedAt": "2026-10-01T23:04:03.575Z",
+  "closingCommit": "af11add54b01e52d79aede21361a1c2b28c6a6be",
+  "dirtyFiles": [
+    "companion/console/app.js",
+    "companion/console/index.html",
+    "companion/console/styles.css",
+    "companion/core/capability-registry.js",
+    "companion/shell/app.js",
+    "development/project-state.json",
+    "development/roadmap.json",
+    "docs/07-progress/work-closeout.json",
+    "package.json",
+    "development/milestones/core-05-workflow-console-matrix-explorer.json",
+    "development/sessions/session-20261001-004.json",
+    "scripts/test-core05-console-matrix-explorer.js"
+  ]
+}
