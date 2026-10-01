@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "core-02-generic-model-qualification",
   "title": "CORE-02 Generic Model Qualification: Benchmark Lab Suites and Qualified Routing for Core Capabilities",
-  "status": "active",
+  "status": "ready-for-delivery",
   "type": "feature",
   "priority": "high",
   "purpose": "Qualify local models on CORE-01 generic capabilities (classify, summarize, extract) via Benchmark Lab evaluation suites, evidence promotion, and qualification records to enable qualification-driven routing in multi-track workflows.",
@@ -76,10 +76,12 @@
   "lifecycleRef": null,
   "createdAt": "2026-09-30T23:50:00.000Z",
   "startedAt": "2026-10-01T01:47:08.802Z",
-  "completedAt": null,
+  "completedAt": "2026-10-01T02:08:59.984Z",
   "mergedAt": null,
   "preparedCommit": "df89e8c3b8556b26826cafe1e59773aad85cbd69",
   "preparedBranch": "milestone/core-02-generic-model-qualification",
   "preparedAt": "2026-10-01T02:07:52.684Z",
-  "latestValidationId": "validation-20261001T020555-b3197f9a"
+  "latestValidationId": "validation-20261001T020757-c32b8132",
+  "completionBranch": "milestone/core-02-generic-model-qualification",
+  "completionHead": "aa8a5a4112b3d24cbfb5d99dcc1c59df9d8e4428"
 }
