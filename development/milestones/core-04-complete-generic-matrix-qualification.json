@@ -33,19 +33,19 @@
       "id": "ac-lfm25-thinking-extract",
       "description": "Benchmark Lab suite core-extract-v1 evaluates lfm25-1p2b-thinking-local, passes semantic evaluation across strata, and generates approved evidence.",
       "status": "satisfied",
-      "evidence": "benchmark-lab/evidence/approved/lfm25-1p2b-thinking-local_core-extract-v1.json"
+      "evidence": "benchmark-lab/evidence/approved/lfm25-1p2b-core-extract-v1.json"
     },
     {
       "id": "ac-lfm25-instruct-generic",
       "description": "Benchmark Lab suites core-classify-v1, core-summarize-v1, and core-extract-v1 evaluate lfm25-1p2b-instruct-local, pass semantic evaluation across strata, and generate approved evidence.",
       "status": "satisfied",
-      "evidence": "benchmark-lab/evidence/approved/lfm25-1p2b-instruct-local_core-classify-v1.json"
+      "evidence": "benchmark-lab/evidence/approved/lfm25-1p2b-instruct-core-classify-v1.json"
     },
     {
       "id": "ac-lfm25-350m-classify",
       "description": "Benchmark Lab suite core-classify-v1 evaluates lfm25-350m-local, passes semantic evaluation across strata, and generates approved evidence.",
       "status": "satisfied",
-      "evidence": "benchmark-lab/evidence/approved/lfm25-350m-local_core-classify-v1.json"
+      "evidence": "benchmark-lab/evidence/approved/lfm25-350m-core-classify-v1.json"
     },
     {
       "id": "ac-matrix-qualifications",
