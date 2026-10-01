@@ -1,0 +1,108 @@
+{
+  "schema": "locaily.development.validation_result.v1",
+  "id": "validation-20261001T020555-b3197f9a",
+  "milestoneId": "core-02-generic-model-qualification",
+  "profileId": "pre-delivery",
+  "status": "passed",
+  "gitState": {
+    "branch": "milestone/core-02-generic-model-qualification",
+    "headCommit": "86bba3f029c5ef224cb01fe88beb23ab97044ffb",
+    "fingerprint": "sha256:a9ad9c587d65db24",
+    "changedFiles": []
+  },
+  "startedAt": "2026-10-01T02:05:55.996Z",
+  "completedAt": "2026-10-01T02:06:57.189Z",
+  "results": [
+    {
+      "id": "strict-status",
+      "command": "node scripts/dev-status.js --strict --json",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 0,
+      "stdout": "",
+      "stderr": "",
+      "summary": "No error/critical contradictions",
+      "required": true
+    },
+    {
+      "id": "dev-status-strict",
+      "command": "node scripts/dev-status.js --strict",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 461,
+      "stdout": "=== Locaily Development Status ===\n\nProject:        locaily\nStatus:         active\nDefault branch: main\nCurrent branch: milestone/core-02-generic-model-qualification\nHEAD:           86bba3f\n\nWorking tree: clean\n\n--- Milestones ---\n  ACTIVE:          core-02-generic-model-qualification — CORE-02 Generic Model Qualification: Benchmark Lab Suites and Qualified Routing for Core Capabilities\n  Planned: 1 | Ready: 0 | Completed: 20\n\n--- Sessions ---\n  No active or paused sessions.\n  Total: 16\n\n--- Leg",
+      "stderr": "",
+      "summary": "  Start a session for active milestone 'core-02-generic-model-qualification' (dev:resume or dev:milestone:start)",
+      "required": true
+    },
+    {
+      "id": "schema-tests",
+      "command": "node scripts/test-development-schemas.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 68,
+      "stdout": "\n## Schema Structure\n  PASS  Schema brief.schema.json has required fields\n  PASS  Schema delivery.schema.json has required fields\n  PASS  Schema issue.schema.json has required fields\n  PASS  Schema milestone.schema.json has required fields\n  PASS  Schema project-state.schema.json has required fields\n  PASS  Schema session.schema.json has required fields\n  PASS  Schema validation-profile.schema.json has required fields\n  PASS  Schema validation-result.schema.json has required fields\n\n## Schema Co",
+      "stderr": "",
+      "summary": "## Results: 29 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "lifecycle-tests",
+      "command": "node scripts/test-lifecycle.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 136,
+      "stdout": "\n## State Machine\n  PASS  STATES are frozen\n  PASS  isTerminal identifies terminal states\n  PASS  isValidTransition enforces legal transitions\n  PASS  Terminal states have no outgoing transitions\n\n## Objective Meta\n  PASS  createObjectiveMeta produces default meta\n  PASS  createObjectiveMeta accepts overrides\n\n## Objective Parsing\n  PASS  parseObjectiveId extracts prefix and slug\n  PASS  parseObjectiveId handles no prefix\n\n## Duplicate Detection\n  PASS  detectDuplicates finds slug duplicates\n  P",
+      "stderr": "",
+      "summary": "## Results: 23 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "controller-tests",
+      "command": "node scripts/test-controller-invariants.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 243,
+      "stdout": "\nTests: 11 passed, 0 failed\n",
+      "stderr": "(node:49956) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
+      "summary": "Tests: 11 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "contract-tests",
+      "command": "node scripts/contract-test.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 252,
+      "stdout": "Contract helpers passed.\n",
+      "stderr": "",
+      "summary": "Contract helpers passed.",
+      "required": true
+    },
+    {
+      "id": "full-suite",
+      "command": "npm run test:full",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 59559,
+      "stdout": "\n> locaily@0.1.0 test:full\n> npm run test:harness && npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:checksum && npm run test:development-lifecycle-gate && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && npm run test:development-m",
+      "stderr": "(node:50920) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:50288) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.\n(Use `node --trace-deprecation ...` to show whe",
+      "summary": "  PASS: har",
+      "required": false
+    }
+  ],
+  "manualChecks": [
+    {
+      "id": "review-gate",
+      "description": "Code review must pass (agent-review.js)",
+      "acknowledged": false
+    },
+    {
+      "id": "closeout-verified",
+      "description": "Closeout record correctly describes completed work",
+      "acknowledged": false
+    }
+  ],
+  "warnings": [],
+  "error": null
+}

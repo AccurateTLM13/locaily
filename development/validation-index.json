@@ -6,6 +6,7 @@
     "dev-harness-01-agent-operations-contract": "validation-20260823T211614-13b4ddad",
     "benchmark-lab-m3-interactive-local-model-lab": "validation-20260804T030446-0b281076",
     "core-01-system-formation": "validation-20260930T232052-d2d7f38e",
-    "durable-job-state-integrity-20260905": "validation-20260930T232551-3b868577"
+    "durable-job-state-integrity-20260905": "validation-20260930T232551-3b868577",
+    "core-02-generic-model-qualification": "validation-20261001T020555-b3197f9a"
   }
 }

@@ -33,37 +33,37 @@
     {
       "id": "ac-classify-suite",
       "description": "Benchmark Lab suite core-classify-v1 validates, passes semantic evaluation across strata, and generates qualification evidence.",
-      "status": "passed",
+      "status": "satisfied",
       "evidence": "benchmark-lab/locaily/tracks/core-classify/ (suite, cases, mock responses, scenarios.js); verified with benchmark-run.js and test:core02."
     },
     {
       "id": "ac-summarize-suite",
       "description": "Benchmark Lab suite core-summarize-v1 validates, passes semantic evaluation across strata, and generates qualification evidence.",
-      "status": "passed",
+      "status": "satisfied",
       "evidence": "benchmark-lab/locaily/tracks/core-summarize/ (suite, cases, mock responses, scenarios.js); verified with benchmark-run.js and test:core02."
     },
     {
       "id": "ac-extract-suite",
       "description": "Benchmark Lab suite core-extract-v1 validates, passes semantic evaluation across strata, and generates qualification evidence.",
-      "status": "passed",
+      "status": "satisfied",
       "evidence": "benchmark-lab/locaily/tracks/core-extract/ (suite, cases, mock responses, scenarios.js); verified with benchmark-run.js and test:core02."
     },
     {
       "id": "ac-qualification-records",
       "description": "Qualification records with verified checksums are loaded into Local Brain, registering qualified capabilities for core.classify, core.summarize, and core.extract.",
-      "status": "passed",
+      "status": "satisfied",
       "evidence": "benchmark-lab/qualifications/models/llama3.2-local-llama3.2-core-*.json with verified checksums in benchmark-lab/evidence/checksums/ loaded by model-qualification-loader."
     },
     {
       "id": "ac-workflow-routing",
       "description": "Composed multi-track workflows (repo_review, text_qa, document_review, content_os) route generic steps to qualified model capabilities and emit canonical Track Run Records with linked qualification evidence.",
-      "status": "passed",
+      "status": "satisfied",
       "evidence": "tool-router and run-plan-executor resolve qualified model and attach qualificationRecordId in Track Run Records across all 4 workflows; verified in test:core02."
     },
     {
       "id": "ac-regression-clean",
       "description": "All existing repository validation commands (npm run test:full) remain 100% green.",
-      "status": "passed",
+      "status": "satisfied",
       "evidence": "npm run test:full passed 100% across all 19 test suites."
     }
   ],
@@ -80,5 +80,6 @@
   "mergedAt": null,
   "preparedCommit": "9f79ea23eaa207b0b240040310ef9be1d3625cad",
   "preparedBranch": "milestone/core-02-generic-model-qualification",
-  "preparedAt": "2026-10-01T02:05:51.090Z"
+  "preparedAt": "2026-10-01T02:05:51.090Z",
+  "latestValidationId": "validation-20261001T020555-b3197f9a"
 }

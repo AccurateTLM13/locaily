@@ -1,32 +1,32 @@
 {
-  "work_id": "durable-job-state-integrity-20260930",
-  "objective_id": "durable-job-state-integrity-20260905",
+  "work_id": "core-02-generic-model-qualification-20261001",
+  "objective_id": "core-02-generic-model-qualification",
   "status": "complete",
-  "closed_at": "2026-09-30T23:25:00.000Z",
-  "original_goal": "Inspect the codebase and fix concrete defects; durable job state integrity with crash-resilient disk persistence and payload isolation.",
+  "closed_at": "2026-10-01T02:08:00.000Z",
+  "original_goal": "Qualify local models on CORE-01 generic capabilities (classify, summarize, extract) via Benchmark Lab evaluation suites, evidence promotion, and qualification records with canonical checksums, enabling qualified model routing across multi-track workflows.",
   "completed": [
-    "All job mutations operate on detached copies and publish in memory only after disk persistence succeeds.",
-    "Creation, completion and failure payloads are detached from caller-owned objects.",
-    "Added regression coverage for rejected updates, serialization errors, storage failures and payload aliasing; included it in test:jobs.",
-    "Full test suite npm run test:full and test:jobs pass with zero failures."
+    "Created Benchmark Lab suites core-classify-v1, core-summarize-v1, core-extract-v1 with test cases across easy, medium, and adversarial strata.",
+    "Created semantic scorers in scenarios.js for each suite, validating schema adherence, non-hallucination, and format conformity.",
+    "Executed evaluation runs, promoted evidence summaries to benchmark-lab/evidence/summaries/, and generated approved evidence in benchmark-lab/evidence/approved/.",
+    "Generated qualification records for llama3.2-local in benchmark-lab/qualifications/models/ and verified canonical sha256 checksums in benchmark-lab/evidence/checksums/.",
+    "Integrated qualified model resolution into tool-router and run-plan-executor, recording qualificationRecordId in Track Run Records.",
+    "Verified all composed workflows (repo_review, text_qa, document_review, content_os) route generic steps to qualified model capabilities.",
+    "Created acceptance test suite scripts/test-core02-model-qualification.js and verified 100% green test:full across all 19 test suites."
   ],
   "remaining": [],
-  "next_required_action": "Merge durable-job-state-integrity into main.",
+  "next_required_action": "Complete milestone lifecycle and merge to main.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
-  "working_branch": "feat/durable-job-state-integrity",
+  "working_branch": "milestone/core-02-generic-model-qualification",
   "validation": {
     "failed": [],
     "passed": [
-      "npm.cmd run test:jobs: all tests passed including durable-store assertions.",
-      "npm.cmd run test:operator: all assertions passed.",
-      "node scripts/test-dev-loop.js: 4 passed.",
-      "node scripts/test-development-schemas.js: 29 passed.",
-      "npm.cmd run test:full: full test suite green."
+      "npm run test:core02: all 9 acceptance tests passed.",
+      "node scripts/test-model-qualification-checksums.js: all checksums verified.",
+      "npm run dev:validate: pre-delivery validation passed.",
+      "npm run test:full: all 19 test suites green (100%)."
     ],
-    "not_run": [
-      "Live-server smoke and browser tests (offline changes only)."
-    ]
+    "not_run": []
   },
   "recommended_next_agent": "system"
 }
