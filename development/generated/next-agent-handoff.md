@@ -1,6 +1,6 @@
 # Next Agent Handoff
 
-**Generated:** 2026-10-01T04:39:01.525Z
+**Generated:** 2026-10-01T12:00:00-05:00
 
 ## Current State
 
@@ -8,15 +8,15 @@
 - **Current Milestone:** none
 - **Active Session:** none
 - **Branch:** main
-- **HEAD:** effb0b7
-- **Working Tree:** dirty
+- **HEAD:** af11add
+- **Working Tree:** clean
 
 ## Resume Commands
 
 ```bash
 npm run dev:status                          # Current project state
-# Start next milestone 'px6-external-validation-program':
-npm run dev:milestone:start --slug px6-external-validation-program --title "External Validation Readiness" --purpose "Continue development"
+# Review and approve the next milestone before starting PX6:
+# PX6 remains planned; start only after JP approves external testers and hardware validation
 npm run dev:session:close --summary "..."   # Close implementation session
 npm run dev:prepare                         # Stage, commit, record prepared SHA
 npm run dev:validate                        # Run validation profile
@@ -31,7 +31,7 @@ start → checkpoint → session:close → prepare → validate → complete →
 
 ## Next Action
 
-next_planned: px6-external-validation-program — External Validation Readiness
+next_planned: px6-external-validation-program — pending JP approval for external validation
 
 ## Roadmap Drift
 
