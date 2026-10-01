@@ -1,6 +1,6 @@
 {
   "schema": "locaily.development.dashboard.v1",
-  "generatedAt": "2026-10-01T02:09:44.310Z",
+  "generatedAt": "2026-10-01T02:51:18.661Z",
   "projectState": {
     "schema": "locaily.development.project_state.v1",
     "project": "locaily",
@@ -8,24 +8,24 @@
     "activeSession": null,
     "status": "idle",
     "defaultBranch": "main",
-    "activeBranch": "milestone/core-02-generic-model-qualification",
-    "lastCompletedMilestone": "core-02-generic-model-qualification",
-    "nextRecommendedAction": "Milestone 'core-02-generic-model-qualification' merged. Run dev:dashboard to refresh.",
+    "activeBranch": "milestone/core-03-multi-model-fallback-qualification",
+    "lastCompletedMilestone": "core-03-multi-model-fallback-qualification",
+    "nextRecommendedAction": "Milestone 'core-03-multi-model-fallback-qualification' merged. Run dev:dashboard to refresh.",
     "blockers": [],
     "warnings": [],
-    "updatedAt": "2026-10-01T02:09:44.049Z",
+    "updatedAt": "2026-10-01T02:51:18.435Z",
     "updatedBy": {
       "type": "agent",
       "name": "dev-lifecycle",
       "platform": "system"
     },
-    "mergedMilestone": "core-02-generic-model-qualification",
-    "mergedAt": "2026-10-01T02:09:44.049Z",
-    "mergedCommit": "8e780d96d009f8769bb826647d1cc2a36664972c"
+    "mergedMilestone": "core-03-multi-model-fallback-qualification",
+    "mergedAt": "2026-10-01T02:51:18.435Z",
+    "mergedCommit": "054fe978a9342835e154a0737fed5a34736859d5"
   },
   "git": {
     "branch": "main",
-    "head": "8e780d9",
+    "head": "054fe97",
     "dirty": true
   },
   "subsystemMaturity": [
@@ -283,6 +283,12 @@
       {
         "id": "core-02-generic-model-qualification",
         "title": "CORE-02 Generic Model Qualification: Benchmark Lab Suites and Qualified Routing for Core Capabilities",
+        "type": "feature",
+        "priority": "high"
+      },
+      {
+        "id": "core-03-multi-model-fallback-qualification",
+        "title": "CORE-03 Multi-Model Fallback Qualification: Secondary Qualified Models & Fallback Routing for Generic Capabilities",
         "type": "feature",
         "priority": "high"
       }
@@ -681,9 +687,56 @@
       "completedAt": "2026-10-01T02:08:55.372Z",
       "requiredPassed": 6,
       "requiredFailed": 0
+    },
+    {
+      "id": "validation-20261001T024808-615d773c",
+      "milestoneId": "core-03-multi-model-fallback-qualification",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "milestone/core-03-multi-model-fallback-qualification",
+      "completedAt": "2026-10-01T02:49:10.561Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
+    },
+    {
+      "id": "validation-20261001T024952-cbe5b823",
+      "milestoneId": "core-03-multi-model-fallback-qualification",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "milestone/core-03-multi-model-fallback-qualification",
+      "completedAt": "2026-10-01T02:50:49.217Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
     }
   ],
   "recentActivity": [
+    {
+      "type": "validation",
+      "id": "validation-20261001T024952-cbe5b823",
+      "milestoneId": "core-03-multi-model-fallback-qualification",
+      "status": "passed",
+      "timestamp": "2026-10-01T02:50:49.217Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20261001T024808-615d773c",
+      "milestoneId": "core-03-multi-model-fallback-qualification",
+      "status": "passed",
+      "timestamp": "2026-10-01T02:49:10.561Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20261001-002",
+      "milestoneId": "core-03-multi-model-fallback-qualification",
+      "timestamp": "2026-10-01T02:47:54.732Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20261001-002",
+      "milestoneId": "core-03-multi-model-fallback-qualification",
+      "status": "closed",
+      "timestamp": "2026-10-01T02:37:55.406Z"
+    },
     {
       "type": "validation",
       "id": "validation-20261001T020757-c32b8132",
@@ -790,32 +843,6 @@
       "milestoneId": "core-01-system-formation",
       "status": "closed",
       "timestamp": "2026-09-07T18:12:54.884Z"
-    },
-    {
-      "type": "session",
-      "id": "session-20260905-002",
-      "milestoneId": "durable-job-state-integrity-20260905",
-      "status": "closed",
-      "timestamp": "2026-09-05T00:34:06.294Z"
-    },
-    {
-      "type": "session-closed",
-      "id": "session-20260905-001",
-      "milestoneId": "durable-job-state-integrity-20260905",
-      "timestamp": "2026-09-05T00:32:29.935Z"
-    },
-    {
-      "type": "session",
-      "id": "session-20260905-001",
-      "milestoneId": "durable-job-state-integrity-20260905",
-      "status": "closed",
-      "timestamp": "2026-09-05T00:28:32.675Z"
-    },
-    {
-      "type": "session-closed",
-      "id": "session-20260823-002",
-      "milestoneId": "dev-harness-01-agent-operations-contract",
-      "timestamp": "2026-08-23T21:17:14.266Z"
     }
   ],
   "nextMilestone": {
@@ -943,22 +970,22 @@
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023227-6fab1834' is 58 days old"
+      "message": "Validation 'validation-20260803T023227-6fab1834' is 59 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023410-3563bd82' is 58 days old"
+      "message": "Validation 'validation-20260803T023410-3563bd82' is 59 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023624-a84bb3ad' is 58 days old"
+      "message": "Validation 'validation-20260803T023624-a84bb3ad' is 59 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023959-bd677b49' is 58 days old"
+      "message": "Validation 'validation-20260803T023959-bd677b49' is 59 days old"
     },
     {
       "severity": "info",
@@ -994,26 +1021,6 @@
       "severity": "info",
       "code": "STALE_VALIDATION",
       "message": "Validation 'validation-20260907T193008-4b632292' is 23 days old"
-    },
-    {
-      "severity": "info",
-      "code": "STALE_GENERATED",
-      "message": "Generated file 'next-agent-handoff.md' may be stale"
-    },
-    {
-      "severity": "info",
-      "code": "STALE_GENERATED",
-      "message": "Generated file 'roadmap-data.json' may be stale"
-    },
-    {
-      "severity": "info",
-      "code": "STALE_GENERATED",
-      "message": "Generated file 'roadmap.html' may be stale"
-    },
-    {
-      "severity": "info",
-      "code": "STALE_GENERATED",
-      "message": "Generated file 'status-summary.md' may be stale"
     }
   ],
   "drift": [
@@ -1049,6 +1056,12 @@
         "id": "core-02-generic-model-qualification",
         "status": "merged",
         "title": "CORE-02 Generic Model Qualification: Benchmark Lab Suites and Qualified Routing for Core Capabilities",
+        "type": "feature"
+      },
+      {
+        "id": "core-03-multi-model-fallback-qualification",
+        "status": "merged",
+        "title": "CORE-03 Multi-Model Fallback Qualification: Secondary Qualified Models & Fallback Routing for Generic Capabilities",
         "type": "feature"
       },
       {
@@ -1277,11 +1290,11 @@
   },
   "humanDecisions": [],
   "stats": {
-    "totalMilestones": 22,
+    "totalMilestones": 23,
     "active": 0,
-    "completed": 21,
-    "totalSessions": 16,
-    "totalValidations": 27,
+    "completed": 22,
+    "totalSessions": 17,
+    "totalValidations": 29,
     "totalDeliveries": 0,
     "totalIssues": 4,
     "openIssues": 0
