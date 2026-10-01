@@ -8,9 +8,17 @@
   "status": "available",
   "capabilities": [
     "structured-output",
-    "intent-classification"
+    "intent-classification",
+    "generic-classification"
   ],
+  "qualifications": {
+    "core.classify": {
+      "edge_worker": "qualified",
+      "fast_worker": "qualified"
+    }
+  },
   "notes": [
-    "Local Ollama manifest generated from installed Hugging Face GGUF model."
+    "Local Ollama manifest generated from installed Hugging Face GGUF model.",
+    "Qualified on core.classify as ultra-compact (229 MB) edge_worker and fast_worker."
   ]
 }

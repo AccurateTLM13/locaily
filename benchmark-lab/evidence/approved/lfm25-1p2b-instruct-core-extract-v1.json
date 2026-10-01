@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "benchmark.approved_evidence_summary.v1",
+  "evidenceId": "lfm25-1p2b-instruct-core-extract-v1",
+  "sourceRunId": "run-20261001T043256Z",
+  "approvedAt": "2026-10-01T04:32:56.809Z",
+  "approvedBy": "locaily-operator",
+  "summaryPath": "benchmark-lab/evidence/summaries/lfm25-1p2b-instruct-core-extract-v1.json",
+  "claims": [
+    "lfm25-1p2b-instruct-local satisfies fast_worker and default_worker roles on core.extract across easy, medium, and adversarial strata.",
+    "Extracts structured JSON adhering to caller-supplied schemas."
+  ]
+}

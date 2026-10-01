@@ -8,9 +8,27 @@
   "status": "available",
   "capabilities": [
     "structured-output",
-    "intent-classification"
+    "intent-classification",
+    "generic-classification",
+    "generic-summarization",
+    "generic-extraction"
   ],
+  "qualifications": {
+    "core.classify": {
+      "fast_worker": "qualified",
+      "default_worker": "qualified"
+    },
+    "core.summarize": {
+      "fast_worker": "qualified",
+      "default_worker": "qualified"
+    },
+    "core.extract": {
+      "fast_worker": "qualified",
+      "default_worker": "qualified"
+    }
+  },
   "notes": [
-    "Local Ollama manifest generated from installed Hugging Face GGUF model."
+    "Local Ollama manifest generated from installed Hugging Face GGUF model.",
+    "Qualified on core.classify, core.summarize, and core.extract as dedicated fast_worker and default_worker."
   ]
 }

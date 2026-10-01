@@ -71,7 +71,8 @@
             "benchmark-lab-m2-reproducible-semantic-qualification",
             "benchmark-lab-m3-interactive-local-model-lab",
             "core-02-generic-model-qualification",
-            "core-03-multi-model-fallback-qualification"
+            "core-03-multi-model-fallback-qualification",
+            "core-04-complete-generic-matrix-qualification"
           ]
         }
       ]

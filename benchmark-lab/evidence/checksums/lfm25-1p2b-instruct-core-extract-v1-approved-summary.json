@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "benchmark.checksum.v1",
+  "checksumId": "lfm25-1p2b-instruct-core-extract-v1-approved-summary",
+  "artifactType": "approved_evidence_summary",
+  "artifactPath": "benchmark-lab/evidence/approved/lfm25-1p2b-instruct-core-extract-v1.json",
+  "algorithm": "sha256",
+  "checksumMode": "canonical_text_v1",
+  "checksum": "sha256:d1fc57356a2d884bf99c6741037a3f2b035c2bb7c123992465a3f43d2d7a4d36",
+  "generatedAt": "2026-10-01T04:32:56.946Z"
+}

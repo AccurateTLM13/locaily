@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "benchmark.qualification.v1",
+  "recordId": "lfm25-350m-local-lfm25-350m-core-classify-v1",
+  "subject": {
+    "type": "model",
+    "id": "lfm25-350m-local",
+    "provider": "ollama",
+    "runtimeModelName": "hf.co/LiquidAI/LFM2.5-350M-GGUF:latest",
+    "digest": "unknown"
+  },
+  "status": "qualified",
+  "qualifiedFor": [
+    {
+      "role": "edge_worker",
+      "trackId": "core.classify",
+      "contractId": "core-classify-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": []
+    },
+    {
+      "role": "fast_worker",
+      "trackId": "core.classify",
+      "contractId": "core-classify-v1",
+      "status": "qualified",
+      "score": 1,
+      "conditions": []
+    }
+  ],
+  "evidence": {
+    "evidenceIds": [
+      "lfm25-350m-core-classify-v1"
+    ],
+    "summaryPaths": [
+      "benchmark-lab/evidence/summaries/lfm25-350m-core-classify-v1.json"
+    ]
+  },
+  "modelProfileId": "lfm25-350m-local",
+  "notes": [
+    "Generated from explicitly promoted Benchmark Lab evidence.",
+    "Qualified for core.classify edge_worker and fast_worker roles. 3/3 scenario strata PASS (100%).",
+    "Ultra-compact footprint (229 MB). Semantic scorer core-classify-semantic-v1 verified."
+  ],
+  "generatedAt": "2026-10-01T04:32:56.809Z"
+}
