@@ -1,29 +1,30 @@
 {
-  "work_id": "core-04-complete-generic-matrix-qualification-20261001",
-  "objective_id": "core-04-complete-generic-matrix-qualification",
+  "work_id": "core-05-workflow-console-matrix-explorer-20261001",
+  "objective_id": "core-05-workflow-console-matrix-explorer",
   "status": "complete",
-  "closed_at": "2026-10-01T04:36:00.000Z",
-  "original_goal": "Complete 100% dual-fallback coverage for generic extraction (core.extract on lfm25-1p2b-thinking-local), establish fast-worker qualification (lfm25-1p2b-instruct-local across classify/summarize/extract), and edge-worker qualification (lfm25-350m-local on classify).",
+  "closed_at": "2026-10-01T23:05:00.000Z",
+  "original_goal": "Activate the Workflows and Model Qualification Matrix Explorer views in the Companion Console UI (and update Unified Shell), allowing operators to view, configure, and trigger all 4 core generic workflows (repo_review, text_qa, document_review, content_os), inspect multi-tier qualified local models across generic capabilities, and test shadow routing with fallback recommendations live from the browser.",
   "completed": [
-    "Evaluated and approved evidence for lfm25-1p2b-thinking-local on core-extract-v1 completing 100% generic fallback matrix.",
-    "Evaluated and approved evidence for lfm25-1p2b-instruct-local on core-classify-v1, core-summarize-v1, and core-extract-v1 (fast worker tier across all 3 generic tracks).",
-    "Evaluated and approved evidence for lfm25-350m-local on core-classify-v1 (ultra-compact 229 MB edge worker tier).",
-    "Generated qualification records with canonical SHA-256 checksums for all 5 new matrix qualifications.",
-    "Verified all 20 qualification checksums via node scripts/test-model-qualification-checksums.js.",
-    "Updated model manifests for lfm25-1p2b-thinking-local, lfm25-1p2b-instruct-local, and lfm25-350m-local.",
-    "Created acceptance test suite scripts/test-core04-generic-matrix-qualification.js and wired test:core04 into test:full.",
-    "Validated 100% green pass rate across npm run test:full."
+    "Activated Workflows, Model Matrix, and Activity navigation links in companion/console/index.html.",
+    "Implemented view panel switching system in companion/console/app.js.",
+    "Implemented generic workflows catalog and interactive workflow runner in companion/console/app.js with example payloads for repo_review, text_qa, document_review, and content_os.",
+    "Implemented Model Qualification Matrix table and model tier cards in companion/console/app.js.",
+    "Implemented interactive shadow routing & fallback tester in companion/console/app.js calling /qualifications/dry-run.",
+    "Integrated shadow router recommendations into capability-registry.js dryRunRecommendation.",
+    "Updated companion/shell/app.js renderWorkflows to dynamically fetch from /orchestration/workflows and support generic workflows.",
+    "Added styling for workflow cards, track pipelines, matrix tables, tier cards, and tester forms in companion/console/styles.css.",
+    "Created acceptance test suite scripts/test-core05-console-matrix-explorer.js and wired test:core05 into test:full.",
+    "All test suites passing 100% green across npm run test:full."
   ],
   "remaining": [],
   "next_required_action": "Complete milestone lifecycle and merge to main.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
-  "working_branch": "milestone/core-04-complete-generic-matrix-qualification",
+  "working_branch": "milestone/core-05-workflow-console-matrix-explorer",
   "validation": {
     "failed": [],
     "passed": [
-      "npm run test:core04: all 5 acceptance tests passed.",
-      "node scripts/test-model-qualification-checksums.js: all 20 model qualification checksums verified.",
+      "npm run test:core05: all 6 acceptance tests passed.",
       "npm run test:full: all test suites green (100%)."
     ],
     "not_run": []

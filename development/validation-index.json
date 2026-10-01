@@ -9,6 +9,7 @@
     "durable-job-state-integrity-20260905": "validation-20260930T232551-3b868577",
     "core-02-generic-model-qualification": "validation-20261001T020757-c32b8132",
     "core-03-multi-model-fallback-qualification": "validation-20261001T024952-cbe5b823",
-    "core-04-complete-generic-matrix-qualification": "validation-20261001T043715-9cd0f7ea"
+    "core-04-complete-generic-matrix-qualification": "validation-20261001T043715-9cd0f7ea",
+    "core-05-workflow-console-matrix-explorer": "validation-20261001T230429-f7d31a6b"
   }
 }

@@ -1,10 +1,12 @@
 const { createQualificationResolver } = require("./qualification-resolver");
+const { createShadowRouter } = require("./shadow-routing");
 
 function createCapabilityRegistry(options = {}) {
   const resolver = options.resolver || createQualificationResolver({
     loader: options.loader,
     ttlMs: options.ttlMs
   });
+  const shadowRouter = options.shadowRouter || createShadowRouter({ resolver });
 
   function listCapabilities() {
     return resolver.resolveAllCapabilities();
@@ -19,7 +21,26 @@ function createCapabilityRegistry(options = {}) {
   }
 
   function dryRunRecommendation({ modelId, role, trackId, contractId, policy }) {
-    return resolver.getDryRunRecommendation({ modelId, role, trackId, contractId, policy });
+    const dryRun = resolver.getDryRunRecommendation({ modelId, role, trackId, contractId, policy });
+    const shadow = shadowRouter.computeShadowRecommendation({
+      role,
+      trackId,
+      contractId,
+      currentModelId: modelId
+    });
+
+    return {
+      ...dryRun,
+      shadowRecommendation: shadow,
+      recommendation: {
+        action: shadow.comparison,
+        modelId: shadow.recommendedCapabilityId ? shadow.recommendedCapabilityId.split(":")[0] : modelId,
+        score: shadow.recommendedScore,
+        confidence: shadow.confidence || "high",
+        reason: shadow.reason,
+        fallbackRecommendation: shadow.fallbackRecommendation
+      }
+    };
   }
 
   return {

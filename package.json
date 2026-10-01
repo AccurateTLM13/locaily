@@ -132,7 +132,8 @@
     "test:core02": "node scripts/test-core02-model-qualification.js",
     "test:core03": "node scripts/test-core03-multi-model-qualification.js",
     "test:core04": "node scripts/test-core04-generic-matrix-qualification.js",
+    "test:core05": "node scripts/test-core05-console-matrix-explorer.js",
     "test:capability-kernel": "node scripts/test-node-roles-capability-capsules.js && node scripts/test-node-event-bus.js && node scripts/test-relay-trust-pairing.js && node scripts/test-lighthouse-product-bridge.js && node scripts/test-dev-loop.js && node scripts/test-development-schemas.js",
-    "test:full": "npm run test:harness && npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:checksum && npm run test:development-lifecycle-gate && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && npm run test:development-memory && npm run test:controller && npm run test:capability-kernel && npm run test:core01 && npm run test:core02 && npm run test:core03 && npm run test:core04"
+    "test:full": "npm run test:harness && npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:checksum && npm run test:development-lifecycle-gate && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && npm run test:development-memory && npm run test:controller && npm run test:capability-kernel && npm run test:core01 && npm run test:core02 && npm run test:core03 && npm run test:core04 && npm run test:core05"
   }
 }

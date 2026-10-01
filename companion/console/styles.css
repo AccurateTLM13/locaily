@@ -905,3 +905,350 @@ input {
 .benchmark-diagnostics__runs { display: grid; gap: 6px; margin-top: 10px; }
 .benchmark-diagnostics__runs div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--border-color, #e5e7eb); font-size: 12px; }
 .benchmark-diagnostics__runs span { color: var(--text-muted, #64748b); text-align: right; }
+
+/* ─────────────────────────────────────────────
+   View Panels & Navigation
+   ───────────────────────────────────────────── */
+.view-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.view-panel[hidden] {
+  display: none !important;
+}
+
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ─────────────────────────────────────────────
+   Generic Workflows Catalog & Runner
+   ───────────────────────────────────────────── */
+.workflow-catalog-grid {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.workflow-cards-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.workflow-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.workflow-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  text-align: left;
+}
+
+.workflow-card:hover {
+  border-color: var(--locaily-green);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.workflow-card--active {
+  border-color: var(--locaily-green);
+  background: #fdfefd;
+  box-shadow: 0 0 0 1px var(--locaily-green);
+}
+
+.workflow-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.workflow-card__title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.workflow-card__desc {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  line-height: 1.4;
+  margin: 4px 0 8px;
+}
+
+.workflow-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: var(--text-xs);
+  color: var(--muted-soft);
+}
+
+.meta-code {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: var(--text-xs);
+  color: var(--locaily-slate);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-tight);
+  padding: 1px 5px;
+}
+
+.pipeline-flow {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin: 12px 0;
+}
+
+.pipeline-track-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.pipeline-track-badge {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: var(--text-xs);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-tight);
+  padding: 3px 7px;
+  color: var(--locaily-slate);
+}
+
+.pipeline-arrow {
+  color: var(--muted-soft);
+  font-size: var(--text-xs);
+  font-weight: bold;
+}
+
+.field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.field__textarea--code {
+  font-family: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: var(--text-xs);
+  tab-size: 2;
+  white-space: pre;
+}
+
+.btn--xs {
+  font-size: var(--text-xs);
+  padding: 2px 8px;
+  height: auto;
+}
+
+.workflow-output-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─────────────────────────────────────────────
+   Model Qualification Matrix Explorer
+   ───────────────────────────────────────────── */
+.matrix-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 14px 12px;
+}
+
+.stat-card__number {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.stat-card__number--success {
+  color: var(--locaily-green);
+}
+
+.stat-card__label {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.matrix-table-surface {
+  margin-top: 4px;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--text-sm);
+}
+
+.matrix-table th {
+  padding: 10px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.matrix-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.matrix-table tr:last-child td {
+  border-bottom: none;
+}
+
+.matrix-table tr:hover td {
+  background: var(--surface);
+}
+
+.model-tiers-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.model-tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.tier-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tier-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.tier-card__name {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tier-card__specs {
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.tier-card__caps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.cap-chip {
+  font-size: 10px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  padding: 2px 5px;
+  border-radius: var(--radius-tight);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--locaily-slate);
+}
+
+.fields-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.routing-tester-surface {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.routing-tester-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.routing-result-card {
+  margin-top: 10px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+@media (max-width: 900px) {
+  .workflow-catalog-grid {
+    grid-template-columns: 1fr;
+  }
+  .matrix-stats-grid,
+  .model-tiers-grid,
+  .fields-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .matrix-stats-grid,
+  .model-tiers-grid,
+  .fields-row {
+    grid-template-columns: 1fr;
+  }
+}
+
