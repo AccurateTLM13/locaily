@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "core-03-multi-model-fallback-qualification",
   "title": "CORE-03 Multi-Model Fallback Qualification: Secondary Qualified Models & Fallback Routing for Generic Capabilities",
-  "status": "active",
+  "status": "ready-for-delivery",
   "type": "feature",
   "priority": "high",
   "purpose": "Qualify lfm25-1p2b-thinking-local on core.classify and core.summarize via Benchmark Lab evaluation suites, evidence promotion, and qualification records with canonical checksums to establish secondary qualified fallbacks and activate multi-model shadow routing.",
@@ -72,10 +72,12 @@
   "lifecycleRef": null,
   "createdAt": "2026-10-01T02:30:00.000Z",
   "startedAt": "2026-10-01T02:37:55.405Z",
-  "completedAt": null,
+  "completedAt": "2026-10-01T02:50:55.358Z",
   "mergedAt": null,
   "preparedCommit": "a4795a730d45db8549b9906129571095a92eb57e",
   "preparedBranch": "milestone/core-03-multi-model-fallback-qualification",
   "preparedAt": "2026-10-01T02:49:46.772Z",
-  "latestValidationId": "validation-20261001T024808-615d773c"
+  "latestValidationId": "validation-20261001T024952-cbe5b823",
+  "completionBranch": "milestone/core-03-multi-model-fallback-qualification",
+  "completionHead": "0fddbaee55213f5b3d5de9798aefac84a11b78ef"
 }
