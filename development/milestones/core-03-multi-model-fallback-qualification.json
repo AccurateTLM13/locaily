@@ -67,5 +67,8 @@
   "createdAt": "2026-10-01T02:30:00.000Z",
   "startedAt": "2026-10-01T02:37:55.405Z",
   "completedAt": null,
-  "mergedAt": null
+  "mergedAt": null,
+  "preparedCommit": "6e0f34334cd1a1050cf9aab2668f751aced81792",
+  "preparedBranch": "milestone/core-03-multi-model-fallback-qualification",
+  "preparedAt": "2026-10-01T02:48:03.133Z"
 }
