@@ -15,7 +15,7 @@
     "Validated 100% green pass rate across npm run test:full."
   ],
   "remaining": [],
-  "next_required_action": "Complete milestone lifecycle and merge to main.",
+  "next_required_action": "No merge action remains. Reconcile generated status surfaces, then select unrelated work only after JP reviews the current roadmap.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
   "working_branch": "milestone/core-04-complete-generic-matrix-qualification",
