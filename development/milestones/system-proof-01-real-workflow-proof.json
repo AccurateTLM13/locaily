@@ -1,4 +1,4 @@
-﻿{
+{
   "schema": "locaily.development.milestone.v1",
   "id": "system-proof-01-real-workflow-proof",
   "title": "SYSTEM-PROOF-01 Real Multi-Track Workflow Proof",
@@ -65,7 +65,7 @@
     },
     {
       "id": "ac-thesis-verdict",
-      "description": "The report explicitly states one of: POSITIVE (Condition C demonstrates a measurable system-level advantage over Condition A in at least one thesis-relevant dimension — reliability, structured-output compliance, failure isolation, controllability, predictable recovery, or comparable usefulness at a lower model tier); NULL (no meaningful measurable difference); or NEGATIVE (Condition C is materially worse than Condition A). Implementation success and experiment completion are NOT sufficient for a POSITIVE verdict.",
+      "description": "The report explicitly states one of: POSITIVE (Condition C demonstrates a measurable system-level advantage over Condition A in at least one thesis-relevant dimension: reliability, structured-output compliance, failure isolation, controllability, predictable recovery, or comparable usefulness at a lower model tier); NULL (no meaningful measurable difference); or NEGATIVE (Condition C is materially worse than Condition A). Implementation success and experiment completion are NOT sufficient for a POSITIVE verdict.",
       "status": "pending"
     },
     {
