@@ -7,11 +7,62 @@
   "priority": "medium",
   "purpose": "Prove multiple unrelated workflows can share Locaily capabilities: verified repository baseline, reusable core capability tracks, multi-track composition, and the Repo Review proof workflow.",
   "scope": {
-    "included": [],
-    "excluded": []
+    "included": [
+      "Capability contracts and registry with honest capability statuses.",
+      "Reusable core tracks: classify, summarize, extract, validate, prioritize, and transform.",
+      "Multi-track composition with schema validation, topological ordering, cross-track inputs, and failure modes.",
+      "Repo Review, Text QA, Document Review, and Content OS workflow classes.",
+      "Lighthouse behavioral-parity evidence and fail-closed OCR behavior.",
+      "Deterministic transform.map tooling and publish-preparation validation gates.",
+      "Lifecycle resume correction and regression coverage for the completed system."
+    ],
+    "excluded": [
+      "A fifth workflow or action-items triage.",
+      "OCR adapter implementation or new external dependencies.",
+      "Benchmark qualification beyond the CORE-01 proof scope.",
+      "OmniRoute/model-gateway routing from issue #42.",
+      "Automatic harness control, transcript capture, or mutating adapter actions."
+    ]
   },
-  "acceptanceCriteria": [],
-  "validationProfile": null,
+  "acceptanceCriteria": [
+    {
+      "id": "ac-capability-contracts",
+      "description": "Capability and workflow contracts validate and the registry exposes honest reusable capability statuses.",
+      "status": "satisfied",
+      "evidence": "companion/orchestration/registry/ and companion/schemas/internal/"
+    },
+    {
+      "id": "ac-composed-workflows",
+      "description": "Repo Review, Text QA, Document Review, and Content OS compose shared tracks with deterministic ordering and explicit failure behavior.",
+      "status": "satisfied",
+      "evidence": "scripts/test-core01-system-formation.js and scripts/test-core01-content-os.js"
+    },
+    {
+      "id": "ac-reuse-proof",
+      "description": "Shared core tracks reproduce Lighthouse behavior and are reused across independent workflow classes without domain contamination.",
+      "status": "satisfied",
+      "evidence": "scripts/test-core01-phase7-reuse.js and docs/07-progress/core01-baseline-20260907.md"
+    },
+    {
+      "id": "ac-transform-publish-gate",
+      "description": "Deterministic transform.map and validation-gated publish preparation produce incomplete packages with ready=false instead of silently publishing.",
+      "status": "satisfied",
+      "evidence": "scripts/test-core01-content-os.js and tool-packs/core-transform-pack/"
+    },
+    {
+      "id": "ac-control-plane",
+      "description": "Lifecycle resume behavior reopens active milestone sessions correctly after closeout.",
+      "status": "satisfied",
+      "evidence": "scripts/dev-lifecycle.js and scripts/test-development-lifecycle-gate.js"
+    },
+    {
+      "id": "ac-regression-clean",
+      "description": "The required CORE-01 suites and repository full suite pass from a committed clean state.",
+      "status": "satisfied",
+      "evidence": "validation-20260930T232052-d2d7f38e and CI run 36790646541"
+    }
+  ],
+  "validationProfile": "pre-delivery",
   "dependencies": [],
   "blockers": [],
   "lifecycleRef": null,

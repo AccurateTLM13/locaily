@@ -4,7 +4,7 @@
   "title": "RESEARCH-01 Locaily Decision Track Bakeoff & External Benchmark Harness",
   "status": "planned",
   "type": "feature",
-  "priority": "high",
+  "priority": "low",
   "purpose": "Establish a first-class DecisionCapability track contract compatible with the SystemOne / Jev / Clef API, and conduct a reproducible bakeoff across deterministic rules, small generative LLMs, and local decision models over 10 Locaily routing scenarios.",
   "problem": "Locaily routing, task intake, and fallback evaluation currently rely on either rigid exact-match conditions or slow, token-heavy generative LLMs that require markdown/JSON parsing. The ecosystem now provides open, sub-40ms decision models (Clef-Flash 9B, Clef 27B) and standardized benchmarks (Decision Index 0.2.1), but Locaily lacks a typed decision contract, adapter, and qualification bakeoff.",
   "scope": {
@@ -54,9 +54,12 @@
   ],
   "validationProfile": "standard",
   "dependencies": [
-    "core-05-workflow-console-matrix-explorer"
+    "core-05-workflow-console-matrix-explorer",
+    "system-proof-01-real-workflow-proof"
   ],
-  "blockers": [],
+  "blockers": [
+    "Must not begin unless SYSTEM-PROOF-01 evidence identifies routing/decision quality as a measurable bottleneck, OR explicit approval from JP is given. Reason: adding a new decision-model architecture before the current routing/orchestration thesis is empirically proven is premature scope expansion."
+  ],
   "lifecycleRef": null,
   "createdAt": "2026-10-01T23:35:00.000Z",
   "startedAt": null,

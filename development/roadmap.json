@@ -318,7 +318,7 @@
           "id": "external-validation",
           "title": "External Validation Program",
           "description": "Five testers, two-device relay pilot, second real workflow",
-          "maturity": "active",
+          "maturity": "planned",
           "milestoneIds": [
             "px6-external-validation-program"
           ]
@@ -345,9 +345,26 @@
           "id": "remaining-milestones-second-pass",
           "title": "PX Remaining Milestones Second Pass",
           "description": "PX6 evidence execution, PX7/PX5/PX1 canonical fixes",
-          "maturity": "active",
+          "maturity": "planned",
           "milestoneIds": [
             "px9-remaining-milestones-second-pass"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "thesis-proof",
+      "title": "Thesis Proof",
+      "description": "Empirical validation that the assembled system provides measurable value over simpler alternatives",
+      "maturity": "planned",
+      "initiatives": [
+        {
+          "id": "system-proof",
+          "title": "System-Level Workflow Proof",
+          "description": "Controlled three-condition experiment: single-model vs decomposed vs Locaily-orchestrated on repo_review",
+          "maturity": "planned",
+          "milestoneIds": [
+            "system-proof-01-real-workflow-proof"
           ]
         }
       ]
@@ -423,8 +440,12 @@
     "core-05-workflow-console-matrix-explorer": [
       "core-04-complete-generic-matrix-qualification"
     ],
-    "research-01-decision-track-bakeoff": [
+    "system-proof-01-real-workflow-proof": [
       "core-05-workflow-console-matrix-explorer"
+    ],
+    "research-01-decision-track-bakeoff": [
+      "core-05-workflow-console-matrix-explorer",
+      "system-proof-01-real-workflow-proof"
     ]
   }
 }

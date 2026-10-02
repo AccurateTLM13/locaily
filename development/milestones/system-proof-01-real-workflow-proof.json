@@ -1,0 +1,114 @@
+﻿{
+  "schema": "locaily.development.milestone.v1",
+  "id": "system-proof-01-real-workflow-proof",
+  "title": "SYSTEM-PROOF-01 Real Multi-Track Workflow Proof",
+  "status": "planned",
+  "type": "experiment",
+  "priority": "high",
+  "purpose": "Empirically determine whether Locaily orchestration provides measurable system-level value over a simpler local-model workflow. This is the missing thesis validation. The experiment does not assume a positive result; a null result is equally valid evidence and triggers a diagnosis gate rather than the next roadmap milestone.",
+  "problem": "Locaily has implemented a system architecture (track engine, generic core capabilities, qualified routing, composed workflows) but has not demonstrated that the assembled system is better than a simpler alternative. The original project commitment was to prove one narrow workflow before expanding. That proof has not been run. This milestone executes it.",
+  "scope": {
+    "included": [
+      "A real repository that Locaily has never seen used as the proof fixture (to be selected at experiment start).",
+      "Condition A: a single local qualified model receives the entire repo_review task without track decomposition.",
+      "Condition B: the same model executes each Locaily repo_review track individually in sequence.",
+      "Condition C: existing Locaily qualification/routing selects the appropriate qualified capability for each repo_review track.",
+      "All three conditions use identical input (same repository, same task requirements, same evaluation criteria).",
+      "Human-readable output for all three conditions at the same level of completeness.",
+      "Structured scoring of all metrics listed in the metrics section.",
+      "A controlled single-capability failure in Condition C to test existing fallback behavior.",
+      "A written experiment report documenting all three condition outputs, scores, and interpretation.",
+      "A thesis verdict: positive, null, or negative as defined in thesisGate."
+    ],
+    "excluded": [
+      "Adding new models, capabilities, workflows, routing layers, or benchmark infrastructure unless an existing missing dependency makes the experiment impossible to run.",
+      "A fifth workflow or any workflow other than repo_review.",
+      "Expanding the model matrix beyond currently qualified models.",
+      "RESEARCH-01 DecisionCapability work or any new routing architecture.",
+      "PX6 external validation.",
+      "Clean-machine installer or packaging work.",
+      "Automatic scoring infrastructure beyond what already exists.",
+      "Any changes to the repo_review workflow definition, track contracts, or capability contracts.",
+      "Optimization of any condition — all three conditions run with current system behavior as-is."
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "ac-fixture-selected",
+      "description": "A real repository Locaily has never processed is selected and frozen as the proof fixture before any condition runs.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-condition-a-complete",
+      "description": "Condition A (single-model baseline) completes: one local qualified model receives the full repo_review task and produces human-readable output. All metrics recorded.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-condition-b-complete",
+      "description": "Condition B (decomposed baseline) completes: the same model executes each repo_review track individually and produces human-readable output. All metrics recorded.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-condition-c-complete",
+      "description": "Condition C (Locaily orchestration) completes: existing qualification/routing selects capabilities for each track, including one controlled failure scenario that exercises existing fallback behavior. All metrics recorded.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-metrics-scored",
+      "description": "All required metric categories are scored for all three conditions: output quality (accuracy, useful findings, unsupported findings, completeness, structured-output compliance); execution behavior (time, retries/failures, capability/model assignment); failure behavior (failure isolation, recovery quality); resource usage where already measurable by existing instrumentation.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-experiment-report",
+      "description": "A written experiment report documents all three condition outputs with scores, comparison, and a clearly stated thesis verdict.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-thesis-verdict",
+      "description": "The report explicitly states one of: POSITIVE (Condition C demonstrates a measurable system-level advantage over Condition A in at least one thesis-relevant dimension — reliability, structured-output compliance, failure isolation, controllability, predictable recovery, or comparable usefulness at a lower model tier); NULL (no meaningful measurable difference); or NEGATIVE (Condition C is materially worse than Condition A). Implementation success and experiment completion are NOT sufficient for a POSITIVE verdict.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-null-result-gate",
+      "description": "If the verdict is NULL or NEGATIVE: a diagnosis document is produced identifying the most likely architectural reason. No subsequent roadmap milestone may begin until the diagnosis is reviewed and explicitly approved by JP.",
+      "status": "pending"
+    }
+  ],
+  "metrics": {
+    "outputQuality": [
+      "factual accuracy (manually scored against known ground truth about the fixture repo)",
+      "useful findings (findings that correctly identify real issues or properties)",
+      "unsupported findings (findings not supported by the actual repository content)",
+      "completeness (coverage of the major areas the repo_review workflow is designed to address)",
+      "structured-output compliance (does the output conform to the expected schema/format)"
+    ],
+    "executionBehavior": [
+      "total execution time (wall clock)",
+      "retries and failures (count and recovery path)",
+      "capability/model assignment per track (which model handled each step in Condition C)"
+    ],
+    "failureBehavior": [
+      "failure isolation (does a single track failure corrupt the rest of the output, or is it contained)",
+      "recovery quality (does the fallback path in Condition C produce a usable partial result)"
+    ],
+    "resourceUsage": [
+      "resource cost where already measurable by existing instrumentation (do not add new instrumentation)"
+    ]
+  },
+  "thesisGate": {
+    "positiveCondition": "Condition C demonstrates a measurable system-level advantage over Condition A in at least one of: reliability (fewer retries/failures per run), structured-output compliance (higher rate of schema-conformant outputs), failure isolation (contained rather than cascading failures), controllability (more predictable which model/capability handles each step), predictable recovery (fallback produces usable partial output), or comparable usefulness at a lower model tier.",
+    "nullResult": "No meaningful measurable difference between Condition A and Condition C on any thesis-relevant dimension.",
+    "negativeResult": "Condition C is materially worse than Condition A on primary output quality or reliability metrics.",
+    "nullOrNegativeAction": "Produce a diagnosis document. Do not start any subsequent roadmap milestone (PX6, RESEARCH-01, fifth workflow, relay proof, etc.) without explicit JP approval after reviewing the diagnosis."
+  },
+  "validationProfile": "standard",
+  "dependencies": [
+    "core-05-workflow-console-matrix-explorer"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-10-02T02:25:00.000Z",
+  "startedAt": null,
+  "completedAt": null,
+  "mergedAt": null
+}
