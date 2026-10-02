@@ -1935,3 +1935,47 @@ Confirmed
 - Repo Review (`repo_review`) is the first composed workflow: 2 domain tracks + 3 shared generic tracks; `text_qa` is a 100%-generic composition proving the same capability tracks serve unrelated workflows unchanged.
 - Composition failure semantics: `on_failure: "abort"` (default) fails the plan with the underlying step error code; `"skip"` records a structured warning and continues.
 - Validated by `scripts/test-core01-system-formation.js` and the preserved `npm run test:full` suite.
+
+---
+
+## 2026-10-01 — Decision Track & SystemOne/Clef-Compatible Capability Abstraction
+
+### Decision
+
+Formalize a first-class `DecisionCapability` contract and a dedicated `decision` track category in Locaily. The interface adopts the SystemOne / Jev / Clef paradigm: state context + typed questions array -> bounded probabilities over discrete categorical choices and scores, with zero freeform prose generation or parsing steps.
+
+Decision capability providers are registered across hardware tiers in the [Capability Registry](file:///c:/Users/JP/Desktop/locailly/companion/core/capability-registry.js):
+- **Tier 0:** Deterministic Rules and regex/schema condition trees (0ms, 0 VRAM — always evaluated first)
+- **Tier 1:** Micro / sub-1B decision models (edge / ultra-low memory viability)
+- **Tier 2:** 1B–4B small decision models (standard laptop CPU/NPU)
+- **Tier 3:** 9B Clef-Flash / Jev class (GPU desktop / ~38ms local inference)
+- **Tier 4:** 27B Clef class (heavy workstation / high-complexity reasoning)
+- **Tier 5:** Optional remote fallback (zero-trust external provider)
+
+Strict architectural boundary: Clef, Jev, or any specific model will NOT become Locaily's central orchestrator. Locaily's [Local Brain](file:///c:/Users/JP/Desktop/locailly/companion/server.js) remains the coordinator and queries registered providers based on availability, hardware budget, and qualification status.
+
+Locaily will adopt the open Decision Index 0.2.1 suite in [Benchmark Lab](file:///c:/Users/JP/Desktop/locailly/benchmark-lab/) as a standardized, external evaluation harness for decision models.
+
+### Why
+
+1. **Routing is a discrete probabilistic decision problem, not a prose generation problem.** Traditional LLM orchestration suffers from token generation latency (500–3,000ms), schema hallucination, markdown code-fence pollution, and fragile JSON parsing.
+2. **Batching and bounded software consumption:** Up to 64 typed questions can be evaluated in a single forward pass over a state tensor, returning direct floating-point probabilities and confidence calibrations.
+3. **Reproducible qualification:** Standardized benchmarks like Decision Index 0.2.1 evaluate tools, retrieval, classification, reasoning, and human taste while penalizing abstentions and errors, eliminating the need to invent custom ad-hoc routing evaluations.
+4. **Locaily Core Thesis:** "Smallest qualified capability." Rather than requiring everyone to run a monolithic 27B model, Locaily establishes a clean track contract and benchmarks to find the smallest local model or deterministic rule that passes acceptance criteria.
+
+### Consequences
+
+- No breaking runtime changes to current server code. Introduced via a planned research bakeoff milestone (`research-01-decision-track-bakeoff`).
+- Ambiguous intake classification, CTK trigger resolution, and guarded enforcement fallback ladders gain a sub-50ms deterministic decision primitive.
+- The Companion Console Matrix Explorer (`companion/console/`) will be extended to display decision provider calibration, latency, and confidence alongside generative model roles.
+- Preserves local-first, LAN-only boundaries; remote providers remain strictly opt-in.
+
+### Status
+
+`Accepted` (Confirmed direction; research bakeoff milestone planned).
+
+### Notes
+
+- External references: Cloudflare Clef (27B) / Clef-Flash (9B) Apache 2.0 release (2026-10-01), Jev / SystemOne API specification, Decision Index 0.2.1 benchmark suite.
+- Reuses and extends existing capability qualification concepts from CORE-02 through CORE-05.
+

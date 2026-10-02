@@ -1,0 +1,65 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "research-01-decision-track-bakeoff",
+  "title": "RESEARCH-01 Locaily Decision Track Bakeoff & External Benchmark Harness",
+  "status": "planned",
+  "type": "feature",
+  "priority": "high",
+  "purpose": "Establish a first-class DecisionCapability track contract compatible with the SystemOne / Jev / Clef API, and conduct a reproducible bakeoff across deterministic rules, small generative LLMs, and local decision models over 10 Locaily routing scenarios.",
+  "problem": "Locaily routing, task intake, and fallback evaluation currently rely on either rigid exact-match conditions or slow, token-heavy generative LLMs that require markdown/JSON parsing. The ecosystem now provides open, sub-40ms decision models (Clef-Flash 9B, Clef 27B) and standardized benchmarks (Decision Index 0.2.1), but Locaily lacks a typed decision contract, adapter, and qualification bakeoff.",
+  "scope": {
+    "included": [
+      "companion/schemas/decision-capability-contract.schema.json",
+      "benchmark-lab/engine/adapters/systemone-adapter.js",
+      "benchmark-lab/fixtures/decision-bakeoff/10-locaily-scenarios.fixture.json",
+      "benchmark-lab/suites/research-decision-bakeoff.suite.json",
+      "docs/02-track-system/decision-track.md",
+      "scripts/run-decision-bakeoff.js",
+      "Evaluation metrics: accuracy, expected calibration error (ECE), latency (p50/p99), VRAM/RAM footprint, abstention/error rate",
+      "Decision Index 0.2.1 test runner adapter and reproduction guide"
+    ],
+    "excluded": [
+      "Monolithic rewrite of Locaily coordinator around Clef",
+      "Replacing or deprecating existing generative tracks (core.classify, core.summarize, core.extract)",
+      "Mandatory cloud-hosted endpoints or non-local dependencies",
+      "Automatic live model enforcement promotion without operator review"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "ac-decision-contract-schema",
+      "description": "Typed JSON schema defining DecisionCapabilityContract (state context + typed questions array -> discrete answers, bounded probabilities, confidence, abstain flag).",
+      "status": "pending"
+    },
+    {
+      "id": "ac-systemone-adapter",
+      "description": "SystemOne-compatible adapter in Benchmark Lab supporting mock fixtures, local /v1/systemone endpoints, and configurable question limits.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-10-locaily-scenarios",
+      "description": "Canonical benchmark fixture suite with 10 representative Locaily routing scenarios across intake, modality, model tier, relay placement, risk gate, and fallback ladder.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-bakeoff-evidence",
+      "description": "Reproducible comparison run measuring accuracy, expected calibration error (ECE), latency, VRAM, and failure rate across Rules Baseline, small LLM, and Clef/Clef-Flash.",
+      "status": "pending"
+    },
+    {
+      "id": "ac-decision-index-runner",
+      "description": "External benchmark harness runner integrating Decision Index 0.2.1 into Benchmark Lab evidence format.",
+      "status": "pending"
+    }
+  ],
+  "validationProfile": "standard",
+  "dependencies": [
+    "core-05-workflow-console-matrix-explorer"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-10-01T23:35:00.000Z",
+  "startedAt": null,
+  "completedAt": null,
+  "mergedAt": null
+}
