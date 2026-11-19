@@ -2,15 +2,19 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-08-03 (Benchmark Lab M3 live acceptance complete)
+**Updated:** 2026-11-18 (SYSTEM-PROOF-01 empirical thesis validation complete; CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Milestone
 
-Benchmark Lab M3 — Interactive Local Model Lab is implemented on `codex/benchmark-lab-m3-interactive-local-model-lab`. The localhost UI discovers installed Ollama models, controls explicit load/unload, launches cataloged suites through an isolated worker, streams summary-safe progress, and recovers durable results after refresh. A real `llama3.2:latest` run completed through the browser with exact digest provenance. The canonical delivery state remains in `development/project-state.json`; the small acceptance run is not a qualification or promotion.
+**Between milestones (`idle` on `main`).** `SYSTEM-PROOF-01` (`system-proof-01-real-workflow-proof`) completed its controlled three-condition + fault-injection experiment on an unseen real repository (`expressjs/express@7ef98448f8b38099ab1ded55e458538ad47a51e7`) with a **POSITIVE** thesis gate verdict: Locaily orchestration enabled a 1.2B model (`LFM2.5-1.2B-Instruct`, 730 MB) to reach 100% factual accuracy and 6/6 structured ranked findings (versus 60% accuracy and collapsed findings from a monolithic 3.2B `llama3.2` baseline), while isolating an injected `MODEL_TIMEOUT` fault into a usable, schema-valid developer handoff. See [system-proof-01-experiment-report.md](../04-validation/system-proof-01-experiment-report.md). Canonical delivery state lives in `development/project-state.json`.
 
 ## What Works
 
-- **Capability Trigger Kernel (CTK-01 & CTK-02)** - trusted local events select versioned installed capabilities, evaluate Node identity & role eligibility (`brain`, `worker`, `hybrid`), verify Capability Capsule checksums (`checksums.json`), resolve secret-free node-local bindings (`data/bindings/node-bindings.json`), generate deterministic plans with placement metadata, execute declared handlers, validate outputs, and persist append-only provenance with explicit rejection codes (`UNSUPPORTED_OS`, `MISSING_RUNTIME`, `INSUFFICIENT_RESOURCES`, `MISSING_BINDING`, `CHECKSUM_MISMATCH`, `FAILED_SELF_TEST`).
+- **Generic Core Capabilities & Multi-Track Workflows (CORE-01 – CORE-05)** — six reusable `core.*` capability tracks (`core.extract`, `core.classify`, `core.prioritize`, `core.summarize`, `core.transform`, `core.validate`) composed into multi-track workflows (`repo_review`, `document_review`, `content_os`, experimental `text_qa`), multi-tier model qualification and fallback routing across `LFM2.5-350M`, `LFM2.5-1.2B-Instruct`, `LFM2.5-1.2B-Thinking`, and `llama3.2` (22 model qualification records), plus the Companion Console Generic Workflows Runner & Model Qualification Matrix Explorer (`CORE-05`).
+- **Unified Shell, Golden Path & Windows Tester Package (PX1 – PX5, PX7 – PX9)** — canonical product status surfaces, fail-closed LAN security hard gate, Golden Path Run Inspector with per-step routing reasons, unified application shell (`companion/shell/`), Windows-first tester setup package, organic discovery docs, and PX8/PX9 audit remediation.
+- **Capability Trigger Kernel (CTK-01, CTK-02, CTK-03)** — trusted local events select versioned installed capabilities, evaluate Node identity & role eligibility (`brain`, `worker`, `hybrid`), verify Capability Capsule checksums (`checksums.json`), resolve secret-free node-local bindings (`data/bindings/node-bindings.json`), bridge local node event bus transports (`CTK-03`), generate deterministic plans with placement metadata, execute declared handlers, validate outputs, and persist append-only provenance with explicit rejection codes (`UNSUPPORTED_OS`, `MISSING_RUNTIME`, `INSUFFICIENT_RESOURCES`, `MISSING_BINDING`, `CHECKSUM_MISMATCH`, `FAILED_SELF_TEST`).
+- **Relay Trust & Pairing (M09A)** — pairing ceremony and authenticated relay node trust primitives alongside the PX2 LAN security hard gate.
+- **Harness-Neutral Agent Operations & Queue Runner (DEV-LOOP-01, DEV-HARNESS-01)** — canonical queue-safe runner and harness-neutral agent operations contract under `development/` and `companion/harness/`.
 - **Local Brain server** - `companion/server.js` on `127.0.0.1:31313`
 - **`POST /tasks/run`** - canonical single-tool entry (plus legacy `/analyze`)
 - **`POST /tracks/run`** and **`GET /tracks`** - Crew track runner
@@ -183,9 +187,9 @@ The North Star is now documented as a local capability network: decompose work i
 
 | Layer | Focus |
 |---|---|
-| **Now** | Follow the canonical Benchmark Lab M3 review, validation, completion, and delivery state. |
-| **Next** | No follow-on Benchmark Lab milestone is approved; choose the next objective explicitly. |
-| **Later** | Physical Multi-Device Pilot (M09 held); Workflow Pack; Orchestrator Governance; Model Specialization |
+| **Now** | Idle on `main` following `SYSTEM-PROOF-01` (`POSITIVE` thesis verdict) closeout and state/doc reconciliation. |
+| **Next** | Awaiting explicit operator selection: `px6-external-validation-program` (5 external testers + physical 2-device Relay pilot), `research-01-decision-track-bakeoff` (gated on approval), or central execution-policy runtime enforcement. |
+| **Later** | Physical Multi-Device Pilot (M09); Workflow Pack; Orchestrator Governance; Model Specialization |
 | **Archive** | Old companion-only architecture, pre-track planning docs |
 
 LFM2.5-1.2B-Thinking is now the first enforced qualified model capability for a companion server runtime track (`website_audit.lighthouse_handoff`, role `priority_helper`). Runtime execution uses `runtimeModelName` from the qualification record; policy and evidence keep the stable capability id `lfm25-1p2b-thinking-local`. Enforcement is still per-track only; no global enforcement is enabled.

@@ -26,22 +26,50 @@
     {
       "id": "ac-five-testers",
       "description": "Protocol + materials exist; at least dry-run internally; results template ready for 5 external testers",
-      "status": "satisfied"
+      "status": "pending",
+      "evidence": [
+        {
+          "type": "document",
+          "reference": "docs/04-validation/px6-execution-evidence.md",
+          "note": "Internal dry-run completed (2/3 tasks); 5 external unassisted developer testers still pending."
+        }
+      ]
     },
     {
       "id": "ac-relay-pilot",
       "description": "Authenticated two-device pilot completed or blocked with explicit evidence and residual risks",
-      "status": "satisfied"
+      "status": "pending",
+      "evidence": [
+        {
+          "type": "document",
+          "reference": "docs/04-validation/px6-execution-evidence.md",
+          "note": "Runbook ready; blocked awaiting a second physical device."
+        }
+      ]
     },
     {
       "id": "ac-second-workflow",
       "description": "Second workflow runnable and used at least once for a non-demo task with evidence",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "document",
+          "reference": "docs/04-validation/px6-execution-evidence.md",
+          "note": "website_audit.accessibility_deep executed with persisted Track Run Record."
+        }
+      ]
     },
     {
       "id": "ac-published",
       "description": "Successes and failures published as validation evidence, not only chat notes",
-      "status": "satisfied"
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "document",
+          "reference": "docs/04-validation/px6-execution-evidence.md",
+          "note": "Execution evidence and residual risks published."
+        }
+      ]
     }
   ],
   "validationProfile": "pre-delivery",
@@ -53,6 +81,6 @@
   "lifecycleRef": null,
   "createdAt": "2026-07-25T03:53:40.372Z",
   "startedAt": "2026-07-26T00:00:00.000Z",
-  "completedAt": "2026-08-01T17:51:35.000Z",
+  "completedAt": null,
   "mergedAt": null
 }

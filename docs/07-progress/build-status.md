@@ -1,40 +1,40 @@
 # Build Status
 
-**Updated:** 2026-08-03 (Benchmark Lab M3 live acceptance complete)
+**Updated:** 2026-11-18 (SYSTEM-PROOF-01 complete & closed out; CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Stage
 
-Pipeline-stage **Local Brain** with **Crew track runner**, JSON-first internal contracts, workflow orchestration, Memory Bridge v0, Benchmark Lab M2 reproducible qualification, and the M3 interactive local model workflow implemented. M9 physical multi-device pilot infrastructure is prepared (not yet executed on hardware).
+Operational **Local Brain** with **Crew track runner** (linear + DAG), generic reusable capability tracks (`core.*`), multi-track composed workflows (`repo_review`, `document_review`, `content_os`, `text_qa`), multi-tier model qualification & fallback routing, Companion Console Workflows & Matrix Explorer (`CORE-05`), unified shell (`PX4`/`PX8`), Benchmark Lab M1–M3, Capability Trigger Kernel (`CTK-01`–`03`), Relay Nodes + `M09A` pairing + `PX2` LAN hard gate, Development Memory Loop (`DM1`–`DM10`), and empirical thesis validation (`SYSTEM-PROOF-01`, `POSITIVE` verdict). Physical two-device pilot and external 5-tester validation (`PX6`) remain planned.
 
-North Star direction is now documented as a local capability network: route track contracts to the smallest qualified capability, validate results, and preserve structured evidence for future routing and track improvement.
+North Star direction is a local capability network: route track contracts to the smallest qualified capability, validate results, and preserve structured evidence for future routing and track improvement.
 
 ## Milestones
 
 | Milestone | Status |
 |---|---|
-| **CTK-01 - Capability Trigger Kernel** | Ready for delivery review - implementation, acceptance suite, and delivery gates pass |
-| **1A - Track system explicit (docs)** | Complete |
-| **1B - Declarative track input mapping (tools)** | Complete |
-| **2 - Second workflow track** | Complete |
-| **3 - Model-step input mapping** | Complete |
-| **4 - Track-based orchestration** | Complete |
-| **5 - Benchmark Lab** | Complete — Milestone 1 operator-ready |
-| **Benchmark Lab M2 - Reproducible Semantic Qualification** | Ready for delivery — implementation, live acceptance, validation, and completion gates passed |
-| **Benchmark Lab M3 - Interactive Local Model Lab** | Implementation and live acceptance complete — canonical lifecycle state determines final readiness |
-| **6 - Relay Nodes (M4)** | Complete |
-| **7 - Multi-Device Workflow Coordination (M5)** | Complete |
-| **8 - Pilot Infrastructure (M9)** | Infrastructure prepared — not yet executed on hardware |
-| **8 - Operator Control Plane (M6)** | Complete |
-| **9 - Physical Multi-Device Pilot (M9)** | Infrastructure prepared — pilot not yet executed |
-| **Development Memory Loop (DM1–DM10)** | Complete — events, capture, sessions, candidates, review, maintainer, retrieval, processor, multi-project |
+| **CORE-01 – CORE-05 (Generic Capabilities, Matrix Qualification, Fallback, Console Explorer)** | Complete & Merged |
+| **SYSTEM-PROOF-01 (Real Multi-Track Workflow Proof)** | Complete & Merged (`POSITIVE` verdict) |
+| **PX1 – PX5, PX7 – PX9 (Truth Surfaces, LAN Gate, Run Inspector, Unified Shell, Tester Package, Audit Remediation)** | Complete |
+| **PX6 (External Validation Program — 5 Testers + Physical 2-Device Pilot)** | Planned (internal dry-run & 2nd workflow done; external testers & 2nd device pending) |
+| **CTK-01 – CTK-03 (Capability Trigger Kernel, Capsules, Event Bus)** | Complete |
+| **M09A (Relay Trust & Pairing Ceremony)** | Complete |
+| **Benchmark Lab M1 – M3 (Evaluation Engine, Semantic Qualification, Interactive Model Lab)** | Complete |
+| **DEV-LOOP-01 & DEV-HARNESS-01 (Queue Runner & Harness-Neutral Operations)** | Complete |
+| **LH Product Bridge & Durable Job State Integrity** | Complete |
+| **Development Memory Loop (DM1–DM10)** | Complete |
+| **RESEARCH-01 (Decision Track Bakeoff)** | Planned (low priority; gated on operator approval) |
 
 ## Current Proof
+
+**Repo Review (`SYSTEM-PROOF-01`)** - workflow id `repo_review`, empirically validated on unseen `expressjs/express@7ef98448...` (`POSITIVE` verdict: 1.2B orchestrated model matched/outperformed monolithic 3.2B baseline with 100% factual accuracy and isolated fault recovery).
 
 **Lighthouse Handoff** - track id `website_audit.lighthouse_handoff`
 
 **DealSniper** - track id `marketplace.dealsniper`
 
-**Benchmark Lab** - operator-ready local evaluation subsystem under `benchmark-lab/`, with CLI and interactive localhost workflows. M2 adds semantic scoring, stable provenance, Wilson uncertainty, and minimum qualification gates. M3 adds model inventory, explicit runtime controls, exact-provenance preflight, isolated execution, durable summary-safe runs, live progress, and frontend result/history views.
+**Document Review & Content OS** - workflow ids `document_review`, `content_os` (proving cross-domain reuse of `core.*` capability tracks)
+
+**Benchmark Lab** - operator-ready local evaluation subsystem under `benchmark-lab/`, with CLI and interactive localhost workflows (M1–M3) and 22 model qualification records across `llama3.2` and `LFM2.5` tiers.
 
 ## Working
 
@@ -94,13 +94,9 @@ North Star direction is now documented as a local capability network: route trac
 
 ## Current Priority
 
-**Now:** Review CTK-01 on the isolated CTK-only branch. Runtime acceptance is 20/20, the full offline repository suite passes, and validation `validation-20260731T012502-3e424fff` passed. Do not activate CTK-02 or implement DBVT SEO Audit integration.
+**Now:** `main` is idle following `SYSTEM-PROOF-01` closeout (`POSITIVE` thesis gate verdict). Canonical state lives in `development/project-state.json`.
 
-**Benchmark Lab M3:** Implementation and real-browser acceptance are complete. Follow `development/project-state.json` for canonical review, validation, completion, and delivery state. No follow-on Benchmark Lab milestone is approved.
-
-**Benchmark Lab M2 gate:** The representative draft has 20 scored trials across 3 strata and is evidence-gate eligible; it remains unpromoted and does not create a new qualification claim.
-
-**Benchmark Lab:** Milestone 1 complete and operator-ready. Broader model, track, hardware, and live qualification coverage remain follow-on work — not yet scoped or scheduled.
+**Next:** Awaiting explicit operator selection among `px6-external-validation-program` (external testers + physical 2-device Relay pilot), central execution-policy runtime enforcement, or `research-01-decision-track-bakeoff`.
 
 ## Evidence Pointers
 

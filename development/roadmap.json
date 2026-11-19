@@ -1,7 +1,7 @@
 {
   "schema": "locaily.development.roadmap.v1",
   "project": "locaily",
-  "updatedAt": "2026-10-01T22:57:22.672Z",
+  "updatedAt": "2026-11-19T02:02:56.876Z",
   "areas": [
     {
       "id": "local-brain",
@@ -267,7 +267,7 @@
       "id": "product-experience",
       "title": "Product Experience",
       "description": "Golden path, unified shell, packaging, external proof, and discovery — make Locaily feelable without architecture literacy",
-      "maturity": "designed",
+      "maturity": "implemented",
       "initiatives": [
         {
           "id": "truth-surfaces",
@@ -345,7 +345,7 @@
           "id": "remaining-milestones-second-pass",
           "title": "PX Remaining Milestones Second Pass",
           "description": "PX6 evidence execution, PX7/PX5/PX1 canonical fixes",
-          "maturity": "planned",
+          "maturity": "completed",
           "milestoneIds": [
             "px9-remaining-milestones-second-pass"
           ]
@@ -356,13 +356,13 @@
       "id": "thesis-proof",
       "title": "Thesis Proof",
       "description": "Empirical validation that the assembled system provides measurable value over simpler alternatives",
-      "maturity": "planned",
+      "maturity": "completed",
       "initiatives": [
         {
           "id": "system-proof",
           "title": "System-Level Workflow Proof",
           "description": "Controlled three-condition experiment: single-model vs decomposed vs Locaily-orchestrated on repo_review",
-          "maturity": "planned",
+          "maturity": "completed",
           "milestoneIds": [
             "system-proof-01-real-workflow-proof"
           ]

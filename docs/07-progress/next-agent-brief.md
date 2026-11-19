@@ -2,30 +2,31 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-08-03 (Benchmark Lab M3 live acceptance complete)
+**Updated:** 2026-11-18 (SYSTEM-PROOF-01 complete & closed out; CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Read First
 
-1. [../00-start-here/current-state.md](../00-start-here/current-state.md)
-2. [active-build-slice.md](./active-build-slice.md)
-3. [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md) *(active objective)*
-4. [../01-architecture/development-memory-loop.md](../01-architecture/development-memory-loop.md) *(Development Memory Loop DM1–DM10 complete)*
-5. [../02-planning/development-memory-roadmap.md](../02-planning/development-memory-roadmap.md)
-6. [build-status.md](./build-status.md)
-7. [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md)
-8. [benchmark-lab/OPERATOR_GUIDE.md](../../benchmark-lab/OPERATOR_GUIDE.md)
-9. [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md)
+1. [../../development/project-state.json](../../development/project-state.json) *(canonical machine-readable state)*
+2. [../00-start-here/current-state.md](../00-start-here/current-state.md)
+3. [../04-validation/system-proof-01-experiment-report.md](../04-validation/system-proof-01-experiment-report.md) *(latest empirical thesis proof)*
+4. [build-status.md](./build-status.md)
+5. [../01-architecture/development-memory-loop.md](../01-architecture/development-memory-loop.md) *(Development Memory Loop DM1–DM10 complete)*
+6. [../02-systems/benchmark-lab.md](../02-systems/benchmark-lab.md)
+7. [benchmark-lab/OPERATOR_GUIDE.md](../../benchmark-lab/OPERATOR_GUIDE.md)
+8. [../00-start-here/north-star-local-capability-network.md](../00-start-here/north-star-local-capability-network.md)
 
 Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../08-agents/agent-context.md)
 
-## Current Benchmark Lab M3 Handoff
+## Current Handoff (Post CORE-05 & SYSTEM-PROOF-01)
 
-- M2 is ready for delivery. M3 is implemented on `codex/benchmark-lab-m3-interactive-local-model-lab`; consult `development/project-state.json` for the canonical lifecycle state.
-- The unified shell discovers manifest-registered installed Ollama models and keeps installation, runtime reachability, loaded state, loadability, manifest status, and qualification state separate.
-- Operators explicitly load/unload models, choose only allowlisted catalog suites, run exact-provenance preflight, and launch quick or qualification runs. The companion spawns an isolated JSONL worker and never imports `benchmark-lab/engine/`.
-- Run summaries and events are durable and summary-safe. The API supports list/detail, SSE replay, polling fallback, cancellation, duplicate protection, and truthful server-restart recovery. Raw prompts and model responses are not exposed.
-- Real browser acceptance completed run `bench-20260803031401-57923dc6` against `llama3.2:latest` at digest `sha256:a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72`: 3/4 passed, Wilson 95% interval 0.300642-0.954413, three strata, zero critical failures. Refresh recovery was verified. This quick run is below qualification thresholds and was not promoted.
-- Preserve the local-only, explicit-control boundary. Do not add automatic downloads, model switching, promotion, qualification, or routing from interactive results.
+- **Repository state:** `main` is **idle** between milestones after closing out `SYSTEM-PROOF-01` (`system-proof-01-real-workflow-proof`). Always run `npm run dev:status` first.
+- **CORE-01 – CORE-05 merged:** Six reusable `core.*` capability tracks (`extract`, `classify`, `prioritize`, `summarize`, `transform`, `validate`), multi-track workflows (`repo_review`, `document_review`, `content_os`, `text_qa`), multi-tier model qualification & fallback routing (`LFM2.5-350M`, `LFM2.5-1.2B-Instruct`, `LFM2.5-1.2B-Thinking`, `llama3.2`), and the Companion Console Generic Workflows & Model Qualification Matrix Explorer (`CORE-05`) are all merged on `main`.
+- **SYSTEM-PROOF-01 verdict (`POSITIVE`):** Controlled 3-condition + fault-injection experiment on unseen `expressjs/express@7ef98448...` showed Locaily orchestration with `LFM2.5-1.2B-Instruct` (730 MB) achieved 100% factual accuracy and 6/6 structured ranked priorities (vs. 60% accuracy and collapsed findings from a monolithic 3.2B `llama3.2`), and isolated an injected `MODEL_TIMEOUT` fault into a schema-valid usable handoff.
+- **Benchmark Lab M1–M3 merged:** Interactive Local Model Lab UI, exact-provenance preflight, isolated JSONL worker, and summary-safe run history are complete on `main`. Preserve the local-only, explicit-control boundary and never import `benchmark-lab/engine/` from `companion/`.
+- **Planned milestones awaiting explicit operator approval:**
+  1. `px6-external-validation-program` — 5 external unassisted testers + physical 2-device Relay pilot (internal dry-run & second workflow evidence already captured in `docs/04-validation/px6-execution-evidence.md`).
+  2. `research-01-decision-track-bakeoff` — low priority; explicitly gated pending operator approval.
+  3. Central execution-policy runtime gate (`policies/default-execution-policy.json` is documented, not yet runtime-enforced).
 
 ## Important: Benchmark Lab Status
 
@@ -365,20 +366,19 @@ See [current-sprint.md](./current-sprint.md) for approved next-work candidates a
 
 ## Next Task
 
-**No active objective.** The next work must be explicitly selected by the operator.
+**No active milestone or objective.** The next milestone must be explicitly selected by the operator before starting work (`npm run dev:milestone:start`).
 
-See [current-sprint.md](./current-sprint.md) for the approved candidate sequence:
+Approved / planned candidates in `development/roadmap.json`:
 
-1. Second-Repository Operator Acceptance (deferred, ready to resume)
-2. Clean-Machine v1 Acceptance (candidate)
-3. Lighthouse Handoff Product Bridge (candidate)
+1. **External Validation Program (`px6-external-validation-program`)** — complete 5 unassisted external developer tester runs and physical 2-device authenticated Relay pilot.
+2. **Central Execution Gate Enforcement** — enforce `policies/default-execution-policy.json` at runtime for filesystem, shell, and network actions.
+3. **Decision Track Bakeoff (`research-01-decision-track-bakeoff`)** — low priority; explicitly blocked pending operator approval.
 
 ### Deferred (requires specific conditions)
 
-1. **Second-Repository Operator Acceptance** — real repository, CLI/API workflow. Record pass/fail; fix only if blocked.
-2. **Physical Multi-Device Pilot (M09)** — requires two devices + Ollama. See `docs/05-integrations/multi-device-pilot.md`. M09 is held; re-entry requires two test devices and an operator.
-3. **Relay Trust and Secure Pairing (M09A)** — should precede physical pilot. Authentication, signed requests, capability allowlists.
-4. **Central Execution Gate Enforcement** — design docs and schemas complete (`docs/security/`, `policies/`). Implementation not yet scoped.
+1. **Physical Multi-Device Pilot (M09 / PX6)** — requires two physical devices + Ollama on LAN. See `docs/05-integrations/multi-device-pilot.md` and `docs/04-validation/px6-execution-evidence.md`.
+2. **Second-Repository Operator Acceptance** — real repository CLI/API acceptance for multi-project Development Memory.
+3. **Central Execution Gate Enforcement** — design docs and schemas complete (`docs/security/`, `policies/`). Implementation not yet scoped.
 
 **Do not:**
 - Remove linear track runner
