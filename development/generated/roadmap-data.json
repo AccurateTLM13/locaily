@@ -1,6 +1,6 @@
 {
   "schema": "locaily.development.dashboard.v1",
-  "generatedAt": "2026-10-01T23:05:55.731Z",
+  "generatedAt": "2026-11-19T02:05:14.128Z",
   "projectState": {
     "schema": "locaily.development.project_state.v1",
     "project": "locaily",
@@ -8,24 +8,24 @@
     "activeSession": null,
     "status": "idle",
     "defaultBranch": "main",
-    "activeBranch": "milestone/core-05-workflow-console-matrix-explorer",
-    "lastCompletedMilestone": "core-05-workflow-console-matrix-explorer",
-    "nextRecommendedAction": "Milestone 'core-05-workflow-console-matrix-explorer' merged. Run dev:dashboard to refresh.",
+    "activeBranch": "main",
+    "lastCompletedMilestone": "system-proof-01-real-workflow-proof",
+    "nextRecommendedAction": "Milestone 'system-proof-01-real-workflow-proof' merged. Run dev:dashboard to refresh.",
     "blockers": [],
     "warnings": [],
-    "updatedAt": "2026-10-01T23:05:55.424Z",
+    "updatedAt": "2026-11-19T02:05:13.857Z",
     "updatedBy": {
       "type": "agent",
       "name": "dev-lifecycle",
       "platform": "system"
     },
-    "mergedMilestone": "core-05-workflow-console-matrix-explorer",
-    "mergedAt": "2026-10-01T23:05:55.424Z",
-    "mergedCommit": "488019518efaa5e9ef54f6448d2b7b80b8237847"
+    "mergedMilestone": "system-proof-01-real-workflow-proof",
+    "mergedAt": "2026-11-19T02:05:13.857Z",
+    "mergedCommit": "559dfc3fac8f66b9e98854012d7affe6cb2878f3"
   },
   "git": {
     "branch": "main",
-    "head": "4880195",
+    "head": "559dfc3",
     "dirty": true
   },
   "subsystemMaturity": [
@@ -212,7 +212,7 @@
     {
       "id": "product-experience",
       "title": "Product Experience",
-      "maturity": "designed",
+      "maturity": "implemented",
       "initiatives": [
         {
           "id": "truth-surfaces",
@@ -242,7 +242,7 @@
         {
           "id": "external-validation",
           "title": "External Validation Program",
-          "maturity": "active"
+          "maturity": "planned"
         },
         {
           "id": "organic-discovery",
@@ -257,7 +257,19 @@
         {
           "id": "remaining-milestones-second-pass",
           "title": "PX Remaining Milestones Second Pass",
-          "maturity": "active"
+          "maturity": "completed"
+        }
+      ]
+    },
+    {
+      "id": "thesis-proof",
+      "title": "Thesis Proof",
+      "maturity": "completed",
+      "initiatives": [
+        {
+          "id": "system-proof",
+          "title": "System-Level Workflow Proof",
+          "maturity": "completed"
         }
       ]
     }
@@ -270,6 +282,12 @@
         "title": "External Validation Readiness",
         "type": "validation",
         "priority": "high"
+      },
+      {
+        "id": "research-01-decision-track-bakeoff",
+        "title": "RESEARCH-01 Locaily Decision Track Bakeoff & External Benchmark Harness",
+        "type": "feature",
+        "priority": "low"
       }
     ],
     "ready": [],
@@ -302,6 +320,12 @@
         "id": "core-05-workflow-console-matrix-explorer",
         "title": "CORE-05 Generic Workflows & Model Qualification Matrix Explorer in Companion Console",
         "type": "feature",
+        "priority": "high"
+      },
+      {
+        "id": "system-proof-01-real-workflow-proof",
+        "title": "SYSTEM-PROOF-01 Real Multi-Track Workflow Proof",
+        "type": "experiment",
         "priority": "high"
       }
     ],
@@ -739,9 +763,39 @@
       "completedAt": "2026-10-01T23:05:30.973Z",
       "requiredPassed": 6,
       "requiredFailed": 0
+    },
+    {
+      "id": "validation-20261119T020458-2c382765",
+      "milestoneId": "system-proof-01-real-workflow-proof",
+      "status": "passed",
+      "profileId": "builtin-quick",
+      "branch": "main",
+      "completedAt": "2026-11-19T02:04:59.724Z",
+      "requiredPassed": 3,
+      "requiredFailed": 0
     }
   ],
   "recentActivity": [
+    {
+      "type": "validation",
+      "id": "validation-20261119T020458-2c382765",
+      "milestoneId": "system-proof-01-real-workflow-proof",
+      "status": "passed",
+      "timestamp": "2026-11-19T02:04:59.724Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20261002-001",
+      "milestoneId": "system-proof-01-real-workflow-proof",
+      "timestamp": "2026-11-19T02:04:36.797Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20261002-001",
+      "milestoneId": "system-proof-01-real-workflow-proof",
+      "status": "closed",
+      "timestamp": "2026-10-02T04:02:20.222Z"
+    },
     {
       "type": "validation",
       "id": "validation-20261001T230429-f7d31a6b",
@@ -855,26 +909,6 @@
       "milestoneId": "core-01-system-formation",
       "status": "passed",
       "timestamp": "2026-09-30T23:20:53.397Z"
-    },
-    {
-      "type": "validation",
-      "id": "validation-20260907T193008-4b632292",
-      "milestoneId": "core-01-system-formation",
-      "status": "passed",
-      "timestamp": "2026-09-07T19:30:09.014Z"
-    },
-    {
-      "type": "session-closed",
-      "id": "session-20260907-003",
-      "milestoneId": "core-01-system-formation",
-      "timestamp": "2026-09-07T19:30:07.325Z"
-    },
-    {
-      "type": "session",
-      "id": "session-20260907-003",
-      "milestoneId": "core-01-system-formation",
-      "status": "closed",
-      "timestamp": "2026-09-07T19:16:19.636Z"
     }
   ],
   "nextMilestone": {
@@ -907,22 +941,50 @@
         {
           "id": "ac-five-testers",
           "description": "Protocol + materials exist; at least dry-run internally; results template ready for 5 external testers",
-          "status": "satisfied"
+          "status": "pending",
+          "evidence": [
+            {
+              "type": "document",
+              "reference": "docs/04-validation/px6-execution-evidence.md",
+              "note": "Internal dry-run completed (2/3 tasks); 5 external unassisted developer testers still pending."
+            }
+          ]
         },
         {
           "id": "ac-relay-pilot",
           "description": "Authenticated two-device pilot completed or blocked with explicit evidence and residual risks",
-          "status": "satisfied"
+          "status": "pending",
+          "evidence": [
+            {
+              "type": "document",
+              "reference": "docs/04-validation/px6-execution-evidence.md",
+              "note": "Runbook ready; blocked awaiting a second physical device."
+            }
+          ]
         },
         {
           "id": "ac-second-workflow",
           "description": "Second workflow runnable and used at least once for a non-demo task with evidence",
-          "status": "satisfied"
+          "status": "satisfied",
+          "evidence": [
+            {
+              "type": "document",
+              "reference": "docs/04-validation/px6-execution-evidence.md",
+              "note": "website_audit.accessibility_deep executed with persisted Track Run Record."
+            }
+          ]
         },
         {
           "id": "ac-published",
           "description": "Successes and failures published as validation evidence, not only chat notes",
-          "status": "satisfied"
+          "status": "satisfied",
+          "evidence": [
+            {
+              "type": "document",
+              "reference": "docs/04-validation/px6-execution-evidence.md",
+              "note": "Execution evidence and residual risks published."
+            }
+          ]
         }
       ],
       "validationProfile": "pre-delivery",
@@ -934,7 +996,7 @@
       "lifecycleRef": null,
       "createdAt": "2026-07-25T03:53:40.372Z",
       "startedAt": "2026-07-26T00:00:00.000Z",
-      "completedAt": "2026-08-01T17:51:35.000Z",
+      "completedAt": null,
       "mergedAt": null
     }
   },
@@ -942,117 +1004,177 @@
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193805-abd72fb5' is 67 days old"
+      "message": "Validation 'validation-20260726T193805-abd72fb5' is 115 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193814-1c6a4d38' is 67 days old"
+      "message": "Validation 'validation-20260726T193814-1c6a4d38' is 115 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193822-682b4aac' is 67 days old"
+      "message": "Validation 'validation-20260726T193822-682b4aac' is 115 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193904-f068ea75' is 67 days old"
+      "message": "Validation 'validation-20260726T193904-f068ea75' is 115 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193946-d77283c5' is 67 days old"
+      "message": "Validation 'validation-20260726T193946-d77283c5' is 115 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T194012-6848fec5' is 67 days old"
+      "message": "Validation 'validation-20260726T194012-6848fec5' is 115 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260731T012126-adab70b6' is 62 days old"
+      "message": "Validation 'validation-20260731T012126-adab70b6' is 111 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260731T012351-67f4276c' is 62 days old"
+      "message": "Validation 'validation-20260731T012351-67f4276c' is 111 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260731T012502-3e424fff' is 62 days old"
+      "message": "Validation 'validation-20260731T012502-3e424fff' is 111 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260801T161108-4465cafc' is 61 days old"
+      "message": "Validation 'validation-20260801T161108-4465cafc' is 109 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260801T161223-cc81739b' is 61 days old"
+      "message": "Validation 'validation-20260801T161223-cc81739b' is 109 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260801T161231-77bc9e23' is 61 days old"
+      "message": "Validation 'validation-20260801T161231-77bc9e23' is 109 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023227-6fab1834' is 59 days old"
+      "message": "Validation 'validation-20260803T023227-6fab1834' is 107 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023410-3563bd82' is 59 days old"
+      "message": "Validation 'validation-20260803T023410-3563bd82' is 107 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023624-a84bb3ad' is 59 days old"
+      "message": "Validation 'validation-20260803T023624-a84bb3ad' is 107 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023959-bd677b49' is 59 days old"
+      "message": "Validation 'validation-20260803T023959-bd677b49' is 107 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T033939-6f1c2b76' is 59 days old"
+      "message": "Validation 'validation-20260803T033939-6f1c2b76' is 107 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260804T030328-9dfffbe6' is 58 days old"
+      "message": "Validation 'validation-20260804T030328-9dfffbe6' is 106 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260804T030446-0b281076' is 58 days old"
+      "message": "Validation 'validation-20260804T030446-0b281076' is 106 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260823T211614-13b4ddad' is 39 days old"
+      "message": "Validation 'validation-20260823T211614-13b4ddad' is 87 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260907T184143-2cd3ef56' is 24 days old"
+      "message": "Validation 'validation-20260907T184143-2cd3ef56' is 72 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260907T191223-c83e1580' is 24 days old"
+      "message": "Validation 'validation-20260907T191223-c83e1580' is 72 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260907T193008-4b632292' is 24 days old"
+      "message": "Validation 'validation-20260907T193008-4b632292' is 72 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260930T232052-d2d7f38e' is 49 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20260930T232551-3b868577' is 49 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20261001T020555-b3197f9a' is 48 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20261001T020757-c32b8132' is 48 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20261001T024808-615d773c' is 48 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20261001T024952-cbe5b823' is 48 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20261001T043715-9cd0f7ea' is 48 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_VALIDATION",
+      "message": "Validation 'validation-20261001T230429-f7d31a6b' is 48 days old"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_GENERATED",
+      "message": "Generated file 'next-agent-handoff.md' may be stale"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_GENERATED",
+      "message": "Generated file 'roadmap-data.json' may be stale"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_GENERATED",
+      "message": "Generated file 'roadmap.html' may be stale"
+    },
+    {
+      "severity": "info",
+      "code": "STALE_GENERATED",
+      "message": "Generated file 'status-summary.md' may be stale"
     }
   ],
   "drift": [
@@ -1215,6 +1337,18 @@
         "status": "completed",
         "title": "PX Remaining Milestones Second Pass — Evidence Execution and Canonical Fixes",
         "type": "remediation"
+      },
+      {
+        "id": "research-01-decision-track-bakeoff",
+        "status": "planned",
+        "title": "RESEARCH-01 Locaily Decision Track Bakeoff & External Benchmark Harness",
+        "type": "feature"
+      },
+      {
+        "id": "system-proof-01-real-workflow-proof",
+        "status": "merged",
+        "title": "SYSTEM-PROOF-01 Real Multi-Track Workflow Proof",
+        "type": "experiment"
       }
     ],
     "edges": [
@@ -1333,16 +1467,28 @@
       {
         "from": "px7-organic-discovery-loop",
         "to": "px9-remaining-milestones-second-pass"
+      },
+      {
+        "from": "core-05-workflow-console-matrix-explorer",
+        "to": "research-01-decision-track-bakeoff"
+      },
+      {
+        "from": "system-proof-01-real-workflow-proof",
+        "to": "research-01-decision-track-bakeoff"
+      },
+      {
+        "from": "core-05-workflow-console-matrix-explorer",
+        "to": "system-proof-01-real-workflow-proof"
       }
     ]
   },
   "humanDecisions": [],
   "stats": {
-    "totalMilestones": 25,
+    "totalMilestones": 27,
     "active": 0,
-    "completed": 24,
-    "totalSessions": 19,
-    "totalValidations": 31,
+    "completed": 25,
+    "totalSessions": 20,
+    "totalValidations": 32,
     "totalDeliveries": 0,
     "totalIssues": 4,
     "openIssues": 0

@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "system-proof-01-real-workflow-proof",
   "title": "SYSTEM-PROOF-01 Real Multi-Track Workflow Proof",
-  "status": "active",
+  "status": "merged",
   "type": "experiment",
   "priority": "high",
   "purpose": "Empirically determine whether Locaily orchestration provides measurable system-level value over a simpler local-model workflow. This is the missing thesis validation. The experiment does not assume a positive result; a null result is equally valid evidence and triggers a diagnosis gate rather than the next roadmap milestone.",
@@ -159,6 +159,10 @@
   "lifecycleRef": null,
   "createdAt": "2026-10-02T02:25:00.000Z",
   "startedAt": "2026-10-02T04:02:20.219Z",
-  "completedAt": null,
-  "mergedAt": null
+  "completedAt": "2026-11-19T02:05:13.050Z",
+  "mergedAt": "2026-11-19T02:05:13.853Z",
+  "latestValidationId": "validation-20261119T020458-2c382765",
+  "completionBranch": "main",
+  "completionHead": "559dfc3fac8f66b9e98854012d7affe6cb2878f3",
+  "mergedCommit": "559dfc3fac8f66b9e98854012d7affe6cb2878f3"
 }
