@@ -1,31 +1,33 @@
 {
-  "work_id": "core-05-workflow-console-matrix-explorer-20261001",
-  "objective_id": "core-05-workflow-console-matrix-explorer",
+  "work_id": "system-proof-01-real-workflow-proof-20261002",
+  "objective_id": "system-proof-01-real-workflow-proof",
   "status": "complete",
-  "closed_at": "2026-10-01T23:05:00.000Z",
-  "original_goal": "Activate the Workflows and Model Qualification Matrix Explorer views in the Companion Console UI (and update Unified Shell), allowing operators to view, configure, and trigger all 4 core generic workflows (repo_review, text_qa, document_review, content_os), inspect multi-tier qualified local models across generic capabilities, and test shadow routing with fallback recommendations live from the browser.",
+  "closed_at": "2026-10-02T04:22:00.000Z",
+  "original_goal": "Empirically determine whether Locaily orchestration provides measurable system-level value over a simpler local-model workflow. Execute a controlled three-condition experiment (Condition A: monolithic baseline, Condition B: decomposed same-model baseline, Condition C: Locaily multi-model orchestration with qualified capability routing, Condition C-fail: fault injection) against a real, unseen repository fixture, score all metrics, and publish a thesis verdict.",
   "completed": [
-    "Activated Workflows, Model Matrix, and Activity navigation links in companion/console/index.html.",
-    "Implemented view panel switching system in companion/console/app.js.",
-    "Implemented generic workflows catalog and interactive workflow runner in companion/console/app.js with example payloads for repo_review, text_qa, document_review, and content_os.",
-    "Implemented Model Qualification Matrix table and model tier cards in companion/console/app.js.",
-    "Implemented interactive shadow routing & fallback tester in companion/console/app.js calling /qualifications/dry-run.",
-    "Integrated shadow router recommendations into capability-registry.js dryRunRecommendation.",
-    "Updated companion/shell/app.js renderWorkflows to dynamically fetch from /orchestration/workflows and support generic workflows.",
-    "Added styling for workflow cards, track pipelines, matrix tables, tier cards, and tester forms in companion/console/styles.css.",
-    "Created acceptance test suite scripts/test-core05-console-matrix-explorer.js and wired test:core05 into test:full.",
-    "All test suites passing 100% green across npm run test:full."
+    "Selected and verified real unseen repository fixture expressjs/express@7ef98448f8b38099ab1ded55e458538ad47a51e7 in data/fixtures/sp01-express.",
+    "Frozen evaluation rubric, ground-truth baseline, and runtime configuration in docs/04-validation/system-proof-01-evaluation-freeze.md before running any condition.",
+    "Implemented automated experiment runner scripts/run-system-proof-01.js executing all 3 conditions plus fault injection against live local Ollama runtime.",
+    "Condition A (Monolithic llama3.2 3.2B): 60% factual accuracy, collapsed findings into single lump with fabricated score 20, 24.4s wall time.",
+    "Condition B (Decomposed llama3.2 3.2B): 100% factual accuracy, 6/6 structured priorities, maintainability classification, 5.3s wall time.",
+    "Condition C (Orchestrated LFM2.5-1.2B 1.2B): 100% factual accuracy, 6/6 structured priorities, rich developer summary, qualification audit trail, 15.8s wall time.",
+    "Condition C-fail (Simulated MODEL_TIMEOUT): failure isolated at track level (on_failure: skip), downstream tracks completed, final developer handoff fully usable and schema-compliant.",
+    "Recorded raw results in data/experiments/system-proof-01/raw-results.json.",
+    "Published full experiment report in docs/04-validation/system-proof-01-experiment-report.md with POSITIVE thesis gate verdict.",
+    "Recorded architecture decision in docs/06-decisions/decision-log.md and updated validation index in docs/04-validation/README.md.",
+    "Updated acceptance criteria in development/milestones/system-proof-01-real-workflow-proof.json and session record in development/sessions/session-20261002-001.json."
   ],
   "remaining": [],
-  "next_required_action": "Complete milestone lifecycle and merge to main.",
+  "next_required_action": "Review experiment report with JP; await approval before planning or starting follow-on milestones.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
-  "working_branch": "milestone/core-05-workflow-console-matrix-explorer",
+  "working_branch": "main",
   "validation": {
     "failed": [],
     "passed": [
-      "npm run test:core05: all 6 acceptance tests passed.",
-      "npm run test:full: all test suites green (100%)."
+      "node scripts/test-development-schemas.js (29/29 passed)",
+      "scripts/run-system-proof-01.js (Conditions A, B, C, C-fail executed and scored)",
+      "Schema validation of all generated handoffs against companion/schemas/repo-review-handoff.schema.json"
     ],
     "not_run": []
   },

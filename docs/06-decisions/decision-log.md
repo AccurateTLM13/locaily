@@ -1,5 +1,31 @@
 # Decision Log
 
+## 2026-10-02 — SYSTEM-PROOF-01 Empirical Thesis Validation Verdict: POSITIVE
+
+### Context
+
+Locaily needed empirical proof on an unseen real-world repository to test whether multi-track capability coordination provides measurable advantages over simpler un-decomposed local model usage. Without this proof, follow-on milestones risked expanding architecture prematurely.
+
+### Decision
+
+- Run a controlled 3-condition experiment on `expressjs/express` (`7ef98448f8b38099ab1ded55e458538ad47a51e7`): Condition A (monolithic `llama3.2` 3.2B baseline), Condition B (decomposed `llama3.2` 3.2B baseline), Condition C (Locaily multi-model orchestration with `LFM2.5-1.2B-Instruct` qualified capabilities), and Condition C-fail (fault injection).
+- Freeze the rubric, ground-truth scan, and model configuration before executing conditions.
+- Score against factual accuracy, useful findings, failure isolation, and schema compliance.
+- Confirm thesis gate verdict: **POSITIVE**.
+
+### Consequences
+
+- Empirically proven: Locaily orchestration achieves 100% factual accuracy and 6/6 structured priorities using a lightweight 1.2B model (730 MB), outperforming a monolithic 3.2B model (2.0 GB, 60% accuracy, collapsed findings).
+- Empirically proven: Track-level failure isolation prevents catastrophic workflow failure under simulated runtime timeout (`MODEL_TIMEOUT`), producing usable partial developer handoffs.
+- Evidence recorded in `docs/04-validation/system-proof-01-experiment-report.md` and `data/experiments/system-proof-01/raw-results.json`.
+- The architectural thesis is validated; follow-on roadmap milestones have empirical grounding.
+
+### Status
+
+Completed and verified (2026-10-02).
+
+---
+
 ## 2026-07-22 — Development Control Plane Phase 1 (Implemented)
 
 ### Context

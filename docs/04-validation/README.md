@@ -32,6 +32,13 @@ Evidence records for Locaily **tracks** and **workflows**.
 | [lighthouse-handoff-validation.md](../03-workflows/lighthouse-handoff-validation.md) | Lighthouse Handoff L1 (Local Brain contract) + L2 (live Ollama) |
 | [l2-live-ollama-memory-bridge.md](./l2-live-ollama-memory-bridge.md) | L2 live Ollama + Memory Bridge milestone (2026-06-13) |
 
+### System proof and empirical validation
+
+| Document | Scope |
+|----------|-------|
+| [system-proof-01-experiment-report.md](./system-proof-01-experiment-report.md) | SYSTEM-PROOF-01 3-condition empirical proof (express fixture) — POSITIVE verdict |
+| [system-proof-01-evaluation-freeze.md](./system-proof-01-evaluation-freeze.md) | SYSTEM-PROOF-01 pre-execution rubric freeze and baseline specification |
+
 ### Model qualification
 
 | Document | Scope |

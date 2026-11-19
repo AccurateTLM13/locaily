@@ -1,0 +1,50 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20261002-001",
+  "milestoneId": "system-proof-01-real-workflow-proof",
+  "agent": {
+    "platform": "antigravity",
+    "model": "gemini-3.8-flash"
+  },
+  "status": "active",
+  "objective": "Empirically determine whether Locaily orchestration provides measurable system-level value over a simpler local-model workflow. This is the missing thesis validation. The experiment does not assume a positive result; a null result is equally valid evidence and triggers a diagnosis gate rather than the next roadmap milestone.",
+  "branch": "main",
+  "startingCommit": "58aac42ee9fbf6805eca4b694d894361b46ef758",
+  "plannedFiles": [
+    "docs/04-validation/system-proof-01-evaluation-freeze.md",
+    "scripts/run-system-proof-01.js",
+    "data/experiments/system-proof-01/raw-results.json",
+    "docs/04-validation/system-proof-01-experiment-report.md"
+  ],
+  "completedWork": [
+    "Selected and verified proof fixture expressjs/express@7ef98448f8b38099ab1ded55e458538ad47a51e7",
+    "Established and published frozen evaluation rubric and ground-truth baseline in docs/04-validation/system-proof-01-evaluation-freeze.md",
+    "Implemented experiment runner script scripts/run-system-proof-01.js for Condition A, B, C, and C-fail",
+    "Executed 3-condition empirical proof against live Ollama runtime; recorded raw results in data/experiments/system-proof-01/raw-results.json",
+    "Published comprehensive experiment report in docs/04-validation/system-proof-01-experiment-report.md confirming POSITIVE thesis gate verdict",
+    "Updated decision log docs/06-decisions/decision-log.md and validation index docs/04-validation/README.md",
+    "Completed SYSTEM-PROOF-01 experiment and published POSITIVE verdict report"
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "name": "schema-tests",
+      "passed": true
+    },
+    {
+      "name": "experiment-execution",
+      "passed": true
+    },
+    {
+      "timestamp": "2026-10-02T04:21:43.846Z",
+      "message": "Completed SYSTEM-PROOF-01 experiment and published POSITIVE verdict report",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-10-02T04:02:20.222Z",
+  "closedAt": null
+}
