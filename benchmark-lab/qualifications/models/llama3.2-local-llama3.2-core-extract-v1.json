@@ -31,7 +31,8 @@
   "notes": [
     "Generated from explicitly promoted Benchmark Lab evidence.",
     "Qualified for core.extract default_worker role. 3/3 scenario strata PASS (100%).",
-    "Semantic scorer core-extract-semantic-v1 verified."
+    "Semantic scorer core-extract-semantic-v1 verified.",
+    "Requalified on 2026-11-19: suite passed 3/3 strata (0 failures)."
   ],
-  "generatedAt": "2026-10-01T01:59:31.811Z"
+  "generatedAt": "2026-11-19T02:09:17.364Z"
 }

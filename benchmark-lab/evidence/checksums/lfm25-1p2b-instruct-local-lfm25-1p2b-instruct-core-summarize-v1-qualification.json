@@ -5,6 +5,6 @@
   "artifactPath": "benchmark-lab/qualifications/models/lfm25-1p2b-instruct-local-lfm25-1p2b-instruct-core-summarize-v1.json",
   "algorithm": "sha256",
   "checksumMode": "canonical_text_v1",
-  "checksum": "sha256:31d030bcc420a49cfca773bb60eb9c0a552d002f65c0569eee2c4d69b3a926c5",
-  "generatedAt": "2026-10-01T04:32:56.917Z"
+  "checksum": "sha256:28547bc27030348277e7ad5a6278ac7dbdaf34fc45865af157fa3cef80eece98",
+  "generatedAt": "2026-11-19T02:09:17.500Z"
 }

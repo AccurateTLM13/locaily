@@ -5,6 +5,6 @@
   "artifactPath": "benchmark-lab/qualifications/models/llama3.2-local-llama3.2-core-classify-v1.json",
   "algorithm": "sha256",
   "checksumMode": "canonical_text_v1",
-  "checksum": "sha256:d002ef07a55549dd446622645e694b86f712a53db59659bc6d5f21c06e5790f3",
-  "generatedAt": "2026-10-01T01:59:31.839Z"
+  "checksum": "sha256:6f5ebbcc12ee5cac0fbe9a4757764bb91ccaf999f2ebdd79b04cb0ff6e3a220b",
+  "generatedAt": "2026-11-19T02:09:17.383Z"
 }

@@ -37,7 +37,16 @@ async function main() {
   console.log("=== CORE-02 Model Qualification & Workflow Routing Tests ===\n");
 
   const loader = createModelQualificationLoader();
-  const resolver = createQualificationResolver({ loader });
+  const latestCoreGeneratedAt = Math.max(
+    ...loader.list()
+      .filter((r) => r.generatedAt && Array.isArray(r.qualifiedFor) && r.qualifiedFor.some((q) => String(q.trackId || "").startsWith("core.")))
+      .map((r) => Date.parse(r.generatedAt))
+      .filter(Number.isFinite)
+  );
+  const resolver = createQualificationResolver({
+    loader,
+    now: () => new Date(latestCoreGeneratedAt + 60_000)
+  });
   const toolRegistry = createToolRegistry();
   const runtime = createMockRuntime();
 

@@ -243,7 +243,14 @@ const modelProfileManager = createModelProfileManager({
   profiles: config.modelProfiles.profiles
 });
 const modelQualificationLoader = createModelQualificationLoader();
-const qualificationResolver = createQualificationResolver({ loader: modelQualificationLoader });
+const parsedQualificationTtlDays = Number(process.env.QUALIFICATION_TTL_DAYS);
+const qualificationTtlMs = Number.isFinite(parsedQualificationTtlDays) && parsedQualificationTtlDays > 0
+  ? parsedQualificationTtlDays * 24 * 60 * 60 * 1000
+  : undefined;
+const qualificationResolver = createQualificationResolver({
+  loader: modelQualificationLoader,
+  ...(qualificationTtlMs !== undefined ? { ttlMs: qualificationTtlMs } : {})
+});
 const capabilityRegistry = createCapabilityRegistry({
   loader: modelQualificationLoader,
   resolver: qualificationResolver

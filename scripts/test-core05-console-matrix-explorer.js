@@ -140,7 +140,16 @@ async function main() {
   // AC5: Capability Registry and Shadow Routing Evaluation
   runTest("AC5: Capability registry loads all qualified models and evaluates dry-run recommendations", () => {
     const loader = createModelQualificationLoader();
-    const resolver = createQualificationResolver({ loader });
+    const latestCoreGeneratedAt = Math.max(
+      ...loader.list()
+        .filter((r) => r.generatedAt && Array.isArray(r.qualifiedFor) && r.qualifiedFor.some((q) => String(q.trackId || "").startsWith("core.")))
+        .map((r) => Date.parse(r.generatedAt))
+        .filter(Number.isFinite)
+    );
+    const resolver = createQualificationResolver({
+      loader,
+      now: () => new Date(latestCoreGeneratedAt + 60_000)
+    });
     const registry = createCapabilityRegistry({ loader, resolver });
 
     const capabilities = registry.listCapabilities();
