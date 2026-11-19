@@ -108,5 +108,6 @@
   "mergedAt": null,
   "preparedCommit": "9556f9031f1b9822d24c4021d0f5339cc3280097",
   "preparedBranch": "milestone/core-06-workflow-packs-and-task-intake",
-  "preparedAt": "2026-11-19T02:57:21.933Z"
+  "preparedAt": "2026-11-19T02:57:21.933Z",
+  "latestValidationId": "validation-20261119T025733-845df6f2"
 }
