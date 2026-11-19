@@ -105,5 +105,8 @@
   "createdAt": "2026-11-19T02:42:33.979Z",
   "startedAt": "2026-11-19T02:42:33.979Z",
   "completedAt": null,
-  "mergedAt": null
+  "mergedAt": null,
+  "preparedCommit": "9556f9031f1b9822d24c4021d0f5339cc3280097",
+  "preparedBranch": "milestone/core-06-workflow-packs-and-task-intake",
+  "preparedAt": "2026-11-19T02:57:21.933Z"
 }
