@@ -1,7 +1,7 @@
 const http = require("node:http");
 const { readFileSync } = require("node:fs");
 const { readFile } = require("node:fs/promises");
-const { join } = require("node:path");
+const { join, resolve, sep } = require("node:path");
 const { createRunIdentity } = require("./core/ids");
 const {
   createAuditLog,
@@ -43,8 +43,16 @@ const {
   listCapabilities,
   buildRunPlan,
   executeRunPlan,
-  recordOrchestrationRun
+  recordOrchestrationRun,
+  evaluateTaskIntake
 } = require("./orchestration");
+const {
+  DEFAULT_PACKS_DIR,
+  getDefaultWorkflowPackRegistry,
+  validateWorkflowPack,
+  evaluatePackPermissions,
+  evaluatePackQualificationReadiness
+} = require("./packs");
 const { recordScoreboardEntry, getScoreboardSummary } = require("./core/scoreboard");
 const { createVaultAdapter } = require("./memory/vault-adapter");
 const { WIKI_ALLOWED_PATHS } = require("./memory/allowlist-presets");
@@ -1271,6 +1279,168 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, 200, {
         ok: true,
         capabilities: listCapabilities()
+      });
+    }
+
+    if (request.method === "GET" && (url.pathname === "/packs" || url.pathname === "/orchestration/packs")) {
+      const packRegistry = getDefaultWorkflowPackRegistry();
+      const packs = packRegistry.listPacks().map((pack) => ({
+        ...pack,
+        permissionStatus: evaluatePackPermissions(pack, permissionManager),
+        qualificationReadiness: evaluatePackQualificationReadiness(pack, qualificationResolver)
+      }));
+      return sendJson(response, 200, {
+        ok: true,
+        packs,
+        errors: packRegistry.getLoadErrors()
+      });
+    }
+
+    if (request.method === "GET" && url.pathname.startsWith("/packs/")) {
+      const packId = decodeURIComponent(url.pathname.slice("/packs/".length)).trim();
+      const packRegistry = getDefaultWorkflowPackRegistry();
+      const pack = packId ? packRegistry.getPack(packId) : null;
+      if (!pack) {
+        return sendJson(response, 404, {
+          ok: false,
+          code: "PACK_NOT_FOUND",
+          message: `Workflow pack '${packId}' was not found.`,
+          nextStep: "Use GET /packs to list installed Workflow Packs."
+        });
+      }
+      return sendJson(response, 200, {
+        ok: true,
+        pack: {
+          ...pack,
+          permissionStatus: evaluatePackPermissions(pack, permissionManager),
+          qualificationReadiness: evaluatePackQualificationReadiness(pack, qualificationResolver)
+        }
+      });
+    }
+
+    if (request.method === "POST" && url.pathname === "/packs/validate") {
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send { packDir } pointing inside workflow-packs/."
+        });
+      }
+
+      const rawDir = bodyResult.body && typeof bodyResult.body.packDir === "string"
+        ? bodyResult.body.packDir.trim()
+        : "";
+      if (!rawDir) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "INVALID_PACK_DIR",
+          message: "packDir string is required.",
+          nextStep: "Send { packDir: 'workflow-packs/<pack-id>' }."
+        });
+      }
+
+      const allowedRoots = [resolve(DEFAULT_PACKS_DIR)];
+      const envPackDirs = process.env.LOCAILY_WORKFLOW_PACK_DIRS;
+      if (typeof envPackDirs === "string" && envPackDirs.trim()) {
+        for (const p of envPackDirs.split(/[,;]/)) {
+          if (p.trim()) allowedRoots.push(resolve(p.trim()));
+        }
+      }
+
+      const candidateDir = resolve(join(__dirname, ".."), rawDir);
+      const isAllowed = allowedRoots.some(
+        (root) => candidateDir === root || candidateDir.startsWith(root + sep)
+      );
+      if (!isAllowed) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "WORKFLOW_PACK_PATH_ESCAPE",
+          message: "packDir must resolve inside an allowed workflow-packs root.",
+          nextStep: "Pass a relative path inside workflow-packs/."
+        });
+      }
+
+      const validation = validateWorkflowPack(candidateDir);
+      return sendJson(response, validation.ok ? 200 : 400, {
+        ok: validation.ok,
+        packId: validation.packId,
+        packDir: validation.packDir,
+        summary: validation.summary,
+        errors: validation.errors,
+        errorCodes: validation.errorCodes,
+        warnings: validation.warnings
+      });
+    }
+
+    if (request.method === "POST" && (url.pathname === "/intake/route" || url.pathname === "/workflows/intake")) {
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send { request, input?, options? }."
+        });
+      }
+
+      const body = bodyResult.body || {};
+      const intakeOptions = (body.options && typeof body.options === "object") ? body.options : {};
+      const intake = await evaluateTaskIntake({
+        request: typeof body.request === "string" ? body.request : "",
+        input: body.input && typeof body.input === "object" ? body.input : {},
+        options: intakeOptions,
+        runtime: getActiveRuntime(),
+        toolRegistry,
+        qualificationResolver
+      });
+
+      if (intakeOptions.execute === true) {
+        const canExecuteConfirmed = intake.decision === "selected"
+          || (intake.decision === "confirm_required" && intakeOptions.confirmed === true);
+
+        let targetWorkflowId = intake.selected_workflow ? intake.selected_workflow.workflow_id : null;
+        if (intakeOptions.confirmed === true && typeof intakeOptions.workflow_id_override === "string") {
+          const overrideId = intakeOptions.workflow_id_override.trim();
+          const known = listWorkflows().find((w) => w.workflow_id === overrideId);
+          if (!known) {
+            return sendJson(response, 400, {
+              ok: false,
+              code: "WORKFLOW_NOT_FOUND",
+              message: `Override workflow '${overrideId}' is not a registered workflow.`,
+              intake
+            });
+          }
+          targetWorkflowId = known.workflow_id;
+        }
+
+        if (canExecuteConfirmed && targetWorkflowId && intake.contract_check.ready_to_run) {
+          const execResult = await executeWorkflowRunRequest({
+            workflow_id: targetWorkflowId,
+            input: body.input || {},
+            options: intakeOptions
+          }, {
+            identity,
+            startedAt
+          });
+          return sendJson(response, execResult.statusCode, {
+            ok: execResult.statusCode < 400,
+            intake,
+            execution: execResult.body
+          });
+        }
+
+        return sendJson(response, 200, {
+          ok: true,
+          intake,
+          execution: null
+        });
+      }
+
+      return sendJson(response, 200, {
+        ok: true,
+        intake
       });
     }
 
@@ -2832,7 +3002,7 @@ const server = http.createServer(async (request, response) => {
       ok: false,
       code: "NOT_FOUND",
       message: `No route matched ${request.method} ${url.pathname}.`,
-      nextStep: "Use GET /console, GET /health, GET /harness/status, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, POST /workflows/plan, POST /workflows/run, POST /tasks/run, POST /jobs, GET /jobs, GET /jobs/:id, POST /jobs/:id/cancel, POST /jobs/:id/retry, POST /jobs/:id/review, or legacy POST /analyze."
+      nextStep: "Use GET /console, GET /health, GET /harness/status, GET /memory/status, POST /memory/context-pack, GET /tools, GET /models/profiles, GET /tracks, POST /tracks/run, GET /orchestration/tracks, GET /orchestration/workflows, GET /packs, POST /intake/route, POST /workflows/plan, POST /workflows/run, POST /tasks/run, POST /jobs, GET /jobs, GET /jobs/:id, POST /jobs/:id/cancel, POST /jobs/:id/retry, POST /jobs/:id/review, or legacy POST /analyze."
     });
   } catch (error) {
     console.error("Unexpected server error.");
@@ -3024,6 +3194,8 @@ async function buildHealthResponse() {
     learningState = await getLearningState();
   } catch {}
 
+  const packRegistry = getDefaultWorkflowPackRegistry();
+
   const health = {
     ok: true,
     engine: "local-ai-engine-core",
@@ -3084,6 +3256,13 @@ async function buildHealthResponse() {
       evidenceMode: "fixture-only",
       statusEndpoint: "/harness/status",
       fixtures: listHarnessFixtures()
+    },
+    workflowPacks: {
+      loaded: packRegistry.listPacks().length,
+      failed: packRegistry.getLoadErrors().length,
+      workflows: packRegistry.listPackWorkflows().map((w) => w.workflow_id),
+      packsEndpoint: "/packs",
+      intakeEndpoint: "/intake/route"
     },
     jobTotals
   };
@@ -4767,14 +4946,21 @@ async function executeWorkflowRunRequest(body, context) {
       durationMs: execution.durationMs
     });
 
+    const resolvedTrackId = execution.plan.track_id || `${execution.plan.workflow_id}#composition`;
+    const flattenedSteps = Array.isArray(execution.plan.steps)
+      ? execution.plan.steps
+      : (Array.isArray(execution.plan.tracks)
+          ? execution.plan.tracks.flatMap((t) => (t.steps || []).map((s) => ({ ...s, track_id: s.track_id || t.track_id })))
+          : []);
+
     recordScoreboardEntry({
-      track: execution.plan.track_id,
+      track: resolvedTrackId,
       mode: body.options?.execution_mode || "workflow_orchestrated",
       durationMs: execution.durationMs,
       schemaValid: execution.schemaValid !== false,
-      steps: execution.plan.steps.map((step) => ({
+      steps: flattenedSteps.map((step) => ({
         name: step.step_id,
-        executor: step.worker_type.type,
+        executor: step.worker_type?.type || "tool",
         tool: step.worker_used?.tool || null,
         model: step.worker_used?.model || null,
         role: step.worker_used?.role || null,
@@ -4811,7 +4997,7 @@ async function executeWorkflowRunRequest(body, context) {
           ...buildTaskRunMeta(context, { warnings: [], risk_level: "medium", flags: [] }, false, { ok: false }),
           job_id: job.job_id,
           workflow_id: body.workflow_id,
-          track_id: execution.plan.track_id,
+          track_id: resolvedTrackId,
           plan_id: execution.plan.plan_id,
           task_id: execution.plan.task_id,
           plan: execution.plan,
@@ -4848,10 +5034,10 @@ async function executeWorkflowRunRequest(body, context) {
         ...buildTaskRunMeta(context, { warnings: [], risk_level: "low", flags: [] }, execution.schemaValid !== false, { ok: true }),
         job_id: job.job_id,
         workflow_id: body.workflow_id,
-        track_id: execution.plan.track_id,
+        track_id: resolvedTrackId,
         plan_id: execution.plan.plan_id,
         task_id: execution.plan.task_id,
-        steps: execution.plan.steps.map((step) => ({
+        steps: flattenedSteps.map((step) => ({
           step_id: step.step_id,
           track_id: step.track_id,
           status: step.status,
@@ -4868,7 +5054,7 @@ async function executeWorkflowRunRequest(body, context) {
     {
       const planned = (runPlanOptions.relay && runPlanOptions.relay.placementSummary) || null;
       const assignments = (runPlanOptions.relay && runPlanOptions.relay.assignments) || {};
-      const actual = (execution.plan.steps || []).map((step) => {
+      const actual = flattenedSteps.map((step) => {
         const wu = step.worker_used || {};
         const plannedAssignment = assignments[step.step_id] || {};
         const actualNodeId = wu.node_id || null;

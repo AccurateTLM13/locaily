@@ -1,0 +1,165 @@
+{
+  "schema": "locaily.task_intake_labeled_dataset.v1",
+  "description": "Human-labeled evaluation set covering built-in workflows, installed Workflow Packs, ambiguous prompts, and out-of-scope refusals.",
+  "cases": [
+    {
+      "id": "lh-01",
+      "request": "Run a lighthouse report audit on our website performance and Core Web Vitals",
+      "expected_decision": "selected",
+      "expected_workflow": "lighthouse_handoff"
+    },
+    {
+      "id": "lh-02",
+      "request": "Generate a pagespeed insights lighthouse handoff for our SEO and WCAG audit",
+      "expected_decision": "selected",
+      "expected_workflow": "lighthouse_handoff"
+    },
+    {
+      "id": "lh-03",
+      "request": "Audit this website performance scores and opportunities",
+      "input": { "url": "https://example.com" },
+      "expected_decision": "selected",
+      "expected_workflow": "lighthouse_handoff"
+    },
+    {
+      "id": "ds-01",
+      "request": "Use DealSniper to check if this Craigslist marketplace listing price is a good deal",
+      "expected_decision": "selected",
+      "expected_workflow": "dealsniper"
+    },
+    {
+      "id": "ds-02",
+      "request": "Analyze this marketplace listing and seller asking price for resell value",
+      "expected_decision": "selected",
+      "expected_workflow": "dealsniper"
+    },
+    {
+      "id": "ds-03",
+      "request": "Check this eBay bargain flip listing",
+      "input": { "title": "Vintage Receiver", "price": 120 },
+      "expected_decision": "selected",
+      "expected_workflow": "dealsniper"
+    },
+    {
+      "id": "rr-01",
+      "request": "Review this repository codebase for maintainability and large files",
+      "expected_decision": "selected",
+      "expected_workflow": "repo_review"
+    },
+    {
+      "id": "rr-02",
+      "request": "Run a repo review to scan source files and build a developer handoff",
+      "expected_decision": "selected",
+      "expected_workflow": "repo_review"
+    },
+    {
+      "id": "rr-03",
+      "request": "Audit repository findings for maintainability",
+      "input": { "files": [{ "path": "src/index.js", "lines": 120 }] },
+      "expected_decision": "selected",
+      "expected_workflow": "repo_review"
+    },
+    {
+      "id": "dr-01",
+      "request": "Perform a document review on this markdown policy spec and whitepaper",
+      "expected_decision": "selected",
+      "expected_workflow": "document_review"
+    },
+    {
+      "id": "dr-02",
+      "request": "Ingest and summarize document from PDF whitepaper report",
+      "expected_decision": "selected",
+      "expected_workflow": "document_review"
+    },
+    {
+      "id": "cos-01",
+      "request": "Use Content OS to prepare publish package for our release announcement",
+      "expected_decision": "selected",
+      "expected_workflow": "content_os"
+    },
+    {
+      "id": "cos-02",
+      "request": "Transform and publish this editorial release package for syndication",
+      "expected_decision": "selected",
+      "expected_workflow": "content_os"
+    },
+    {
+      "id": "tqa-01",
+      "request": "Run a text qa pass to extract and validate JSON fields against schema",
+      "expected_decision": "selected",
+      "expected_workflow": "text_qa"
+    },
+    {
+      "id": "old-01",
+      "request": "Scan second brain inventory and rank operator log opportunities",
+      "expected_decision": "selected",
+      "expected_workflow": "operator_log_discovery"
+    },
+    {
+      "id": "olw-01",
+      "request": "Draft operator log HTML article and sitemap from the selected opportunity",
+      "expected_decision": "selected",
+      "expected_workflow": "operator_log_draft"
+    },
+    {
+      "id": "inc-01",
+      "request": "Triage this incident: sev1 production outage on checkout-api returning 503 errors",
+      "expected_decision": "selected",
+      "expected_workflow": "incident_triage"
+    },
+    {
+      "id": "inc-02",
+      "request": "Investigate alert from PagerDuty about 500 error spike and downtime",
+      "expected_decision": "selected",
+      "expected_workflow": "incident_triage"
+    },
+    {
+      "id": "amb-01",
+      "request": "Review this markdown document and check its JSON schema",
+      "expected_decision": "confirm_required",
+      "expected_workflow": null
+    },
+    {
+      "id": "amb-02",
+      "request": "Check these website vitals",
+      "expected_decision": "confirm_required",
+      "expected_workflow": "lighthouse_handoff"
+    },
+    {
+      "id": "amb-03",
+      "request": "Scan the codebase repository",
+      "expected_decision": "confirm_required",
+      "expected_workflow": "repo_review"
+    },
+    {
+      "id": "ref-01",
+      "request": "Book me a round-trip flight to Chicago next Tuesday morning",
+      "expected_decision": "refused",
+      "expected_workflow": null
+    },
+    {
+      "id": "ref-02",
+      "request": "Delete all files inside C:\\Windows\\System32 immediately",
+      "expected_decision": "refused",
+      "expected_workflow": null
+    },
+    {
+      "id": "ref-03",
+      "request": "What will the weather forecast be in Austin tomorrow?",
+      "expected_decision": "refused",
+      "expected_workflow": null
+    },
+    {
+      "id": "ref-04",
+      "request": "Compose a jazz piano chord progression in D minor",
+      "expected_decision": "refused",
+      "expected_workflow": null
+    },
+    {
+      "id": "ref-05",
+      "request": "Order a large pepperoni pizza for dinner delivery",
+      "expected_decision": "refused",
+      "expected_workflow": null
+    }
+  ]
+}

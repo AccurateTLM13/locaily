@@ -7,7 +7,13 @@
       "track_id": "website_audit.lighthouse_handoff",
       "input_type": "lighthouse_report",
       "output_type": "developer_handoff",
-      "status": "implemented"
+      "status": "implemented",
+      "intake": {
+        "keywords": ["lighthouse", "pagespeed", "vitals", "lcp", "cls", "tbt", "website", "seo", "wcag", "performance"],
+        "phrases": ["lighthouse handoff", "lighthouse report", "pagespeed insights", "audit this website", "website audit"],
+        "input_hints": ["url", "scores", "opportunities", "diagnostics"],
+        "negative_keywords": ["dealsniper", "marketplace", "incident", "outage", "repository"]
+      }
     },
     {
       "workflow_id": "dealsniper",
@@ -16,7 +22,13 @@
       "track_id": "marketplace.dealsniper",
       "input_type": "marketplace_listing",
       "output_type": "deal_analysis",
-      "status": "implemented"
+      "status": "implemented",
+      "intake": {
+        "keywords": ["dealsniper", "marketplace", "craigslist", "ebay", "listing", "bargain", "resell", "flip", "seller", "price"],
+        "phrases": ["analyze this listing", "good deal", "marketplace listing", "deal analysis"],
+        "input_hints": ["price", "title", "listing"],
+        "negative_keywords": ["lighthouse", "incident", "repository", "codebase"]
+      }
     },
     {
       "workflow_id": "operator_log_discovery",
@@ -25,7 +37,13 @@
       "track_id": "publishing.operator_log_discovery",
       "input_type": "editorial_discovery_request",
       "output_type": "editorial_opportunity_report",
-      "status": "experimental"
+      "status": "experimental",
+      "intake": {
+        "keywords": ["editorial", "second brain", "opportunities", "topics", "story", "discovery", "inventory"],
+        "phrases": ["operator log opportunities", "editorial discovery", "rank editorial opportunities", "scan second brain"],
+        "input_hints": ["editorialBrief"],
+        "negative_keywords": ["draft html", "selected opportunity", "lighthouse", "incident"]
+      }
     },
     {
       "workflow_id": "operator_log_draft",
@@ -34,7 +52,13 @@
       "track_id": "publishing.operator_log_draft",
       "input_type": "selected_editorial_opportunity",
       "output_type": "operator_log_html_proposal",
-      "status": "experimental"
+      "status": "experimental",
+      "intake": {
+        "keywords": ["draft", "html", "sitemap", "article", "operator log", "evidence packet"],
+        "phrases": ["draft operator log", "write operator log", "operator log html", "draft from opportunity"],
+        "input_hints": ["opportunity"],
+        "negative_keywords": ["discovery", "lighthouse", "dealsniper", "incident"]
+      }
     },
     {
       "workflow_id": "repo_review",
@@ -44,6 +68,12 @@
       "output_type": "developer_handoff",
       "status": "implemented",
       "output_alias": "handoff",
+      "intake": {
+        "keywords": ["repository", "repo", "codebase", "source", "maintainability", "todo", "files", "findings", "developer handoff"],
+        "phrases": ["review this repository", "scan repo", "repo review", "review codebase", "audit repository"],
+        "input_hints": ["files", "findings", "path"],
+        "negative_keywords": ["lighthouse", "marketplace", "incident", "outage"]
+      },
       "input_requirements": [
         { "field": "path", "type": "string", "required": false, "help": "Local repository directory (read-only scan) — or send an inline files[] manifest instead." },
         { "field": "files", "type": "array", "required": false, "help": "Inline manifest [{path, lines?, todo_count?}] for offline/hermetic runs." },
@@ -104,6 +134,12 @@
       "output_type": "text_qa_report",
       "status": "experimental",
       "output_alias": "check",
+      "intake": {
+        "keywords": ["qa", "validate", "schema", "extract", "classify", "json"],
+        "phrases": ["text qa", "qa pass", "check text against schema", "extract and validate text"],
+        "input_hints": ["text", "categories", "expected_schema"],
+        "negative_keywords": ["publish", "document review", "lighthouse", "incident"]
+      },
       "input_requirements": [
         { "field": "text", "type": "string", "required": true, "help": "Send the text to check." },
         { "field": "categories", "type": "array", "required": true, "help": "Caller-defined classification categories." },
@@ -144,6 +180,12 @@
       "output_type": "document_review_report",
       "status": "implemented",
       "output_alias": "report",
+      "intake": {
+        "keywords": ["document", "markdown", "policy", "spec", "report", "whitepaper", "ocr", "pdf", "ingest"],
+        "phrases": ["review this document", "document review", "ingest and summarize document", "review policy document"],
+        "input_hints": ["content", "doc_categories", "document_schema"],
+        "negative_keywords": ["publish package", "content os", "lighthouse", "incident"]
+      },
       "input_requirements": [
         { "field": "path", "type": "string", "required": false, "help": "Local .md/.txt document path — or send inline content instead." },
         { "field": "content", "type": "string", "required": false, "help": "Inline document text." },
@@ -207,6 +249,12 @@
       "output_type": "publish_package",
       "status": "implemented",
       "output_alias": "publish",
+      "intake": {
+        "keywords": ["content os", "publish", "package", "transform", "announcement", "release", "mapping", "syndicate"],
+        "phrases": ["prepare publish package", "content os", "transform and publish", "publish ready package", "release announcement"],
+        "input_hints": ["content_categories", "content_schema", "publish_mapping", "publish_schema"],
+        "negative_keywords": ["lighthouse", "dealsniper", "incident"]
+      },
       "input_requirements": [
         { "field": "path", "type": "string", "required": false, "help": "Local .md/.txt document path — or send inline content." },
         { "field": "content", "type": "string", "required": false, "help": "Inline document text." },

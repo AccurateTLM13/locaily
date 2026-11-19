@@ -1,3 +1,5 @@
+const { getDefaultWorkflowPackRegistry } = require("../packs");
+
 function buildPrioritizeFixesPrompt(stepInput) {
   return [
     "Review the deterministically classified Lighthouse issues below.",
@@ -264,14 +266,35 @@ const PROMPT_TEMPLATES = {
   }
 };
 
+function renderPackPromptTemplate(template, context, stepInput) {
+  const input = (stepInput && typeof stepInput === "object") ? stepInput : {};
+  const rootInput = (context && context.input && typeof context.input === "object") ? context.input : {};
+
+  return template
+    .replace(/\{\{json:([a-zA-Z0-9_.-]+)\}\}/g, (_match, key) => {
+      const value = Object.prototype.hasOwnProperty.call(input, key) ? input[key] : rootInput[key];
+      return JSON.stringify(value ?? null);
+    })
+    .replace(/\{\{([a-zA-Z0-9_.-]+)\}\}/g, (_match, key) => {
+      const value = Object.prototype.hasOwnProperty.call(input, key) ? input[key] : rootInput[key];
+      if (value === undefined || value === null) return "";
+      return typeof value === "object" ? JSON.stringify(value) : String(value);
+    });
+}
+
 function buildPrompt(templateKey, context, stepInput) {
   const builder = PROMPT_TEMPLATES[templateKey];
 
-  if (!builder) {
-    throw new Error(`Unknown prompt template '${templateKey}'.`);
+  if (builder) {
+    return builder(context, stepInput);
   }
 
-  return builder(context, stepInput);
+  const packTemplate = getDefaultWorkflowPackRegistry().getPackPromptTemplate(templateKey);
+  if (typeof packTemplate === "string") {
+    return renderPackPromptTemplate(packTemplate, context, stepInput);
+  }
+
+  throw new Error(`Unknown prompt template '${templateKey}'.`);
 }
 
 module.exports = {

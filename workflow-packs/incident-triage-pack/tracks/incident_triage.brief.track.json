@@ -1,0 +1,23 @@
+{
+  "track_id": "incident_triage.brief",
+  "version": "1.0.0",
+  "name": "Assemble Incident Triage Brief",
+  "description": "Deterministically combine parsed incident signals, core.classify category, and core.summarize bullets into a structured brief.",
+  "output_schema": "schemas/incident-brief.schema.json",
+  "result_step": "assemble",
+  "steps": [
+    {
+      "id": "assemble",
+      "input_map": {
+        "parsed": "$input.parsed",
+        "classification": "$input.classification",
+        "summary": "$input.summary"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "incident-parser",
+        "task": "assemble_brief"
+      }
+    }
+  ]
+}

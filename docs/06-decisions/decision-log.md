@@ -1,5 +1,30 @@
 # Decision Log
 
+## 2026-11-18 — CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake
+
+### Context
+
+Locaily previously required modifying core registry/server files (`workflows.json`, `track-metadata.json`, `prompts.js`, `config.json`) to add workflows, and callers had to pass explicit `workflow_id` or `track_id` identifiers because no front-door task intake existed.
+
+### Decision
+
+- Define a self-contained Workflow Pack contract (`companion/schemas/workflow-pack-manifest.schema.json`, `locaily.workflow_pack.v1`) loaded dynamically from `workflow-packs/` (`LOCAILY_WORKFLOW_PACK_DIRS`) with strict pack-root path containment (`WORKFLOW_PACK_PATH_ESCAPE`) and built-in ID collision rejection (`WORKFLOW_PACK_ID_CONFLICT`).
+- Allow validated Workflow Pack tools to register in `companion/tools/registry.js` without requiring edits to `companion/config.json`'s built-in `tools.enabled` list (unless `filterWorkflowPackTools: true` is passed).
+- Provide a reference pack (`workflow-packs/incident-triage-pack/`) and Starter SDK CLI (`scripts/workflow-pack-sdk.js` — `pack:list`, `pack:validate`, `pack:init`, `pack:test`).
+- Implement 4-stage Automatic Task Intake (`companion/orchestration/task-intake.js`, `locaily.task_intake_result.v1`) combining deterministic hints, an optional qualification-gated small classifier with strict anti-invention enforcement, contract/capability readiness checks, and `selected` / `confirm_required` / `refused` decisions exposed at `POST /intake/route` and `POST /workflows/intake` plus Console/Shell UI.
+- Normalize `plan_version: 2` multi-track composition plans inside `companion/orchestration/run-logger.js` and `companion/server.js` (`executeWorkflowRunRequest`) so composed workflows (including pack workflows) execute cleanly over HTTP.
+
+### Consequences
+
+- New workflows install as isolated directories under `workflow-packs/` without editing Local Brain core files.
+- Plain-English intake routes across built-in and pack workflows while refusing unsupported requests and asking confirmation when uncertain or incomplete.
+
+### Status
+
+Implemented and verified on `milestone/core-06-workflow-packs-and-task-intake` (2026-11-18).
+
+---
+
 ## 2026-10-02 — SYSTEM-PROOF-01 Empirical Thesis Validation Verdict: POSITIVE
 
 ### Context

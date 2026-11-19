@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { buildModelStepInput } = require("./step-input");
 const { buildPrompt } = require("./prompts");
+const { resolvePackSchemaPath } = require("../packs");
 
 function resolveModel(role, resolveModelForRole) {
   const resolver = typeof resolveModelForRole === "function"
@@ -42,8 +43,8 @@ function resolveStepModel(role, options = {}) {
   return resolveModel(role, options.resolveModelForRole);
 }
 
-function loadStepSchema(schemaPath) {
-  const absolutePath = path.resolve(__dirname, "..", "..", schemaPath);
+function loadStepSchema(schemaPath, trackId = null) {
+  const absolutePath = resolvePackSchemaPath(schemaPath, trackId);
   return JSON.parse(fs.readFileSync(absolutePath, "utf8"));
 }
 
@@ -51,7 +52,7 @@ async function executeModelStep({ step, context, runtime, options }) {
   const executor = step.executor;
   const role = executor.role || "default_worker";
   const modelResolution = resolveStepModel(role, options);
-  const schema = loadStepSchema(executor.schema);
+  const schema = loadStepSchema(executor.schema, options.track_id || null);
   const stepInput = buildModelStepInput(step, context);
   const prompt = buildPrompt(executor.prompt_template, context, stepInput);
   const stepStart = Date.now();

@@ -1,0 +1,176 @@
+{
+  "schema": "locaily.workflow_pack.v1",
+  "id": "incident-triage-pack",
+  "name": "Incident Triage Pack",
+  "version": "1.0.0",
+  "trust": "official",
+  "description": "Self-contained Workflow Pack that parses production outage alerts or error logs, composes shared core.classify and core.summarize tracks, and produces a schema-validated incident triage brief.",
+  "author": "Locaily",
+  "license": "MIT",
+  "workflows": [
+    {
+      "workflow_id": "incident_triage",
+      "name": "Incident Triage Brief",
+      "description": "Parse incident signals deterministically, classify root area, summarize impact, and assemble a structured on-call triage brief.",
+      "input_type": "incident_report",
+      "output_type": "incident_triage_brief",
+      "status": "implemented",
+      "output_alias": "brief",
+      "input_requirements": [
+        {
+          "field": "incident_text",
+          "type": "string",
+          "required": true,
+          "help": "Raw alert payload, error snippet, or incident notes to triage."
+        },
+        {
+          "field": "service",
+          "type": "string",
+          "required": false,
+          "help": "Optional service name (inferred from logs if omitted)."
+        },
+        {
+          "field": "environment",
+          "type": "string",
+          "required": false,
+          "help": "Optional deployment environment (e.g. production, staging)."
+        }
+      ],
+      "intake": {
+        "keywords": [
+          "incident",
+          "outage",
+          "sev1",
+          "sev2",
+          "sev3",
+          "pager",
+          "pagerduty",
+          "alert",
+          "500",
+          "503",
+          "crash",
+          "triage",
+          "postmortem",
+          "downtime",
+          "spike"
+        ],
+        "phrases": [
+          "triage this incident",
+          "production outage",
+          "investigate alert",
+          "service is down",
+          "error spike",
+          "on-call brief"
+        ],
+        "examples": [
+          "Triage this sev1 production outage on checkout-api returning 503 errors",
+          "Investigate the pager alert for elevated 500 latency spike"
+        ],
+        "input_hints": [
+          "incident_text",
+          "service",
+          "alert"
+        ],
+        "negative_keywords": [
+          "lighthouse",
+          "dealsniper",
+          "seo",
+          "marketplace",
+          "listing",
+          "operator log"
+        ]
+      },
+      "composition": [
+        {
+          "as": "parse",
+          "track_id": "incident_triage.parse",
+          "input_map": {
+            "incident_text": "$input.incident_text",
+            "service": "$input.service",
+            "environment": "$input.environment"
+          }
+        },
+        {
+          "as": "classify",
+          "on_failure": "skip",
+          "track_id": "core.classify",
+          "input_map": {
+            "text": "$artifacts.parse.summary_text",
+            "categories": {
+              "$literal": ["availability", "latency", "security", "data_integrity", "deployment"]
+            }
+          }
+        },
+        {
+          "as": "summarize",
+          "track_id": "core.summarize",
+          "input_map": {
+            "text": "$artifacts.parse.summary_text",
+            "style": "incident-brief",
+            "max_points": 4
+          }
+        },
+        {
+          "as": "brief",
+          "track_id": "incident_triage.brief",
+          "requires": ["parse", "summarize"],
+          "input_map": {
+            "parsed": "$artifacts.parse",
+            "classification": "$artifacts.classify",
+            "summary": "$artifacts.summarize"
+          }
+        }
+      ]
+    }
+  ],
+  "tracks": [
+    "tracks/incident_triage.parse.track.json",
+    "tracks/incident_triage.brief.track.json"
+  ],
+  "track_metadata": {
+    "incident_triage.parse": {
+      "purpose": "Deterministically extract error codes, timestamps, affected service, and severity from raw incident notes.",
+      "input_type": "incident_report",
+      "output_type": "parsed_incident_signals",
+      "preferred_worker_type": "tool_only",
+      "fallback_behavior": "deterministic_tool",
+      "validation_expectations": {
+        "output_schema": "tools/schemas/incident.parse.output.schema.json",
+        "required_result_sections": ["service", "severity", "error_codes", "summary_text"]
+      }
+    },
+    "incident_triage.brief": {
+      "purpose": "Assemble parsed incident signals, classification, and summary into a structured on-call triage brief.",
+      "input_type": "incident_brief_inputs",
+      "output_type": "incident_triage_brief",
+      "preferred_worker_type": "tool_only",
+      "fallback_behavior": "deterministic_tool",
+      "validation_expectations": {
+        "output_schema": "schemas/incident-brief.schema.json",
+        "required_result_sections": ["title", "severity", "service", "category", "summary", "next_actions", "markdown"]
+      }
+    }
+  },
+  "tools": "tools/tool.json",
+  "prompts": {
+    "incident_triage_summary": "prompts/triage-summary.md"
+  },
+  "schemas": [
+    "schemas/incident-brief.schema.json",
+    "tools/schemas/incident.parse.input.schema.json",
+    "tools/schemas/incident.parse.output.schema.json",
+    "tools/schemas/incident.assemble_brief.input.schema.json",
+    "tools/schemas/incident.assemble_brief.output.schema.json"
+  ],
+  "fixtures": [
+    {
+      "name": "Sample Checkout 503 Outage",
+      "workflow_id": "incident_triage",
+      "path": "fixtures/sample-outage.json",
+      "expected_fields": ["title", "severity", "service", "category", "summary", "markdown"]
+    }
+  ],
+  "permissions": "permissions.json",
+  "qualification_requirements": "qualification-requirements.json",
+  "readme": "README.md"
+}

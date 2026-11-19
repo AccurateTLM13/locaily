@@ -1,3 +1,4 @@
+const fs = require("node:fs");
 const path = require("node:path");
 const { loadTrack } = require("./decomposer");
 const { executeModelStep } = require("./model-router");
@@ -7,6 +8,7 @@ const { validateResult } = require("../core/result-validator");
 const { recordDirectTrackRun } = require("./runtime-track-run-recorder");
 const { executeDag, validateDag, createDagContext } = require("../core/dag-executor");
 const { executeStepViaRelayIfNeeded } = require("../relay/router");
+const { resolvePackSchemaPath } = require("../packs");
 
 function createTrackContext(input) {
   return {
@@ -20,8 +22,8 @@ function loadOutputSchema(track) {
     return null;
   }
 
-  const schemaPath = path.resolve(__dirname, "..", "..", track.output_schema);
-  return require(schemaPath);
+  const schemaPath = resolvePackSchemaPath(track.output_schema, track.track_id);
+  return JSON.parse(fs.readFileSync(schemaPath, "utf8"));
 }
 
 async function executeStep({ step, context, runtime, options, toolRegistry, meta }) {

@@ -1,0 +1,19 @@
+{
+  "id": "incident-parser",
+  "name": "Incident Parser Tools",
+  "version": "1.0.0",
+  "trust": "official",
+  "description": "Deterministic incident signal extraction and triage brief assembly.",
+  "tools": [
+    {
+      "id": "incident-parser",
+      "name": "Incident Parser",
+      "description": "Parse outage text and assemble structured incident triage briefs without network or disk side effects.",
+      "model_role": null,
+      "permissions": [],
+      "tasks": ["parse", "assemble_brief"],
+      "input_schema": "schemas/incident.parse.input.schema.json",
+      "output_schema": "schemas/incident.parse.output.schema.json"
+    }
+  ]
+}
