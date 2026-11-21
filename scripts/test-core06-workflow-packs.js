@@ -305,6 +305,16 @@ async function main() {
     }
   });
 
+  await check("AC7: buildPrompt rejects prototype-inherited method names safely", () => {
+    for (const unsafeKey of ["toString", "constructor", "__proto__", "valueOf", "hasOwnProperty"]) {
+      assert.throws(
+        () => buildPrompt(unsafeKey, {}, {}),
+        /Unknown prompt template/,
+        `Expected buildPrompt('${unsafeKey}') to reject inherited property`
+      );
+    }
+  });
+
   console.log(`\n========================================`);
   console.log(`Passed: ${passed}, Failed: ${failed}`);
   if (failed > 0) {

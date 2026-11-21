@@ -266,26 +266,36 @@ const PROMPT_TEMPLATES = {
   }
 };
 
+const PROMPT_TEMPLATE_BUILDERS = new Map(Object.entries(PROMPT_TEMPLATES));
+
 function renderPackPromptTemplate(template, context, stepInput) {
   const input = (stepInput && typeof stepInput === "object") ? stepInput : {};
   const rootInput = (context && context.input && typeof context.input === "object") ? context.input : {};
+  const readOwn = (key) => {
+    if (Object.prototype.hasOwnProperty.call(input, key)) return input[key];
+    if (Object.prototype.hasOwnProperty.call(rootInput, key)) return rootInput[key];
+    return undefined;
+  };
 
   return template
     .replace(/\{\{json:([a-zA-Z0-9_.-]+)\}\}/g, (_match, key) => {
-      const value = Object.prototype.hasOwnProperty.call(input, key) ? input[key] : rootInput[key];
+      const value = readOwn(key);
       return JSON.stringify(value ?? null);
     })
     .replace(/\{\{([a-zA-Z0-9_.-]+)\}\}/g, (_match, key) => {
-      const value = Object.prototype.hasOwnProperty.call(input, key) ? input[key] : rootInput[key];
+      const value = readOwn(key);
       if (value === undefined || value === null) return "";
       return typeof value === "object" ? JSON.stringify(value) : String(value);
     });
 }
 
 function buildPrompt(templateKey, context, stepInput) {
-  const builder = PROMPT_TEMPLATES[templateKey];
+  if (typeof templateKey !== "string" || !templateKey) {
+    throw new Error(`Unknown prompt template '${String(templateKey)}'.`);
+  }
 
-  if (builder) {
+  const builder = PROMPT_TEMPLATE_BUILDERS.get(templateKey);
+  if (typeof builder === "function") {
     return builder(context, stepInput);
   }
 
