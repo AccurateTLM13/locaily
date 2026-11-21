@@ -2,11 +2,11 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-11-18 (CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake implemented on `milestone/core-06-workflow-packs-and-task-intake`; SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
+**Updated:** 2026-11-21 (CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake merged on `main` via PR #46; `main` is idle; SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Milestone
 
-**CORE-06 (`core-06-workflow-packs-and-task-intake`) — ready for delivery on `milestone/core-06-workflow-packs-and-task-intake`.** Delivers a self-contained Workflow Pack contract (`locaily.workflow_pack.v1`), path-safe dynamic pack registry (`companion/packs/`), reference `incident-triage-pack`, Starter SDK CLI (`pack:list`, `pack:validate`, `pack:init`, `pack:test`), and 4-stage Automatic Task Intake & Track Selection (`companion/orchestration/task-intake.js`, `POST /intake/route`, Console/Shell UI).
+**None — `main` is idle.** CORE-06 (`core-06-workflow-packs-and-task-intake`) merged on `main` via PR #46 (`24bcc5c`). Delivers a self-contained Workflow Pack contract (`locaily.workflow_pack.v1`), path-safe dynamic pack registry (`companion/packs/`), reference `incident-triage-pack`, Starter SDK CLI (`pack:list`, `pack:validate`, `pack:init`, `pack:test`), and 4-stage Automatic Task Intake & Track Selection (`companion/orchestration/task-intake.js`, `POST /intake/route`, Console/Shell UI).
 
 ## What Works
 

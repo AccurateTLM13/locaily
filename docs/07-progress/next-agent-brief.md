@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-11-18 (CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake ready for delivery on `milestone/core-06-workflow-packs-and-task-intake`)
+**Updated:** 2026-11-21 (CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake merged on `main` via PR #46; `main` is idle)
 
 ## Read First
 
@@ -19,7 +19,7 @@ Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../0
 
 ## Current Handoff (Post CORE-06: Workflow Packs & Automatic Task Intake)
 
-- **Repository state:** `CORE-06` (`core-06-workflow-packs-and-task-intake`) is implemented and validated on `milestone/core-06-workflow-packs-and-task-intake`. Always run `npm run dev:status` first.
+- **Repository state:** `CORE-06` (`core-06-workflow-packs-and-task-intake`) is merged on `main` (PR #46, `24bcc5c`) and `main` is `idle`. Always run `npm run dev:status` first.
 - **Workflow Pack Contract & Starter SDK:** Packs under `workflow-packs/` (`LOCAILY_WORKFLOW_PACK_DIRS`) register tracks, tools, schemas, prompts, permissions, qualification requirements, and intake hints dynamically (`companion/packs/`). Reference pack: `workflow-packs/incident-triage-pack/`. SDK CLI: `npm run pack:list|validate|init|test`.
 - **Automatic Task Intake & Track Selection:** `companion/orchestration/task-intake.js` implements deterministic hints → optional qualification-gated classifier with anti-invention guard → contract & capability check → `selected` / `confirm_required` / `refused`. Exposed via `POST /intake/route`, `POST /workflows/intake`, and Companion Console (`#taskIntakeSurface`).
 - **CORE-01 – CORE-05 & SYSTEM-PROOF-01 merged on `main`:** Generic `core.*` capabilities, multi-tier qualification, Console Workflows/Matrix Explorer, and the `POSITIVE` thesis proof (`expressjs/express@7ef98448...`) are on `main`.

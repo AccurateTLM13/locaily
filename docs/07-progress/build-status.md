@@ -1,6 +1,6 @@
 # Build Status
 
-**Updated:** 2026-11-18 (CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake ready for delivery; SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
+**Updated:** 2026-11-21 (CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake merged on `main` via PR #46; SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Stage
 
@@ -12,7 +12,7 @@ North Star direction is a local capability network: route track contracts to the
 
 | Milestone | Status |
 |---|---|
-| **CORE-06 (Workflow Pack Contract, Starter SDK, and Automatic Task Intake)** | Implemented & Validated (ready for delivery) |
+| **CORE-06 (Workflow Pack Contract, Starter SDK, and Automatic Task Intake)** | Complete & Merged (PR #46) |
 | **CORE-01 – CORE-05 (Generic Capabilities, Matrix Qualification, Fallback, Console Explorer)** | Complete & Merged |
 | **SYSTEM-PROOF-01 (Real Multi-Track Workflow Proof)** | Complete & Merged (`POSITIVE` verdict) |
 | **PX1 – PX5, PX7 – PX9 (Truth Surfaces, LAN Gate, Run Inspector, Unified Shell, Tester Package, Audit Remediation)** | Complete |
@@ -80,7 +80,6 @@ North Star direction is a local capability network: route track contracts to the
 ## Not Built
 
 - Automatic model swapping / Model Garage auto-switching
-- Automatic track classifier (optional M3 area — planner covers manual decomposition)
 - Distributed consensus / Byzantine fault tolerance across relay nodes (relay nodes are ephemeral execution targets; local fallback always available)
 - Global scheduler / latency-aware placement (placement is capability + health + least-loaded only)
 - `GET /jobs/{id}/status` persistence API
@@ -95,9 +94,9 @@ North Star direction is a local capability network: route track contracts to the
 
 ## Current Priority
 
-**Now:** `main` is idle following `SYSTEM-PROOF-01` closeout (`POSITIVE` thesis gate verdict). Canonical state lives in `development/project-state.json`.
+**Now:** `main` is idle following `CORE-06` (`core-06-workflow-packs-and-task-intake`) merge via PR #46 (`24bcc5c`). Canonical state lives in `development/project-state.json`.
 
-**Next:** Awaiting explicit operator selection among `px6-external-validation-program` (external testers + physical 2-device Relay pilot), central execution-policy runtime enforcement, or `research-01-decision-track-bakeoff`.
+**Next:** Awaiting explicit operator approval before starting the next milestone (`px6-external-validation-program` — external testers + physical 2-device Relay pilot, central execution-policy runtime enforcement, or `research-01-decision-track-bakeoff`).
 
 ## Evidence Pointers
 

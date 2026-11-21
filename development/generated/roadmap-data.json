@@ -1,6 +1,6 @@
 {
   "schema": "locaily.development.dashboard.v1",
-  "generatedAt": "2026-11-19T02:05:14.128Z",
+  "generatedAt": "2026-11-21T22:54:18.052Z",
   "projectState": {
     "schema": "locaily.development.project_state.v1",
     "project": "locaily",
@@ -9,23 +9,23 @@
     "status": "idle",
     "defaultBranch": "main",
     "activeBranch": "main",
-    "lastCompletedMilestone": "system-proof-01-real-workflow-proof",
-    "nextRecommendedAction": "Milestone 'system-proof-01-real-workflow-proof' merged. Run dev:dashboard to refresh.",
+    "lastCompletedMilestone": "core-06-workflow-packs-and-task-intake",
+    "nextRecommendedAction": "Milestone 'core-06-workflow-packs-and-task-intake' merged. Run dev:dashboard to refresh.",
     "blockers": [],
     "warnings": [],
-    "updatedAt": "2026-11-19T02:05:13.857Z",
+    "updatedAt": "2026-11-21T22:53:50.449Z",
     "updatedBy": {
       "type": "agent",
       "name": "dev-lifecycle",
       "platform": "system"
     },
-    "mergedMilestone": "system-proof-01-real-workflow-proof",
-    "mergedAt": "2026-11-19T02:05:13.857Z",
-    "mergedCommit": "559dfc3fac8f66b9e98854012d7affe6cb2878f3"
+    "mergedMilestone": "core-06-workflow-packs-and-task-intake",
+    "mergedAt": "2026-11-21T22:53:50.449Z",
+    "mergedCommit": "24bcc5cbdaa56662f9b232975cef9d1ca6f1eecc"
   },
   "git": {
     "branch": "main",
-    "head": "559dfc3",
+    "head": "24bcc5c",
     "dirty": true
   },
   "subsystemMaturity": [
@@ -60,6 +60,11 @@
           "id": "track-planner",
           "title": "Track Planner",
           "maturity": "tested"
+        },
+        {
+          "id": "workflow-packs-and-intake",
+          "title": "Workflow Packs and Automatic Task Intake",
+          "maturity": "implemented"
         }
       ]
     },
@@ -319,6 +324,12 @@
       {
         "id": "core-05-workflow-console-matrix-explorer",
         "title": "CORE-05 Generic Workflows & Model Qualification Matrix Explorer in Companion Console",
+        "type": "feature",
+        "priority": "high"
+      },
+      {
+        "id": "core-06-workflow-packs-and-task-intake",
+        "title": "CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake",
         "type": "feature",
         "priority": "high"
       },
@@ -773,9 +784,56 @@
       "completedAt": "2026-11-19T02:04:59.724Z",
       "requiredPassed": 3,
       "requiredFailed": 0
+    },
+    {
+      "id": "validation-20261119T025733-845df6f2",
+      "milestoneId": "core-06-workflow-packs-and-task-intake",
+      "status": "failed",
+      "profileId": "pre-delivery",
+      "branch": "milestone/core-06-workflow-packs-and-task-intake",
+      "completedAt": "2026-11-19T02:59:26.493Z",
+      "requiredPassed": 5,
+      "requiredFailed": 1
+    },
+    {
+      "id": "validation-20261119T025955-91d9deb5",
+      "milestoneId": "core-06-workflow-packs-and-task-intake",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "milestone/core-06-workflow-packs-and-task-intake",
+      "completedAt": "2026-11-19T03:01:42.997Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
     }
   ],
   "recentActivity": [
+    {
+      "type": "validation",
+      "id": "validation-20261119T025955-91d9deb5",
+      "milestoneId": "core-06-workflow-packs-and-task-intake",
+      "status": "passed",
+      "timestamp": "2026-11-19T03:01:42.997Z"
+    },
+    {
+      "type": "validation",
+      "id": "validation-20261119T025733-845df6f2",
+      "milestoneId": "core-06-workflow-packs-and-task-intake",
+      "status": "failed",
+      "timestamp": "2026-11-19T02:59:26.493Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20261119-001",
+      "milestoneId": "core-06-workflow-packs-and-task-intake",
+      "timestamp": "2026-11-19T02:57:06.123Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20261119-001",
+      "milestoneId": "core-06-workflow-packs-and-task-intake",
+      "status": "closed",
+      "timestamp": "2026-11-19T02:42:33.981Z"
+    },
     {
       "type": "validation",
       "id": "validation-20261119T020458-2c382765",
@@ -882,33 +940,6 @@
       "id": "session-20261001-001",
       "milestoneId": "core-02-generic-model-qualification",
       "timestamp": "2026-10-01T02:04:21.468Z"
-    },
-    {
-      "type": "session",
-      "id": "session-20261001-001",
-      "milestoneId": "core-02-generic-model-qualification",
-      "status": "closed",
-      "timestamp": "2026-10-01T01:47:08.804Z"
-    },
-    {
-      "type": "validation",
-      "id": "validation-20260930T232551-3b868577",
-      "milestoneId": "durable-job-state-integrity-20260905",
-      "status": "passed",
-      "timestamp": "2026-09-30T23:25:52.285Z"
-    },
-    {
-      "type": "session-closed",
-      "id": "session-20260905-002",
-      "milestoneId": "durable-job-state-integrity-20260905",
-      "timestamp": "2026-09-30T23:25:47.664Z"
-    },
-    {
-      "type": "validation",
-      "id": "validation-20260930T232052-d2d7f38e",
-      "milestoneId": "core-01-system-formation",
-      "status": "passed",
-      "timestamp": "2026-09-30T23:20:53.397Z"
     }
   ],
   "nextMilestone": {
@@ -1004,177 +1035,157 @@
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193805-abd72fb5' is 115 days old"
+      "message": "Validation 'validation-20260726T193805-abd72fb5' is 118 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193814-1c6a4d38' is 115 days old"
+      "message": "Validation 'validation-20260726T193814-1c6a4d38' is 118 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193822-682b4aac' is 115 days old"
+      "message": "Validation 'validation-20260726T193822-682b4aac' is 118 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193904-f068ea75' is 115 days old"
+      "message": "Validation 'validation-20260726T193904-f068ea75' is 118 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193946-d77283c5' is 115 days old"
+      "message": "Validation 'validation-20260726T193946-d77283c5' is 118 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T194012-6848fec5' is 115 days old"
+      "message": "Validation 'validation-20260726T194012-6848fec5' is 118 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260731T012126-adab70b6' is 111 days old"
+      "message": "Validation 'validation-20260731T012126-adab70b6' is 113 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260731T012351-67f4276c' is 111 days old"
+      "message": "Validation 'validation-20260731T012351-67f4276c' is 113 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260731T012502-3e424fff' is 111 days old"
+      "message": "Validation 'validation-20260731T012502-3e424fff' is 113 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260801T161108-4465cafc' is 109 days old"
+      "message": "Validation 'validation-20260801T161108-4465cafc' is 112 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260801T161223-cc81739b' is 109 days old"
+      "message": "Validation 'validation-20260801T161223-cc81739b' is 112 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260801T161231-77bc9e23' is 109 days old"
+      "message": "Validation 'validation-20260801T161231-77bc9e23' is 112 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023227-6fab1834' is 107 days old"
+      "message": "Validation 'validation-20260803T023227-6fab1834' is 110 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023410-3563bd82' is 107 days old"
+      "message": "Validation 'validation-20260803T023410-3563bd82' is 110 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023624-a84bb3ad' is 107 days old"
+      "message": "Validation 'validation-20260803T023624-a84bb3ad' is 110 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T023959-bd677b49' is 107 days old"
+      "message": "Validation 'validation-20260803T023959-bd677b49' is 110 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260803T033939-6f1c2b76' is 107 days old"
+      "message": "Validation 'validation-20260803T033939-6f1c2b76' is 110 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260804T030328-9dfffbe6' is 106 days old"
+      "message": "Validation 'validation-20260804T030328-9dfffbe6' is 109 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260804T030446-0b281076' is 106 days old"
+      "message": "Validation 'validation-20260804T030446-0b281076' is 109 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260823T211614-13b4ddad' is 87 days old"
+      "message": "Validation 'validation-20260823T211614-13b4ddad' is 90 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260907T184143-2cd3ef56' is 72 days old"
+      "message": "Validation 'validation-20260907T184143-2cd3ef56' is 75 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260907T191223-c83e1580' is 72 days old"
+      "message": "Validation 'validation-20260907T191223-c83e1580' is 75 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260907T193008-4b632292' is 72 days old"
+      "message": "Validation 'validation-20260907T193008-4b632292' is 75 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260930T232052-d2d7f38e' is 49 days old"
+      "message": "Validation 'validation-20260930T232052-d2d7f38e' is 51 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260930T232551-3b868577' is 49 days old"
+      "message": "Validation 'validation-20260930T232551-3b868577' is 51 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20261001T020555-b3197f9a' is 48 days old"
+      "message": "Validation 'validation-20261001T020555-b3197f9a' is 51 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20261001T020757-c32b8132' is 48 days old"
+      "message": "Validation 'validation-20261001T020757-c32b8132' is 51 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20261001T024808-615d773c' is 48 days old"
+      "message": "Validation 'validation-20261001T024808-615d773c' is 51 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20261001T024952-cbe5b823' is 48 days old"
+      "message": "Validation 'validation-20261001T024952-cbe5b823' is 51 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20261001T043715-9cd0f7ea' is 48 days old"
+      "message": "Validation 'validation-20261001T043715-9cd0f7ea' is 51 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20261001T230429-f7d31a6b' is 48 days old"
-    },
-    {
-      "severity": "info",
-      "code": "STALE_GENERATED",
-      "message": "Generated file 'next-agent-handoff.md' may be stale"
-    },
-    {
-      "severity": "info",
-      "code": "STALE_GENERATED",
-      "message": "Generated file 'roadmap-data.json' may be stale"
-    },
-    {
-      "severity": "info",
-      "code": "STALE_GENERATED",
-      "message": "Generated file 'roadmap.html' may be stale"
-    },
-    {
-      "severity": "info",
-      "code": "STALE_GENERATED",
-      "message": "Generated file 'status-summary.md' may be stale"
+      "message": "Validation 'validation-20261001T230429-f7d31a6b' is 50 days old"
     }
   ],
   "drift": [
@@ -1228,6 +1239,12 @@
         "id": "core-05-workflow-console-matrix-explorer",
         "status": "merged",
         "title": "CORE-05 Generic Workflows & Model Qualification Matrix Explorer in Companion Console",
+        "type": "feature"
+      },
+      {
+        "id": "core-06-workflow-packs-and-task-intake",
+        "status": "merged",
+        "title": "CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake",
         "type": "feature"
       },
       {
@@ -1369,6 +1386,14 @@
         "to": "core-05-workflow-console-matrix-explorer"
       },
       {
+        "from": "core-05-workflow-console-matrix-explorer",
+        "to": "core-06-workflow-packs-and-task-intake"
+      },
+      {
+        "from": "system-proof-01-real-workflow-proof",
+        "to": "core-06-workflow-packs-and-task-intake"
+      },
+      {
         "from": "ctk-01-capability-trigger-kernel",
         "to": "ctk-02-node-roles-capability-capsules"
       },
@@ -1484,11 +1509,11 @@
   },
   "humanDecisions": [],
   "stats": {
-    "totalMilestones": 27,
+    "totalMilestones": 28,
     "active": 0,
-    "completed": 25,
-    "totalSessions": 20,
-    "totalValidations": 32,
+    "completed": 26,
+    "totalSessions": 21,
+    "totalValidations": 34,
     "totalDeliveries": 0,
     "totalIssues": 4,
     "openIssues": 0

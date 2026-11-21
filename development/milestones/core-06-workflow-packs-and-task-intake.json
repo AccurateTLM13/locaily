@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "core-06-workflow-packs-and-task-intake",
   "title": "CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake",
-  "status": "ready-for-delivery",
+  "status": "merged",
   "type": "feature",
   "priority": "high",
   "purpose": "Deliver a self-contained Workflow Pack contract and Starter SDK so workflows install without editing Local Brain core, plus Automatic Task Intake & Track Selection across built-in and pack workflows.",
@@ -105,11 +105,13 @@
   "createdAt": "2026-11-19T02:42:33.979Z",
   "startedAt": "2026-11-19T02:42:33.979Z",
   "completedAt": "2026-11-19T03:01:55.207Z",
-  "mergedAt": null,
+  "mergedAt": "2026-11-21T22:53:50.447Z",
   "preparedCommit": "9556f9031f1b9822d24c4021d0f5339cc3280097",
   "preparedBranch": "milestone/core-06-workflow-packs-and-task-intake",
   "preparedAt": "2026-11-19T02:57:21.933Z",
   "latestValidationId": "validation-20261119T025955-91d9deb5",
   "completionBranch": "milestone/core-06-workflow-packs-and-task-intake",
-  "completionHead": "d73c13d75af5f9a013307deb62e987f0b9adb825"
+  "completionHead": "d73c13d75af5f9a013307deb62e987f0b9adb825",
+  "mergedCommit": "24bcc5cbdaa56662f9b232975cef9d1ca6f1eecc",
+  "prNumber": 46
 }

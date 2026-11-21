@@ -3,20 +3,20 @@
   "project": "locaily",
   "currentMilestone": null,
   "activeSession": null,
-  "status": "ready-for-delivery",
+  "status": "idle",
   "defaultBranch": "main",
-  "activeBranch": "milestone/core-06-workflow-packs-and-task-intake",
+  "activeBranch": "main",
   "lastCompletedMilestone": "core-06-workflow-packs-and-task-intake",
-  "nextRecommendedAction": "Deliver milestone 'core-06-workflow-packs-and-task-intake' (deliver-milestone.js --slug core-06-workflow-packs-and-task-intake --all)",
+  "nextRecommendedAction": "Milestone 'core-06-workflow-packs-and-task-intake' merged. Run dev:dashboard to refresh.",
   "blockers": [],
   "warnings": [],
-  "updatedAt": "2026-11-19T03:01:55.210Z",
+  "updatedAt": "2026-11-21T22:53:50.449Z",
   "updatedBy": {
     "type": "agent",
     "name": "dev-lifecycle",
     "platform": "system"
   },
-  "mergedMilestone": "system-proof-01-real-workflow-proof",
-  "mergedAt": "2026-11-19T02:05:13.857Z",
-  "mergedCommit": "559dfc3fac8f66b9e98854012d7affe6cb2878f3"
+  "mergedMilestone": "core-06-workflow-packs-and-task-intake",
+  "mergedAt": "2026-11-21T22:53:50.449Z",
+  "mergedCommit": "24bcc5cbdaa56662f9b232975cef9d1ca6f1eecc"
 }
