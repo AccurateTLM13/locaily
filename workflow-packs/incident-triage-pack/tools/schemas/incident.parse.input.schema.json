@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Incident Parse Input",
+  "type": "object",
+  "required": ["incident_text"],
+  "properties": {
+    "incident_text": { "type": "string", "minLength": 1 },
+    "service": { "type": "string" },
+    "environment": { "type": "string" }
+  },
+  "additionalProperties": true
+}

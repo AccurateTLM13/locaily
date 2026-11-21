@@ -11,6 +11,7 @@
     "core-03-multi-model-fallback-qualification": "validation-20261001T024952-cbe5b823",
     "core-04-complete-generic-matrix-qualification": "validation-20261001T043715-9cd0f7ea",
     "core-05-workflow-console-matrix-explorer": "validation-20261001T230429-f7d31a6b",
-    "system-proof-01-real-workflow-proof": "validation-20261119T020458-2c382765"
+    "system-proof-01-real-workflow-proof": "validation-20261119T020458-2c382765",
+    "core-06-workflow-packs-and-task-intake": "validation-20261119T025955-91d9deb5"
   }
 }

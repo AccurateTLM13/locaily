@@ -1,0 +1,115 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "core-06-workflow-packs-and-task-intake",
+  "title": "CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake",
+  "status": "ready-for-delivery",
+  "type": "feature",
+  "priority": "high",
+  "purpose": "Deliver a self-contained Workflow Pack contract and Starter SDK so workflows install without editing Local Brain core, plus Automatic Task Intake & Track Selection across built-in and pack workflows.",
+  "scope": {
+    "included": [
+      "companion/",
+      "workflow-packs/",
+      "scripts/",
+      "docs/",
+      "package.json",
+      "development/"
+    ],
+    "excluded": [
+      "Automatic model swapping / Model Garage auto-switching",
+      "Remote marketplace download or unverified code execution",
+      "Free-form track invention by LLMs"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "ac-pack-contract",
+      "description": "Workflow Pack manifest schema (locaily.workflow_pack.v1) and path-safe loader dynamically register tracks, tools, prompts, schemas, workflows, permissions, and qualification requirements with zero edits to Local Brain core.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "scripts/test-core06-workflow-packs.js",
+          "note": "AC1-AC5 verified schema validation, path traversal escape blocking, ID conflict rejection, dynamic registration across all registries, and permission/qualification readiness."
+        }
+      ]
+    },
+    {
+      "id": "ac-starter-pack-and-sdk",
+      "description": "Reference pack (workflow-packs/incident-triage-pack/) executes end-to-end composing pack-local tracks/tools/schemas/prompts with shared core.* capabilities, and Starter SDK CLI (pack:list, pack:init, pack:validate, pack:test) scaffolds, validates, and runs a fresh pack in isolation.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "scripts/workflow-pack-sdk.js",
+          "note": "pack:validate and pack:test passed on workflow-packs/incident-triage-pack (1/1 fixture, schemaValid: true); AC6 passed pack:init -> pack:validate -> pack:test in isolated temp dir."
+        }
+      ]
+    },
+    {
+      "id": "ac-task-intake-pipeline",
+      "description": "Automatic Task Intake implements deterministic intent hints -> optional qualification-gated small classifier -> candidate workflow/track selection -> contract & capability check -> selected / confirm_required / refused with uncertainty, explanations, and strict anti-invention enforcement.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "scripts/test-core06-task-intake.js",
+          "note": "AC1-AC4 verified deterministic routing, ambiguity confirm_required, unsupported refusal, qualification gating, and invented workflow ID rejection."
+        }
+      ]
+    },
+    {
+      "id": "ac-intake-labeled-eval",
+      "description": "Human-labeled dataset (>= 20 cases covering built-in workflows, installed Workflow Pack, ambiguous prompts, and unsupported refusals) achieves >= 90% accuracy, 100% unsupported refusal rate, and 0% invented tracks.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "validation-record",
+          "reference": "companion/schemas/fixtures/task-intake-labeled-dataset.json",
+          "note": "26/26 passed (100.0% accuracy, 100.0% refusal recall, 0 invented tracks) via evaluateLabeledDataset."
+        }
+      ]
+    },
+    {
+      "id": "ac-api-and-console",
+      "description": "Additive HTTP endpoints (GET /packs, GET /packs/:id, POST /packs/validate, POST /intake/route, POST /workflows/intake) and Companion Console (companion/console/) + Unified Shell (companion/shell/) UI surfaces work end-to-end.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "scripts/test-core06-task-intake.js",
+          "note": "AC6 tested live HTTP routes on companion/server.js (including incident_triage execution via /intake/route) and verified Console + Shell UI markup/scripts."
+        }
+      ]
+    },
+    {
+      "id": "ac-full-validation",
+      "description": "npm run test:workflow-packs, npm run test:task-intake, and full npm run test:full pass 100% green.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "package.json",
+          "note": "npm run test:workflow-packs (6/6), npm run test:task-intake (6/6), and npm run test:full (all 26 suites) passed with exit code 0."
+        }
+      ]
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [
+    "core-05-workflow-console-matrix-explorer",
+    "system-proof-01-real-workflow-proof"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-11-19T02:42:33.979Z",
+  "startedAt": "2026-11-19T02:42:33.979Z",
+  "completedAt": "2026-11-19T03:01:55.207Z",
+  "mergedAt": null,
+  "preparedCommit": "9556f9031f1b9822d24c4021d0f5339cc3280097",
+  "preparedBranch": "milestone/core-06-workflow-packs-and-task-intake",
+  "preparedAt": "2026-11-19T02:57:21.933Z",
+  "latestValidationId": "validation-20261119T025955-91d9deb5",
+  "completionBranch": "milestone/core-06-workflow-packs-and-task-intake",
+  "completionHead": "d73c13d75af5f9a013307deb62e987f0b9adb825"
+}

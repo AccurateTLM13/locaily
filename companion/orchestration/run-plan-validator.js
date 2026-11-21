@@ -1,15 +1,17 @@
+const fs = require("node:fs");
 const path = require("node:path");
 const { validateResult } = require("../core/result-validator");
 const { getTrackRegistryEntry } = require("./track-registry");
+const { resolvePackSchemaPath } = require("../packs");
 const workflowVerificationResultSchema = require("../schemas/internal/workflow-verification-result.schema.json");
 
-function loadSchema(schemaPath) {
+function loadSchema(schemaPath, trackId = null) {
   if (!schemaPath) {
     return null;
   }
 
-  const resolved = path.resolve(__dirname, "..", "..", schemaPath);
-  return require(resolved);
+  const resolved = resolvePackSchemaPath(schemaPath, trackId);
+  return JSON.parse(fs.readFileSync(resolved, "utf8"));
 }
 
 function resolveVerificationStepId(track) {
@@ -86,7 +88,7 @@ function validateStepOutput(planStep, output, trackStep, track = null) {
   }
 
   if (trackStep.executor.type === "model" && trackStep.executor.schema) {
-    const schema = loadSchema(trackStep.executor.schema);
+    const schema = loadSchema(trackStep.executor.schema, track ? track.track_id : null);
     const validation = validateResult(output, schema);
 
     return {
@@ -133,7 +135,7 @@ function validateWorkflowResult(trackId, result) {
   }
 
   if (expectations.output_schema) {
-    const schema = loadSchema(expectations.output_schema);
+    const schema = loadSchema(expectations.output_schema, trackId);
     const schemaValidation = validateResult(result, schema);
 
     if (!schemaValidation.ok) {

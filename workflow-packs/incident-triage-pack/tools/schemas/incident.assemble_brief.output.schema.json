@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Incident Brief Assembly Output",
+  "type": "object",
+  "required": ["title", "service", "environment", "severity", "category", "summary", "next_actions", "markdown"],
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "service": { "type": "string", "minLength": 1 },
+    "environment": { "type": "string", "minLength": 1 },
+    "severity": { "type": "string" },
+    "category": { "type": "string" },
+    "error_codes": { "type": "array", "items": { "type": "string" } },
+    "timestamps": { "type": "array", "items": { "type": "string" } },
+    "summary": { "type": "string", "minLength": 1 },
+    "key_points": { "type": "array", "items": { "type": "string" } },
+    "next_actions": { "type": "array", "items": { "type": "string" } },
+    "markdown": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

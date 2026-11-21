@@ -1,27 +1,37 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { validateResult } = require("../core/result-validator");
+const { getDefaultWorkflowPackRegistry } = require("../packs");
 
 const TRACKS_DIR = path.join(__dirname, "tracks");
 const taskTrackSchema = require("../schemas/internal/task-track.schema.json");
 
 function listTracks() {
-  if (!fs.existsSync(TRACKS_DIR)) {
-    return [];
-  }
+  const tracks = [];
+  const seen = new Set();
 
-  return fs.readdirSync(TRACKS_DIR)
-    .filter((file) => file.endsWith(".track.json"))
-    .map((file) => {
+  if (fs.existsSync(TRACKS_DIR)) {
+    for (const file of fs.readdirSync(TRACKS_DIR).filter((f) => f.endsWith(".track.json"))) {
       const track = loadTrackFile(path.join(TRACKS_DIR, file));
-      return {
+      seen.add(track.track_id);
+      tracks.push({
         track_id: track.track_id,
         version: track.version,
         name: track.name,
         description: track.description,
         steps: Array.isArray(track.steps) ? track.steps.map((step) => step.id) : []
-      };
-    });
+      });
+    }
+  }
+
+  for (const packTrack of getDefaultWorkflowPackRegistry().listPackTracks()) {
+    if (!seen.has(packTrack.track_id)) {
+      seen.add(packTrack.track_id);
+      tracks.push(packTrack);
+    }
+  }
+
+  return tracks;
 }
 
 function loadTrack(trackId) {
@@ -36,13 +46,20 @@ function loadTrack(trackId) {
     return loadTrackFile(directPath);
   }
 
-  const entries = fs.readdirSync(TRACKS_DIR).filter((file) => file.endsWith(".track.json"));
+  if (fs.existsSync(TRACKS_DIR)) {
+    const entries = fs.readdirSync(TRACKS_DIR).filter((file) => file.endsWith(".track.json"));
 
-  for (const file of entries) {
-    const track = loadTrackFile(path.join(TRACKS_DIR, file));
-    if (track.track_id === normalized) {
-      return track;
+    for (const file of entries) {
+      const track = loadTrackFile(path.join(TRACKS_DIR, file));
+      if (track.track_id === normalized) {
+        return track;
+      }
     }
+  }
+
+  const packTrack = getDefaultWorkflowPackRegistry().getPackTrack(normalized);
+  if (packTrack) {
+    return packTrack;
   }
 
   throw trackError(

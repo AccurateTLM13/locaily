@@ -1,10 +1,10 @@
 # Build Status
 
-**Updated:** 2026-11-18 (SYSTEM-PROOF-01 complete & closed out; CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
+**Updated:** 2026-11-18 (CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake ready for delivery; SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Stage
 
-Operational **Local Brain** with **Crew track runner** (linear + DAG), generic reusable capability tracks (`core.*`), multi-track composed workflows (`repo_review`, `document_review`, `content_os`, `text_qa`), multi-tier model qualification & fallback routing, Companion Console Workflows & Matrix Explorer (`CORE-05`), unified shell (`PX4`/`PX8`), Benchmark Lab M1–M3, Capability Trigger Kernel (`CTK-01`–`03`), Relay Nodes + `M09A` pairing + `PX2` LAN hard gate, Development Memory Loop (`DM1`–`DM10`), and empirical thesis validation (`SYSTEM-PROOF-01`, `POSITIVE` verdict). Physical two-device pilot and external 5-tester validation (`PX6`) remain planned.
+Operational **Local Brain** with **Crew track runner** (linear + DAG), generic reusable capability tracks (`core.*`), self-contained **Workflow Packs + Starter SDK (`CORE-06`)**, **Automatic Task Intake & Track Selection (`CORE-06`)**, multi-track composed workflows (`repo_review`, `document_review`, `content_os`, `text_qa`, `incident_triage`), multi-tier model qualification & fallback routing, Companion Console (`CORE-05`/`CORE-06`), unified shell (`PX4`/`PX8`), Benchmark Lab M1–M3, Capability Trigger Kernel (`CTK-01`–`03`), Relay Nodes + `M09A` pairing + `PX2` LAN hard gate, Development Memory Loop (`DM1`–`DM10`), and empirical thesis validation (`SYSTEM-PROOF-01`, `POSITIVE` verdict). Physical two-device pilot and external 5-tester validation (`PX6`) remain planned.
 
 North Star direction is a local capability network: route track contracts to the smallest qualified capability, validate results, and preserve structured evidence for future routing and track improvement.
 
@@ -12,6 +12,7 @@ North Star direction is a local capability network: route track contracts to the
 
 | Milestone | Status |
 |---|---|
+| **CORE-06 (Workflow Pack Contract, Starter SDK, and Automatic Task Intake)** | Implemented & Validated (ready for delivery) |
 | **CORE-01 – CORE-05 (Generic Capabilities, Matrix Qualification, Fallback, Console Explorer)** | Complete & Merged |
 | **SYSTEM-PROOF-01 (Real Multi-Track Workflow Proof)** | Complete & Merged (`POSITIVE` verdict) |
 | **PX1 – PX5, PX7 – PX9 (Truth Surfaces, LAN Gate, Run Inspector, Unified Shell, Tester Package, Audit Remediation)** | Complete |

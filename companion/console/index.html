@@ -212,6 +212,46 @@
               <button id="refreshWorkflowsBtn" type="button" class="btn btn--ghost">Refresh Workflows</button>
             </div>
 
+            <section id="taskIntakeSurface" class="surface intake-surface" aria-labelledby="taskIntakeTitle">
+              <div class="section-header">
+                <div>
+                  <h3 id="taskIntakeTitle" class="section-title">Automatic Task Intake &amp; Track Selection</h3>
+                  <p class="section-subtitle">Describe a task in plain English. Deterministic hints and optional qualification-gated classification select a workflow or ask for confirmation.</p>
+                </div>
+              </div>
+              <form id="intakeForm" class="intake-form">
+                <div class="field">
+                  <label for="intakeRequestInput" class="field__label">Task Request</label>
+                  <textarea id="intakeRequestInput" class="field__textarea" rows="2" placeholder="e.g., Triage this sev1 production outage on checkout-api returning 503 errors"></textarea>
+                </div>
+                <div class="intake-controls">
+                  <label class="intake-toggle">
+                    <input id="intakeUseClassifierCheckbox" type="checkbox">
+                    <span>Enable optional small classifier (qualification-gated)</span>
+                  </label>
+                  <button id="btnEvaluateIntake" type="submit" class="btn btn--primary">Route Request</button>
+                </div>
+              </form>
+              <div id="intakeResultCard" class="intake-result-card" hidden>
+                <div class="section-header">
+                  <div>
+                    <strong>Intake Decision</strong>
+                    <span id="intakeConfidenceLabel" class="meta-text"></span>
+                  </div>
+                  <span id="intakeDecisionBadge" class="status-pill">
+                    <span class="status-pill__dot"></span>
+                    <span class="status-pill__label"></span>
+                  </span>
+                </div>
+                <p id="intakeExplanation" class="meta-text"></p>
+                <div id="intakeMissingInputs" class="intake-missing-inputs"></div>
+                <div id="intakeCandidatesList" class="intake-candidates"></div>
+                <div class="launcher-actions">
+                  <button id="btnConfirmIntakeWorkflow" type="button" class="btn btn--secondary" hidden>Load Workflow into Runner</button>
+                </div>
+              </div>
+            </section>
+
             <div class="workflow-catalog-grid">
               <div class="workflow-cards-col">
                 <div class="section-header">
@@ -286,6 +326,17 @@
                 </section>
               </div>
             </div>
+
+            <section id="workflowPacksSurface" class="surface packs-surface" aria-labelledby="workflowPacksTitle">
+              <div class="section-header">
+                <div>
+                  <h3 id="workflowPacksTitle" class="section-title">Installed Workflow Packs</h3>
+                  <p class="section-subtitle">Self-contained packs loaded dynamically from workflow-packs/ with declared tracks, tools, permissions, and qualification checks.</p>
+                </div>
+                <span id="workflowPacksCount" class="meta-text">Loading…</span>
+              </div>
+              <div id="workflowPacksList" class="packs-grid"></div>
+            </section>
           </div>
 
           <!-- Model Qualification Matrix View Panel -->

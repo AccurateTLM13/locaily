@@ -3,6 +3,7 @@ const path = require("node:path");
 const { dealSniperTool } = require("./deal-sniper");
 const { lighthouseHandoffTool } = require("./lighthouse-handoff");
 const { validateResult } = require("../core/result-validator");
+const { getDefaultWorkflowPackRegistry } = require("../packs");
 
 const toolPackManifestToolSchema = require("../schemas/internal/tool-pack-manifest-tool.schema.json");
 const toolPackManifestSchema = {
@@ -57,6 +58,29 @@ function createToolRegistry(options = {}) {
       }
     } catch (err) {
       console.warn(`[Registry Loader] Warning: Failed to read tool-packs directory: ${err.message}`);
+    }
+  }
+
+  // 3. Discover and load tools bundled inside installed Workflow Packs
+  if (options.disableWorkflowPacks !== true) {
+    const packRegistry = options.workflowPackRegistry || getDefaultWorkflowPackRegistry();
+    const packEnabledFilter = options.filterWorkflowPackTools === true ? enabledSet : new Set();
+    for (const desc of packRegistry.getToolPackDescriptors()) {
+      try {
+        loadToolPack(desc.toolDir, desc.manifestPath, tools, packEnabledFilter);
+      } catch (err) {
+        console.warn(`[Registry Loader] Warning: Failed to load tool pack from workflow pack '${desc.packId}': ${err.message}`);
+      }
+    }
+  }
+
+  // 4. Optional extra tool pack directories (used by isolated SDK tests)
+  if (Array.isArray(options.extraToolPackDirs)) {
+    for (const extraDir of options.extraToolPackDirs) {
+      const manifestPath = path.join(path.resolve(extraDir), "tool.json");
+      if (fs.existsSync(manifestPath)) {
+        loadToolPack(path.resolve(extraDir), manifestPath, tools, enabledSet);
+      }
     }
   }
 

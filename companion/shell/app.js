@@ -645,7 +645,14 @@ async function renderWorkflows() {
     badge: "CORE · Generic"
   }));
 
-  const allItems = [...coreCards, ...defaultRoutes];
+  const packCards = workflows.filter(w => Boolean(w.pack_id)).map(wf => ({
+    id: wf.workflow_id,
+    title: wf.name || wf.workflow_id,
+    desc: wf.description || "",
+    badge: `Pack · ${wf.pack_id}`
+  }));
+
+  const allItems = [...coreCards, ...packCards, ...defaultRoutes];
 
   const cardsHtml = allItems.map(item => `
     <div class="route-card" onclick="openTaskModalWithRoute('${escapeHtml(item.id)}')">

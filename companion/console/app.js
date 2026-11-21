@@ -1172,12 +1172,182 @@ if (btnFormatWorkflowInput) btnFormatWorkflowInput.addEventListener("click", for
 const btnResetWorkflowInput = document.getElementById("btnResetWorkflowInput");
 if (btnResetWorkflowInput) btnResetWorkflowInput.addEventListener("click", resetWorkflowInput);
 
+const intakeForm = document.getElementById("intakeForm");
+if (intakeForm) intakeForm.addEventListener("submit", evaluateTaskIntake);
+
+let lastIntakeMatchedWorkflowId = null;
+const btnConfirmIntakeWorkflow = document.getElementById("btnConfirmIntakeWorkflow");
+if (btnConfirmIntakeWorkflow) {
+  btnConfirmIntakeWorkflow.addEventListener("click", () => {
+    if (!lastIntakeMatchedWorkflowId) return;
+    const wf = loadedWorkflows.find((w) => w.workflow_id === lastIntakeMatchedWorkflowId);
+    if (wf) {
+      selectWorkflow(wf);
+      const runner = document.getElementById("workflowRunForm");
+      if (runner && typeof runner.scrollIntoView === "function") {
+        runner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }
+  });
+}
+
+async function evaluateTaskIntake(e) {
+  e.preventDefault();
+  const inputEl = document.getElementById("intakeRequestInput");
+  const classifierEl = document.getElementById("intakeUseClassifierCheckbox");
+  const resultCard = document.getElementById("intakeResultCard");
+  const badgeEl = document.getElementById("intakeDecisionBadge");
+  const confidenceEl = document.getElementById("intakeConfidenceLabel");
+  const explanationEl = document.getElementById("intakeExplanation");
+  const missingEl = document.getElementById("intakeMissingInputs");
+  const candidatesEl = document.getElementById("intakeCandidatesList");
+  const confirmBtn = document.getElementById("btnConfirmIntakeWorkflow");
+  const btn = document.getElementById("btnEvaluateIntake");
+
+  if (!resultCard || !inputEl) return;
+  const requestText = inputEl.value.trim();
+  const useModelClassifier = Boolean(classifierEl && classifierEl.checked);
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Routing…";
+  }
+  resultCard.hidden = false;
+
+  try {
+    const res = await requestJson("/intake/route", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        request: requestText,
+        input: {},
+        options: { useModelClassifier }
+      })
+    });
+
+    const intake = res.intake || res;
+    const decision = intake.decision || "refused";
+    const pillClass = decision === "selected"
+      ? "status-pill status-pill--success"
+      : (decision === "confirm_required" ? "status-pill status-pill--warn" : "status-pill status-pill--error");
+
+    if (badgeEl) {
+      badgeEl.className = pillClass;
+      badgeEl.innerHTML = `<span class="status-pill__dot"></span><span class="status-pill__label">${escapeDiagnostic(decision)}</span>`;
+    }
+    if (confidenceEl) {
+      confidenceEl.textContent = ` · confidence ${(Number(intake.confidence || 0) * 100).toFixed(0)}%`;
+    }
+    if (explanationEl) {
+      explanationEl.textContent = intake.explanation || "";
+    }
+
+    if (missingEl) {
+      const missing = Array.isArray(intake.missing_inputs) ? intake.missing_inputs : [];
+      missingEl.innerHTML = missing.length > 0
+        ? `<p class="field__hint"><strong>Required inputs when running:</strong> ${missing.map((m) => `<code>${escapeDiagnostic(m.field)}</code> (${escapeDiagnostic(m.type)})`).join(", ")}</p>`
+        : "";
+    }
+
+    const candidates = Array.isArray(intake.candidates) ? intake.candidates.filter((c) => c.score > 0) : [];
+    if (candidatesEl) {
+      candidatesEl.innerHTML = candidates.map((c) => `
+        <div class="intake-candidate-row">
+          <div>
+            <strong>${escapeDiagnostic(c.name || c.workflow_id)}</strong>
+            <span class="meta-code">${escapeDiagnostic(c.workflow_id)}</span>
+            ${c.pack_id ? `<span class="cap-chip">pack: ${escapeDiagnostic(c.pack_id)}</span>` : ""}
+            <span class="meta-text">score ${escapeDiagnostic(c.score)}</span>
+          </div>
+          <button type="button" class="btn btn--xs btn--ghost" data-intake-wf="${escapeDiagnostic(c.workflow_id)}">Select</button>
+        </div>
+      `).join("");
+
+      candidatesEl.querySelectorAll("[data-intake-wf]").forEach((btnEl) => {
+        btnEl.addEventListener("click", () => {
+          const wf = loadedWorkflows.find((w) => w.workflow_id === btnEl.dataset.intakeWf);
+          if (wf) selectWorkflow(wf);
+        });
+      });
+    }
+
+    lastIntakeMatchedWorkflowId = intake.selected_workflow ? intake.selected_workflow.workflow_id : null;
+    if (confirmBtn) {
+      confirmBtn.hidden = !lastIntakeMatchedWorkflowId;
+      confirmBtn.textContent = decision === "confirm_required"
+        ? `Confirm & Load '${lastIntakeMatchedWorkflowId}'`
+        : `Load '${lastIntakeMatchedWorkflowId}' into Runner`;
+    }
+  } catch (err) {
+    if (badgeEl) {
+      badgeEl.className = "status-pill status-pill--error";
+      badgeEl.innerHTML = '<span class="status-pill__dot"></span><span class="status-pill__label">error</span>';
+    }
+    if (explanationEl) {
+      explanationEl.textContent = `Intake routing failed: ${err.message}`;
+    }
+    if (confirmBtn) confirmBtn.hidden = true;
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Route Request";
+    }
+  }
+}
+
+async function loadWorkflowPacks() {
+  const listEl = document.getElementById("workflowPacksList");
+  const countEl = document.getElementById("workflowPacksCount");
+  if (!listEl) return;
+
+  try {
+    const res = await fetchJson("/packs");
+    const packs = res.packs || [];
+    if (countEl) countEl.textContent = `${packs.length} installed`;
+
+    if (!packs.length) {
+      listEl.innerHTML = '<p class="meta-text">No external Workflow Packs installed under workflow-packs/.</p>';
+      return;
+    }
+
+    listEl.innerHTML = packs.map((pack) => {
+      const permOk = pack.permissionStatus ? pack.permissionStatus.ok : true;
+      const qualReady = pack.qualificationReadiness ? pack.qualificationReadiness.ready : true;
+      return `
+        <div class="pack-card">
+          <div class="pack-card__header">
+            <div>
+              <strong>${escapeDiagnostic(pack.name)}</strong>
+              <span class="meta-code">${escapeDiagnostic(pack.id)} v${escapeDiagnostic(pack.version)}</span>
+            </div>
+            <span class="status-pill ${permOk && qualReady ? "status-pill--success" : "status-pill--warn"}">
+              <span class="status-pill__dot"></span>
+              <span class="status-pill__label">${escapeDiagnostic(pack.trust)}</span>
+            </span>
+          </div>
+          <p class="meta-text">${escapeDiagnostic(pack.description || "")}</p>
+          <div class="pack-card__meta">
+            <span class="cap-chip">workflows: ${escapeDiagnostic((pack.workflows || []).join(", ") || "none")}</span>
+            <span class="cap-chip">tracks: ${escapeDiagnostic((pack.tracks || []).length)}</span>
+            <span class="cap-chip">tools: ${escapeDiagnostic((pack.tools || []).length)}</span>
+            <span class="cap-chip">perms: ${permOk ? "ok" : "missing"}</span>
+            <span class="cap-chip">quals: ${qualReady ? "ready" : "review"}</span>
+          </div>
+        </div>
+      `;
+    }).join("");
+  } catch (err) {
+    listEl.innerHTML = `<p class="form-message form-message--error">Failed to load workflow packs: ${escapeDiagnostic(err.message)}</p>`;
+  }
+}
+
 async function loadWorkflows() {
   const listContainer = document.getElementById("workflowCardsList");
   const countLabel = document.getElementById("workflowCatalogCount");
   if (!listContainer) return;
 
   listContainer.innerHTML = '<p class="meta-text">Loading workflows…</p>';
+  loadWorkflowPacks();
 
   try {
     const res = await fetchJson("/orchestration/workflows");
@@ -1191,7 +1361,7 @@ async function loadWorkflows() {
 
     listContainer.innerHTML = loadedWorkflows.map((wf) => {
       const isCore = ["repo_review", "text_qa", "document_review", "content_os"].includes(wf.workflow_id);
-      const badgeText = isCore ? "CORE Generic" : (wf.status || "ready");
+      const badgeText = wf.pack_id ? `Pack: ${wf.pack_id}` : (isCore ? "CORE Generic" : (wf.status || "ready"));
       const trackCount = wf.composition ? wf.composition.length : 1;
       return `
         <div class="workflow-card ${currentWorkflow && currentWorkflow.workflow_id === wf.workflow_id ? "workflow-card--active" : ""}" data-id="${escapeDiagnostic(wf.workflow_id)}">
@@ -1267,7 +1437,9 @@ function resetWorkflowInput() {
   const inputEditor = document.getElementById("workflowInputEditor");
   if (!inputEditor) return;
 
-  const example = WORKFLOW_EXAMPLES[currentWorkflow.workflow_id] || { text: "Sample execution text." };
+  const example = currentWorkflow.default_fixture_input
+    || WORKFLOW_EXAMPLES[currentWorkflow.workflow_id]
+    || { text: "Sample execution text." };
   inputEditor.value = JSON.stringify(example, null, 2);
 }
 

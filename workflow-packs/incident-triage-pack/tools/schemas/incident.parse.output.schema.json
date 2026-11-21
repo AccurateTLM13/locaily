@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Incident Parse Output",
+  "type": "object",
+  "required": ["service", "environment", "severity", "error_codes", "timestamps", "summary_text"],
+  "properties": {
+    "service": { "type": "string", "minLength": 1 },
+    "environment": { "type": "string", "minLength": 1 },
+    "severity": { "type": "string", "enum": ["sev1", "sev2", "sev3", "sev4"] },
+    "error_codes": { "type": "array", "items": { "type": "string" } },
+    "timestamps": { "type": "array", "items": { "type": "string" } },
+    "raw_excerpt": { "type": "string" },
+    "summary_text": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

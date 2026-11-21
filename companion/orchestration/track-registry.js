@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadTrack } = require("../crew/decomposer");
+const { getDefaultWorkflowPackRegistry } = require("../packs");
 
 const METADATA_PATH = path.join(__dirname, "registry", "track-metadata.json");
 
@@ -35,7 +36,8 @@ function inferPreferredWorkerType(track) {
 function buildTrackRegistryEntry(trackId) {
   const track = loadTrack(trackId);
   const metadataByTrack = loadTrackMetadataFile();
-  const metadata = metadataByTrack[trackId] || {};
+  const packRegistry = getDefaultWorkflowPackRegistry();
+  const metadata = metadataByTrack[trackId] || packRegistry.getPackTrackMetadata(trackId) || {};
 
   return {
     track_id: track.track_id,
@@ -60,13 +62,16 @@ function buildTrackRegistryEntry(trackId) {
 
 function listTrackRegistry() {
   const metadataByTrack = loadTrackMetadataFile();
-  return Object.keys(metadataByTrack).map((trackId) => buildTrackRegistryEntry(trackId));
+  const packTrackIds = getDefaultWorkflowPackRegistry().listPackTrackIds();
+  const allIds = [...new Set([...Object.keys(metadataByTrack), ...packTrackIds])];
+  return allIds.map((trackId) => buildTrackRegistryEntry(trackId));
 }
 
 function getTrackRegistryEntry(trackId) {
   const metadataByTrack = loadTrackMetadataFile();
+  const packTrack = getDefaultWorkflowPackRegistry().getPackTrack(trackId);
 
-  if (!metadataByTrack[trackId]) {
+  if (!metadataByTrack[trackId] && !packTrack) {
     const error = new Error(`Track '${trackId}' is not registered for orchestration.`);
     error.code = "TRACK_REGISTRY_NOT_FOUND";
     error.nextStep = "Use GET /orchestration/tracks to list registered tracks.";

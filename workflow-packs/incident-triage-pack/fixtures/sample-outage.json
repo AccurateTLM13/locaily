@@ -1,0 +1,7 @@
+{
+  "input": {
+    "incident_text": "2026-11-18T19:42:10Z SEV1 alert in production: checkout-api returning HTTP 503 ECONNREFUSED against payments-db primary after deploy v2.18.4; error spike at 18% of requests.",
+    "service": "checkout-api",
+    "environment": "production"
+  }
+}

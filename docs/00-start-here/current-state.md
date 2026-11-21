@@ -2,14 +2,16 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-11-18 (SYSTEM-PROOF-01 empirical thesis validation complete; CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
+**Updated:** 2026-11-18 (CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake implemented on `milestone/core-06-workflow-packs-and-task-intake`; SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Milestone
 
-**Between milestones (`idle` on `main`).** `SYSTEM-PROOF-01` (`system-proof-01-real-workflow-proof`) completed its controlled three-condition + fault-injection experiment on an unseen real repository (`expressjs/express@7ef98448f8b38099ab1ded55e458538ad47a51e7`) with a **POSITIVE** thesis gate verdict: Locaily orchestration enabled a 1.2B model (`LFM2.5-1.2B-Instruct`, 730 MB) to reach 100% factual accuracy and 6/6 structured ranked findings (versus 60% accuracy and collapsed findings from a monolithic 3.2B `llama3.2` baseline), while isolating an injected `MODEL_TIMEOUT` fault into a usable, schema-valid developer handoff. See [system-proof-01-experiment-report.md](../04-validation/system-proof-01-experiment-report.md). Canonical delivery state lives in `development/project-state.json`.
+**CORE-06 (`core-06-workflow-packs-and-task-intake`) — ready for delivery on `milestone/core-06-workflow-packs-and-task-intake`.** Delivers a self-contained Workflow Pack contract (`locaily.workflow_pack.v1`), path-safe dynamic pack registry (`companion/packs/`), reference `incident-triage-pack`, Starter SDK CLI (`pack:list`, `pack:validate`, `pack:init`, `pack:test`), and 4-stage Automatic Task Intake & Track Selection (`companion/orchestration/task-intake.js`, `POST /intake/route`, Console/Shell UI).
 
 ## What Works
 
+- **Workflow Pack Contract & Starter SDK (CORE-06)** — self-contained packs under `workflow-packs/` (plus `LOCAILY_WORKFLOW_PACK_DIRS`) dynamically register workflows, tracks, tools, schemas, prompts, permissions, qualification requirements, and intake hints without editing Local Brain core files, with strict path-escape and ID-collision guards (`GET /packs`, `GET /packs/:id`, `POST /packs/validate`, `npm run pack:*`).
+- **Automatic Task Intake & Track Selection (CORE-06)** — deterministic intent/input hints + optional qualification-gated small classifier + contract/capability check routing plain-English requests to `selected`, `confirm_required`, or `refused` with strict anti-invention enforcement (`POST /intake/route`, `POST /workflows/intake`, Companion Console intake panel; 26/26 labeled eval accuracy, 100% refusal recall, 0 invented tracks).
 - **Generic Core Capabilities & Multi-Track Workflows (CORE-01 – CORE-05)** — six reusable `core.*` capability tracks (`core.extract`, `core.classify`, `core.prioritize`, `core.summarize`, `core.transform`, `core.validate`) composed into multi-track workflows (`repo_review`, `document_review`, `content_os`, experimental `text_qa`), multi-tier model qualification and fallback routing across `LFM2.5-350M`, `LFM2.5-1.2B-Instruct`, `LFM2.5-1.2B-Thinking`, and `llama3.2` (22 model qualification records), plus the Companion Console Generic Workflows Runner & Model Qualification Matrix Explorer (`CORE-05`).
 - **Unified Shell, Golden Path & Windows Tester Package (PX1 – PX5, PX7 – PX9)** — canonical product status surfaces, fail-closed LAN security hard gate, Golden Path Run Inspector with per-step routing reasons, unified application shell (`companion/shell/`), Windows-first tester setup package, organic discovery docs, and PX8/PX9 audit remediation.
 - **Capability Trigger Kernel (CTK-01, CTK-02, CTK-03)** — trusted local events select versioned installed capabilities, evaluate Node identity & role eligibility (`brain`, `worker`, `hybrid`), verify Capability Capsule checksums (`checksums.json`), resolve secret-free node-local bindings (`data/bindings/node-bindings.json`), bridge local node event bus transports (`CTK-03`), generate deterministic plans with placement metadata, execute declared handlers, validate outputs, and persist append-only provenance with explicit rejection codes (`UNSUPPORTED_OS`, `MISSING_RUNTIME`, `INSUFFICIENT_RESOURCES`, `MISSING_BINDING`, `CHECKSUM_MISMATCH`, `FAILED_SELF_TEST`).
@@ -95,12 +97,10 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 
 ## What Is Not Built Yet
 
-- **Automatic track classification** - no classifier selects workflow + track *(follow-on candidate)*
 - **Automatic model swapping / Model Garage auto-switching** - proposed only
 - **Clean-machine install-and-run path** - no validated clone-to-cleanup flow for non-developer users
 - **End-to-end Lighthouse Handoff product bridge** - extension discovers Local Brain, CORS, report comparison, export
-- **Workflow Pack contract** - complete distributable unit (tracks + tools + prompts + schemas + fixtures)
-- **Relay Node trust boundary** - no authentication, pairing, or signed requests (M09A candidate)
+- **Relay Node trust boundary** - full node-to-node pairing/signing rollout outside trusted dev network
 - **Central execution gate** - policy documented but not enforced at runtime (applies to filesystem, shell, network actions — separate from LAN security)
 
 ## Lifecycle Infrastructure

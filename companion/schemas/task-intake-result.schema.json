@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locaily.dev/schemas/task-intake-result.schema.json",
+  "title": "Automatic Task Intake Result",
+  "description": "Contract returned by POST /intake/route and POST /workflows/intake describing workflow selection, uncertainty, contract readiness, and capability checks.",
+  "type": "object",
+  "required": [
+    "schema",
+    "decision",
+    "request",
+    "confidence",
+    "explanation",
+    "confirmation_required",
+    "selected_workflow",
+    "selected_tracks",
+    "candidates",
+    "uncertainty_reasons",
+    "missing_inputs",
+    "contract_check",
+    "capability_check",
+    "classifier"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locaily.task_intake_result.v1"
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["selected", "confirm_required", "refused"]
+    },
+    "request": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "explanation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confirmation_required": {
+      "type": "boolean"
+    },
+    "selected_workflow": {
+      "type": ["object", "null"],
+      "required": [
+        "workflow_id",
+        "name",
+        "pack_id",
+        "status",
+        "input_type",
+        "output_type"
+      ],
+      "properties": {
+        "workflow_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "pack_id": { "type": ["string", "null"] },
+        "status": { "type": "string" },
+        "input_type": { "type": "string" },
+        "output_type": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "selected_tracks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["workflow_id", "name", "pack_id", "score", "matched_hints", "reason"],
+        "properties": {
+          "workflow_id": { "type": "string" },
+          "name": { "type": "string" },
+          "pack_id": { "type": ["string", "null"] },
+          "score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "matched_hints": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "reason": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "uncertainty_reasons": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "missing_inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "type", "help"],
+        "properties": {
+          "field": { "type": "string" },
+          "type": { "type": "string" },
+          "help": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "contract_check": {
+      "type": "object",
+      "required": ["checked", "ready_to_run", "missing_required_inputs", "invalid_inputs"],
+      "properties": {
+        "checked": { "type": "boolean" },
+        "ready_to_run": { "type": "boolean" },
+        "missing_required_inputs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "invalid_inputs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "capability_check": {
+      "type": "object",
+      "required": [
+        "tracks_resolved",
+        "missing_tracks",
+        "tools_resolved",
+        "missing_tools",
+        "qualification_status",
+        "track_qualifications"
+      ],
+      "properties": {
+        "tracks_resolved": { "type": "boolean" },
+        "missing_tracks": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "tools_resolved": { "type": "boolean" },
+        "missing_tools": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "qualification_status": {
+          "type": "string",
+          "enum": ["qualified", "partial", "stale", "untested", "tool_only", "none"]
+        },
+        "track_qualifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["track_id", "requires_model", "role", "state"],
+            "properties": {
+              "track_id": { "type": "string" },
+              "requires_model": { "type": "boolean" },
+              "role": { "type": ["string", "null"] },
+              "state": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "classifier": {
+      "type": "object",
+      "required": [
+        "used",
+        "mode",
+        "model",
+        "qualification_state",
+        "raw_category",
+        "invented_rejected",
+        "note"
+      ],
+      "properties": {
+        "used": { "type": "boolean" },
+        "mode": { "type": "string" },
+        "model": { "type": ["string", "null"] },
+        "qualification_state": { "type": ["string", "null"] },
+        "raw_category": { "type": ["string", "null"] },
+        "invented_rejected": { "type": "boolean" },
+        "note": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

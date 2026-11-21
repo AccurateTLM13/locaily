@@ -1,35 +1,39 @@
 {
-  "work_id": "system-proof-01-real-workflow-proof-20261002",
-  "objective_id": "system-proof-01-real-workflow-proof",
+  "work_id": "core-06-workflow-packs-and-task-intake-20261118",
+  "objective_id": "core-06-workflow-packs-and-task-intake",
   "status": "complete",
-  "closed_at": "2026-10-02T04:22:00.000Z",
-  "original_goal": "Empirically determine whether Locaily orchestration provides measurable system-level value over a simpler local-model workflow. Execute a controlled three-condition experiment (Condition A: monolithic baseline, Condition B: decomposed same-model baseline, Condition C: Locaily multi-model orchestration with qualified capability routing, Condition C-fail: fault injection) against a real, unseen repository fixture, score all metrics, and publish a thesis verdict.",
+  "closed_at": "2026-11-18T20:57:00.000Z",
+  "original_goal": "Implement #4 Workflow Pack Contract & Starter SDK and #5 Automatic Task Intake & Track Selection together as CORE-06 (core-06-workflow-packs-and-task-intake).",
   "completed": [
-    "Selected and verified real unseen repository fixture expressjs/express@7ef98448f8b38099ab1ded55e458538ad47a51e7 in data/fixtures/sp01-express.",
-    "Frozen evaluation rubric, ground-truth baseline, and runtime configuration in docs/04-validation/system-proof-01-evaluation-freeze.md before running any condition.",
-    "Implemented automated experiment runner scripts/run-system-proof-01.js executing all 3 conditions plus fault injection against live local Ollama runtime.",
-    "Condition A (Monolithic llama3.2 3.2B): 60% factual accuracy, collapsed findings into single lump with fabricated score 20, 24.4s wall time.",
-    "Condition B (Decomposed llama3.2 3.2B): 100% factual accuracy, 6/6 structured priorities, maintainability classification, 5.3s wall time.",
-    "Condition C (Orchestrated LFM2.5-1.2B 1.2B): 100% factual accuracy, 6/6 structured priorities, rich developer summary, qualification audit trail, 15.8s wall time.",
-    "Condition C-fail (Simulated MODEL_TIMEOUT): failure isolated at track level (on_failure: skip), downstream tracks completed, final developer handoff fully usable and schema-compliant.",
-    "Recorded raw results in data/experiments/system-proof-01/raw-results.json.",
-    "Published full experiment report in docs/04-validation/system-proof-01-experiment-report.md with POSITIVE thesis gate verdict.",
-    "Recorded architecture decision in docs/06-decisions/decision-log.md and updated validation index in docs/04-validation/README.md.",
-    "Updated acceptance criteria in development/milestones/system-proof-01-real-workflow-proof.json and session record in development/sessions/session-20261002-001.json."
+    "Added companion/schemas/workflow-pack-manifest.schema.json (locaily.workflow_pack.v1) and companion/schemas/task-intake-result.schema.json (locaily.task_intake_result.v1).",
+    "Implemented path-safe dynamic Workflow Pack loader and registry (companion/packs/) with WORKFLOW_PACK_PATH_ESCAPE and WORKFLOW_PACK_ID_CONFLICT guards, permission evaluation, and qualification readiness checks.",
+    "Wired dynamic Workflow Pack discovery into tool registry, track decomposer, track orchestrator, model router, prompt templates, track registry, run-plan validator, and workflow registry without breaking built-ins.",
+    "Created reference pack workflow-packs/incident-triage-pack/ composing pack-local parse/brief tracks with core.classify and core.summarize, plus Starter SDK CLI scripts/workflow-pack-sdk.js (pack:list, pack:validate, pack:init, pack:test).",
+    "Implemented 4-stage Automatic Task Intake (companion/orchestration/task-intake.js) with deterministic hints, optional qualification-gated classifier with anti-invention guard, contract & capability checks, and selected/confirm_required/refused policy.",
+    "Created 26-case human-labeled evaluation dataset companion/schemas/fixtures/task-intake-labeled-dataset.json achieving 26/26 (100.0%) accuracy, 100.0% refusal recall, and 0 invented tracks.",
+    "Fixed composition-plan normalization in companion/orchestration/run-logger.js and companion/server.js, added GET /packs, GET /packs/:id, POST /packs/validate, POST /intake/route, POST /workflows/intake, /health workflowPacks summary, and updated Companion Console + Unified Shell UI.",
+    "Added acceptance tests scripts/test-core06-workflow-packs.js and scripts/test-core06-task-intake.js and wired both into package.json and test:full."
   ],
   "remaining": [],
-  "next_required_action": "Review experiment report with JP; await approval before planning or starting follow-on milestones.",
+  "next_required_action": "Review CORE-06 on branch milestone/core-06-workflow-packs-and-task-intake with JP; merge/push or open a draft PR upon approval.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
-  "working_branch": "main",
+  "working_branch": "milestone/core-06-workflow-packs-and-task-intake",
   "validation": {
-    "failed": [],
     "passed": [
+      "npm.cmd run pack:validate -- workflow-packs/incident-triage-pack (ok: true)",
+      "npm.cmd run pack:test -- workflow-packs/incident-triage-pack (1/1 passed, schemaValid: true)",
+      "npm.cmd run test:workflow-packs (6/6 passed)",
+      "npm.cmd run test:task-intake (6/6 passed, labeled dataset 26/26 = 100.0%)",
+      "npm.cmd run test:full (all 26 suites exited 0)",
       "node scripts/test-development-schemas.js (29/29 passed)",
-      "scripts/run-system-proof-01.js (Conditions A, B, C, C-fail executed and scored)",
-      "Schema validation of all generated handoffs against companion/schemas/repo-review-handoff.schema.json"
+      "node scripts/test-lifecycle.js (23/23 passed)",
+      "node scripts/test-controller-invariants.js (11/11 passed)",
+      "node scripts/contract-test.js (passed)",
+      "node scripts/test-development-lifecycle-gate.js (6/6 passed)"
     ],
+    "failed": [],
     "not_run": []
   },
-  "recommended_next_agent": "system"
+  "recommended_next_agent": "human"
 }

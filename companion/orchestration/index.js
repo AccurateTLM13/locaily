@@ -4,6 +4,7 @@ const { listCapabilities, getCapability } = require("./capability-registry");
 const { buildRunPlan } = require("./run-plan-builder");
 const { executeRunPlan } = require("./run-plan-executor");
 const { recordOrchestrationRun } = require("./run-logger");
+const { evaluateTaskIntake, evaluateLabeledDataset, scoreDeterministicHints } = require("./task-intake");
 
 module.exports = {
   listTrackRegistry,
@@ -14,5 +15,8 @@ module.exports = {
   getCapability,
   buildRunPlan,
   executeRunPlan,
-  recordOrchestrationRun
+  recordOrchestrationRun,
+  evaluateTaskIntake,
+  evaluateLabeledDataset,
+  scoreDeterministicHints
 };

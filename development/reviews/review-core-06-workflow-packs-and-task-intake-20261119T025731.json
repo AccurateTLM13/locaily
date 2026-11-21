@@ -1,0 +1,15 @@
+{
+  "id": "review-core-06-workflow-packs-and-task-intake-20261119T025731",
+  "milestoneId": "core-06-workflow-packs-and-task-intake",
+  "status": "passed",
+  "branch": "milestone/core-06-workflow-packs-and-task-intake",
+  "headCommit": "8971c0fab1744cada4553e49a338a3844602f447",
+  "findings": [],
+  "summary": {
+    "total": 0,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0
+  },
+  "reviewedAt": "2026-11-19T02:57:31.505Z"
+}

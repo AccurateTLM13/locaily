@@ -1,0 +1,23 @@
+{
+  "track_id": "incident_triage.parse",
+  "version": "1.0.0",
+  "name": "Parse Incident Signals",
+  "description": "Deterministically parse status codes, timestamps, service identifiers, and severity hints from raw incident text.",
+  "output_schema": "tools/schemas/incident.parse.output.schema.json",
+  "result_step": "parse",
+  "steps": [
+    {
+      "id": "parse",
+      "input_map": {
+        "incident_text": "$input.incident_text",
+        "service": "$input.service",
+        "environment": "$input.environment"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "incident-parser",
+        "task": "parse"
+      }
+    }
+  ]
+}
