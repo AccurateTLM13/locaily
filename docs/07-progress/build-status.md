@@ -1,6 +1,6 @@
 # Build Status
 
-**Updated:** 2026-11-22 (CORE-07 Starter Read-Only Workflow Pack Library ready for delivery on `milestone/core-07-starter-workflow-packs`; SEC-01 Central Execution-Policy Runtime Gate queued as `planned`; CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
+**Updated:** 2026-11-22 (CORE-07 Starter Read-Only Workflow Pack Library merged on `main` via PR #47; SEC-01 Central Execution-Policy Runtime Gate queued as `planned`; CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Stage
 
@@ -12,7 +12,7 @@ North Star direction is a local capability network: route track contracts to the
 
 | Milestone | Status |
 |---|---|
-| **CORE-07 (Starter Read-Only Workflow Pack Library)** | Implemented & Validated (ready for delivery) |
+| **CORE-07 (Starter Read-Only Workflow Pack Library)** | Complete & Merged (PR #47) |
 | **SEC-01 (Central Execution-Policy Runtime Gate)** | Planned (queued next pending explicit start) |
 | **CORE-06 (Workflow Pack Contract, Starter SDK, and Automatic Task Intake)** | Complete & Merged (PR #46) |
 | **CORE-01 – CORE-05 (Generic Capabilities, Matrix Qualification, Fallback, Console Explorer)** | Complete & Merged |
@@ -96,9 +96,9 @@ North Star direction is a local capability network: route track contracts to the
 
 ## Current Priority
 
-**Now:** `CORE-07` (`core-07-starter-workflow-packs`) is ready for delivery on branch `milestone/core-07-starter-workflow-packs`. Canonical state lives in `development/project-state.json`.
+**Now:** `main` is idle following `CORE-07` (`core-07-starter-workflow-packs`) merge via PR #47 (`25d3a2f`). Canonical state lives in `development/project-state.json`.
 
-**Next:** Deliver/merge `CORE-07`, then await explicit operator approval to begin `sec-01-execution-policy-runtime-gate` (`SEC-01`: Central Execution-Policy Runtime Gate). Other planned options: `px6-external-validation-program` or `research-01-decision-track-bakeoff`.
+**Next:** Ready to start `sec-01-execution-policy-runtime-gate` (`SEC-01`: Central Execution-Policy Runtime Gate). Other planned options: `px6-external-validation-program` or `research-01-decision-track-bakeoff`.
 
 ## Evidence Pointers
 

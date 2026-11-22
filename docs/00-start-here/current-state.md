@@ -2,11 +2,11 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-11-22 (CORE-07 Starter Read-Only Workflow Pack Library implemented on `milestone/core-07-starter-workflow-packs`; SEC-01 Central Execution-Policy Runtime Gate queued as `planned`; CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
+**Updated:** 2026-11-22 (CORE-07 Starter Read-Only Workflow Pack Library merged on `main` via PR #47; `main` is idle; SEC-01 Central Execution-Policy Runtime Gate queued as `planned`; CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Milestone
 
-**CORE-07 (`core-07-starter-workflow-packs`) — ready for delivery on `milestone/core-07-starter-workflow-packs`.** Adds five strictly read-only starter Workflow Packs (`pr-diff-review-pack`, `ci-failure-triage-pack`, `issue-triage-pack`, `meeting-notes-pack`, `release-notes-pack`) alongside `incident-triage-pack`, expands Task Intake labeled evaluation coverage, adds pack read-only mode & runner shortcuts to Companion Console, and queues `sec-01-execution-policy-runtime-gate` (`SEC-01`) as the next `planned` milestone.
+**None — `main` is idle.** CORE-07 (`core-07-starter-workflow-packs`) merged on `main` via PR #47 (`25d3a2f`). Adds five strictly read-only starter Workflow Packs (`pr-diff-review-pack`, `ci-failure-triage-pack`, `issue-triage-pack`, `meeting-notes-pack`, `release-notes-pack`) alongside `incident-triage-pack`, expands Task Intake labeled evaluation coverage, adds pack read-only mode & runner shortcuts to Companion Console, and queues `sec-01-execution-policy-runtime-gate` (`SEC-01`) as the next `planned` milestone.
 
 ## What Works
 

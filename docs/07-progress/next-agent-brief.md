@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-11-22 (CORE-07 Starter Read-Only Workflow Pack Library ready for delivery on `milestone/core-07-starter-workflow-packs`; SEC-01 Central Execution-Policy Runtime Gate queued as `planned`)
+**Updated:** 2026-11-22 (CORE-07 Starter Read-Only Workflow Pack Library merged on `main` via PR #47; `main` is idle; SEC-01 Central Execution-Policy Runtime Gate queued as `planned`)
 
 ## Read First
 
@@ -19,7 +19,7 @@ Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../0
 
 ## Current Handoff (Post CORE-07: Starter Read-Only Workflow Packs)
 
-- **Repository state:** `CORE-07` (`core-07-starter-workflow-packs`) is ready for delivery on `milestone/core-07-starter-workflow-packs`. Always run `npm run dev:status` first.
+- **Repository state:** `CORE-07` (`core-07-starter-workflow-packs`) is merged on `main` (PR #47, `25d3a2f`) and `main` is `idle`. Always run `npm run dev:status` first.
 - **Starter Workflow Pack Library (CORE-07):** Six official read-only packs live under `workflow-packs/` (`incident-triage-pack`, `pr-diff-review-pack`, `ci-failure-triage-pack`, `issue-triage-pack`, `meeting-notes-pack`, `release-notes-pack`), composing shared `core.*` capabilities with zero write/shell/network side effects. SDK CLI: `npm run pack:list|validate|init|test`.
 - **Automatic Task Intake & Track Selection:** `companion/orchestration/task-intake.js` routes across all built-in and pack workflows (`POST /intake/route`, `POST /workflows/intake`, Companion Console `#taskIntakeSurface` and `#workflowPacksSurface`).
 - **CORE-01 – CORE-06 & SYSTEM-PROOF-01 merged on `main`:** Generic `core.*` capabilities, Workflow Pack contract, Task Intake, and the `POSITIVE` thesis proof (`expressjs/express@7ef98448...`) are on `main`.

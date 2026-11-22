@@ -14,10 +14,10 @@
     "Queued sec-01-execution-policy-runtime-gate (SEC-01 Central Execution-Policy Runtime Gate) as status='planned' in development/milestones/ and development/roadmap.json without starting it."
   ],
   "remaining": [],
-  "next_required_action": "Review CORE-07 on branch milestone/core-07-starter-workflow-packs with JP; open PR and merge to main upon approval, then decide whether to start sec-01-execution-policy-runtime-gate.",
+  "next_required_action": "CORE-07 merged to main via PR #47; ready to begin sec-01-execution-policy-runtime-gate.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
-  "working_branch": "milestone/core-07-starter-workflow-packs",
+  "working_branch": "main",
   "validation": {
     "passed": [
       "npm.cmd run pack:validate across all 6 packs (100% ok: true)",
@@ -28,7 +28,8 @@
       "npm.cmd run test:full (all 27 suites exited 0)",
       "node scripts/smoke-test.js (clean companion server: 61/61 passed)",
       "npm.cmd run test:jobs:production (8/8 passed)",
-      "npm.cmd run test:relay:e2e (11/11 passed)"
+      "npm.cmd run test:relay:e2e (11/11 passed)",
+      "GitHub Actions PR #47 CI (verify, Analyze (actions), Analyze (javascript-typescript), CodeQL all passed)"
     ],
     "failed": [],
     "not_run": []
