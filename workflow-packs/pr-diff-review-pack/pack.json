@@ -1,0 +1,193 @@
+{
+  "schema": "locaily.workflow_pack.v1",
+  "id": "pr-diff-review-pack",
+  "name": "PR Diff Review Pack",
+  "version": "1.0.0",
+  "trust": "official",
+  "description": "Read-only Workflow Pack that parses unified git diffs, highlights sensitive paths and churn risk, ranks files via core.prioritize, classifies change type via core.classify, summarizes via core.summarize, and assembles a structured PR review checklist.",
+  "author": "Locaily",
+  "license": "MIT",
+  "workflows": [
+    {
+      "workflow_id": "pr_diff_review",
+      "name": "PR Diff Review Checklist",
+      "description": "Inspect a unified git diff deterministically, rank risky files, classify change kind, summarize scope, and generate a read-only code review checklist and test focus.",
+      "input_type": "pr_diff_request",
+      "output_type": "pr_review_brief",
+      "status": "implemented",
+      "output_alias": "brief",
+      "input_requirements": [
+        {
+          "field": "diff_text",
+          "type": "string",
+          "required": true,
+          "help": "Unified git diff text (e.g. from git diff) or patch hunks to review."
+        },
+        {
+          "field": "pr_title",
+          "type": "string",
+          "required": false,
+          "help": "Optional pull request title."
+        },
+        {
+          "field": "base_branch",
+          "type": "string",
+          "required": false,
+          "help": "Optional target base branch (defaults to main)."
+        }
+      ],
+      "intake": {
+        "keywords": [
+          "pr",
+          "pull request",
+          "diff",
+          "git diff",
+          "patch",
+          "hunk",
+          "changeset",
+          "merge request",
+          "code review"
+        ],
+        "phrases": [
+          "review this pr",
+          "review this pull request",
+          "review this diff",
+          "pr diff review",
+          "check this patch",
+          "change risk checklist"
+        ],
+        "examples": [
+          "Review this PR diff touching auth middleware and server routes",
+          "Check this git diff patch for sensitive changes and test targets"
+        ],
+        "input_hints": [
+          "diff_text",
+          "pr_title",
+          "base_branch"
+        ],
+        "negative_keywords": [
+          "lighthouse",
+          "dealsniper",
+          "incident",
+          "outage",
+          "pagerduty",
+          "meeting",
+          "changelog",
+          "release notes",
+          "bug report",
+          "ci failure",
+          "entire repository",
+          "whole codebase"
+        ]
+      },
+      "composition": [
+        {
+          "as": "parse",
+          "track_id": "pr_diff_review.parse",
+          "input_map": {
+            "diff_text": "$input.diff_text",
+            "pr_title": "$input.pr_title",
+            "base_branch": "$input.base_branch"
+          }
+        },
+        {
+          "as": "classify",
+          "on_failure": "skip",
+          "track_id": "core.classify",
+          "input_map": {
+            "text": "$artifacts.parse.summary_text",
+            "categories": {
+              "$literal": ["feature", "bugfix", "refactor", "security", "config_or_infra"]
+            }
+          }
+        },
+        {
+          "as": "prioritize",
+          "on_failure": "skip",
+          "track_id": "core.prioritize",
+          "input_map": {
+            "items": "$artifacts.parse.risk_items",
+            "score_fields": {
+              "$literal": [
+                { "field": "risk_score", "weight": 3 },
+                { "field": "churn_score", "weight": 1 }
+              ]
+            },
+            "tie_break": "file",
+            "limit": 10
+          }
+        },
+        {
+          "as": "summarize",
+          "track_id": "core.summarize",
+          "input_map": {
+            "text": "$artifacts.parse.summary_text",
+            "style": "pr-review-brief",
+            "max_points": 5
+          }
+        },
+        {
+          "as": "brief",
+          "track_id": "pr_diff_review.brief",
+          "requires": ["parse", "summarize"],
+          "input_map": {
+            "parsed": "$artifacts.parse",
+            "classification": "$artifacts.classify",
+            "prioritized": "$artifacts.prioritize",
+            "summary": "$artifacts.summarize"
+          }
+        }
+      ]
+    }
+  ],
+  "tracks": [
+    "tracks/pr_diff_review.parse.track.json",
+    "tracks/pr_diff_review.brief.track.json"
+  ],
+  "track_metadata": {
+    "pr_diff_review.parse": {
+      "purpose": "Deterministically parse changed files, line churn, and sensitive path indicators from a unified git diff.",
+      "input_type": "pr_diff_request",
+      "output_type": "parsed_pr_diff",
+      "preferred_worker_type": "tool_only",
+      "fallback_behavior": "deterministic_tool",
+      "validation_expectations": {
+        "output_schema": "tools/schemas/pr-diff-parser.parse.output.schema.json",
+        "required_result_sections": ["files_changed", "risk_items", "sensitive_files", "summary_text"]
+      }
+    },
+    "pr_diff_review.brief": {
+      "purpose": "Assemble parsed diff metrics, ranked risks, classification, and summary into a structured PR review brief.",
+      "input_type": "pr_diff_brief_inputs",
+      "output_type": "pr_review_brief",
+      "preferred_worker_type": "tool_only",
+      "fallback_behavior": "deterministic_tool",
+      "validation_expectations": {
+        "output_schema": "schemas/pr-review-brief.schema.json",
+        "required_result_sections": ["title", "category", "files_changed", "sensitive_files", "top_risks", "review_checklist", "suggested_tests", "summary", "markdown"]
+      }
+    }
+  },
+  "tools": "tools/tool.json",
+  "prompts": {
+    "pr_diff_review_summary": "prompts/pr-review-summary.md"
+  },
+  "schemas": [
+    "schemas/pr-review-brief.schema.json",
+    "tools/schemas/pr-diff-parser.parse.input.schema.json",
+    "tools/schemas/pr-diff-parser.parse.output.schema.json",
+    "tools/schemas/pr-diff-parser.assemble_brief.input.schema.json",
+    "tools/schemas/pr-diff-parser.assemble_brief.output.schema.json"
+  ],
+  "fixtures": [
+    {
+      "name": "Sample Security & Server PR Diff",
+      "workflow_id": "pr_diff_review",
+      "path": "fixtures/sample-pr-diff.json",
+      "expected_fields": ["title", "category", "files_changed", "sensitive_files", "top_risks", "review_checklist", "suggested_tests", "summary", "markdown"]
+    }
+  ],
+  "permissions": "permissions.json",
+  "qualification_requirements": "qualification-requirements.json",
+  "readme": "README.md"
+}

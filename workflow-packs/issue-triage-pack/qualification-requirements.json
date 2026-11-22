@@ -1,0 +1,14 @@
+[
+  {
+    "track_id": "core.classify",
+    "role": "default_worker",
+    "min_status": "qualified",
+    "min_score": 0.7
+  },
+  {
+    "track_id": "core.summarize",
+    "role": "default_worker",
+    "min_status": "qualified",
+    "min_score": 0.7
+  }
+]

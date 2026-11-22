@@ -1,0 +1,19 @@
+{
+  "id": "issue-parser",
+  "name": "Issue Parser Tools",
+  "version": "1.0.0",
+  "trust": "official",
+  "description": "Read-only GitHub issue and bug report parsing and triage card assembly.",
+  "tools": [
+    {
+      "id": "issue-parser",
+      "name": "Issue Parser",
+      "description": "Inspect bug reports and assemble structured triage cards in memory without disk, shell, or network side effects.",
+      "model_role": null,
+      "permissions": [],
+      "tasks": ["parse", "assemble_brief"],
+      "input_schema": "schemas/issue-parser.parse.input.schema.json",
+      "output_schema": "schemas/issue-parser.parse.output.schema.json"
+    }
+  ]
+}

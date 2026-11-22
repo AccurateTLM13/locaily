@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CI Log Parse Input",
+  "type": "object",
+  "required": ["log_text"],
+  "properties": {
+    "log_text": { "type": "string", "minLength": 1 },
+    "job_name": { "type": "string" },
+    "runner_os": { "type": "string" }
+  },
+  "additionalProperties": true
+}

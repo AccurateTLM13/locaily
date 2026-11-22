@@ -1,0 +1,7 @@
+{
+  "input": {
+    "version": "v0.7.0",
+    "previous_version": "v0.6.0",
+    "commits_text": "feat(workflow-packs): add five read-only starter workflow packs (#47)\nfix(security)!: enforce Map lookup for prompt template dispatch (#46)\nBREAKING CHANGE: PROMPT_TEMPLATES no longer falls back to Object.prototype keys\nchore(lifecycle): queue SEC-01 central execution-policy runtime gate (#48)\n"
+  }
+}

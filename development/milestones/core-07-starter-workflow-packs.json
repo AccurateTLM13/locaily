@@ -1,0 +1,120 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "core-07-starter-workflow-packs",
+  "title": "CORE-07 Starter Read-Only Workflow Pack Library",
+  "status": "active",
+  "type": "feature",
+  "priority": "high",
+  "purpose": "Deliver five read-only starter Workflow Packs (PR diff review, CI failure triage, issue triage, meeting notes action plan, release notes) composing qualified core.* capabilities, expand Task Intake labeled evaluation coverage, enhance Companion Console pack cards, and queue SEC-01 Central Execution-Policy Runtime Gate as the next planned milestone.",
+  "scope": {
+    "included": [
+      "workflow-packs/",
+      "companion/",
+      "scripts/",
+      "docs/",
+      "package.json",
+      "development/"
+    ],
+    "excluded": [
+      "Side-effecting write, shell, or network tool permissions in starter packs",
+      "Runtime implementation of SEC-01 central execution-policy gate (queued as planned milestone only)",
+      "Core server routing/orchestration architectural changes"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "ac-five-starter-packs",
+      "description": "Five read-only starter Workflow Packs (pr-diff-review-pack, ci-failure-triage-pack, issue-triage-pack, meeting-notes-pack, release-notes-pack) exist under workflow-packs/ and compose qualified core.* tracks into validated structured briefs.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "scripts/test-core07-starter-packs.js",
+          "note": "AC1 & AC4 verified all 6 official packs load with 0 load errors, validate against locaily.workflow_pack.v1, meet core.* qualification readiness, and meeting_action_plan passes core.validate."
+        }
+      ]
+    },
+    {
+      "id": "ac-strict-read-only",
+      "description": "All starter packs remain strictly read-only (only model.run permission, zero write/shell/network/credential permissions, pure in-memory tool handlers with no disk/process/network imports).",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "scripts/test-core07-starter-packs.js",
+          "note": "AC2 audited permissions.json (only model.run), tool.json (permissions: []), and tools/index.js source (no fs/child_process/http imports) across all 6 packs."
+        }
+      ]
+    },
+    {
+      "id": "ac-fixtures-and-sdk",
+      "description": "All six installed Workflow Packs pass workflow-pack-sdk validate and workflow-pack-sdk test end-to-end against mock runtime with valid schemas and expected output fields.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "scripts/workflow-pack-sdk.js",
+          "note": "AC3 ran workflow-pack-sdk validate and workflow-pack-sdk test across all 6 packs: 100% ok:true, schemaValid:true, zero missing expected fields."
+        }
+      ]
+    },
+    {
+      "id": "ac-intake-eval",
+      "description": "Expanded Task Intake labeled evaluation dataset (>= 40 cases covering built-ins, all 6 packs, cross-pack disambiguation, ambiguity, and read-only refusals) achieves >= 90% accuracy, 100% refusal recall, and 0 invented tracks.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "validation-record",
+          "reference": "companion/schemas/fixtures/task-intake-labeled-dataset.json",
+          "note": "AC5 (and test:task-intake) evaluated 42/42 cases passed (accuracy=100.0%, refusalRecall=100.0%, invented=0)."
+        }
+      ]
+    },
+    {
+      "id": "ac-console-ui",
+      "description": "Companion Console pack cards display read-only posture badge and a one-click Load in Runner button.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "companion/console/app.js",
+          "note": "AC6 verified live HTTP /console/app.js serves mode: read-only badge and data-pack-workflow Load in Runner button."
+        }
+      ]
+    },
+    {
+      "id": "ac-sec01-queued",
+      "description": "Central execution-policy runtime gate milestone (sec-01-execution-policy-runtime-gate) is queued as a valid planned milestone in development/milestones/ and development/roadmap.json without starting or activating it.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "document",
+          "reference": "development/milestones/sec-01-execution-policy-runtime-gate.json",
+          "note": "AC7 verified sec-01-execution-policy-runtime-gate exists with status='planned', startedAt=null, and is registered in development/roadmap.json."
+        }
+      ]
+    },
+    {
+      "id": "ac-full-validation",
+      "description": "npm run test:starter-packs, npm run test:task-intake, npm run test:workflow-packs, and full npm run test:full plus clean-server smoke checks pass 100%.",
+      "status": "satisfied",
+      "evidence": [
+        {
+          "type": "test",
+          "reference": "package.json",
+          "note": "test:starter-packs (7/7), test:task-intake (6/6), test:workflow-packs (7/7), test:full (all 27 suites), and clean-server smoke (61/61 smoke, 8/8 jobs, 11/11 relay e2e) all passed."
+        }
+      ]
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [
+    "core-06-workflow-packs-and-task-intake"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-11-22T18:52:00.684Z",
+  "startedAt": "2026-11-22T18:52:00.685Z",
+  "completedAt": null,
+  "mergedAt": null
+}

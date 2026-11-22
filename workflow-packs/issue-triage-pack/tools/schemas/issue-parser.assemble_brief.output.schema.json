@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Issue Triage Brief Assembly Output",
+  "type": "object",
+  "required": ["title", "issue_title", "category", "suggested_priority", "has_repro_steps", "environment", "subsystems", "missing_info_questions", "ranked_signals", "summary", "next_actions", "markdown"],
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "issue_title": { "type": "string", "minLength": 1 },
+    "category": { "type": "string", "minLength": 1 },
+    "suggested_priority": { "type": "string", "minLength": 1 },
+    "has_repro_steps": { "type": "boolean" },
+    "environment": { "type": "string", "minLength": 1 },
+    "subsystems": { "type": "array", "items": { "type": "string" } },
+    "missing_info_questions": { "type": "array", "items": { "type": "string" } },
+    "ranked_signals": { "type": "array", "items": { "type": "object" } },
+    "summary": { "type": "string", "minLength": 1 },
+    "next_actions": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "markdown": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

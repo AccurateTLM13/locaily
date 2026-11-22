@@ -1,0 +1,199 @@
+{
+  "schema": "locaily.workflow_pack.v1",
+  "id": "issue-triage-pack",
+  "name": "Issue Triage Pack",
+  "version": "1.0.0",
+  "trust": "official",
+  "description": "Read-only Workflow Pack that inspects bug reports, GitHub issues, and user tickets, checks repro completeness, infers affected subsystems, ranks signals via core.prioritize, classifies via core.classify, summarizes via core.summarize, and assembles a structured backlog triage card.",
+  "author": "Locaily",
+  "license": "MIT",
+  "workflows": [
+    {
+      "workflow_id": "issue_triage",
+      "name": "Issue & Bug Triage Card",
+      "description": "Analyze a GitHub issue, bug report, or support ticket deterministically, classify issue type, prioritize impact/urgency signals, and list missing clarification questions.",
+      "input_type": "issue_report",
+      "output_type": "issue_triage_brief",
+      "status": "implemented",
+      "output_alias": "brief",
+      "input_requirements": [
+        {
+          "field": "issue_text",
+          "type": "string",
+          "required": true,
+          "help": "Bug report body, GitHub issue description, or support ticket details."
+        },
+        {
+          "field": "issue_title",
+          "type": "string",
+          "required": false,
+          "help": "Optional issue title."
+        },
+        {
+          "field": "reporter",
+          "type": "string",
+          "required": false,
+          "help": "Optional reporter handle or team."
+        }
+      ],
+      "intake": {
+        "keywords": [
+          "bug report",
+          "github issue",
+          "issue",
+          "ticket",
+          "backlog",
+          "repro",
+          "regression",
+          "feature request",
+          "customer ticket",
+          "support ticket"
+        ],
+        "phrases": [
+          "triage this issue",
+          "triage this bug",
+          "triage bug report",
+          "classify github issue",
+          "check bug report",
+          "backlog triage"
+        ],
+        "examples": [
+          "Triage this bug report from a GitHub issue with crash on Windows",
+          "Check if this customer support ticket has repro steps and assign priority"
+        ],
+        "input_hints": [
+          "issue_text",
+          "issue_title",
+          "reporter"
+        ],
+        "negative_keywords": [
+          "lighthouse",
+          "dealsniper",
+          "sev1",
+          "pagerduty",
+          "production outage",
+          "downtime",
+          "ci build",
+          "github actions",
+          "meeting",
+          "release notes",
+          "git diff"
+        ]
+      },
+      "composition": [
+        {
+          "as": "parse",
+          "track_id": "issue_triage.parse",
+          "input_map": {
+            "issue_text": "$input.issue_text",
+            "issue_title": "$input.issue_title",
+            "reporter": "$input.reporter"
+          }
+        },
+        {
+          "as": "classify",
+          "on_failure": "skip",
+          "track_id": "core.classify",
+          "input_map": {
+            "text": "$artifacts.parse.summary_text",
+            "categories": {
+              "$literal": [
+                "bug",
+                "regression",
+                "feature_request",
+                "documentation",
+                "support_question"
+              ]
+            }
+          }
+        },
+        {
+          "as": "prioritize",
+          "on_failure": "skip",
+          "track_id": "core.prioritize",
+          "input_map": {
+            "items": "$artifacts.parse.triage_signals",
+            "score_fields": {
+              "$literal": [
+                { "field": "impact_score", "weight": 3 },
+                { "field": "urgency_score", "weight": 2 }
+              ]
+            },
+            "tie_break": "signal",
+            "limit": 8
+          }
+        },
+        {
+          "as": "summarize",
+          "track_id": "core.summarize",
+          "input_map": {
+            "text": "$artifacts.parse.summary_text",
+            "style": "issue-triage-card",
+            "max_points": 4
+          }
+        },
+        {
+          "as": "brief",
+          "track_id": "issue_triage.brief",
+          "requires": ["parse", "summarize"],
+          "input_map": {
+            "parsed": "$artifacts.parse",
+            "classification": "$artifacts.classify",
+            "prioritized": "$artifacts.prioritize",
+            "summary": "$artifacts.summarize"
+          }
+        }
+      ]
+    }
+  ],
+  "tracks": [
+    "tracks/issue_triage.parse.track.json",
+    "tracks/issue_triage.brief.track.json"
+  ],
+  "track_metadata": {
+    "issue_triage.parse": {
+      "purpose": "Deterministically inspect issue reports for repro steps, runtime metadata, subsystems, missing questions, and triage signals.",
+      "input_type": "issue_report",
+      "output_type": "parsed_issue_signals",
+      "preferred_worker_type": "tool_only",
+      "fallback_behavior": "deterministic_tool",
+      "validation_expectations": {
+        "output_schema": "tools/schemas/issue-parser.parse.output.schema.json",
+        "required_result_sections": ["issue_title", "has_repro_steps", "environment", "subsystems", "triage_signals", "summary_text"]
+      }
+    },
+    "issue_triage.brief": {
+      "purpose": "Assemble parsed issue signals, ranked signals, classification, and summary into a structured backlog triage card.",
+      "input_type": "issue_triage_brief_inputs",
+      "output_type": "issue_triage_brief",
+      "preferred_worker_type": "tool_only",
+      "fallback_behavior": "deterministic_tool",
+      "validation_expectations": {
+        "output_schema": "schemas/issue-triage-brief.schema.json",
+        "required_result_sections": ["title", "category", "suggested_priority", "has_repro_steps", "missing_info_questions", "summary", "next_actions", "markdown"]
+      }
+    }
+  },
+  "tools": "tools/tool.json",
+  "prompts": {
+    "issue_triage_summary": "prompts/issue-triage-summary.md"
+  },
+  "schemas": [
+    "schemas/issue-triage-brief.schema.json",
+    "tools/schemas/issue-parser.parse.input.schema.json",
+    "tools/schemas/issue-parser.parse.output.schema.json",
+    "tools/schemas/issue-parser.assemble_brief.input.schema.json",
+    "tools/schemas/issue-parser.assemble_brief.output.schema.json"
+  ],
+  "fixtures": [
+    {
+      "name": "Sample Windows Node Bug Report",
+      "workflow_id": "issue_triage",
+      "path": "fixtures/sample-bug-report.json",
+      "expected_fields": ["title", "category", "suggested_priority", "has_repro_steps", "environment", "subsystems", "missing_info_questions", "ranked_signals", "summary", "next_actions", "markdown"]
+    }
+  ],
+  "permissions": "permissions.json",
+  "qualification_requirements": "qualification-requirements.json",
+  "readme": "README.md"
+}

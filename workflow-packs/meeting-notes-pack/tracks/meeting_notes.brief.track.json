@@ -1,0 +1,24 @@
+{
+  "track_id": "meeting_notes.brief",
+  "version": "1.0.0",
+  "name": "Assemble Meeting Action Brief",
+  "description": "Deterministically combine parsed meeting signals, prioritized actions, classification, and summary into a structured brief.",
+  "output_schema": "schemas/meeting-action-brief.schema.json",
+  "result_step": "assemble",
+  "steps": [
+    {
+      "id": "assemble",
+      "input_map": {
+        "parsed": "$input.parsed",
+        "classification": "$input.classification",
+        "prioritized": "$input.prioritized",
+        "summary": "$input.summary"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "meeting-notes-parser",
+        "task": "assemble_brief"
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "track_id": "pr_diff_review.parse",
+  "version": "1.0.0",
+  "name": "Parse PR Diff Signals",
+  "description": "Deterministically extract changed files, addition/deletion counts, sensitive areas, and risk items from a unified git diff.",
+  "output_schema": "tools/schemas/pr-diff-parser.parse.output.schema.json",
+  "result_step": "parse",
+  "steps": [
+    {
+      "id": "parse",
+      "input_map": {
+        "diff_text": "$input.diff_text",
+        "pr_title": "$input.pr_title",
+        "base_branch": "$input.base_branch"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "pr-diff-parser",
+        "task": "parse"
+      }
+    }
+  ]
+}

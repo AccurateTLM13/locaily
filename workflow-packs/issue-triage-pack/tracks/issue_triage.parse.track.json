@@ -1,0 +1,23 @@
+{
+  "track_id": "issue_triage.parse",
+  "version": "1.0.0",
+  "name": "Parse Issue Report Signals",
+  "description": "Deterministically extract repro completeness, environment hints, subsystem matches, missing questions, and weighted triage signals from a bug report or issue.",
+  "output_schema": "tools/schemas/issue-parser.parse.output.schema.json",
+  "result_step": "parse",
+  "steps": [
+    {
+      "id": "parse",
+      "input_map": {
+        "issue_text": "$input.issue_text",
+        "issue_title": "$input.issue_title",
+        "reporter": "$input.reporter"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "issue-parser",
+        "task": "parse"
+      }
+    }
+  ]
+}

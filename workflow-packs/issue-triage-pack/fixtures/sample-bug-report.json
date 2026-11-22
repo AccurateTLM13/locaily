@@ -1,0 +1,7 @@
+{
+  "input": {
+    "issue_title": "Shell console crashes when opening relay pane on Windows",
+    "reporter": "@tester-kim",
+    "issue_text": "Environment: Windows 11, Node v20.11\nSteps to reproduce:\n1. Start companion server locally\n2. Open shell UI and click Relay Nodes tab\nExpected: Shows empty relay node list cleanly.\nActual: TypeError unhandled exception in shell console panel — looks like a regression since v0.9."
+  }
+}

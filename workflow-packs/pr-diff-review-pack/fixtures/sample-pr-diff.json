@@ -1,0 +1,7 @@
+{
+  "input": {
+    "pr_title": "Guard relay bearer token verification",
+    "base_branch": "main",
+    "diff_text": "diff --git a/companion/security/auth-token.js b/companion/security/auth-token.js\n--- a/companion/security/auth-token.js\n+++ b/companion/security/auth-token.js\n@@ -10,4 +10,7 @@\n-  return provided === expected;\n+  if (!provided || !expected) return false;\n+  return timingSafeEqualStrings(provided, expected);\n }\n+diff --git a/companion/server.js b/companion/server.js\n--- a/companion/server.js\n+++ b/companion/server.js\n@@ -820,2 +820,3 @@\n-  if (!req.headers.authorization) return send401(res);\n+  if (!verifyBearerHeader(req.headers.authorization)) return send401(res);\n"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "track_id": "release_notes.parse",
+  "version": "1.0.0",
+  "name": "Parse Release Commit Log",
+  "description": "Deterministically parse conventional commits, breaking changes, PR references, and recommended semver bump from release notes text.",
+  "output_schema": "tools/schemas/release-log-parser.parse.output.schema.json",
+  "result_step": "parse",
+  "steps": [
+    {
+      "id": "parse",
+      "input_map": {
+        "commits_text": "$input.commits_text",
+        "version": "$input.version",
+        "previous_version": "$input.previous_version"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "release-log-parser",
+        "task": "parse"
+      }
+    }
+  ]
+}

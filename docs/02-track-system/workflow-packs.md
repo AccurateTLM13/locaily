@@ -56,3 +56,16 @@ npm run pack:test -- workflow-packs/incident-triage-pack
 - `GET /packs` (alias `GET /orchestration/packs`) — lists loaded packs with `permissionStatus`, `qualificationReadiness`, and load errors.
 - `GET /packs/:id` — detailed pack summary (`404 PACK_NOT_FOUND` when missing).
 - `POST /packs/validate` — validates `{ packDir }` restricted inside allowed pack roots.
+
+## Installed Official Starter Packs (Read-Only)
+
+All six official packs declare only `model.run` permission and use strictly in-memory deterministic tools (no filesystem writes, shell execution, or network calls) pending the runtime central execution-policy gate (`SEC-01`):
+
+| Pack ID | Workflow ID | Composed Shared Capabilities | Purpose |
+|---|---|---|---|
+| `incident-triage-pack` | `incident_triage` | `core.classify`, `core.summarize` | Parse outage alerts/error codes and assemble an on-call triage brief |
+| `pr-diff-review-pack` | `pr_diff_review` | `core.classify`, `core.prioritize`, `core.summarize` | Parse unified git diffs, flag sensitive paths, rank file risk, and generate review checklist |
+| `ci-failure-triage-pack` | `ci_failure_triage` | `core.classify`, `core.summarize` | Extract failing tests, stack locations, and flake hints from CI build logs |
+| `issue-triage-pack` | `issue_triage` | `core.classify`, `core.prioritize`, `core.summarize` | Audit repro completeness, identify missing clarification questions, and suggest backlog priority |
+| `meeting-notes-pack` | `meeting_action_plan` | `core.classify`, `core.prioritize`, `core.summarize`, `core.validate` | Extract decisions, blockers, open questions, and prioritized action items from transcripts |
+| `release-notes-pack` | `release_notes` | `core.classify`, `core.summarize` | Group conventional commits, detect breaking changes/semver bump, and draft changelog + upgrade notes |

@@ -97,6 +97,8 @@
       "text.classify",
       "text.detect_injection",
       "text.validate_schema",
+      "rank.items",
+      "transform.map",
       "lighthouse.parse",
       "lighthouse.classify_audits",
       "lighthouse.validate_priority_fixes",

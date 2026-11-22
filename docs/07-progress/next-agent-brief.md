@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-11-21 (CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake merged on `main` via PR #46; `main` is idle)
+**Updated:** 2026-11-22 (CORE-07 Starter Read-Only Workflow Pack Library ready for delivery on `milestone/core-07-starter-workflow-packs`; SEC-01 Central Execution-Policy Runtime Gate queued as `planned`)
 
 ## Read First
 
@@ -17,17 +17,17 @@ Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
 Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../08-agents/agent-context.md)
 
-## Current Handoff (Post CORE-06: Workflow Packs & Automatic Task Intake)
+## Current Handoff (Post CORE-07: Starter Read-Only Workflow Packs)
 
-- **Repository state:** `CORE-06` (`core-06-workflow-packs-and-task-intake`) is merged on `main` (PR #46, `24bcc5c`) and `main` is `idle`. Always run `npm run dev:status` first.
-- **Workflow Pack Contract & Starter SDK:** Packs under `workflow-packs/` (`LOCAILY_WORKFLOW_PACK_DIRS`) register tracks, tools, schemas, prompts, permissions, qualification requirements, and intake hints dynamically (`companion/packs/`). Reference pack: `workflow-packs/incident-triage-pack/`. SDK CLI: `npm run pack:list|validate|init|test`.
-- **Automatic Task Intake & Track Selection:** `companion/orchestration/task-intake.js` implements deterministic hints → optional qualification-gated classifier with anti-invention guard → contract & capability check → `selected` / `confirm_required` / `refused`. Exposed via `POST /intake/route`, `POST /workflows/intake`, and Companion Console (`#taskIntakeSurface`).
-- **CORE-01 – CORE-05 & SYSTEM-PROOF-01 merged on `main`:** Generic `core.*` capabilities, multi-tier qualification, Console Workflows/Matrix Explorer, and the `POSITIVE` thesis proof (`expressjs/express@7ef98448...`) are on `main`.
+- **Repository state:** `CORE-07` (`core-07-starter-workflow-packs`) is ready for delivery on `milestone/core-07-starter-workflow-packs`. Always run `npm run dev:status` first.
+- **Starter Workflow Pack Library (CORE-07):** Six official read-only packs live under `workflow-packs/` (`incident-triage-pack`, `pr-diff-review-pack`, `ci-failure-triage-pack`, `issue-triage-pack`, `meeting-notes-pack`, `release-notes-pack`), composing shared `core.*` capabilities with zero write/shell/network side effects. SDK CLI: `npm run pack:list|validate|init|test`.
+- **Automatic Task Intake & Track Selection:** `companion/orchestration/task-intake.js` routes across all built-in and pack workflows (`POST /intake/route`, `POST /workflows/intake`, Companion Console `#taskIntakeSurface` and `#workflowPacksSurface`).
+- **CORE-01 – CORE-06 & SYSTEM-PROOF-01 merged on `main`:** Generic `core.*` capabilities, Workflow Pack contract, Task Intake, and the `POSITIVE` thesis proof (`expressjs/express@7ef98448...`) are on `main`.
 - **Benchmark Lab M1–M3 merged:** Interactive Local Model Lab UI, exact-provenance preflight, isolated JSONL worker, and summary-safe run history are complete on `main`. Preserve the local-only, explicit-control boundary and never import `benchmark-lab/engine/` from `companion/`.
 - **Planned milestones awaiting explicit operator approval:**
-  1. `px6-external-validation-program` — 5 external unassisted testers + physical 2-device Relay pilot (internal dry-run & second workflow evidence already captured in `docs/04-validation/px6-execution-evidence.md`).
-  2. `research-01-decision-track-bakeoff` — low priority; explicitly gated pending operator approval.
-  3. Central execution-policy runtime gate (`policies/default-execution-policy.json` is documented, not yet runtime-enforced).
+  1. `sec-01-execution-policy-runtime-gate` (`SEC-01`) — **queued next**: fail-closed central runtime gate enforcing `policies/default-execution-policy.json` (`action-request.schema.json` -> `policy-decision.schema.json`) + human approval flow before enabling side-effecting tool/pack actions.
+  2. `px6-external-validation-program` — 5 external unassisted testers + physical 2-device Relay pilot (internal dry-run & second workflow evidence already captured in `docs/04-validation/px6-execution-evidence.md`).
+  3. `research-01-decision-track-bakeoff` — low priority; explicitly gated pending operator approval.
 
 ## Important: Benchmark Lab Status
 

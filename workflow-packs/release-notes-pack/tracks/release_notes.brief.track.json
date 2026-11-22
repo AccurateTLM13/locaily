@@ -1,0 +1,23 @@
+{
+  "track_id": "release_notes.brief",
+  "version": "1.0.0",
+  "name": "Assemble Release Notes Brief",
+  "description": "Deterministically assemble parsed release commits, classification, and highlights into a structured changelog.",
+  "output_schema": "schemas/release-notes-brief.schema.json",
+  "result_step": "assemble",
+  "steps": [
+    {
+      "id": "assemble",
+      "input_map": {
+        "parsed": "$input.parsed",
+        "classification": "$input.classification",
+        "summary": "$input.summary"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "release-log-parser",
+        "task": "assemble_brief"
+      }
+    }
+  ]
+}

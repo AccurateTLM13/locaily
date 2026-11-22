@@ -72,7 +72,7 @@
         "keywords": ["repository", "repo", "codebase", "source", "maintainability", "todo", "files", "findings", "developer handoff"],
         "phrases": ["review this repository", "scan repo", "repo review", "review codebase", "audit repository"],
         "input_hints": ["files", "findings", "path"],
-        "negative_keywords": ["lighthouse", "marketplace", "incident", "outage"]
+        "negative_keywords": ["lighthouse", "marketplace", "incident", "outage", "git diff", "pull request", "pr diff", "patch", "ci failure", "changelog"]
       },
       "input_requirements": [
         { "field": "path", "type": "string", "required": false, "help": "Local repository directory (read-only scan) — or send an inline files[] manifest instead." },
@@ -253,7 +253,7 @@
         "keywords": ["content os", "publish", "package", "transform", "announcement", "release", "mapping", "syndicate"],
         "phrases": ["prepare publish package", "content os", "transform and publish", "publish ready package", "release announcement"],
         "input_hints": ["content_categories", "content_schema", "publish_mapping", "publish_schema"],
-        "negative_keywords": ["lighthouse", "dealsniper", "incident"]
+        "negative_keywords": ["lighthouse", "dealsniper", "incident", "changelog", "release notes", "commits"]
       },
       "input_requirements": [
         { "field": "path", "type": "string", "required": false, "help": "Local .md/.txt document path — or send inline content." },

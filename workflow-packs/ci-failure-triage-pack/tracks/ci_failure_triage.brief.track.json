@@ -1,0 +1,23 @@
+{
+  "track_id": "ci_failure_triage.brief",
+  "version": "1.0.0",
+  "name": "Assemble CI Failure Triage Brief",
+  "description": "Deterministically assemble parsed CI signals, failure classification, and summary into a structured diagnosis brief.",
+  "output_schema": "schemas/ci-triage-brief.schema.json",
+  "result_step": "assemble",
+  "steps": [
+    {
+      "id": "assemble",
+      "input_map": {
+        "parsed": "$input.parsed",
+        "classification": "$input.classification",
+        "summary": "$input.summary"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "ci-log-parser",
+        "task": "assemble_brief"
+      }
+    }
+  ]
+}

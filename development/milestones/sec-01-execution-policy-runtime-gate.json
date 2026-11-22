@@ -1,0 +1,64 @@
+{
+  "schema": "locaily.development.milestone.v1",
+  "id": "sec-01-execution-policy-runtime-gate",
+  "title": "SEC-01 Central Execution-Policy Runtime Gate",
+  "status": "planned",
+  "type": "infrastructure",
+  "priority": "high",
+  "purpose": "Enforce Locaily's central execution-security boundary at runtime ('models may propose actions; Locaily decides whether they execute') using policies/default-execution-policy.json, action-request.schema.json, and policy-decision.schema.json before enabling any write, shell, or network capabilities in Workflow Packs or tools.",
+  "problem": "docs/security/* and policies/default-execution-policy.json currently define a design-only policy boundary; filesystem, shell, network, credential, and NearbyNode actions are not yet routed through a fail-closed central runtime decision engine with human approval gates and audit trails.",
+  "scope": {
+    "included": [
+      "companion/security/",
+      "companion/core/",
+      "companion/tools/",
+      "companion/packs/",
+      "companion/server.js",
+      "companion/console/",
+      "policies/",
+      "scripts/",
+      "docs/security/"
+    ],
+    "excluded": [
+      "OS-level container/VM sandboxing",
+      "Auto-approving arbitrary shell commands or credential reads",
+      "Enabling external network writes by default"
+    ]
+  },
+  "acceptanceCriteria": [
+    {
+      "id": "sec-01-ac-engine",
+      "description": "Fail-closed runtime policy engine evaluating action-request.schema.json against policies/default-execution-policy.json (defaultDecision: 'deny', emitting policy-decision.schema.json decisions: allow, require_approval, deny).",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "sec-01-ac-hooks",
+      "description": "Enforcement hooks wrapping filesystem, shell, network, credential, and NearbyNode tool and Workflow Pack execution paths with explicit decision codes and audit events (zero bypasses).",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "sec-01-ac-approval-ui",
+      "description": "Human-in-the-loop approval flow (API + Companion Console UI surface) for require_approval actions while preserving hard deny for shell.execute.arbitrary, credentials.read, audit.disable, and policy.modify.runtime.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "sec-01-ac-nope-and-tests",
+      "description": "NOPE evaluation decision (docs/security/NOPE-EVALUATION.md) recorded in docs/06-decisions/decision-log.md and comprehensive positive/negative security test suite wired into npm run test:full.",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "validationProfile": "pre-delivery",
+  "dependencies": [
+    "core-07-starter-workflow-packs"
+  ],
+  "blockers": [],
+  "lifecycleRef": null,
+  "createdAt": "2026-11-22T18:52:00.000Z",
+  "startedAt": null,
+  "completedAt": null,
+  "mergedAt": null
+}

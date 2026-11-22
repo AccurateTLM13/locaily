@@ -1,0 +1,24 @@
+{
+  "track_id": "pr_diff_review.brief",
+  "version": "1.0.0",
+  "name": "Assemble PR Review Brief",
+  "description": "Deterministically combine parsed diff signals, prioritized risk items, classification, and summary into a PR review checklist.",
+  "output_schema": "schemas/pr-review-brief.schema.json",
+  "result_step": "assemble",
+  "steps": [
+    {
+      "id": "assemble",
+      "input_map": {
+        "parsed": "$input.parsed",
+        "classification": "$input.classification",
+        "prioritized": "$input.prioritized",
+        "summary": "$input.summary"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "pr-diff-parser",
+        "task": "assemble_brief"
+      }
+    }
+  ]
+}
