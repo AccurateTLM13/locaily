@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Meeting Notes Parse Input",
+  "type": "object",
+  "required": ["notes_text"],
+  "properties": {
+    "notes_text": { "type": "string", "minLength": 1 },
+    "meeting_title": { "type": "string" },
+    "meeting_date": { "type": "string" }
+  },
+  "additionalProperties": true
+}

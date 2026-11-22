@@ -1,0 +1,222 @@
+{
+  "schema": "locaily.workflow_pack.v1",
+  "id": "meeting-notes-pack",
+  "name": "Meeting Notes & Action Plan Pack",
+  "version": "1.0.0",
+  "trust": "official",
+  "description": "Read-only Workflow Pack that parses raw meeting transcripts, standup notes, or brain dumps, extracts decisions, blockers, open questions, and owned action items, prioritizes actions via core.prioritize, classifies via core.classify, summarizes via core.summarize, and validates the brief via core.validate.",
+  "author": "Locaily",
+  "license": "MIT",
+  "workflows": [
+    {
+      "workflow_id": "meeting_action_plan",
+      "name": "Meeting Notes Action Plan",
+      "description": "Extract decisions, owners, blockers, open questions, and prioritized action items from meeting transcripts or standup notes into a validated brief.",
+      "input_type": "meeting_notes_text",
+      "output_type": "meeting_action_brief",
+      "status": "implemented",
+      "output_alias": "brief",
+      "input_requirements": [
+        {
+          "field": "notes_text",
+          "type": "string",
+          "required": true,
+          "help": "Raw meeting transcript, standup notes, or voice-note brain dump."
+        },
+        {
+          "field": "meeting_title",
+          "type": "string",
+          "required": false,
+          "help": "Optional meeting or sync title."
+        },
+        {
+          "field": "meeting_date",
+          "type": "string",
+          "required": false,
+          "help": "Optional meeting date (e.g. 2026-11-22)."
+        }
+      ],
+      "intake": {
+        "keywords": [
+          "meeting",
+          "transcript",
+          "standup",
+          "action items",
+          "attendees",
+          "sync",
+          "retrospective",
+          "brain dump",
+          "minutes",
+          "follow-ups",
+          "voice notes"
+        ],
+        "phrases": [
+          "meeting notes",
+          "action plan from meeting",
+          "summarize standup",
+          "extract action items",
+          "turn transcript into actions",
+          "meeting minutes"
+        ],
+        "examples": [
+          "Extract decisions, owners, and prioritized action items from our engineering standup notes",
+          "Turn this messy architecture sync transcript into a structured meeting action plan"
+        ],
+        "input_hints": [
+          "notes_text",
+          "meeting_title",
+          "meeting_date"
+        ],
+        "negative_keywords": [
+          "lighthouse",
+          "dealsniper",
+          "incident",
+          "outage",
+          "git diff",
+          "pull request",
+          "ci failure",
+          "changelog",
+          "release notes",
+          "bug report"
+        ]
+      },
+      "composition": [
+        {
+          "as": "parse",
+          "track_id": "meeting_notes.parse",
+          "input_map": {
+            "notes_text": "$input.notes_text",
+            "meeting_title": "$input.meeting_title",
+            "meeting_date": "$input.meeting_date"
+          }
+        },
+        {
+          "as": "classify",
+          "on_failure": "skip",
+          "track_id": "core.classify",
+          "input_map": {
+            "text": "$artifacts.parse.summary_text",
+            "categories": {
+              "$literal": [
+                "planning",
+                "standup",
+                "architecture_review",
+                "retrospective",
+                "stakeholder_sync"
+              ]
+            }
+          }
+        },
+        {
+          "as": "prioritize",
+          "on_failure": "skip",
+          "track_id": "core.prioritize",
+          "input_map": {
+            "items": "$artifacts.parse.action_items",
+            "score_fields": {
+              "$literal": [
+                { "field": "urgency", "weight": 3 },
+                { "field": "impact", "weight": 2 }
+              ]
+            },
+            "tie_break": "id",
+            "limit": 12
+          }
+        },
+        {
+          "as": "summarize",
+          "track_id": "core.summarize",
+          "input_map": {
+            "text": "$artifacts.parse.summary_text",
+            "style": "meeting-action-brief",
+            "max_points": 5
+          }
+        },
+        {
+          "as": "brief",
+          "track_id": "meeting_notes.brief",
+          "requires": ["parse", "summarize"],
+          "input_map": {
+            "parsed": "$artifacts.parse",
+            "classification": "$artifacts.classify",
+            "prioritized": "$artifacts.prioritize",
+            "summary": "$artifacts.summarize"
+          }
+        },
+        {
+          "as": "validate",
+          "track_id": "core.validate",
+          "requires": ["brief"],
+          "input_map": {
+            "data": "$artifacts.brief",
+            "schema": {
+              "$literal": {
+                "type": "object",
+                "required": ["title", "category", "decisions", "action_items", "blockers", "summary", "markdown"],
+                "properties": {
+                  "title": { "type": "string", "minLength": 1 },
+                  "category": { "type": "string", "minLength": 1 },
+                  "decisions": { "type": "array", "items": { "type": "string" } },
+                  "action_items": { "type": "array", "minItems": 1, "items": { "type": "object" } },
+                  "blockers": { "type": "array", "items": { "type": "string" } },
+                  "summary": { "type": "string", "minLength": 1 },
+                  "markdown": { "type": "string", "minLength": 1 }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "tracks": [
+    "tracks/meeting_notes.parse.track.json",
+    "tracks/meeting_notes.brief.track.json"
+  ],
+  "track_metadata": {
+    "meeting_notes.parse": {
+      "purpose": "Deterministically extract attendees, decisions, action items with urgency/impact scores, blockers, and open questions from meeting notes.",
+      "input_type": "meeting_notes_text",
+      "output_type": "parsed_meeting_notes",
+      "preferred_worker_type": "tool_only",
+      "fallback_behavior": "deterministic_tool",
+      "validation_expectations": {
+        "output_schema": "tools/schemas/meeting-notes-parser.parse.output.schema.json",
+        "required_result_sections": ["meeting_title", "attendees", "decisions", "action_items", "blockers", "open_questions", "summary_text"]
+      }
+    },
+    "meeting_notes.brief": {
+      "purpose": "Assemble parsed meeting notes, ranked actions, classification, and summary into a validated action plan brief.",
+      "input_type": "meeting_action_brief_inputs",
+      "output_type": "meeting_action_brief",
+      "preferred_worker_type": "tool_only",
+      "fallback_behavior": "deterministic_tool",
+      "validation_expectations": {
+        "output_schema": "schemas/meeting-action-brief.schema.json",
+        "required_result_sections": ["title", "category", "attendees", "decisions", "action_items", "blockers", "open_questions", "summary", "markdown"]
+      }
+    }
+  },
+  "tools": "tools/tool.json",
+  "prompts": {
+    "meeting_action_summary": "prompts/meeting-action-summary.md"
+  },
+  "schemas": [
+    "schemas/meeting-action-brief.schema.json",
+    "tools/schemas/meeting-notes-parser.parse.input.schema.json",
+    "tools/schemas/meeting-notes-parser.parse.output.schema.json",
+    "tools/schemas/meeting-notes-parser.assemble_brief.input.schema.json",
+    "tools/schemas/meeting-notes-parser.assemble_brief.output.schema.json"
+  ],
+  "fixtures": [
+    {
+      "name": "Sample Engineering Planning Sync",
+      "workflow_id": "meeting_action_plan",
+      "path": "fixtures/sample-meeting-notes.json",
+      "expected_fields": ["title", "category", "attendees", "decisions", "action_items", "blockers", "open_questions", "summary", "markdown"]
+    }
+  ],
+  "permissions": "permissions.json",
+  "qualification_requirements": "qualification-requirements.json",
+  "readme": "README.md"
+}

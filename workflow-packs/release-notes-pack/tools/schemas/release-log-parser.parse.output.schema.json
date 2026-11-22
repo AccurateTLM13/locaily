@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Log Parse Output",
+  "type": "object",
+  "required": ["version", "previous_version", "release_type", "breaking_changes", "features", "fixes", "other_changes", "summary_text"],
+  "properties": {
+    "version": { "type": "string", "minLength": 1 },
+    "previous_version": { "type": "string", "minLength": 1 },
+    "release_type": { "type": "string", "enum": ["major", "minor", "patch"] },
+    "pr_refs": { "type": "array", "items": { "type": "string" } },
+    "breaking_changes": { "type": "array", "items": { "type": "string" } },
+    "features": { "type": "array", "items": { "type": "string" } },
+    "fixes": { "type": "array", "items": { "type": "string" } },
+    "other_changes": { "type": "array", "items": { "type": "string" } },
+    "summary_text": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

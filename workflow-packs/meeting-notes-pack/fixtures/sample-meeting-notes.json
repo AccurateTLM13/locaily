@@ -1,0 +1,7 @@
+{
+  "input": {
+    "meeting_title": "Execution Policy & Starter Packs Sync",
+    "meeting_date": "2026-11-22",
+    "notes_text": "Elena: Agreed to keep all starter Workflow Packs read-only until SEC-01 lands.\nMarcus: DECISION: Prioritize PR diff, CI failure, and issue triage first.\nACTION: @elena will draft the SEC-01 runtime policy gate milestone by Friday.\nACTION: @marcus needs to verify expanded intake dataset accuracy today.\nBLOCKER: Waiting on NOPE dependency evaluation decision before enabling shell.execute.approved.\nShould external community packs also declare explicit output schemas?"
+  }
+}

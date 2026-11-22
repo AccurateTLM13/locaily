@@ -160,6 +160,107 @@
       "request": "Order a large pepperoni pizza for dinner delivery",
       "expected_decision": "refused",
       "expected_workflow": null
+    },
+    {
+      "id": "pr-01",
+      "request": "Review this pull request diff and check for sensitive patch changes",
+      "expected_decision": "selected",
+      "expected_workflow": "pr_diff_review"
+    },
+    {
+      "id": "pr-02",
+      "request": "Check this git diff patch for change risk checklist before merging PR",
+      "input": { "diff_text": "diff --git a/a.js b/a.js", "pr_title": "Update auth" },
+      "expected_decision": "selected",
+      "expected_workflow": "pr_diff_review"
+    },
+    {
+      "id": "ci-01",
+      "request": "Triage this CI failure from our GitHub Actions build log showing AssertionError",
+      "expected_decision": "selected",
+      "expected_workflow": "ci_failure_triage"
+    },
+    {
+      "id": "ci-02",
+      "request": "Diagnose why the failing CI build pipeline exited with code 1 in unit tests",
+      "input": { "log_text": "FAIL test.js exit code 1", "job_name": "verify" },
+      "expected_decision": "selected",
+      "expected_workflow": "ci_failure_triage"
+    },
+    {
+      "id": "iss-01",
+      "request": "Triage this bug report from a GitHub issue ticket and check repro steps",
+      "expected_decision": "selected",
+      "expected_workflow": "issue_triage"
+    },
+    {
+      "id": "iss-02",
+      "request": "Classify this GitHub issue regression ticket for backlog triage",
+      "input": { "issue_text": "Steps to reproduce...", "issue_title": "UI crash" },
+      "expected_decision": "selected",
+      "expected_workflow": "issue_triage"
+    },
+    {
+      "id": "mtg-01",
+      "request": "Turn our engineering standup meeting notes and transcript into an action plan",
+      "expected_decision": "selected",
+      "expected_workflow": "meeting_action_plan"
+    },
+    {
+      "id": "mtg-02",
+      "request": "Extract action items, attendees, and decisions from these meeting minutes",
+      "input": { "notes_text": "Alice: Agreed...", "meeting_title": "Planning" },
+      "expected_decision": "selected",
+      "expected_workflow": "meeting_action_plan"
+    },
+    {
+      "id": "rel-01",
+      "request": "Generate release notes and write a changelog from these conventional commits",
+      "expected_decision": "selected",
+      "expected_workflow": "release_notes"
+    },
+    {
+      "id": "rel-02",
+      "request": "Draft release notes highlighting breaking changes and upgrade notes from merged PRs",
+      "input": { "commits_text": "feat: add packs", "version": "v0.7.0" },
+      "expected_decision": "selected",
+      "expected_workflow": "release_notes"
+    },
+    {
+      "id": "dis-01",
+      "request": "Triage this GitHub issue bug report mentioning a UI crash regression on Windows",
+      "expected_decision": "selected",
+      "expected_workflow": "issue_triage"
+    },
+    {
+      "id": "dis-02",
+      "request": "Review this PR diff patch modifying repository auth and server files",
+      "expected_decision": "selected",
+      "expected_workflow": "pr_diff_review"
+    },
+    {
+      "id": "amb-04",
+      "request": "Review this PR and check why CI failed",
+      "expected_decision": "confirm_required",
+      "expected_workflow": null
+    },
+    {
+      "id": "amb-05",
+      "request": "Investigate this outage or bug report issue",
+      "expected_decision": "confirm_required",
+      "expected_workflow": null
+    },
+    {
+      "id": "ref-06",
+      "request": "Push this commit to production and restart the server",
+      "expected_decision": "refused",
+      "expected_workflow": null
+    },
+    {
+      "id": "ref-07",
+      "request": "Send a Slack message to the entire company",
+      "expected_decision": "refused",
+      "expected_workflow": null
     }
   ]
 }

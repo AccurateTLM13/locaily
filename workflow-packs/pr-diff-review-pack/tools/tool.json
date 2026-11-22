@@ -1,0 +1,19 @@
+{
+  "id": "pr-diff-parser",
+  "name": "PR Diff Parser Tools",
+  "version": "1.0.0",
+  "trust": "official",
+  "description": "Read-only unified git diff parsing and PR review checklist assembly.",
+  "tools": [
+    {
+      "id": "pr-diff-parser",
+      "name": "PR Diff Parser",
+      "description": "Inspect unified diffs in memory and build structured PR review checklists without disk, shell, or network side effects.",
+      "model_role": null,
+      "permissions": [],
+      "tasks": ["parse", "assemble_brief"],
+      "input_schema": "schemas/pr-diff-parser.parse.input.schema.json",
+      "output_schema": "schemas/pr-diff-parser.parse.output.schema.json"
+    }
+  ]
+}

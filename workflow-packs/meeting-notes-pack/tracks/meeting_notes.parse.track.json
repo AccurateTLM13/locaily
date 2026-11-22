@@ -1,0 +1,23 @@
+{
+  "track_id": "meeting_notes.parse",
+  "version": "1.0.0",
+  "name": "Parse Meeting Notes Signals",
+  "description": "Deterministically extract speakers, decisions, action items, blockers, and open questions from raw meeting notes.",
+  "output_schema": "tools/schemas/meeting-notes-parser.parse.output.schema.json",
+  "result_step": "parse",
+  "steps": [
+    {
+      "id": "parse",
+      "input_map": {
+        "notes_text": "$input.notes_text",
+        "meeting_title": "$input.meeting_title",
+        "meeting_date": "$input.meeting_date"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "meeting-notes-parser",
+        "task": "parse"
+      }
+    }
+  ]
+}

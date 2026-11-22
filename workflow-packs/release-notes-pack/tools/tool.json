@@ -1,0 +1,19 @@
+{
+  "id": "release-log-parser",
+  "name": "Release Log Parser Tools",
+  "version": "1.0.0",
+  "trust": "official",
+  "description": "Read-only conventional commit parsing and release changelog brief assembly.",
+  "tools": [
+    {
+      "id": "release-log-parser",
+      "name": "Release Log Parser",
+      "description": "Group commit logs into changelog sections in memory without disk, shell, or network side effects.",
+      "model_role": null,
+      "permissions": [],
+      "tasks": ["parse", "assemble_brief"],
+      "input_schema": "schemas/release-log-parser.parse.input.schema.json",
+      "output_schema": "schemas/release-log-parser.parse.output.schema.json"
+    }
+  ]
+}

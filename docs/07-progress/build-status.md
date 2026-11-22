@@ -1,10 +1,10 @@
 # Build Status
 
-**Updated:** 2026-11-21 (CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake merged on `main` via PR #46; SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
+**Updated:** 2026-11-22 (CORE-07 Starter Read-Only Workflow Pack Library ready for delivery on `milestone/core-07-starter-workflow-packs`; SEC-01 Central Execution-Policy Runtime Gate queued as `planned`; CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Stage
 
-Operational **Local Brain** with **Crew track runner** (linear + DAG), generic reusable capability tracks (`core.*`), self-contained **Workflow Packs + Starter SDK (`CORE-06`)**, **Automatic Task Intake & Track Selection (`CORE-06`)**, multi-track composed workflows (`repo_review`, `document_review`, `content_os`, `text_qa`, `incident_triage`), multi-tier model qualification & fallback routing, Companion Console (`CORE-05`/`CORE-06`), unified shell (`PX4`/`PX8`), Benchmark Lab M1–M3, Capability Trigger Kernel (`CTK-01`–`03`), Relay Nodes + `M09A` pairing + `PX2` LAN hard gate, Development Memory Loop (`DM1`–`DM10`), and empirical thesis validation (`SYSTEM-PROOF-01`, `POSITIVE` verdict). Physical two-device pilot and external 5-tester validation (`PX6`) remain planned.
+Operational **Local Brain** with **Crew track runner** (linear + DAG), generic reusable capability tracks (`core.*`), self-contained **Workflow Packs + Starter SDK (`CORE-06`)**, six official **read-only Starter Workflow Packs (`CORE-07`)**, **Automatic Task Intake & Track Selection (`CORE-06`/`CORE-07`)**, multi-track composed workflows, multi-tier model qualification & fallback routing, Companion Console (`CORE-05`/`CORE-06`/`CORE-07`), unified shell (`PX4`/`PX8`), Benchmark Lab M1–M3, Capability Trigger Kernel (`CTK-01`–`03`), Relay Nodes + `M09A` pairing + `PX2` LAN hard gate, Development Memory Loop (`DM1`–`DM10`), and empirical thesis validation (`SYSTEM-PROOF-01`, `POSITIVE` verdict). `SEC-01` (Central Execution-Policy Runtime Gate) is queued next as `planned`; physical two-device pilot and external 5-tester validation (`PX6`) also remain planned.
 
 North Star direction is a local capability network: route track contracts to the smallest qualified capability, validate results, and preserve structured evidence for future routing and track improvement.
 
@@ -12,6 +12,8 @@ North Star direction is a local capability network: route track contracts to the
 
 | Milestone | Status |
 |---|---|
+| **CORE-07 (Starter Read-Only Workflow Pack Library)** | Implemented & Validated (ready for delivery) |
+| **SEC-01 (Central Execution-Policy Runtime Gate)** | Planned (queued next pending explicit start) |
 | **CORE-06 (Workflow Pack Contract, Starter SDK, and Automatic Task Intake)** | Complete & Merged (PR #46) |
 | **CORE-01 – CORE-05 (Generic Capabilities, Matrix Qualification, Fallback, Console Explorer)** | Complete & Merged |
 | **SYSTEM-PROOF-01 (Real Multi-Track Workflow Proof)** | Complete & Merged (`POSITIVE` verdict) |
@@ -94,9 +96,9 @@ North Star direction is a local capability network: route track contracts to the
 
 ## Current Priority
 
-**Now:** `main` is idle following `CORE-06` (`core-06-workflow-packs-and-task-intake`) merge via PR #46 (`24bcc5c`). Canonical state lives in `development/project-state.json`.
+**Now:** `CORE-07` (`core-07-starter-workflow-packs`) is ready for delivery on branch `milestone/core-07-starter-workflow-packs`. Canonical state lives in `development/project-state.json`.
 
-**Next:** Awaiting explicit operator approval before starting the next milestone (`px6-external-validation-program` — external testers + physical 2-device Relay pilot, central execution-policy runtime enforcement, or `research-01-decision-track-bakeoff`).
+**Next:** Deliver/merge `CORE-07`, then await explicit operator approval to begin `sec-01-execution-policy-runtime-gate` (`SEC-01`: Central Execution-Policy Runtime Gate). Other planned options: `px6-external-validation-program` or `research-01-decision-track-bakeoff`.
 
 ## Evidence Pointers
 

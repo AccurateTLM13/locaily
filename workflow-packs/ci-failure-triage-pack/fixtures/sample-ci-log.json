@@ -1,0 +1,7 @@
+{
+  "input": {
+    "job_name": "verify",
+    "runner_os": "ubuntu-latest",
+    "log_text": "FAIL scripts/test-core06-task-intake.js\nAssertionError [ERR_ASSERTION]: Expected decision 'selected', got 'confirm_required'\n    at runDatasetCheck (scripts/test-core06-task-intake.js:204:11)\n    at main (scripts/test-core06-task-intake.js:312:5)\nProcess exited with code 1\n"
+  }
+}

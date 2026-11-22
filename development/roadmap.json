@@ -1,7 +1,7 @@
 {
   "schema": "locaily.development.roadmap.v1",
   "project": "locaily",
-  "updatedAt": "2026-11-19T02:42:54.789Z",
+  "updatedAt": "2026-11-22T18:52:00.000Z",
   "areas": [
     {
       "id": "local-brain",
@@ -22,6 +22,15 @@
           "description": "Track runner, workflow orchestration, step input mapping",
           "maturity": "operational",
           "milestoneIds": []
+        },
+        {
+          "id": "central-execution-policy",
+          "title": "Central Execution-Policy Runtime Gate",
+          "description": "Fail-closed runtime policy engine and human approval gates enforcing policies/default-execution-policy.json before side-effecting tool or pack actions execute",
+          "maturity": "designed",
+          "milestoneIds": [
+            "sec-01-execution-policy-runtime-gate"
+          ]
         }
       ]
     },
@@ -53,7 +62,8 @@
           "description": "Self-contained Workflow Pack contract, Starter SDK, and Automatic Task Intake & Track Selection",
           "maturity": "implemented",
           "milestoneIds": [
-            "core-06-workflow-packs-and-task-intake"
+            "core-06-workflow-packs-and-task-intake",
+            "core-07-starter-workflow-packs"
           ]
         }
       ]
@@ -459,6 +469,12 @@
     "core-06-workflow-packs-and-task-intake": [
       "core-05-workflow-console-matrix-explorer",
       "system-proof-01-real-workflow-proof"
+    ],
+    "core-07-starter-workflow-packs": [
+      "core-06-workflow-packs-and-task-intake"
+    ],
+    "sec-01-execution-policy-runtime-gate": [
+      "core-07-starter-workflow-packs"
     ]
   }
 }

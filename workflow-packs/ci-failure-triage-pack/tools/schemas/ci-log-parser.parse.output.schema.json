@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CI Log Parse Output",
+  "type": "object",
+  "required": ["job_name", "runner_os", "exit_code", "failing_tests", "stack_locations", "error_signatures", "likely_flake", "summary_text"],
+  "properties": {
+    "job_name": { "type": "string", "minLength": 1 },
+    "runner_os": { "type": "string", "minLength": 1 },
+    "exit_code": { "type": "integer" },
+    "failing_tests": { "type": "array", "items": { "type": "string" } },
+    "stack_locations": { "type": "array", "items": { "type": "string" } },
+    "error_signatures": { "type": "array", "items": { "type": "string" } },
+    "likely_flake": { "type": "boolean" },
+    "summary_text": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": true
+}

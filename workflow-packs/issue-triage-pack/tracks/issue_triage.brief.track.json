@@ -1,0 +1,24 @@
+{
+  "track_id": "issue_triage.brief",
+  "version": "1.0.0",
+  "name": "Assemble Issue Triage Card",
+  "description": "Deterministically combine parsed issue signals, ranked impact/urgency signals, classification, and summary into a structured backlog triage card.",
+  "output_schema": "schemas/issue-triage-brief.schema.json",
+  "result_step": "assemble",
+  "steps": [
+    {
+      "id": "assemble",
+      "input_map": {
+        "parsed": "$input.parsed",
+        "classification": "$input.classification",
+        "prioritized": "$input.prioritized",
+        "summary": "$input.summary"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "issue-parser",
+        "task": "assemble_brief"
+      }
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "schema": "locaily.workflow_pack.v1",
+  "id": "ci-failure-triage-pack",
+  "name": "CI Failure Triage Pack",
+  "version": "1.0.0",
+  "trust": "official",
+  "description": "Read-only Workflow Pack that parses failing CI/build/test logs, extracts failing test cases, stack locations, and error signatures, classifies failure type via core.classify, summarizes via core.summarize, and assembles a structured diagnosis brief.",
+  "author": "Locaily",
+  "license": "MIT",
+  "workflows": [
+    {
+      "workflow_id": "ci_failure_triage",
+      "name": "CI Failure Triage Brief",
+      "description": "Parse build or test runner logs deterministically, classify the failure category, detect flake signals, and produce structured next debugging steps.",
+      "input_type": "ci_failure_log",
+      "output_type": "ci_triage_brief",
+      "status": "implemented",
+      "output_alias": "brief",
+      "input_requirements": [
+        {
+          "field": "log_text",
+          "type": "string",
+          "required": true,
+          "help": "Raw CI job output, failing test log, or stack trace."
+        },
+        {
+          "field": "job_name",
+          "type": "string",
+          "required": false,
+          "help": "Optional CI job or workflow step name."
+        },
+        {
+          "field": "runner_os",
+          "type": "string",
+          "required": false,
+          "help": "Optional runner OS label (e.g. ubuntu-latest, windows-latest)."
+        }
+      ],
+      "intake": {
+        "keywords": [
+          "ci",
+          "github actions",
+          "pipeline",
+          "build log",
+          "test failure",
+          "stack trace",
+          "failing tests",
+          "jest",
+          "mocha",
+          "pytest",
+          "exit code",
+          "assertionerror",
+          "flake"
+        ],
+        "phrases": [
+          "triage ci failure",
+          "failing ci build",
+          "diagnose test failure",
+          "why did ci fail",
+          "ci failed",
+          "failed unit tests",
+          "parse build log",
+          "github actions failed"
+        ],
+        "examples": [
+          "Triage this CI failure from our GitHub Actions test job with AssertionError",
+          "Diagnose why the build log exited with code 1 on ubuntu-latest"
+        ],
+        "input_hints": [
+          "log_text",
+          "job_name",
+          "runner_os"
+        ],
+        "negative_keywords": [
+          "lighthouse",
+          "dealsniper",
+          "production outage",
+          "pagerduty",
+          "sev1",
+          "meeting",
+          "changelog",
+          "release notes",
+          "pull request diff"
+        ]
+      },
+      "composition": [
+        {
+          "as": "parse",
+          "track_id": "ci_failure_triage.parse",
+          "input_map": {
+            "log_text": "$input.log_text",
+            "job_name": "$input.job_name",
+            "runner_os": "$input.runner_os"
+          }
+        },
+        {
+          "as": "classify",
+          "on_failure": "skip",
+          "track_id": "core.classify",
+          "input_map": {
+            "text": "$artifacts.parse.summary_text",
+            "categories": {
+              "$literal": [
+                "assertion_failure",
+                "type_or_syntax",
+                "environment_or_dependency",
+                "timeout_or_flake",
+                "security_or_lint"
+              ]
+            }
+          }
+        },
+        {
+          "as": "summarize",
+          "track_id": "core.summarize",
+          "input_map": {
+            "text": "$artifacts.parse.summary_text",
+            "style": "ci-diagnosis-brief",
+            "max_points": 5
+          }
+        },
+        {
+          "as": "brief",
+          "track_id": "ci_failure_triage.brief",
+          "requires": ["parse", "summarize"],
+          "input_map": {
+            "parsed": "$artifacts.parse",
+            "classification": "$artifacts.classify",
+            "summary": "$artifacts.summarize"
+          }
+        }
+      ]
+    }
+  ],
+  "tracks": [
+    "tracks/ci_failure_triage.parse.track.json",
+    "tracks/ci_failure_triage.brief.track.json"
+  ],
+  "track_metadata": {
+    "ci_failure_triage.parse": {
+      "purpose": "Deterministically extract failing tests, stack locations, error signatures, exit code, and flake signals from CI logs.",
+      "input_type": "ci_failure_log",
+      "output_type": "parsed_ci_failure",
+      "preferred_worker_type": "tool_only",
+      "fallback_behavior": "deterministic_tool",
+      "validation_expectations": {
+        "output_schema": "tools/schemas/ci-log-parser.parse.output.schema.json",
+        "required_result_sections": ["job_name", "exit_code", "failing_tests", "error_signatures", "summary_text"]
+      }
+    },
+    "ci_failure_triage.brief": {
+      "purpose": "Assemble parsed CI failure signals, classification, and summary into a structured debugging brief.",
+      "input_type": "ci_triage_brief_inputs",
+      "output_type": "ci_triage_brief",
+      "preferred_worker_type": "tool_only",
+      "fallback_behavior": "deterministic_tool",
+      "validation_expectations": {
+        "output_schema": "schemas/ci-triage-brief.schema.json",
+        "required_result_sections": ["title", "category", "exit_code", "failing_tests", "error_signatures", "summary", "debug_steps", "markdown"]
+      }
+    }
+  },
+  "tools": "tools/tool.json",
+  "prompts": {
+    "ci_failure_triage_summary": "prompts/ci-triage-summary.md"
+  },
+  "schemas": [
+    "schemas/ci-triage-brief.schema.json",
+    "tools/schemas/ci-log-parser.parse.input.schema.json",
+    "tools/schemas/ci-log-parser.parse.output.schema.json",
+    "tools/schemas/ci-log-parser.assemble_brief.input.schema.json",
+    "tools/schemas/ci-log-parser.assemble_brief.output.schema.json"
+  ],
+  "fixtures": [
+    {
+      "name": "Sample Node CI Assertion Failure",
+      "workflow_id": "ci_failure_triage",
+      "path": "fixtures/sample-ci-log.json",
+      "expected_fields": ["title", "category", "exit_code", "failing_tests", "error_signatures", "summary", "debug_steps", "markdown"]
+    }
+  ],
+  "permissions": "permissions.json",
+  "qualification_requirements": "qualification-requirements.json",
+  "readme": "README.md"
+}

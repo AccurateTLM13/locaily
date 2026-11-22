@@ -1,0 +1,23 @@
+{
+  "track_id": "ci_failure_triage.parse",
+  "version": "1.0.0",
+  "name": "Parse CI Failure Log",
+  "description": "Deterministically extract failing tests, stack trace locations, error signatures, exit code, and flake indicators from CI logs.",
+  "output_schema": "tools/schemas/ci-log-parser.parse.output.schema.json",
+  "result_step": "parse",
+  "steps": [
+    {
+      "id": "parse",
+      "input_map": {
+        "log_text": "$input.log_text",
+        "job_name": "$input.job_name",
+        "runner_os": "$input.runner_os"
+      },
+      "executor": {
+        "type": "tool",
+        "tool": "ci-log-parser",
+        "task": "parse"
+      }
+    }
+  ]
+}

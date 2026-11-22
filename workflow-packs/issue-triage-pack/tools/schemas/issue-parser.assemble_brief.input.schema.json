@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Issue Triage Brief Assembly Input",
+  "type": "object",
+  "required": ["parsed"],
+  "properties": {
+    "parsed": { "type": "object" },
+    "classification": { "type": ["object", "null"] },
+    "prioritized": { "type": ["object", "null"] },
+    "summary": { "type": ["object", "null"] }
+  },
+  "additionalProperties": true
+}

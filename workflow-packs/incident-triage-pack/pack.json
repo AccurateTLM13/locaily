@@ -77,7 +77,16 @@
           "seo",
           "marketplace",
           "listing",
-          "operator log"
+          "operator log",
+          "bug report",
+          "github issue",
+          "ci failure",
+          "failing tests",
+          "pull request",
+          "git diff",
+          "meeting",
+          "changelog",
+          "release notes"
         ]
       },
       "composition": [

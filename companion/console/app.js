@@ -1313,6 +1313,12 @@ async function loadWorkflowPacks() {
     listEl.innerHTML = packs.map((pack) => {
       const permOk = pack.permissionStatus ? pack.permissionStatus.ok : true;
       const qualReady = pack.qualificationReadiness ? pack.qualificationReadiness.ready : true;
+      const permList = [
+        ...((pack.permissions && Array.isArray(pack.permissions.required)) ? pack.permissions.required : []),
+        ...((pack.permissions && Array.isArray(pack.permissions.optional)) ? pack.permissions.optional : [])
+      ];
+      const isReadOnly = !permList.some((perm) => /^(file\.write|shell\.|network\.|credentials\.|memory\.writeback\.apply)/i.test(String(perm)));
+      const firstWf = Array.isArray(pack.workflows) && pack.workflows.length > 0 ? pack.workflows[0] : "";
       return `
         <div class="pack-card">
           <div class="pack-card__header">
@@ -1327,15 +1333,30 @@ async function loadWorkflowPacks() {
           </div>
           <p class="meta-text">${escapeDiagnostic(pack.description || "")}</p>
           <div class="pack-card__meta">
+            <span class="cap-chip">mode: ${isReadOnly ? "read-only" : "side-effects"}</span>
             <span class="cap-chip">workflows: ${escapeDiagnostic((pack.workflows || []).join(", ") || "none")}</span>
             <span class="cap-chip">tracks: ${escapeDiagnostic((pack.tracks || []).length)}</span>
             <span class="cap-chip">tools: ${escapeDiagnostic((pack.tools || []).length)}</span>
             <span class="cap-chip">perms: ${permOk ? "ok" : "missing"}</span>
             <span class="cap-chip">quals: ${qualReady ? "ready" : "review"}</span>
+            ${firstWf ? `<button type="button" class="btn btn--xs btn--ghost" data-pack-workflow="${escapeDiagnostic(firstWf)}">Load in Runner</button>` : ""}
           </div>
         </div>
       `;
     }).join("");
+
+    listEl.querySelectorAll("[data-pack-workflow]").forEach((btnEl) => {
+      btnEl.addEventListener("click", () => {
+        const wf = loadedWorkflows.find((w) => w.workflow_id === btnEl.dataset.packWorkflow);
+        if (wf) {
+          selectWorkflow(wf);
+          const runner = document.getElementById("workflowRunForm");
+          if (runner && typeof runner.scrollIntoView === "function") {
+            runner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        }
+      });
+    });
   } catch (err) {
     listEl.innerHTML = `<p class="form-message form-message--error">Failed to load workflow packs: ${escapeDiagnostic(err.message)}</p>`;
   }

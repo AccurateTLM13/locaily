@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR Diff Parse Input",
+  "type": "object",
+  "required": ["diff_text"],
+  "properties": {
+    "diff_text": { "type": "string", "minLength": 1 },
+    "pr_title": { "type": "string" },
+    "base_branch": { "type": "string" }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Log Parse Input",
+  "type": "object",
+  "required": ["commits_text"],
+  "properties": {
+    "commits_text": { "type": "string", "minLength": 1 },
+    "version": { "type": "string" },
+    "previous_version": { "type": "string" }
+  },
+  "additionalProperties": true
+}
