@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "sec-01-execution-policy-runtime-gate",
   "title": "SEC-01 Central Execution-Policy Runtime Gate",
-  "status": "active",
+  "status": "ready-for-delivery",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Enforce Locaily's central execution-security boundary at runtime ('models may propose actions; Locaily decides whether they execute') using policies/default-execution-policy.json, action-request.schema.json, and policy-decision.schema.json before enabling any write, shell, or network capabilities in Workflow Packs or tools.",
@@ -75,6 +75,9 @@
   "lifecycleRef": null,
   "createdAt": "2026-11-22T18:52:00.000Z",
   "startedAt": "2026-11-22T19:32:06.250Z",
-  "completedAt": null,
-  "mergedAt": null
+  "completedAt": "2026-11-22T19:47:06.025Z",
+  "mergedAt": null,
+  "latestValidationId": "validation-20261122T194545-4362baf5",
+  "completionBranch": "milestone/sec-01-execution-policy-runtime-gate",
+  "completionHead": "6cf489d057a09931016e3dcf1c0ffa98c260d80d"
 }

@@ -13,6 +13,7 @@
     "core-05-workflow-console-matrix-explorer": "validation-20261001T230429-f7d31a6b",
     "system-proof-01-real-workflow-proof": "validation-20261119T020458-2c382765",
     "core-06-workflow-packs-and-task-intake": "validation-20261119T025955-91d9deb5",
-    "core-07-starter-workflow-packs": "validation-20261122T190311-b5387c7a"
+    "core-07-starter-workflow-packs": "validation-20261122T190311-b5387c7a",
+    "sec-01-execution-policy-runtime-gate": "validation-20261122T194545-4362baf5"
   }
 }

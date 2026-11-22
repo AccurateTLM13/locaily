@@ -1,0 +1,112 @@
+{
+  "schema": "locaily.development.validation_result.v1",
+  "id": "validation-20261122T194545-4362baf5",
+  "milestoneId": "sec-01-execution-policy-runtime-gate",
+  "profileId": "pre-delivery",
+  "status": "passed",
+  "gitState": {
+    "branch": "milestone/sec-01-execution-policy-runtime-gate",
+    "headCommit": "6cf489d057a09931016e3dcf1c0ffa98c260d80d",
+    "fingerprint": "sha256:71f1fbcda0f65693",
+    "changedFiles": []
+  },
+  "startedAt": "2026-11-22T19:45:45.033Z",
+  "completedAt": "2026-11-22T19:47:04.632Z",
+  "results": [
+    {
+      "id": "strict-status",
+      "command": "node scripts/dev-status.js --strict --json",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 0,
+      "stdout": "",
+      "stderr": "",
+      "summary": "No error/critical contradictions",
+      "required": true
+    },
+    {
+      "id": "dev-status-strict",
+      "command": "node scripts/dev-status.js --strict",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 527,
+      "stdout": "=== Locaily Development Status ===\n\nProject:        locaily\nStatus:         active\nDefault branch: main\nCurrent branch: milestone/sec-01-execution-policy-runtime-gate\nHEAD:           6cf489d\n\nWorking tree: clean\n\n--- Milestones ---\n  ACTIVE:          sec-01-execution-policy-runtime-gate — SEC-01 Central Execution-Policy Runtime Gate\n  Planned: 2 | Ready: 0 | Completed: 27\n\n--- Sessions ---\n  No active or paused sessions.\n  Total: 23\n\n--- Legacy State (.opencode) ---\n  Run-state objective: (empty",
+      "stderr": "",
+      "summary": "  Start a session for active milestone 'sec-01-execution-policy-runtime-gate' (dev:resume or dev:milestone:start)",
+      "required": true
+    },
+    {
+      "id": "schema-tests",
+      "command": "node scripts/test-development-schemas.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 87,
+      "stdout": "\n## Schema Structure\n  PASS  Schema brief.schema.json has required fields\n  PASS  Schema delivery.schema.json has required fields\n  PASS  Schema issue.schema.json has required fields\n  PASS  Schema milestone.schema.json has required fields\n  PASS  Schema project-state.schema.json has required fields\n  PASS  Schema session.schema.json has required fields\n  PASS  Schema validation-profile.schema.json has required fields\n  PASS  Schema validation-result.schema.json has required fields\n\n## Schema Co",
+      "stderr": "",
+      "summary": "## Results: 29 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "lifecycle-tests",
+      "command": "node scripts/test-lifecycle.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 127,
+      "stdout": "\n## State Machine\n  PASS  STATES are frozen\n  PASS  isTerminal identifies terminal states\n  PASS  isValidTransition enforces legal transitions\n  PASS  Terminal states have no outgoing transitions\n\n## Objective Meta\n  PASS  createObjectiveMeta produces default meta\n  PASS  createObjectiveMeta accepts overrides\n\n## Objective Parsing\n  PASS  parseObjectiveId extracts prefix and slug\n  PASS  parseObjectiveId handles no prefix\n\n## Duplicate Detection\n  PASS  detectDuplicates finds slug duplicates\n  P",
+      "stderr": "",
+      "summary": "## Results: 23 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "controller-tests",
+      "command": "node scripts/test-controller-invariants.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 232,
+      "stdout": "\nTests: 11 passed, 0 failed\n",
+      "stderr": "(node:30736) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n",
+      "summary": "Tests: 11 passed, 0 failed",
+      "required": true
+    },
+    {
+      "id": "contract-tests",
+      "command": "node scripts/contract-test.js",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 343,
+      "stdout": "Contract helpers passed.\n",
+      "stderr": "",
+      "summary": "Contract helpers passed.",
+      "required": true
+    },
+    {
+      "id": "full-suite",
+      "command": "npm run test:full",
+      "status": "passed",
+      "exitCode": 0,
+      "durationMs": 77767,
+      "stdout": "=== Harness Adapter Tests ===\n\n  PASS: Codex fixture normalizes successfully\n  PASS: OpenCode fixture normalizes successfully\n  PASS: Codex snapshot matches strict schema\n  PASS: OpenCode snapshot matches strict schema\n  PASS: canonical harness schema fixture references the checked-in schema\n  PASS: checked-in canonical valid fixture matches strict schema\n  PASS: checked-in canonical invalid fixture is rejected\n  PASS: Codex and OpenCode produce equivalent canonical shapes\n  PASS: source harness",
+      "stderr": "npm notice run locaily@0.1.0 test:full\nnpm notice run npm run test:harness && npm run test:contract && npm run test:dag && npm run benchmark:test && npm run benchmark:status-smoke && npm run test:checksum && npm run test:development-lifecycle-gate && npm run test:relay && npm run test:memory-v1 && npm run test:relay:placement && npm run test:multi-device:e2e && npm run test:qualification && npm run test:track-records && npm run test:human-review && npm run test:jobs && npm run test:operator && n",
+      "summary": "✔ runtime",
+      "required": false
+    }
+  ],
+  "manualChecks": [
+    {
+      "id": "review-gate",
+      "description": "Code review must pass (agent-review.js)",
+      "acknowledged": true,
+      "acknowledgedBy": "antigravity",
+      "acknowledgedAt": "2026-11-22T19:47:04.632Z"
+    },
+    {
+      "id": "closeout-verified",
+      "description": "Closeout record correctly describes completed work",
+      "acknowledged": true,
+      "acknowledgedBy": "antigravity",
+      "acknowledgedAt": "2026-11-22T19:47:04.632Z"
+    }
+  ],
+  "warnings": [],
+  "error": null
+}
