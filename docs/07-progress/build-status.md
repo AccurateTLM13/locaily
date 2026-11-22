@@ -1,10 +1,10 @@
 # Build Status
 
-**Updated:** 2026-11-22 (CORE-07 Starter Read-Only Workflow Pack Library merged on `main` via PR #47; SEC-01 Central Execution-Policy Runtime Gate queued as `planned`; CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
+**Updated:** 2026-11-22 (SEC-01 Central Execution-Policy Runtime Gate implemented on `milestone/sec-01-execution-policy-runtime-gate`; CORE-07 Starter Read-Only Workflow Pack Library merged on `main` via PR #47; CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Stage
 
-Operational **Local Brain** with **Crew track runner** (linear + DAG), generic reusable capability tracks (`core.*`), self-contained **Workflow Packs + Starter SDK (`CORE-06`)**, six official **read-only Starter Workflow Packs (`CORE-07`)**, **Automatic Task Intake & Track Selection (`CORE-06`/`CORE-07`)**, multi-track composed workflows, multi-tier model qualification & fallback routing, Companion Console (`CORE-05`/`CORE-06`/`CORE-07`), unified shell (`PX4`/`PX8`), Benchmark Lab M1–M3, Capability Trigger Kernel (`CTK-01`–`03`), Relay Nodes + `M09A` pairing + `PX2` LAN hard gate, Development Memory Loop (`DM1`–`DM10`), and empirical thesis validation (`SYSTEM-PROOF-01`, `POSITIVE` verdict). `SEC-01` (Central Execution-Policy Runtime Gate) is queued next as `planned`; physical two-device pilot and external 5-tester validation (`PX6`) also remain planned.
+Operational **Local Brain** with **Crew track runner** (linear + DAG), generic reusable capability tracks (`core.*`), **Central Execution-Policy Runtime Gate (`SEC-01`)**, self-contained **Workflow Packs + Starter SDK (`CORE-06`)**, six official **read-only Starter Workflow Packs (`CORE-07`)**, **Automatic Task Intake & Track Selection (`CORE-06`/`CORE-07`)**, multi-track composed workflows, multi-tier model qualification & fallback routing, Companion Console (`CORE-05`/`CORE-06`/`CORE-07`/`SEC-01`), unified shell (`PX4`/`PX8`), Benchmark Lab M1–M3, Capability Trigger Kernel (`CTK-01`–`03`), Relay Nodes + `M09A` pairing + `PX2` LAN hard gate, Development Memory Loop (`DM1`–`DM10`), and empirical thesis validation (`SYSTEM-PROOF-01`, `POSITIVE` verdict). Physical two-device pilot and external 5-tester validation (`PX6`) and `RESEARCH-01` remain planned.
 
 North Star direction is a local capability network: route track contracts to the smallest qualified capability, validate results, and preserve structured evidence for future routing and track improvement.
 
@@ -12,8 +12,8 @@ North Star direction is a local capability network: route track contracts to the
 
 | Milestone | Status |
 |---|---|
+| **SEC-01 (Central Execution-Policy Runtime Gate)** | Implemented & Verified on `milestone/sec-01-execution-policy-runtime-gate` (`ready-for-delivery` pending merge) |
 | **CORE-07 (Starter Read-Only Workflow Pack Library)** | Complete & Merged (PR #47) |
-| **SEC-01 (Central Execution-Policy Runtime Gate)** | Planned (queued next pending explicit start) |
 | **CORE-06 (Workflow Pack Contract, Starter SDK, and Automatic Task Intake)** | Complete & Merged (PR #46) |
 | **CORE-01 – CORE-05 (Generic Capabilities, Matrix Qualification, Fallback, Console Explorer)** | Complete & Merged |
 | **SYSTEM-PROOF-01 (Real Multi-Track Workflow Proof)** | Complete & Merged (`POSITIVE` verdict) |

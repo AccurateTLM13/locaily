@@ -36,6 +36,7 @@
             <li><a class="side-rail__link" href="#workflows" id="navWorkflowsLink">Workflows</a></li>
             <li><a class="side-rail__link" href="#matrix" id="navMatrixLink">Model Matrix</a></li>
             <li><a class="side-rail__link" href="#activity" id="navActivityLink">Activity</a></li>
+            <li><a class="side-rail__link" href="#security" id="navSecurityLink">Security</a></li>
             <li><a class="side-rail__link" href="/#benchmarks" target="_blank" rel="noopener">Benchmark Lab ↗</a></li>
           </ul>
         </nav>
@@ -469,6 +470,139 @@
             </div>
             <section class="surface activity-surface">
               <div id="activityRunsList" class="history-list">Loading runs…</div>
+            </section>
+          </div>
+
+          <!-- Execution Policy & Security View Panel -->
+          <div id="securityView" class="view-panel" hidden>
+            <div class="view-header">
+              <div>
+                <h2 class="section-title">Execution Policy Runtime Gate &amp; Approvals</h2>
+                <p class="section-subtitle">Models may propose actions; Locaily decides whether they execute (fail-closed default: deny).</p>
+              </div>
+              <button id="refreshSecurityBtn" type="button" class="btn btn--ghost">Refresh Policy &amp; Queue</button>
+            </div>
+
+            <div class="matrix-stats-grid security-stats-grid">
+              <div class="surface stat-card">
+                <div class="stat-card__number stat-card__number--success" id="secStatStatus">enforced</div>
+                <div class="stat-card__label">Gate Status</div>
+              </div>
+              <div class="surface stat-card">
+                <div class="stat-card__number" id="secStatDefault">deny</div>
+                <div class="stat-card__label">Default Decision</div>
+              </div>
+              <div class="surface stat-card">
+                <div class="stat-card__number" id="secStatPending">0</div>
+                <div class="stat-card__label">Pending Approvals</div>
+              </div>
+              <div class="surface stat-card">
+                <div class="stat-card__number" id="secStatDeniedRules">13</div>
+                <div class="stat-card__label">Immutable Deny Rules</div>
+              </div>
+            </div>
+
+            <div class="workflow-catalog-grid">
+              <section class="surface" aria-labelledby="securityApprovalsTitle">
+                <div class="section-header">
+                  <div>
+                    <h3 id="securityApprovalsTitle" class="section-title">Human Approval Queue</h3>
+                    <p class="section-subtitle">Approve or deny actions paused with <code>require_approval</code>. Permanently denied actions cannot be approved.</p>
+                  </div>
+                  <select id="securityApprovalsFilter" class="field__input" aria-label="Filter approvals">
+                    <option value="">All Statuses</option>
+                    <option value="pending" selected>Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="denied">Denied</option>
+                    <option value="expired">Expired</option>
+                  </select>
+                </div>
+                <div id="securityApprovalsList" class="approval-list">Loading approval queue…</div>
+              </section>
+
+              <section class="surface" aria-labelledby="securityEvaluateTitle">
+                <div class="section-header">
+                  <div>
+                    <h3 id="securityEvaluateTitle" class="section-title">Interactive Policy Gate Tester</h3>
+                    <p class="section-subtitle">Evaluate an action request against <code>policies/default-execution-policy.json</code> via <code>POST /security/evaluate</code>.</p>
+                  </div>
+                  <span id="secAdapterBadge" class="status-pill status-pill--pending">
+                    <span class="status-pill__dot" aria-hidden="true"></span>
+                    <span class="status-pill__label">native</span>
+                  </span>
+                </div>
+                <form id="securityEvaluateForm" class="launcher-form">
+                  <div class="field">
+                    <label for="secActionInput" class="field__label">Action</label>
+                    <input id="secActionInput" list="secActionSuggestions" class="field__input" value="memory.writeback.apply" required>
+                    <datalist id="secActionSuggestions">
+                      <option value="filesystem.read.workspace"></option>
+                      <option value="filesystem.write.workspace"></option>
+                      <option value="filesystem.delete"></option>
+                      <option value="memory.writeback.apply"></option>
+                      <option value="shell.execute.approved"></option>
+                      <option value="shell.execute.arbitrary"></option>
+                      <option value="credentials.read"></option>
+                      <option value="nearbyNode.register"></option>
+                      <option value="nearbyNode.invoke"></option>
+                      <option value="policy.modify.runtime"></option>
+                      <option value="audit.disable"></option>
+                      <option value="unknown.unlisted.action"></option>
+                    </datalist>
+                  </div>
+                  <div class="field">
+                    <label for="secTargetInput" class="field__label">Target</label>
+                    <input id="secTargetInput" type="text" class="field__input" value="projects/sample-note.md" required>
+                  </div>
+                  <div class="fields-row">
+                    <div class="field">
+                      <label for="secRequestedByInput" class="field__label">Requested By</label>
+                      <input id="secRequestedByInput" type="text" class="field__input" value="console-operator" required>
+                    </div>
+                    <div class="field">
+                      <label for="secRiskSelect" class="field__label">Risk Level</label>
+                      <select id="secRiskSelect" class="field__input">
+                        <option value="low">low</option>
+                        <option value="medium" selected>medium</option>
+                        <option value="high">high</option>
+                        <option value="critical">critical</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="secReasonInput" class="field__label">Reason</label>
+                    <input id="secReasonInput" type="text" class="field__input" value="Console policy gate test" required>
+                  </div>
+                  <label class="intake-toggle">
+                    <input id="secCreateApprovalCheckbox" type="checkbox">
+                    <span>Queue for human approval if policy returns <code>require_approval</code></span>
+                  </label>
+                  <div class="launcher-actions">
+                    <button id="btnEvaluatePolicy" type="submit" class="btn btn--primary">Evaluate Policy Decision</button>
+                  </div>
+                </form>
+
+                <div id="securityEvalResultCard" class="intake-result-card" hidden>
+                  <div class="section-header">
+                    <h4>Gate Decision</h4>
+                    <span id="securityEvalBadge" class="status-pill">
+                      <span class="status-pill__dot" aria-hidden="true"></span>
+                      <span class="status-pill__label"></span>
+                    </span>
+                  </div>
+                  <dl id="securityEvalFields" class="result-fields"></dl>
+                </div>
+              </section>
+            </div>
+
+            <section class="surface" aria-labelledby="securityDecisionsTitle">
+              <div class="section-header">
+                <div>
+                  <h3 id="securityDecisionsTitle" class="section-title">Recent Policy Decisions Audit Trail</h3>
+                  <p class="section-subtitle">Chronological record from <code>GET /security/decisions</code> and <code>data/security/policy-decisions.jsonl</code>.</p>
+                </div>
+              </div>
+              <div id="securityDecisionsList" class="decision-list">Loading policy decisions…</div>
             </section>
           </div>
         </main>

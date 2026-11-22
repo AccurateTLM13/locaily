@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "sec-01-execution-policy-runtime-gate",
   "title": "SEC-01 Central Execution-Policy Runtime Gate",
-  "status": "planned",
+  "status": "ready-for-delivery",
   "type": "infrastructure",
   "priority": "high",
   "purpose": "Enforce Locaily's central execution-security boundary at runtime ('models may propose actions; Locaily decides whether they execute') using policies/default-execution-policy.json, action-request.schema.json, and policy-decision.schema.json before enabling any write, shell, or network capabilities in Workflow Packs or tools.",
@@ -29,26 +29,42 @@
     {
       "id": "sec-01-ac-engine",
       "description": "Fail-closed runtime policy engine evaluating action-request.schema.json against policies/default-execution-policy.json (defaultDecision: 'deny', emitting policy-decision.schema.json decisions: allow, require_approval, deny).",
-      "status": "pending",
-      "evidence": []
+      "status": "satisfied",
+      "evidence": [
+        "policies/default-execution-policy.json (v1.0.0 status=enforced, defaultDecision=deny)",
+        "companion/security/{policy-loader.js,policy-evaluator-adapter.js,execution-gate.js,index.js}",
+        "scripts/test-sec01-execution-policy-gate.js AC1 & AC4 (verified schema validation, fail-closed unknown/prototype/invalid requests, workspace-escape/credential/config escalation)"
+      ]
     },
     {
       "id": "sec-01-ac-hooks",
       "description": "Enforcement hooks wrapping filesystem, shell, network, credential, and NearbyNode tool and Workflow Pack execution paths with explicit decision codes and audit events (zero bypasses).",
-      "status": "pending",
-      "evidence": []
+      "status": "satisfied",
+      "evidence": [
+        "companion/crew/tool-router.js (executeToolStep policy hook)",
+        "companion/packs/workflow-pack-loader.js (evaluatePackExecutionPolicy surfaced on /packs and /packs/:id)",
+        "companion/relay/router.js & companion/server.js (/tasks/run, /analyze, /tracks/run, /workflows/run, /memory/writeback/apply, /relay/register, /relay/step)",
+        "Clean-server smoke-test.js 61/61, test:jobs:production 8/8, test:relay:e2e 11/11, npm run test:full 28/28 suites passed"
+      ]
     },
     {
       "id": "sec-01-ac-approval-ui",
       "description": "Human-in-the-loop approval flow (API + Companion Console UI surface) for require_approval actions while preserving hard deny for shell.execute.arbitrary, credentials.read, audit.disable, and policy.modify.runtime.",
-      "status": "pending",
-      "evidence": []
+      "status": "satisfied",
+      "evidence": [
+        "companion/security/approval-store.js & companion/server.js (/security/policy, /security/evaluate, /security/decisions, /security/approvals, /security/approvals/:id/approve|deny)",
+        "companion/console/{index.html,app.js,styles.css} (#navSecurityLink, #securityView, approval queue controls, interactive policy evaluator)",
+        "scripts/test-sec01-execution-policy-gate.js AC2, AC3 & AC6"
+      ]
     },
     {
       "id": "sec-01-ac-nope-and-tests",
       "description": "NOPE evaluation decision (docs/security/NOPE-EVALUATION.md) recorded in docs/06-decisions/decision-log.md and comprehensive positive/negative security test suite wired into npm run test:full.",
-      "status": "pending",
-      "evidence": []
+      "status": "satisfied",
+      "evidence": [
+        "docs/security/NOPE-EVALUATION.md & docs/06-decisions/decision-log.md (native zero-dependency evaluator behind pluggable adapter)",
+        "scripts/test-sec01-execution-policy-gate.js (7/7 passed) wired as package.json test:execution-policy and inside test:full"
+      ]
     }
   ],
   "validationProfile": "pre-delivery",
@@ -58,7 +74,10 @@
   "blockers": [],
   "lifecycleRef": null,
   "createdAt": "2026-11-22T18:52:00.000Z",
-  "startedAt": null,
-  "completedAt": null,
-  "mergedAt": null
+  "startedAt": "2026-11-22T19:32:06.250Z",
+  "completedAt": "2026-11-22T19:47:06.025Z",
+  "mergedAt": null,
+  "latestValidationId": "validation-20261122T194545-4362baf5",
+  "completionBranch": "milestone/sec-01-execution-policy-runtime-gate",
+  "completionHead": "6cf489d057a09931016e3dcf1c0ffa98c260d80d"
 }

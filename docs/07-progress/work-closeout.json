@@ -1,35 +1,31 @@
 {
-  "work_id": "core-07-starter-workflow-packs-20261122",
-  "objective_id": "core-07-starter-workflow-packs",
+  "work_id": "sec-01-execution-policy-runtime-gate-20261122",
+  "objective_id": "sec-01-execution-policy-runtime-gate",
   "status": "complete",
-  "closed_at": "2026-11-22T19:03:00.000Z",
-  "original_goal": "Implement five read-only starter Workflow Packs (PR diff review, CI failure triage, issue triage, meeting notes action plan, release notes) under CORE-07 and queue SEC-01 Central Execution-Policy Runtime Gate as the next planned milestone.",
+  "closed_at": "2026-11-22T19:45:00.000Z",
+  "original_goal": "Implement SEC-01 Central Execution-Policy Runtime Gate enforcing fail-closed runtime decisions against policies/default-execution-policy.json across tool, pack, memory writeback, and NearbyNode relay execution paths, with human approval API/UI and NOPE evaluation decision.",
   "completed": [
-    "Implemented five strictly read-only Workflow Packs under workflow-packs/: pr-diff-review-pack, ci-failure-triage-pack, issue-triage-pack, meeting-notes-pack, and release-notes-pack.",
-    "Composes shared qualified core.* tracks (core.classify, core.prioritize, core.summarize, plus core.validate verification gate in meeting-notes-pack) with pure in-memory tools (model.run only, zero disk/shell/network imports or permissions).",
-    "Added rank.items and transform.map to companion/config.json tools.enabled so shared core.prioritize and core.transform resolve on the live companion server.",
-    "Tuned cross-pack intake negative_keywords and expanded companion/schemas/fixtures/task-intake-labeled-dataset.json from 26 to 42 labeled cases achieving 42/42 (100.0%) accuracy, 100.0% refusal recall, and 0 invented tracks.",
-    "Updated Companion Console (companion/console/app.js) pack cards with mode: read-only/side-effects posture badge and one-click Load in Runner button.",
-    "Added acceptance suite scripts/test-core07-starter-packs.js (7/7 passed), wired test:starter-packs into package.json and test:full (all 27 suites), and updated workflow-packs/state documentation.",
-    "Queued sec-01-execution-policy-runtime-gate (SEC-01 Central Execution-Policy Runtime Gate) as status='planned' in development/milestones/ and development/roadmap.json without starting it."
+    "Upgraded policies/default-execution-policy.json to version 1.0.0 (status: enforced, defaultDecision: deny) preserving all 11 canonical actions plus runtime actions for model, tool, filesystem, browser, memory, NearbyNode, audit, and software controls.",
+    "Implemented companion/security/ (policy-loader.js, policy-evaluator-adapter.js, approval-store.js, execution-gate.js, index.js) with Map/Set prototype-safe lookups, ALWAYS_DENIED_ACTIONS immutable guardrails, workspace/credential/config escalation guards, durable action+target-bound approval store, JSONL policy decision log, and schema-valid audit-log emission.",
+    "Wired executionGate runtime enforcement hooks into companion/crew/tool-router.js (executeToolStep), companion/packs/workflow-pack-loader.js (evaluatePackExecutionPolicy on /packs and /packs/:id), companion/relay/router.js, and companion/server.js (/tasks/run, /analyze, /tracks/run, /workflows/run, /memory/writeback/apply, /relay/register, /relay/step, /health, /console/status).",
+    "Exposed HTTP operator endpoints (/security/policy, /security/evaluate, /security/decisions, /security/approvals, /security/approvals/:id/approve, /security/approvals/:id/deny) and added the Security view (#security / #navSecurityLink) to Companion Console (companion/console/{index.html,app.js,styles.css}).",
+    "Evaluated @agnt-gg/nope in docs/security/NOPE-EVALUATION.md (zero-dependency native evaluator behind pluggable adapter selected for SEC-01), recorded ADR in docs/06-decisions/decision-log.md, and updated docs/security/{README,EXECUTION-POLICY,CAPABILITY-BOUNDARIES}.md and progress docs.",
+    "Created scripts/test-sec01-execution-policy-gate.js (7/7 passed), wired test:execution-policy into package.json and test:full, and updated scripts/test-core07-starter-packs.js AC7 for valid SEC-01 lifecycle states."
   ],
   "remaining": [],
-  "next_required_action": "CORE-07 merged to main via PR #47; ready to begin sec-01-execution-policy-runtime-gate.",
+  "next_required_action": "Open PR and merge SEC-01 (milestone/sec-01-execution-policy-runtime-gate) into main after user approval.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
-  "working_branch": "main",
+  "working_branch": "milestone/sec-01-execution-policy-runtime-gate",
   "validation": {
     "passed": [
-      "npm.cmd run pack:validate across all 6 packs (100% ok: true)",
-      "npm.cmd run pack:test across all 6 packs (100% passed, schemaValid: true)",
-      "npm.cmd run test:starter-packs (7/7 passed, 42/42 intake eval = 100.0%)",
-      "npm.cmd run test:task-intake (6/6 passed, 42/42 intake eval = 100.0%)",
-      "npm.cmd run test:workflow-packs (7/7 passed)",
-      "npm.cmd run test:full (all 27 suites exited 0)",
-      "node scripts/smoke-test.js (clean companion server: 61/61 passed)",
+      "npm.cmd run test:execution-policy (7/7 passed)",
+      "npm.cmd run test:starter-packs (7/7 passed)",
+      "node scripts/smoke-test.js on clean companion server (61/61 passed)",
       "npm.cmd run test:jobs:production (8/8 passed)",
       "npm.cmd run test:relay:e2e (11/11 passed)",
-      "GitHub Actions PR #47 CI (verify, Analyze (actions), Analyze (javascript-typescript), CodeQL all passed)"
+      "CORE-06 live HTTP spot-checks (workflowPacks.loaded=6, /packs, /intake/route, /console passed)",
+      "npm.cmd run test:full (all 28 suites passed)"
     ],
     "failed": [],
     "not_run": []

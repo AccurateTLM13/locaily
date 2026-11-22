@@ -24,6 +24,7 @@ const { createModelRoleManager } = require("./core/model-roles");
 const { createModelProfileManager } = require("./core/model-profiles");
 const { createModelQualificationLoader } = require("./core/model-qualification-loader");
 const { createPermissionManager } = require("./core/permissions");
+const { createExecutionGate } = require("./security");
 const { runToolWithValidation } = require("./core/result-validator");
 const { createProviderRouter } = require("./providers/router");
 const { createOllamaRuntime } = require("./runtime/ollama");
@@ -51,6 +52,7 @@ const {
   getDefaultWorkflowPackRegistry,
   validateWorkflowPack,
   evaluatePackPermissions,
+  evaluatePackExecutionPolicy,
   evaluatePackQualificationReadiness
 } = require("./packs");
 const { recordScoreboardEntry, getScoreboardSummary } = require("./core/scoreboard");
@@ -309,6 +311,12 @@ const auditLog = createAuditLog({
   filePath: config.audit.filePath
 });
 const permissionManager = createPermissionManager(config.permissions);
+const executionGate = createExecutionGate({
+  auditLog,
+  workspaceRoot: join(__dirname, ".."),
+  approvalsFilePath: process.env.EXECUTION_POLICY_APPROVALS_PATH || undefined,
+  decisionsFilePath: process.env.EXECUTION_POLICY_DECISIONS_PATH || undefined
+});
 const localSetupStore = createLocalSetupStore({
   dataDir: join(__dirname, "..", "data")
 });
@@ -1287,6 +1295,7 @@ const server = http.createServer(async (request, response) => {
       const packs = packRegistry.listPacks().map((pack) => ({
         ...pack,
         permissionStatus: evaluatePackPermissions(pack, permissionManager),
+        executionPolicyStatus: evaluatePackExecutionPolicy(pack, executionGate),
         qualificationReadiness: evaluatePackQualificationReadiness(pack, qualificationResolver)
       }));
       return sendJson(response, 200, {
@@ -1313,6 +1322,7 @@ const server = http.createServer(async (request, response) => {
         pack: {
           ...pack,
           permissionStatus: evaluatePackPermissions(pack, permissionManager),
+          executionPolicyStatus: evaluatePackExecutionPolicy(pack, executionGate),
           qualificationReadiness: evaluatePackQualificationReadiness(pack, qualificationResolver)
         }
       });
@@ -1490,6 +1500,167 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, workflowRunResult.statusCode, workflowRunResult.body);
     }
 
+    if (request.method === "GET" && url.pathname === "/security/policy") {
+      return sendJson(response, 200, {
+        ok: true,
+        policy: executionGate.getPolicySnapshot(),
+        status: executionGate.getStatus()
+      });
+    }
+
+    if (
+      ["POST", "PUT", "PATCH", "DELETE"].includes(request.method || "")
+      && url.pathname === "/security/policy"
+    ) {
+      const denyModify = await executionGate.evaluate({
+        action: "policy.modify.runtime",
+        target: "policies/default-execution-policy.json",
+        requestedBy: "http-operator",
+        reason: `Attempted ${request.method} /security/policy runtime mutation`,
+        riskLevel: "critical"
+      }, {
+        runId: identity.run_id,
+        traceId: identity.trace_id,
+        surface: "http:/security/policy"
+      });
+      return sendJson(response, 403, {
+        ok: false,
+        code: denyModify.code,
+        message: denyModify.decision.reason,
+        nextStep: "Runtime modification of execution policy is forbidden; edit policies/default-execution-policy.json via reviewed source changes.",
+        policy_decision: denyModify.decision
+      });
+    }
+
+    if (request.method === "POST" && url.pathname === "/security/evaluate") {
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send { action, target, requestedBy, reason, riskLevel?, dryRun?, createApproval?, approvalId? }."
+        });
+      }
+
+      const raw = bodyResult.body && typeof bodyResult.body === "object" && !Array.isArray(bodyResult.body)
+        ? bodyResult.body
+        : {};
+      const actionRequest = {
+        action: raw.action,
+        target: raw.target,
+        requestedBy: raw.requestedBy,
+        reason: raw.reason
+      };
+      if (raw.projectId !== undefined) actionRequest.projectId = raw.projectId;
+      if (raw.nodeId !== undefined) actionRequest.nodeId = raw.nodeId;
+      if (raw.riskLevel !== undefined) actionRequest.riskLevel = raw.riskLevel;
+
+      const createApproval = raw.createApproval === true;
+      const dryRun = raw.dryRun !== undefined ? raw.dryRun !== false && !createApproval : !createApproval;
+      const evalResult = await executionGate.evaluate(actionRequest, {
+        dryRun,
+        createApproval,
+        approvalId: raw.approvalId || request.headers["x-locaily-approval-id"] || null,
+        runId: identity.run_id,
+        traceId: identity.trace_id,
+        surface: "http:/security/evaluate"
+      });
+
+      return sendJson(response, 200, {
+        ok: true,
+        ...evalResult
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/security/decisions") {
+      const limit = Number(url.searchParams.get("limit") || 50);
+      return sendJson(response, 200, {
+        ok: true,
+        decisions: executionGate.listDecisions(limit),
+        status: executionGate.getStatus()
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/security/approvals") {
+      const statusFilter = url.searchParams.get("status") || null;
+      const limit = Number(url.searchParams.get("limit") || 50);
+      return sendJson(response, 200, {
+        ok: true,
+        approvals: executionGate.approvals.list({
+          status: statusFilter,
+          limit
+        })
+      });
+    }
+
+    const securityApproveMatch = url.pathname.match(/^\/security\/approvals\/([^/]+)\/approve$/);
+    if (securityApproveMatch && request.method === "POST") {
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send { operator?, reason?, constraints? }."
+        });
+      }
+
+      const approvalId = decodeURIComponent(securityApproveMatch[1]);
+      const raw = bodyResult.body || {};
+      const resolved = executionGate.approvals.approve(approvalId, {
+        operator: raw.operator,
+        reason: raw.reason,
+        constraints: raw.constraints !== undefined ? raw.constraints : null
+      });
+
+      if (!resolved.ok) {
+        return sendJson(response, resolved.statusCode || 400, {
+          ok: false,
+          code: resolved.code,
+          message: resolved.message
+        });
+      }
+
+      return sendJson(response, 200, {
+        ok: true,
+        approval: resolved.approval
+      });
+    }
+
+    const securityDenyMatch = url.pathname.match(/^\/security\/approvals\/([^/]+)\/deny$/);
+    if (securityDenyMatch && request.method === "POST") {
+      const bodyResult = await readJsonBody(request);
+      if (!bodyResult.ok) {
+        return sendJson(response, 400, {
+          ok: false,
+          code: "BAD_JSON",
+          message: "Request body could not be parsed as JSON.",
+          nextStep: "Send { operator?, reason? }."
+        });
+      }
+
+      const approvalId = decodeURIComponent(securityDenyMatch[1]);
+      const raw = bodyResult.body || {};
+      const resolved = executionGate.approvals.deny(approvalId, {
+        operator: raw.operator,
+        reason: raw.reason
+      });
+
+      if (!resolved.ok) {
+        return sendJson(response, resolved.statusCode || 400, {
+          ok: false,
+          code: resolved.code,
+          message: resolved.message
+        });
+      }
+
+      return sendJson(response, 200, {
+        ok: true,
+        approval: resolved.approval
+      });
+    }
+
     if (request.method === "GET" && url.pathname === "/providers/status") {
       return sendJson(response, 200, await buildProvidersStatusResponse());
     }
@@ -1603,11 +1774,57 @@ const server = http.createServer(async (request, response) => {
         }
       }
 
-      const { nodeId, baseUrl, label, capabilities, hardware, protocolVersion, overwrite } = bodyResult.body || {};
+      const { nodeId, baseUrl, label, capabilities, hardware, protocolVersion, overwrite, approvalId, requirePolicyApproval } = bodyResult.body || {};
+      const strictRelay = !isLoopback(baseUrl)
+        || Boolean(config.relay && config.relay.lanMode)
+        || process.env.EXECUTION_POLICY_STRICT_RELAY === "1"
+        || requirePolicyApproval === true
+        || request.headers["x-locaily-strict-policy"] === "1";
+
+      const relayRegisterGate = await executionGate.evaluate({
+        action: "nearbyNode.register",
+        target: String(baseUrl || nodeId || "relay:unknown"),
+        requestedBy: "relay.register",
+        reason: "Register NearbyNode capability advertisement",
+        ...(nodeId ? { nodeId: String(nodeId) } : {}),
+        riskLevel: "high"
+      }, {
+        approvalId: approvalId || request.headers["x-locaily-approval-id"] || null,
+        createApproval: strictRelay,
+        runId: identity.run_id,
+        traceId: identity.trace_id,
+        surface: "http:/relay/register"
+      });
+
+      if (
+        relayRegisterGate.code === "POLICY_DENIED"
+        || relayRegisterGate.code === "APPROVAL_INVALID"
+        || (!relayRegisterGate.allowed && strictRelay)
+      ) {
+        return sendJson(response, 403, {
+          ok: false,
+          code: relayRegisterGate.code,
+          message: relayRegisterGate.decision.reason,
+          nextStep: relayRegisterGate.code === "APPROVAL_REQUIRED" && relayRegisterGate.approval
+            ? `Approve '${relayRegisterGate.approval.id}' via POST /security/approvals/:id/approve, then retry with approvalId.`
+            : "Blocked by Locaily execution policy.",
+          policy_decision: relayRegisterGate.decision,
+          approval: relayRegisterGate.approval
+        });
+      }
 
       try {
         const node = relayRegistry.register({ nodeId, baseUrl, label, capabilities, hardware, protocolVersion, overwrite });
-        return sendJson(response, 200, { ok: true, node });
+        return sendJson(response, 200, {
+          ok: true,
+          node,
+          execution_policy: {
+            code: relayRegisterGate.code,
+            decision: relayRegisterGate.decision.decision,
+            strict: strictRelay,
+            ...(strictRelay ? {} : { loopback_dev_compat: true })
+          }
+        });
       } catch (error) {
         return sendJson(response, 400, {
           ok: false,
@@ -1765,7 +1982,7 @@ const server = http.createServer(async (request, response) => {
         }
       }
 
-      const { step, context, options, meta } = bodyResult.body || {};
+      const { step, context, options, meta, approvalId } = bodyResult.body || {};
 
       if (!step || typeof step !== "object" || !step.executor) {
         return sendJson(response, 400, {
@@ -1776,12 +1993,74 @@ const server = http.createServer(async (request, response) => {
         });
       }
 
+      const executorType = step.executor.type;
+      const isUnsupportedExecutor = executorType !== "model" && executorType !== "tool";
+      const isUnregisteredTool = executorType === "tool" && (!step.executor.tool || !toolRegistry.has(step.executor.tool));
+
+      if (isUnsupportedExecutor || isUnregisteredTool) {
+        const unregisteredGate = await executionGate.evaluate({
+          action: "nearbyNode.invoke.unregistered",
+          target: String(step.executor.tool || step.executor.type || step.id || "unregistered"),
+          requestedBy: "relay.step",
+          reason: "Attempted relay invocation of unregistered capability or executor",
+          riskLevel: "critical"
+        }, {
+          runId: identity.run_id,
+          traceId: identity.trace_id,
+          surface: "http:/relay/step"
+        });
+        return sendJson(response, 403, {
+          ok: false,
+          code: unregisteredGate.code,
+          message: unregisteredGate.decision.reason,
+          nextStep: "Register an authorized capability or tool before invoking /relay/step.",
+          policy_decision: unregisteredGate.decision
+        });
+      }
+
+      const strictRelayStep = !isLoopback(config.server.host)
+        || Boolean(config.relay && config.relay.lanMode)
+        || process.env.EXECUTION_POLICY_STRICT_RELAY === "1"
+        || Boolean(options && (options.requirePolicyApproval === true || options.strictExecutionPolicy === true))
+        || request.headers["x-locaily-strict-policy"] === "1";
+
+      const relayStepGate = await executionGate.evaluate({
+        action: "nearbyNode.invoke",
+        target: String(step.executor.tool || step.executor.role || step.id || "relay-step"),
+        requestedBy: "relay.step",
+        reason: `Execute delegated relay step '${String(step.id || executorType)}'`,
+        riskLevel: "high"
+      }, {
+        approvalId: (options && options.approvalId) || approvalId || request.headers["x-locaily-approval-id"] || null,
+        createApproval: strictRelayStep,
+        runId: identity.run_id,
+        traceId: identity.trace_id,
+        surface: "http:/relay/step"
+      });
+
+      if (
+        relayStepGate.code === "POLICY_DENIED"
+        || relayStepGate.code === "APPROVAL_INVALID"
+        || (!relayStepGate.allowed && strictRelayStep)
+      ) {
+        return sendJson(response, 403, {
+          ok: false,
+          code: relayStepGate.code,
+          message: relayStepGate.decision.reason,
+          nextStep: relayStepGate.code === "APPROVAL_REQUIRED" && relayStepGate.approval
+            ? `Approve '${relayStepGate.approval.id}' via POST /security/approvals/:id/approve, then retry with approvalId.`
+            : "Blocked by Locaily execution policy.",
+          policy_decision: relayStepGate.decision,
+          approval: relayStepGate.approval
+        });
+      }
+
       try {
         const stepResult = await executeStep({
           step,
           context: context || { input: {}, artifacts: {} },
           runtime: getActiveRuntime(),
-          options: { ...(options || {}), relay: { enabled: false } },
+          options: { ...(options || {}), executionGate, relay: { enabled: false } },
           toolRegistry,
           meta: meta || {}
         });
@@ -1793,6 +2072,15 @@ const server = http.createServer(async (request, response) => {
           meta: stepResult.meta
         });
       } catch (error) {
+        if (error && (error.code === "POLICY_DENIED" || error.code === "APPROVAL_REQUIRED" || error.code === "APPROVAL_INVALID")) {
+          return sendJson(response, 403, {
+            ok: false,
+            code: error.code,
+            message: error.message,
+            policy_decision: error.decision || null,
+            approval: error.approval || null
+          });
+        }
         return sendJson(response, 200, {
           protocolVersion: describeProtocol().version,
           ok: false,
@@ -2016,16 +2304,52 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 400, responseBody);
       }
 
+      const { targetPath, approvalId } = bodyResult.body || {};
+      const writebackGate = await executionGate.evaluate({
+        action: "memory.writeback.apply",
+        target: String(targetPath || "vault:unknown"),
+        requestedBy: "memory.writeback.apply",
+        reason: "Apply memory writeback proposal to local vault",
+        riskLevel: "high"
+      }, {
+        approvalId: approvalId || request.headers["x-locaily-approval-id"] || null,
+        runId: identity.run_id,
+        traceId: identity.trace_id,
+        surface: "http:/memory/writeback/apply"
+      });
+
+      if (!writebackGate.allowed) {
+        const responseBody = buildMemoryErrorResponse({
+          identity,
+          startedAt,
+          code: writebackGate.code,
+          message: writebackGate.decision.reason,
+          nextStep: writebackGate.code === "APPROVAL_REQUIRED" && writebackGate.approval
+            ? `Approve '${writebackGate.approval.id}' via POST /security/approvals/:id/approve, then retry with approvalId.`
+            : "Blocked by Locaily execution policy.",
+          warnings: [writebackGate.code]
+        });
+        responseBody.policy_decision = writebackGate.decision;
+        responseBody.approval = writebackGate.approval;
+        await recordMemoryAudit({
+          identity, startedAt, endpoint: "memory/writeback/apply",
+          requestBody: bodyResult.body, responseBody, statusCode: 403
+        });
+        return sendJson(response, 403, responseBody);
+      }
+
       const permissionResult = permissionManager.check({
         tool: { permissions: ["memory.writeback.apply"] },
         requestedPermissions: ["memory.writeback.apply"]
       });
 
       if (!permissionResult.ok) {
+        const errMessage = (permissionResult.error && permissionResult.error.message) || permissionResult.message || "Permission denied.";
+        const errNextStep = (permissionResult.error && permissionResult.error.nextStep) || permissionResult.nextStep || "Enable memory.writeback.apply permission.";
         const responseBody = buildMemoryErrorResponse({
           identity, startedAt, code: "PERMISSION_DENIED",
-          message: permissionResult.error.message,
-          nextStep: permissionResult.error.nextStep,
+          message: errMessage,
+          nextStep: errNextStep,
           warnings: ["memory.writeback.apply permission denied."]
         });
         await recordMemoryAudit({
@@ -2035,7 +2359,6 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, 403, responseBody);
       }
 
-      const { targetPath } = bodyResult.body || {};
       const markdown = renderProposalMarkdown(bodyResult.body || {});
       const applyResult = vaultAdapter.applyWriteback({ targetPath, content: markdown });
       const responseBody = buildMemoryActionResponse({
@@ -3243,6 +3566,13 @@ async function buildHealthResponse() {
       enforcementLocked: enforcementHealth.enforcementLocked,
       policyEndpoint: "/enforcement/policy"
     },
+    execution_policy: {
+      ...executionGate.getStatus(),
+      policyEndpoint: "/security/policy",
+      evaluateEndpoint: "/security/evaluate",
+      approvalsEndpoint: "/security/approvals",
+      decisionsEndpoint: "/security/decisions"
+    },
     learning_evidence: {
       available: learningState.shadowComparisonCount > 0,
       recordCount: learningState.shadowComparisonCount,
@@ -3595,6 +3925,13 @@ async function buildConsoleStatusResponse(modelOverride = null) {
       developmentMemoryProjects: developmentProjectRegistry.getRegistrySummary()
     },
     auditLogging: auditStatus,
+    execution_policy: {
+      ...executionGate.getStatus(),
+      policyEndpoint: "/security/policy",
+      evaluateEndpoint: "/security/evaluate",
+      approvalsEndpoint: "/security/approvals",
+      decisionsEndpoint: "/security/decisions"
+    },
     warnings
   };
 }
@@ -3953,6 +4290,7 @@ function buildModelRoutingOptions(extra = {}) {
     resolveModelForRole: (role) => resolveModelForRole(role),
     shadowRouter: (shadowOpts) => shadowRouter.computeShadowRecommendation(shadowOpts),
     enforcementPolicy,
+    executionGate,
     toolRegistry,
     memoryBridge: {
       adapter: vaultAdapter
@@ -4054,6 +4392,41 @@ async function executeAnalyzeRequest(body, context) {
     };
   }
 
+  const analyzePolicyGate = await executionGate.evaluateToolExecution({
+    tool,
+    task: body.task,
+    input: body.input,
+    requestedPermissions: resolveRequestedPermissions(body, tool),
+    requestedActions: body.options && Array.isArray(body.options.actions) ? body.options.actions : null,
+    options: {
+      ...(body.options || {}),
+      approvalId: (body.options && body.options.approvalId) || body.approvalId || null,
+      surface: "http:/analyze"
+    },
+    meta: {
+      run_id: context.identity.run_id,
+      trace_id: context.identity.trace_id,
+      requestedBy: contextPacket.source && contextPacket.source.app_id ? contextPacket.source.app_id : "analyze"
+    }
+  });
+
+  if (!analyzePolicyGate.allowed) {
+    const errorBody = buildAnalyzeError({
+      tool: body.tool,
+      task: body.task,
+      code: analyzePolicyGate.code,
+      message: analyzePolicyGate.decision.reason,
+      nextStep: getAnalyzeErrorNextStep(analyzePolicyGate.code),
+      meta: buildAnalyzeRequestMeta(context, inputGateResult, permissionResult)
+    });
+    errorBody.policy_decision = analyzePolicyGate.decision;
+    errorBody.approval = analyzePolicyGate.approval || null;
+    return {
+      statusCode: 403,
+      body: errorBody
+    };
+  }
+
   if (tool.requiresRuntime !== false) {
     const modelRole = resolveModelRole(body, tool);
     const modelResolution = resolveModelForRole(modelRole);
@@ -4147,18 +4520,24 @@ async function executeAnalyzeRequest(body, context) {
     };
   } catch (error) {
     const code = error.code || "INTERNAL_ERROR";
-    const statusCode = code === "NOT_IMPLEMENTED" ? 501 : code === "SCHEMA_VALIDATION_FAILED" ? 422 : 500;
+    const isPolicyError = code === "POLICY_DENIED" || code === "APPROVAL_REQUIRED" || code === "APPROVAL_INVALID";
+    const statusCode = isPolicyError
+      ? 403
+      : (code === "NOT_IMPLEMENTED" ? 501 : code === "SCHEMA_VALIDATION_FAILED" ? 422 : 500);
 
+    const errorBody = buildAnalyzeError({
+      tool: body.tool,
+      task: body.task,
+      code,
+      message: error.message || "Tool execution failed.",
+      nextStep: error.nextStep || getAnalyzeErrorNextStep(code),
+      meta: buildAnalyzeRequestMeta(context, inputGateResult, permissionResult, error)
+    });
+    if (error.decision) errorBody.policy_decision = error.decision;
+    if (error.approval) errorBody.approval = error.approval;
     return {
       statusCode,
-      body: buildAnalyzeError({
-        tool: body.tool,
-        task: body.task,
-        code,
-        message: error.message || "Tool execution failed.",
-        nextStep: error.nextStep || getAnalyzeErrorNextStep(code),
-        meta: buildAnalyzeRequestMeta(context, inputGateResult, permissionResult, error)
-      })
+      body: errorBody
     };
   }
 }
@@ -4291,6 +4670,51 @@ async function executeTaskRunRequest(body, context) {
     };
   }
 
+  const taskPolicyGate = await executionGate.evaluateToolExecution({
+    tool,
+    task,
+    input: toolInput,
+    requestedPermissions: resolveRequestedPermissions(body, tool),
+    requestedActions: body.options && Array.isArray(body.options.actions) ? body.options.actions : null,
+    options: {
+      ...(body.options || {}),
+      approvalId: (body.options && body.options.approvalId) || body.approvalId || null,
+      surface: "http:/tasks/run"
+    },
+    meta: {
+      run_id: context.identity.run_id,
+      trace_id: context.identity.trace_id,
+      requestedBy: contextPacket.source && contextPacket.source.app_id ? contextPacket.source.app_id : "tasks.run"
+    }
+  });
+
+  if (!taskPolicyGate.allowed) {
+    const errorBody = buildTaskRunError({
+      identity: context.identity,
+      startedAt: context.startedAt,
+      tool: body.tool,
+      task,
+      code: taskPolicyGate.code,
+      message: taskPolicyGate.decision.reason,
+      nextStep: taskPolicyGate.code === "APPROVAL_REQUIRED" && taskPolicyGate.approval
+        ? `Approve '${taskPolicyGate.approval.id}' via POST /security/approvals/:id/approve, then retry with approvalId.`
+        : getTaskRunErrorNextStep(taskPolicyGate.code),
+      modelRole,
+      model: modelResolution.ok ? modelResolution.model : getActiveModel(),
+      inputGateResult,
+      permissionResult
+    });
+    errorBody.policy_decision = taskPolicyGate.decision;
+    errorBody.approval = taskPolicyGate.approval || null;
+    return {
+      statusCode: 403,
+      tool,
+      contextPacket,
+      permissionResult,
+      body: errorBody
+    };
+  }
+
   if (tool.requiresRuntime !== false) {
     const explicitModel = resolveExplicitModel(body);
     const selectedModel = explicitModel || (modelResolution.ok ? modelResolution.model : getActiveModel());
@@ -4416,28 +4840,35 @@ async function executeTaskRunRequest(body, context) {
     };
   } catch (error) {
     const code = normalizeTaskRunErrorCode(error.code || "INTERNAL_ERROR");
-    const statusCode = code === "NOT_IMPLEMENTED" ? 501 : code === "SCHEMA_VALIDATION_FAILED" ? 422 : 500;
+    const isPolicyError = code === "POLICY_DENIED" || code === "APPROVAL_REQUIRED" || code === "APPROVAL_INVALID";
+    const statusCode = isPolicyError
+      ? 403
+      : (code === "NOT_IMPLEMENTED" ? 501 : code === "SCHEMA_VALIDATION_FAILED" ? 422 : 500);
+
+    const errorBody = buildTaskRunError({
+      identity: context.identity,
+      startedAt: context.startedAt,
+      tool: body.tool,
+      task,
+      code,
+      message: error.message || "Tool execution failed.",
+      nextStep: error.nextStep || getTaskRunErrorNextStep(code),
+      modelRole,
+      model: modelResolution.ok ? modelResolution.model : getActiveModel(),
+      inputGateResult,
+      permissionResult,
+      schemaValid: code !== "SCHEMA_VALIDATION_FAILED",
+      fallbacksUsed: error.fallbacks_used || []
+    });
+    if (error.decision) errorBody.policy_decision = error.decision;
+    if (error.approval) errorBody.approval = error.approval;
 
     return {
       statusCode,
       tool,
       contextPacket,
       permissionResult,
-      body: buildTaskRunError({
-        identity: context.identity,
-        startedAt: context.startedAt,
-        tool: body.tool,
-        task,
-        code,
-        message: error.message || "Tool execution failed.",
-        nextStep: error.nextStep || getTaskRunErrorNextStep(code),
-        modelRole,
-        model: modelResolution.ok ? modelResolution.model : getActiveModel(),
-        inputGateResult,
-        permissionResult,
-        schemaValid: code !== "SCHEMA_VALIDATION_FAILED",
-        fallbacksUsed: error.fallbacks_used || []
-      })
+      body: errorBody
     };
   }
 }
@@ -4645,9 +5076,13 @@ async function executeTrackRunRequest(body, context) {
     if (failedEvidence) {
       errorBody.evidence = failedEvidence;
     }
+    if (error.decision) errorBody.policy_decision = error.decision;
+    if (error.approval) errorBody.approval = error.approval;
+
+    const isPolicyError = code === "POLICY_DENIED" || code === "APPROVAL_REQUIRED" || code === "APPROVAL_INVALID";
 
     return {
-      statusCode: code === "TRACK_NOT_FOUND" ? 404 : 500,
+      statusCode: isPolicyError ? 403 : (code === "TRACK_NOT_FOUND" ? 404 : 500),
       body: errorBody
     };
   }
@@ -4725,6 +5160,10 @@ function validateWorkflowRequest(body) {
 }
 
 function mapWorkflowErrorStatus(code) {
+  if (code === "POLICY_DENIED" || code === "APPROVAL_REQUIRED" || code === "APPROVAL_INVALID") {
+    return 403;
+  }
+
   if (code === "WORKFLOW_NOT_FOUND" || code === "TRACK_NOT_FOUND" || code === "TRACK_REGISTRY_NOT_FOUND") {
     return 404;
   }
@@ -5138,6 +5577,8 @@ async function executeWorkflowRunRequest(body, context) {
     if (failedEvidence) {
       workflowErrorBody.evidence = failedEvidence;
     }
+    if (error.decision) workflowErrorBody.policy_decision = error.decision;
+    if (error.approval) workflowErrorBody.approval = error.approval;
 
     return {
       statusCode: mapWorkflowErrorStatus(code),
@@ -5344,6 +5785,14 @@ function normalizeToolResult(result) {
 }
 
 function getAnalyzeErrorNextStep(code) {
+  if (code === "POLICY_DENIED" || code === "APPROVAL_INVALID") {
+    return "Action was blocked by Locaily execution policy. Adjust the request to an allowed scope.";
+  }
+
+  if (code === "APPROVAL_REQUIRED") {
+    return "Approve the pending policy request via POST /security/approvals/:id/approve or Companion Console #security, then retry with approvalId.";
+  }
+
   if (code === "NOT_IMPLEMENTED") {
     return "Implement the selected tool handler in a later phase.";
   }
@@ -5509,6 +5958,14 @@ function normalizeTaskRunErrorCode(code) {
 }
 
 function getTaskRunErrorNextStep(code) {
+  if (code === "POLICY_DENIED" || code === "APPROVAL_INVALID") {
+    return "Action was blocked by Locaily execution policy. Review policies/default-execution-policy.json and adjust the requested scope.";
+  }
+
+  if (code === "APPROVAL_REQUIRED") {
+    return "Approve the pending policy request via POST /security/approvals/:id/approve or Companion Console #security, then retry with approvalId.";
+  }
+
   if (code === "TOOL_NOT_FOUND") {
     return "Use a registered tool ID from /tools.";
   }

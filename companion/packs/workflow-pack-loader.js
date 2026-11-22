@@ -778,6 +778,65 @@ function evaluatePackPermissions(pack, permissionManager) {
   };
 }
 
+function evaluatePackExecutionPolicy(pack, executionGate = null) {
+  if (executionGate && typeof executionGate.evaluatePackPolicy === "function") {
+    return executionGate.evaluatePackPolicy(pack);
+  }
+
+  const { loadExecutionPolicy, createNativePolicyEvaluator, mapPermissionToAction } = require("../security");
+  const policy = loadExecutionPolicy();
+  const evaluator = createNativePolicyEvaluator({ policy });
+  const perms = (pack && pack.permissions) || { required: [], optional: [] };
+  const required = Array.isArray(perms.required) ? perms.required : [];
+  const actionsToCheck = required.length > 0
+    ? required.map(mapPermissionToAction).filter(Boolean)
+    : ["tool.execute.deterministic"];
+  const packId = (pack && pack.id) || "unknown-pack";
+
+  const allowed = [];
+  const requireApproval = [];
+  const denied = [];
+  const evaluatedActions = [];
+
+  for (const action of actionsToCheck) {
+    const decision = evaluator.evaluate({
+      action,
+      target: `workflow-pack:${packId}`,
+      requestedBy: `workflow-pack:${packId}`,
+      reason: `Pack permission declaration '${action}'`,
+      riskLevel: "medium"
+    });
+    evaluatedActions.push({ action, decision: decision.decision, reason: decision.reason });
+    if (decision.decision === "allow" || decision.decision === "constrain") {
+      allowed.push(action);
+    } else if (decision.decision === "require_approval") {
+      requireApproval.push(action);
+    } else {
+      denied.push(action);
+    }
+  }
+
+  const readOnlyActions = new Set([
+    "model.run",
+    "tool.execute.deterministic",
+    "filesystem.read.workspace",
+    "memory.read"
+  ]);
+  const optional = Array.isArray(perms.optional) ? perms.optional : [];
+  const allDeclared = [...required, ...optional].map(mapPermissionToAction).filter(Boolean);
+
+  return {
+    ok: denied.length === 0 && requireApproval.length === 0,
+    readOnly: allDeclared.every((action) => readOnlyActions.has(action)),
+    policyVersion: policy.version,
+    defaultDecision: policy.defaultDecision,
+    evaluatedActions,
+    allowed,
+    requireApproval,
+    denied
+  };
+}
+
 function evaluatePackQualificationReadiness(pack, qualificationResolver) {
   const reqs = (pack && (pack.qualification_requirements || pack.qualificationRequirements)) || [];
   if (!Array.isArray(reqs) || reqs.length === 0) {
@@ -844,6 +903,7 @@ module.exports = {
   validateWorkflowPack,
   createWorkflowPackRegistry,
   evaluatePackPermissions,
+  evaluatePackExecutionPolicy,
   evaluatePackQualificationReadiness,
   getDefaultWorkflowPackRegistry,
   reloadDefaultWorkflowPacks,

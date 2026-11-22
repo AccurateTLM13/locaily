@@ -1,5 +1,34 @@
 # Decision Log
 
+## 2026-11-22 — SEC-01 Central Execution-Policy Runtime Gate & NOPE Evaluation Decision
+
+### Context
+
+Locaily's execution security boundary (`docs/security/*` and `policies/default-execution-policy.json`) previously existed only as design documentation. Before introducing write-capable, shell, or network capabilities to Workflow Packs or tools, Locaily needed a fail-closed central runtime enforcement gate with human approval flows, audit logging, and an evaluation decision on `@agnt-gg/nope`.
+
+### Decision
+
+- **Implement `companion/security/` as Locaily's central execution-policy runtime gate:**
+  - `policy-loader.js`: Enforces `defaultDecision: "deny"`, validates policy structure on load, uses prototype-safe `Map`/`Set` lookups, and maintains an immutable `ALWAYS_DENIED_ACTIONS` set (`shell.execute.arbitrary`, `credentials.read`, `credentials.write`, `credentials.pass.external`, `audit.disable`, `audit.delete`, `policy.modify.runtime`, `filesystem.delete.protected`, `nearbyNode.invoke.unregistered`, `software.install.system`, `software.download_execute`, `publish.social`, `memory.delete`).
+  - `policy-evaluator-adapter.js`: Evaluates `policies/action-request.schema.json` against `policies/default-execution-policy.json` (`1.0.0`, `"enforced"`) with workspace-escape, credential-path, protected security/audit path, and config-file escalation checks, emitting decisions validated against `policies/policy-decision.schema.json`.
+  - `approval-store.js`: Durable human-in-the-loop queue (`data/security/approvals.json`) bound strictly to `action` + `target`, supporting constraints and refusing approval of immutable hard-deny actions.
+  - `execution-gate.js`: Single gate entry point emitting decision logs (`data/security/policy-decisions.jsonl`) and schema-valid audit records (`companion/core/audit-log.js`).
+- **Reject `@agnt-gg/nope` npm adoption in `SEC-01` (recorded in `docs/security/NOPE-EVALUATION.md`):** Keep Locaily's zero-dependency runtime while wrapping `createNativePolicyEvaluator` behind `wrapEvaluatorAdapter` so external policy engines remain swappable in the future without changing runtime callers.
+- **Enforce runtime hooks without breaking local loopback relay tests:** Hook `/tasks/run`, `/analyze`, `/tracks/run`, `/workflows/run`, `executeToolStep`, `evaluatePackExecutionPolicy`, `/memory/writeback/apply`, `/relay/register`, `/relay/step`, and `companion/relay/router.js`. Hard-deny `nearbyNode.invoke.unregistered` everywhere; enforce blocking `403 APPROVAL_REQUIRED` on remote/LAN/strict relay calls (`EXECUTION_POLICY_STRICT_RELAY=1` or `x-locaily-strict-policy: 1`) while evaluating and audit-logging localhost loopback relay dev/E2E calls.
+- **Expose operator APIs & Console `#security` UI:** `/security/policy`, `/security/evaluate`, `/security/decisions`, `/security/approvals`, `/security/approvals/:id/approve`, `/security/approvals/:id/deny`, plus `companion/console/` Security panel.
+
+### Consequences
+
+- Unknown, invalid, credential-targeted, or permanently denied actions fail closed across API and tool-router execution paths.
+- Side-effecting `require_approval` operations (`memory.writeback.apply`, `filesystem.delete`, `shell.execute.approved`, strict NearbyNode actions) pause until an operator explicitly approves the pending approval ID.
+- Zero external runtime dependencies were added to `package.json`.
+
+### Status
+
+Implemented and verified on `milestone/sec-01-execution-policy-runtime-gate` (2026-11-22).
+
+---
+
 ## 2026-11-18 — CORE-06 Workflow Pack Contract, Starter SDK, and Automatic Task Intake
 
 ### Context
