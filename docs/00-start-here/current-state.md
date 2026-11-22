@@ -2,11 +2,11 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-11-22 (SEC-01 Central Execution-Policy Runtime Gate implemented on `milestone/sec-01-execution-policy-runtime-gate`; CORE-07 Starter Read-Only Workflow Pack Library merged on `main` via PR #47; CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
+**Updated:** 2026-11-22 (SEC-01 Central Execution-Policy Runtime Gate merged on `main` via PR #48; `main` is idle; CORE-07, CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Milestone
 
-**`sec-01-execution-policy-runtime-gate` (`SEC-01` — Active on `milestone/sec-01-execution-policy-runtime-gate`).** Enforces Locaily's central fail-closed execution-policy runtime gate (`companion/security/`, `policies/default-execution-policy.json` v1.0.0 `status: "enforced"`), wrapping tool, track/pack, memory writeback apply, and NearbyNode relay execution paths with human approval flows (`/security/*` + Companion Console `#security`) and the recorded NOPE dependency decision (`docs/security/NOPE-EVALUATION.md`).
+**None — `main` is idle.** SEC-01 (`sec-01-execution-policy-runtime-gate`) merged on `main` via PR #48 (`2b3c1b1`). Enforces Locaily's central fail-closed execution-policy runtime gate (`companion/security/`, `policies/default-execution-policy.json` v1.0.0 `status: "enforced"`), wrapping tool, track/pack, memory writeback apply, and NearbyNode relay execution paths with human approval flows (`/security/*` + Companion Console `#security`) and the recorded NOPE dependency decision (`docs/security/NOPE-EVALUATION.md`).
 
 ## What Works
 

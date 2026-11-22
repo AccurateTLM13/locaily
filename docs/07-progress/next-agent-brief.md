@@ -2,7 +2,7 @@
 
 Hand this to Cursor, Claude, Codex, or any coding agent continuing Locaily work.
 
-**Updated:** 2026-11-22 (SEC-01 Central Execution-Policy Runtime Gate implemented & verified on `milestone/sec-01-execution-policy-runtime-gate`; CORE-07 Starter Read-Only Workflow Pack Library merged on `main` via PR #47)
+**Updated:** 2026-11-22 (SEC-01 Central Execution-Policy Runtime Gate merged on `main` via PR #48; `main` is idle)
 
 ## Read First
 
@@ -19,7 +19,7 @@ Also: root [AGENTS.md](../../AGENTS.md) and [../08-agents/agent-context.md](../0
 
 ## Current Handoff (Post SEC-01: Central Execution-Policy Runtime Gate)
 
-- **Repository state:** `SEC-01` (`sec-01-execution-policy-runtime-gate`) is implemented and validated on `milestone/sec-01-execution-policy-runtime-gate` (`ready-for-delivery` / awaiting PR & merge to `main`). Always run `npm run dev:status` first.
+- **Repository state:** `SEC-01` (`sec-01-execution-policy-runtime-gate`) is merged on `main` (PR #48, `2b3c1b1`) and `main` is `idle`. Always run `npm run dev:status` first.
 - **Central Execution-Policy Runtime Gate (SEC-01):** `companion/security/` enforces `policies/default-execution-policy.json` (`1.0.0`, `"enforced"`, `defaultDecision: "deny"`) behind a pluggable evaluator adapter (`companion/security/policy-evaluator-adapter.js`). Runtime hooks gate `/tasks/run`, `/analyze`, `executeToolStep`, `/memory/writeback/apply`, `/packs`, `/relay/register`, `/relay/step`, and `companion/relay/router.js`. Operator APIs (`/security/*`) and Companion Console `#security` manage human approvals. `@agnt-gg/nope` non-adoption decision is documented in `docs/security/NOPE-EVALUATION.md` and `docs/06-decisions/decision-log.md`.
 - **Starter Workflow Pack Library (CORE-07):** Six official read-only packs live under `workflow-packs/` (`incident-triage-pack`, `pr-diff-review-pack`, `ci-failure-triage-pack`, `issue-triage-pack`, `meeting-notes-pack`, `release-notes-pack`), composing shared `core.*` capabilities with zero write/shell/network side effects. SDK CLI: `npm run pack:list|validate|init|test`.
 - **Automatic Task Intake & Track Selection:** `companion/orchestration/task-intake.js` routes across all built-in and pack workflows (`POST /intake/route`, `POST /workflows/intake`, Companion Console `#taskIntakeSurface` and `#workflowPacksSurface`).

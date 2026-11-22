@@ -1,6 +1,6 @@
 # Build Status
 
-**Updated:** 2026-11-22 (SEC-01 Central Execution-Policy Runtime Gate implemented on `milestone/sec-01-execution-policy-runtime-gate`; CORE-07 Starter Read-Only Workflow Pack Library merged on `main` via PR #47; CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
+**Updated:** 2026-11-22 (SEC-01 Central Execution-Policy Runtime Gate merged on `main` via PR #48; `main` is idle; CORE-07, CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Stage
 
@@ -12,7 +12,7 @@ North Star direction is a local capability network: route track contracts to the
 
 | Milestone | Status |
 |---|---|
-| **SEC-01 (Central Execution-Policy Runtime Gate)** | Implemented & Verified on `milestone/sec-01-execution-policy-runtime-gate` (`ready-for-delivery` pending merge) |
+| **SEC-01 (Central Execution-Policy Runtime Gate)** | Complete & Merged (PR #48) |
 | **CORE-07 (Starter Read-Only Workflow Pack Library)** | Complete & Merged (PR #47) |
 | **CORE-06 (Workflow Pack Contract, Starter SDK, and Automatic Task Intake)** | Complete & Merged (PR #46) |
 | **CORE-01 – CORE-05 (Generic Capabilities, Matrix Qualification, Fallback, Console Explorer)** | Complete & Merged |

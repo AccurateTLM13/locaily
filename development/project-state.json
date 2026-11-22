@@ -3,20 +3,20 @@
   "project": "locaily",
   "currentMilestone": null,
   "activeSession": null,
-  "status": "ready-for-delivery",
+  "status": "idle",
   "defaultBranch": "main",
   "activeBranch": "milestone/sec-01-execution-policy-runtime-gate",
   "lastCompletedMilestone": "sec-01-execution-policy-runtime-gate",
-  "nextRecommendedAction": "Deliver milestone 'sec-01-execution-policy-runtime-gate' (deliver-milestone.js --slug sec-01-execution-policy-runtime-gate --all)",
+  "nextRecommendedAction": "Milestone 'sec-01-execution-policy-runtime-gate' merged. Run dev:dashboard to refresh.",
   "blockers": [],
   "warnings": [],
-  "updatedAt": "2026-11-22T19:47:06.026Z",
+  "updatedAt": "2026-11-22T20:16:58.250Z",
   "updatedBy": {
     "type": "agent",
     "name": "dev-lifecycle",
     "platform": "system"
   },
-  "mergedMilestone": "core-07-starter-workflow-packs",
-  "mergedAt": "2026-11-22T19:24:40.210Z",
-  "mergedCommit": "25d3a2f49605ec9a87b6bbcfca90b3cbf9ccc584"
+  "mergedMilestone": "sec-01-execution-policy-runtime-gate",
+  "mergedAt": "2026-11-22T20:16:58.250Z",
+  "mergedCommit": "2b3c1b1d29989a806ee321f1f0839b6818bcaee8"
 }

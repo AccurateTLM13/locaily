@@ -13,10 +13,10 @@
     "Created scripts/test-sec01-execution-policy-gate.js (7/7 passed), wired test:execution-policy into package.json and test:full, and updated scripts/test-core07-starter-packs.js AC7 for valid SEC-01 lifecycle states."
   ],
   "remaining": [],
-  "next_required_action": "Open PR and merge SEC-01 (milestone/sec-01-execution-policy-runtime-gate) into main after user approval.",
+  "next_required_action": "SEC-01 merged to main via PR #48; main is idle and ready for next explicitly approved milestone.",
   "blockers": [],
   "safe_to_start_unrelated_work": true,
-  "working_branch": "milestone/sec-01-execution-policy-runtime-gate",
+  "working_branch": "main",
   "validation": {
     "passed": [
       "npm.cmd run test:execution-policy (7/7 passed)",
@@ -25,7 +25,8 @@
       "npm.cmd run test:jobs:production (8/8 passed)",
       "npm.cmd run test:relay:e2e (11/11 passed)",
       "CORE-06 live HTTP spot-checks (workflowPacks.loaded=6, /packs, /intake/route, /console passed)",
-      "npm.cmd run test:full (all 28 suites passed)"
+      "npm.cmd run test:full (all 28 suites passed)",
+      "GitHub Actions PR #48 CI (verify 47s, Analyze (actions) 36s, Analyze (javascript-typescript) 1m15s, CodeQL 7s all passed)"
     ],
     "failed": [],
     "not_run": []

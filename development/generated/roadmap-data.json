@@ -1,6 +1,6 @@
 {
   "schema": "locaily.development.dashboard.v1",
-  "generatedAt": "2026-11-22T19:25:07.274Z",
+  "generatedAt": "2026-11-22T20:16:59.227Z",
   "projectState": {
     "schema": "locaily.development.project_state.v1",
     "project": "locaily",
@@ -8,24 +8,24 @@
     "activeSession": null,
     "status": "idle",
     "defaultBranch": "main",
-    "activeBranch": "main",
-    "lastCompletedMilestone": "core-07-starter-workflow-packs",
-    "nextRecommendedAction": "Milestone 'core-07-starter-workflow-packs' merged. Run dev:dashboard to refresh.",
+    "activeBranch": "milestone/sec-01-execution-policy-runtime-gate",
+    "lastCompletedMilestone": "sec-01-execution-policy-runtime-gate",
+    "nextRecommendedAction": "Milestone 'sec-01-execution-policy-runtime-gate' merged. Run dev:dashboard to refresh.",
     "blockers": [],
     "warnings": [],
-    "updatedAt": "2026-11-22T19:24:40.210Z",
+    "updatedAt": "2026-11-22T20:16:58.250Z",
     "updatedBy": {
       "type": "agent",
       "name": "dev-lifecycle",
       "platform": "system"
     },
-    "mergedMilestone": "core-07-starter-workflow-packs",
-    "mergedAt": "2026-11-22T19:24:40.210Z",
-    "mergedCommit": "25d3a2f49605ec9a87b6bbcfca90b3cbf9ccc584"
+    "mergedMilestone": "sec-01-execution-policy-runtime-gate",
+    "mergedAt": "2026-11-22T20:16:58.250Z",
+    "mergedCommit": "2b3c1b1d29989a806ee321f1f0839b6818bcaee8"
   },
   "git": {
     "branch": "main",
-    "head": "25d3a2f",
+    "head": "2b3c1b1",
     "dirty": true
   },
   "subsystemMaturity": [
@@ -298,12 +298,6 @@
         "title": "RESEARCH-01 Locaily Decision Track Bakeoff & External Benchmark Harness",
         "type": "feature",
         "priority": "low"
-      },
-      {
-        "id": "sec-01-execution-policy-runtime-gate",
-        "title": "SEC-01 Central Execution-Policy Runtime Gate",
-        "type": "infrastructure",
-        "priority": "high"
       }
     ],
     "ready": [],
@@ -348,6 +342,12 @@
         "id": "core-07-starter-workflow-packs",
         "title": "CORE-07 Starter Read-Only Workflow Pack Library",
         "type": "feature",
+        "priority": "high"
+      },
+      {
+        "id": "sec-01-execution-policy-runtime-gate",
+        "title": "SEC-01 Central Execution-Policy Runtime Gate",
+        "type": "infrastructure",
         "priority": "high"
       },
       {
@@ -831,9 +831,39 @@
       "completedAt": "2026-11-22T19:04:27.551Z",
       "requiredPassed": 6,
       "requiredFailed": 0
+    },
+    {
+      "id": "validation-20261122T194545-4362baf5",
+      "milestoneId": "sec-01-execution-policy-runtime-gate",
+      "status": "passed",
+      "profileId": "pre-delivery",
+      "branch": "milestone/sec-01-execution-policy-runtime-gate",
+      "completedAt": "2026-11-22T19:47:04.632Z",
+      "requiredPassed": 6,
+      "requiredFailed": 0
     }
   ],
   "recentActivity": [
+    {
+      "type": "validation",
+      "id": "validation-20261122T194545-4362baf5",
+      "milestoneId": "sec-01-execution-policy-runtime-gate",
+      "status": "passed",
+      "timestamp": "2026-11-22T19:47:04.632Z"
+    },
+    {
+      "type": "session-closed",
+      "id": "session-20261122-002",
+      "milestoneId": "sec-01-execution-policy-runtime-gate",
+      "timestamp": "2026-11-22T19:44:33.213Z"
+    },
+    {
+      "type": "session",
+      "id": "session-20261122-002",
+      "milestoneId": "sec-01-execution-policy-runtime-gate",
+      "status": "closed",
+      "timestamp": "2026-11-22T19:32:06.251Z"
+    },
     {
       "type": "validation",
       "id": "validation-20261122T190311-b5387c7a",
@@ -947,26 +977,6 @@
       "milestoneId": "core-03-multi-model-fallback-qualification",
       "status": "passed",
       "timestamp": "2026-10-01T02:50:49.217Z"
-    },
-    {
-      "type": "validation",
-      "id": "validation-20261001T024808-615d773c",
-      "milestoneId": "core-03-multi-model-fallback-qualification",
-      "status": "passed",
-      "timestamp": "2026-10-01T02:49:10.561Z"
-    },
-    {
-      "type": "session-closed",
-      "id": "session-20261001-002",
-      "milestoneId": "core-03-multi-model-fallback-qualification",
-      "timestamp": "2026-10-01T02:47:54.732Z"
-    },
-    {
-      "type": "session",
-      "id": "session-20261001-002",
-      "milestoneId": "core-03-multi-model-fallback-qualification",
-      "status": "closed",
-      "timestamp": "2026-10-01T02:37:55.406Z"
     }
   ],
   "nextMilestone": {
@@ -1062,32 +1072,32 @@
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193805-abd72fb5' is 118 days old"
+      "message": "Validation 'validation-20260726T193805-abd72fb5' is 119 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193814-1c6a4d38' is 118 days old"
+      "message": "Validation 'validation-20260726T193814-1c6a4d38' is 119 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193822-682b4aac' is 118 days old"
+      "message": "Validation 'validation-20260726T193822-682b4aac' is 119 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193904-f068ea75' is 118 days old"
+      "message": "Validation 'validation-20260726T193904-f068ea75' is 119 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T193946-d77283c5' is 118 days old"
+      "message": "Validation 'validation-20260726T193946-d77283c5' is 119 days old"
     },
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260726T194012-6848fec5' is 118 days old"
+      "message": "Validation 'validation-20260726T194012-6848fec5' is 119 days old"
     },
     {
       "severity": "info",
@@ -1172,7 +1182,7 @@
     {
       "severity": "info",
       "code": "STALE_VALIDATION",
-      "message": "Validation 'validation-20260907T193008-4b632292' is 75 days old"
+      "message": "Validation 'validation-20260907T193008-4b632292' is 76 days old"
     },
     {
       "severity": "info",
@@ -1216,6 +1226,13 @@
     }
   ],
   "drift": [
+    {
+      "type": "maturity-lag",
+      "severity": "warning",
+      "areaId": "local-brain",
+      "initiativeId": "central-execution-policy",
+      "message": "Initiative 'Central Execution-Policy Runtime Gate' has completed milestone(s) but maturity is still 'designed'"
+    },
     {
       "type": "maturity-lag",
       "severity": "warning",
@@ -1396,7 +1413,7 @@
       },
       {
         "id": "sec-01-execution-policy-runtime-gate",
-        "status": "planned",
+        "status": "merged",
         "title": "SEC-01 Central Execution-Policy Runtime Gate",
         "type": "infrastructure"
       },
@@ -1558,9 +1575,9 @@
   "stats": {
     "totalMilestones": 30,
     "active": 0,
-    "completed": 27,
-    "totalSessions": 22,
-    "totalValidations": 35,
+    "completed": 28,
+    "totalSessions": 23,
+    "totalValidations": 36,
     "totalDeliveries": 0,
     "totalIssues": 4,
     "openIssues": 0
