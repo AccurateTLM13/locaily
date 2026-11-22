@@ -12,11 +12,18 @@ This folder documents Locaily's intended execution-security boundary — the des
 
 ## Current Status
 
-Locaily has documented its intended execution-security boundary.
+Locaily has implemented **v1.0.0** of its Central Execution-Policy Runtime Gate (`SEC-01`, `companion/security/`) enforcing `policies/default-execution-policy.json` (`status: "enforced"`, `defaultDecision: "deny"`).
 
-Runtime enforcement is not yet complete. These documents describe required
-behavior and future architecture; they must not be treated as proof that all
-agent actions are currently sandboxed or policy-enforced.
+Runtime enforcement now wraps:
+- Tool and track execution (`companion/crew/tool-router.js`, `POST /tasks/run`, `POST /analyze`, `POST /tracks/run`, `POST /workflows/run`, background worker options)
+- Memory vault writeback apply (`POST /memory/writeback/apply`)
+- NearbyNode relay registration and dispatch (`POST /relay/register`, `POST /relay/step`, `companion/relay/router.js`)
+- Workflow Pack permission assessment (`GET /packs`, `GET /packs/:id`)
+- Operator inspection and approval resolution (`/security/policy`, `/security/evaluate`, `/security/decisions`, `/security/approvals`, and Companion Console `#security`)
+
+Remaining scope boundaries (intentionally out of scope for `SEC-01`):
+- OS-level container/VM process sandboxing
+- Automated browser-action execution runtime
 
 ## Documents
 

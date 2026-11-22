@@ -1056,14 +1056,16 @@ const views = {
   run: document.getElementById("runView"),
   workflows: document.getElementById("workflowsView"),
   matrix: document.getElementById("matrixView"),
-  activity: document.getElementById("activityView")
+  activity: document.getElementById("activityView"),
+  security: document.getElementById("securityView")
 };
 
 const navLinks = {
   run: document.getElementById("navRunLink"),
   workflows: document.getElementById("navWorkflowsLink"),
   matrix: document.getElementById("navMatrixLink"),
-  activity: document.getElementById("navActivityLink")
+  activity: document.getElementById("navActivityLink"),
+  security: document.getElementById("navSecurityLink")
 };
 
 function switchView(viewName) {
@@ -1085,6 +1087,7 @@ function switchView(viewName) {
   if (viewName === "workflows") loadWorkflows();
   else if (viewName === "matrix") loadMatrix();
   else if (viewName === "activity") loadActivity();
+  else if (viewName === "security") loadSecurityView();
 }
 
 window.addEventListener("hashchange", () => {
@@ -1821,6 +1824,236 @@ async function loadActivity() {
     `).join("");
   } catch (err) {
     container.innerHTML = `<p class="form-message form-message--error">Failed to load activity: ${escapeDiagnostic(err.message)}</p>`;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Execution Policy Runtime Gate & Approvals View
+   ───────────────────────────────────────────── */
+const refreshSecurityBtn = document.getElementById("refreshSecurityBtn");
+if (refreshSecurityBtn) refreshSecurityBtn.addEventListener("click", loadSecurityView);
+
+const securityApprovalsFilter = document.getElementById("securityApprovalsFilter");
+if (securityApprovalsFilter) securityApprovalsFilter.addEventListener("change", loadSecurityApprovals);
+
+const securityEvaluateForm = document.getElementById("securityEvaluateForm");
+if (securityEvaluateForm) securityEvaluateForm.addEventListener("submit", handleSecurityEvaluate);
+
+const securityApprovalsList = document.getElementById("securityApprovalsList");
+if (securityApprovalsList) {
+  securityApprovalsList.addEventListener("click", async (event) => {
+    const btn = event.target.closest("button[data-approval-id][data-approval-action]");
+    if (!btn) return;
+    const approvalId = btn.dataset.approvalId;
+    const action = btn.dataset.approvalAction;
+    if (!approvalId || (action !== "approve" && action !== "deny")) return;
+    btn.disabled = true;
+    try {
+      await fetchJson(`/security/approvals/${encodeURIComponent(approvalId)}/${action}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          operator: "console-operator",
+          reason: action === "approve" ? "Approved via Companion Console" : "Denied via Companion Console"
+        })
+      });
+      await loadSecurityView();
+    } catch (err) {
+      alert(`Failed to ${action} approval '${approvalId}': ${err.message}`);
+      btn.disabled = false;
+    }
+  });
+}
+
+async function loadSecurityView() {
+  await Promise.all([
+    loadSecurityPolicy(),
+    loadSecurityApprovals(),
+    loadSecurityDecisions()
+  ]);
+}
+
+async function loadSecurityPolicy() {
+  try {
+    const res = await fetchJson("/security/policy");
+    const status = res.status || {};
+    const policy = res.policy || {};
+    const statStatusEl = document.getElementById("secStatStatus");
+    const statDefaultEl = document.getElementById("secStatDefault");
+    const statPendingEl = document.getElementById("secStatPending");
+    const statDeniedEl = document.getElementById("secStatDeniedRules");
+    const adapterBadge = document.getElementById("secAdapterBadge");
+
+    if (statStatusEl) statStatusEl.textContent = status.status || (status.enforced ? "enforced" : "unknown");
+    if (statDefaultEl) statDefaultEl.textContent = policy.defaultDecision || "deny";
+    if (statPendingEl) statPendingEl.textContent = String(status.pendingApprovals ?? 0);
+    if (statDeniedEl) statDeniedEl.textContent = String(status.immutableDeniedCount ?? (policy.immutableDeniedActions || []).length);
+    if (adapterBadge) {
+      adapterBadge.className = "status-pill status-pill--success";
+      adapterBadge.innerHTML = `<span class="status-pill__dot" aria-hidden="true"></span><span class="status-pill__label">${escapeDiagnostic(policy.evaluator || "native")}</span>`;
+    }
+  } catch (err) {
+    const adapterBadge = document.getElementById("secAdapterBadge");
+    if (adapterBadge) {
+      adapterBadge.className = "status-pill status-pill--error";
+      adapterBadge.innerHTML = '<span class="status-pill__dot" aria-hidden="true"></span><span class="status-pill__label">error</span>';
+    }
+  }
+}
+
+async function loadSecurityApprovals() {
+  const container = document.getElementById("securityApprovalsList");
+  const filterEl = document.getElementById("securityApprovalsFilter");
+  if (!container) return;
+
+  const statusFilter = filterEl ? filterEl.value : "pending";
+  const query = statusFilter ? `?status=${encodeURIComponent(statusFilter)}&limit=50` : "?limit=50";
+
+  try {
+    const res = await fetchJson(`/security/approvals${query}`);
+    const approvals = res.approvals || [];
+
+    if (!approvals.length) {
+      container.innerHTML = '<p class="meta-text">No approval requests match this filter.</p>';
+      return;
+    }
+
+    container.innerHTML = approvals.map((item) => {
+      const req = item.actionRequest || {};
+      const statusCls = item.status === "approved"
+        ? "success"
+        : item.status === "pending"
+          ? "warn"
+          : "error";
+      const actionsHtml = item.status === "pending"
+        ? `<div class="approval-card__actions">
+             <button type="button" class="btn btn--primary btn--sm" data-approval-id="${escapeDiagnostic(item.id)}" data-approval-action="approve">Approve</button>
+             <button type="button" class="btn btn--secondary btn--sm" data-approval-id="${escapeDiagnostic(item.id)}" data-approval-action="deny">Deny</button>
+           </div>`
+        : `<div class="meta-text">${escapeDiagnostic(item.resolvedBy || "")} ${item.resolutionReason ? `— ${escapeDiagnostic(item.resolutionReason)}` : ""}</div>`;
+
+      return `
+        <div class="approval-card">
+          <div class="approval-card__header">
+            <strong>${escapeDiagnostic(req.action || "unknown")}</strong>
+            <span class="status-pill status-pill--${statusCls}">
+              <span class="status-pill__dot" aria-hidden="true"></span>
+              <span class="status-pill__label">${escapeDiagnostic(item.status)}</span>
+            </span>
+          </div>
+          <div class="meta-text">ID: <code>${escapeDiagnostic(item.id)}</code> · Target: <code>${escapeDiagnostic(req.target || "")}</code></div>
+          <div class="meta-text">Requested by: ${escapeDiagnostic(req.requestedBy || "")} · Risk: ${escapeDiagnostic(req.riskLevel || "medium")}</div>
+          <div class="meta-text">${escapeDiagnostic(req.reason || "")}</div>
+          ${actionsHtml}
+        </div>
+      `;
+    }).join("");
+  } catch (err) {
+    container.innerHTML = `<p class="form-message form-message--error">Failed to load approvals: ${escapeDiagnostic(err.message)}</p>`;
+  }
+}
+
+async function handleSecurityEvaluate(event) {
+  event.preventDefault();
+  const actionEl = document.getElementById("secActionInput");
+  const targetEl = document.getElementById("secTargetInput");
+  const reqByEl = document.getElementById("secRequestedByInput");
+  const riskEl = document.getElementById("secRiskSelect");
+  const reasonEl = document.getElementById("secReasonInput");
+  const createApprovalEl = document.getElementById("secCreateApprovalCheckbox");
+  const resultCard = document.getElementById("securityEvalResultCard");
+  const badgeEl = document.getElementById("securityEvalBadge");
+  const fieldsEl = document.getElementById("securityEvalFields");
+
+  if (!actionEl || !targetEl || !reqByEl || !reasonEl) return;
+
+  try {
+    const res = await fetchJson("/security/evaluate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: actionEl.value.trim(),
+        target: targetEl.value.trim(),
+        requestedBy: reqByEl.value.trim(),
+        reason: reasonEl.value.trim(),
+        riskLevel: riskEl ? riskEl.value : "medium",
+        createApproval: Boolean(createApprovalEl && createApprovalEl.checked),
+        dryRun: !(createApprovalEl && createApprovalEl.checked)
+      })
+    });
+
+    if (resultCard) resultCard.hidden = false;
+    const dec = res.decision || {};
+    const statusCls = dec.decision === "allow" || dec.decision === "constrain"
+      ? "success"
+      : dec.decision === "require_approval"
+        ? "warn"
+        : "error";
+
+    if (badgeEl) {
+      badgeEl.className = `status-pill status-pill--${statusCls}`;
+      badgeEl.innerHTML = `<span class="status-pill__dot" aria-hidden="true"></span><span class="status-pill__label">${escapeDiagnostic(res.code || dec.decision || "evaluated")}</span>`;
+    }
+    if (fieldsEl) {
+      const approvalRow = res.approval
+        ? `<div><dt>Approval ID</dt><dd><code>${escapeDiagnostic(res.approval.id)}</code></dd></div>`
+        : "";
+      fieldsEl.innerHTML = `
+        <div><dt>Decision</dt><dd><strong>${escapeDiagnostic(dec.decision || "deny")}</strong> (allowed: ${res.allowed ? "true" : "false"})</dd></div>
+        <div><dt>Code</dt><dd><code>${escapeDiagnostic(res.code || "")}</code></dd></div>
+        <div><dt>Policy Version</dt><dd>${escapeDiagnostic(dec.policyVersion || "")}</dd></div>
+        <div><dt>Reason</dt><dd>${escapeDiagnostic(dec.reason || "")}</dd></div>
+        ${approvalRow}
+      `;
+    }
+    await Promise.all([loadSecurityPolicy(), loadSecurityApprovals(), loadSecurityDecisions()]);
+  } catch (err) {
+    if (resultCard) resultCard.hidden = false;
+    if (badgeEl) {
+      badgeEl.className = "status-pill status-pill--error";
+      badgeEl.innerHTML = '<span class="status-pill__dot" aria-hidden="true"></span><span class="status-pill__label">ERROR</span>';
+    }
+    if (fieldsEl) {
+      fieldsEl.innerHTML = `<p class="form-message form-message--error">${escapeDiagnostic(err.message)}</p>`;
+    }
+  }
+}
+
+async function loadSecurityDecisions() {
+  const container = document.getElementById("securityDecisionsList");
+  if (!container) return;
+
+  try {
+    const res = await fetchJson("/security/decisions?limit=25");
+    const decisions = res.decisions || [];
+
+    if (!decisions.length) {
+      container.innerHTML = '<p class="meta-text">No policy decisions recorded yet.</p>';
+      return;
+    }
+
+    container.innerHTML = decisions.map((d) => {
+      const badgeCls = d.decision === "allow" || d.decision === "constrain"
+        ? "success"
+        : d.decision === "require_approval"
+          ? "warn"
+          : "error";
+      return `
+        <div class="decision-row">
+          <div class="approval-card__header">
+            <code>${escapeDiagnostic(d.action || "invalid")}</code>
+            <span class="status-pill status-pill--${badgeCls}">
+              <span class="status-pill__dot" aria-hidden="true"></span>
+              <span class="status-pill__label">${escapeDiagnostic(d.code || d.decision)}</span>
+            </span>
+          </div>
+          <div class="meta-text">${escapeDiagnostic(d.surface || "runtime")} · Target: <code>${escapeDiagnostic(d.target || "")}</code> · ${escapeDiagnostic(d.timestamp || "")}</div>
+          <div class="meta-text">${escapeDiagnostic(d.reason || "")}</div>
+        </div>
+      `;
+    }).join("");
+  } catch (err) {
+    container.innerHTML = `<p class="form-message form-message--error">Failed to load policy decisions: ${escapeDiagnostic(err.message)}</p>`;
   }
 }
 

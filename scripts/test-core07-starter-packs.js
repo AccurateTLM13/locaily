@@ -323,14 +323,16 @@ async function main() {
     }
   });
 
-  await check("AC7: SEC-01 central execution-policy runtime gate milestone is queued as planned without activating it", () => {
+  await check("AC7: SEC-01 central execution-policy runtime gate milestone is registered in development/milestones and roadmap.json", () => {
     const sec01Path = path.join(ROOT, "development", "milestones", "sec-01-execution-policy-runtime-gate.json");
     assert(fs.existsSync(sec01Path), "Expected sec-01-execution-policy-runtime-gate.json to exist");
     const sec01 = JSON.parse(fs.readFileSync(sec01Path, "utf8"));
     assert.equal(sec01.schema, "locaily.development.milestone.v1");
     assert.equal(sec01.id, "sec-01-execution-policy-runtime-gate");
-    assert.equal(sec01.status, "planned");
-    assert.equal(sec01.startedAt, null);
+    assert(
+      ["planned", "active", "completed", "merged"].includes(sec01.status),
+      `Expected valid sec-01 status, got '${sec01.status}'`
+    );
     assert(Array.isArray(sec01.acceptanceCriteria) && sec01.acceptanceCriteria.length >= 4);
 
     const roadmap = JSON.parse(fs.readFileSync(path.join(ROOT, "development", "roadmap.json"), "utf8"));

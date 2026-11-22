@@ -191,6 +191,48 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
 
     const node = decision.node;
 
+    if (options?.executionGate && typeof options.executionGate.evaluate === "function") {
+      const targetStr = String(node.baseUrl || node.nodeId || "relay:unknown");
+      let isRemote = false;
+      try {
+        const parsedHost = new URL(targetStr).hostname.toLowerCase();
+        isRemote = !["127.0.0.1", "localhost", "::1", "[::1]"].includes(parsedHost);
+      } catch {
+        isRemote = true;
+      }
+      const strictRelay = isRemote
+        || process.env.EXECUTION_POLICY_STRICT_RELAY === "1"
+        || options.relay?.strictPolicy === true
+        || options.requirePolicyApproval === true;
+      const gateResult = await options.executionGate.evaluate({
+        action: "nearbyNode.invoke",
+        target: targetStr,
+        requestedBy: "relay-router",
+        reason: `Dispatch step '${step && step.id ? step.id : "unknown"}' to NearbyNode '${node.nodeId}'`,
+        nodeId: node.nodeId,
+        riskLevel: "high"
+      }, {
+        approvalId: options.approvalId || options.relay?.approvalId || null,
+        createApproval: strictRelay,
+        runId: (meta && meta.run_id) || null,
+        traceId: (meta && meta.trace_id) || null,
+        surface: "relay-router:fallback"
+      });
+
+      if (
+        gateResult.code === "POLICY_DENIED"
+        || gateResult.code === "APPROVAL_INVALID"
+        || (!gateResult.allowed && strictRelay)
+      ) {
+        const err = new Error(gateResult.decision.reason || `Relay dispatch blocked by policy (${gateResult.code}).`);
+        err.code = gateResult.code;
+        err.statusCode = 403;
+        err.decision = gateResult.decision;
+        err.approval = gateResult.approval || null;
+        throw err;
+      }
+    }
+
     try {
       const minimized = minimizeContext(step, context);
       const remote = await connector.executeRemoteStep({
@@ -347,6 +389,48 @@ function createRelayRouter({ registry, connector, auditLog, options = {} }) {
         actualTarget: "local",
         actualNodeId: null
       });
+    }
+
+    if (options?.executionGate && typeof options.executionGate.evaluate === "function") {
+      const targetStr = String(node.baseUrl || node.nodeId || "relay:unknown");
+      let isRemote = false;
+      try {
+        const parsedHost = new URL(targetStr).hostname.toLowerCase();
+        isRemote = !["127.0.0.1", "localhost", "::1", "[::1]"].includes(parsedHost);
+      } catch {
+        isRemote = true;
+      }
+      const strictRelay = isRemote
+        || process.env.EXECUTION_POLICY_STRICT_RELAY === "1"
+        || options.relay?.strictPolicy === true
+        || options.requirePolicyApproval === true;
+      const gateResult = await options.executionGate.evaluate({
+        action: "nearbyNode.invoke",
+        target: targetStr,
+        requestedBy: "relay-router",
+        reason: `Dispatch step '${step && step.id ? step.id : "unknown"}' to assigned NearbyNode '${node.nodeId}'`,
+        nodeId: node.nodeId,
+        riskLevel: "high"
+      }, {
+        approvalId: options.approvalId || options.relay?.approvalId || null,
+        createApproval: strictRelay,
+        runId: (meta && meta.run_id) || null,
+        traceId: (meta && meta.trace_id) || null,
+        surface: "relay-router:assigned"
+      });
+
+      if (
+        gateResult.code === "POLICY_DENIED"
+        || gateResult.code === "APPROVAL_INVALID"
+        || (!gateResult.allowed && strictRelay)
+      ) {
+        const err = new Error(gateResult.decision.reason || `Relay dispatch blocked by policy (${gateResult.code}).`);
+        err.code = gateResult.code;
+        err.statusCode = 403;
+        err.decision = gateResult.decision;
+        err.approval = gateResult.approval || null;
+        throw err;
+      }
     }
 
     try {

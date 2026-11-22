@@ -51,7 +51,9 @@ No code path bypasses the gate. This includes:
 
 ## Current Implementation Status
 
-Relay Node protocol and capability registration are implemented (M4). The execution gate that wraps capability invocation in policy evaluation is planned but not yet implemented.
+Relay Node protocol, capability registration (M4), and the Central Execution-Policy Runtime Gate (`SEC-01`) are implemented:
+- `POST /relay/step` hard-denies unregistered capabilities/executors via `nearbyNode.invoke.unregistered` (`403 POLICY_DENIED`), evaluates `nearbyNode.invoke` through `createExecutionGate`, and routes inner tool steps through policy-gated `executeStep`.
+- `POST /relay/register` and `companion/relay/router.js` evaluate `nearbyNode.register` / `nearbyNode.invoke` against `policies/default-execution-policy.json` and enforce blocking human approval (`403 APPROVAL_REQUIRED`) when non-loopback, in LAN mode, or when strict relay policy is enabled (`EXECUTION_POLICY_STRICT_RELAY=1` or `x-locaily-strict-policy: 1`), while maintaining compatibility with local loopback dev/E2E harnesses.
 
 The existing capability registry (`docs/01-architecture/capability-registry.md`) documents what capabilities exist. This document defines the security boundary around how they may be used.
 

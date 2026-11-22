@@ -125,4 +125,4 @@ If an action is not explicitly listed in the policy, it does not execute. This i
 
 ## Enforcement Notes
 
-These policies describe the intended execution boundary. Runtime enforcement is planned but not yet implemented. The machine-readable policy definitions in `policies/default-execution-policy.json` are the canonical source for the intended policy shape.
+`policies/default-execution-policy.json` (`version: "1.0.0"`, `status: "enforced"`, `defaultDecision: "deny"`) is enforced at runtime by `companion/security/` (`createExecutionGate`). Tool runs, workflow steps, memory writebacks, Workflow Pack permission assessments, and NearbyNode relay endpoints evaluate `action-request.schema.json` payloads before execution and record `policy-decision.schema.json` outcomes to `data/security/policy-decisions.jsonl` and `companion/core/audit-log.js`. OS-level container/VM sandboxing and full browser automation remain future runtime hardening outside `SEC-01`.

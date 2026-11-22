@@ -31,6 +31,41 @@ async function executeToolStep({ step, context, toolRegistry, runtime, options, 
     throw error;
   }
 
+  if (options?.executionGate && typeof options.executionGate.evaluateToolExecution === "function") {
+    const requestedPerms = Array.isArray(options?.requestedPermissions)
+      ? options.requestedPermissions
+      : (Array.isArray(tool.permissions) ? tool.permissions : []);
+    const gateResult = await options.executionGate.evaluateToolExecution({
+      tool,
+      task,
+      input: stepInput,
+      requestedPermissions: requestedPerms,
+      requestedActions: Array.isArray(options?.requestedActions) ? options.requestedActions : null,
+      options: {
+        approvalId: options?.approvalId || null,
+        dryRun: false,
+        surface: "tool-router"
+      },
+      meta: {
+        ...(meta || {}),
+        step_id: step.id,
+        requestedBy: `track:${options?.track_id || "unknown"}:step:${step.id}`
+      }
+    });
+
+    if (!gateResult.allowed) {
+      const error = new Error(gateResult.decision.reason || `Execution blocked by policy (${gateResult.code}).`);
+      error.code = gateResult.code;
+      error.statusCode = 403;
+      error.decision = gateResult.decision;
+      error.approval = gateResult.approval || null;
+      error.nextStep = gateResult.code === "APPROVAL_REQUIRED" && gateResult.approval
+        ? `Approve pending request '${gateResult.approval.id}' via POST /security/approvals/:id/approve or Console #security, then retry with approvalId.`
+        : "Action blocked by Locaily execution policy.";
+      throw error;
+    }
+  }
+
   const role = tool.modelRole || executor.role || null;
   let resolvedModel = null;
   let qualification = null;
@@ -98,6 +133,15 @@ async function executeToolStep({ step, context, toolRegistry, runtime, options, 
       meta
     });
   } catch (toolErr) {
+    if (
+      toolErr
+      && (toolErr.code === "POLICY_DENIED"
+        || toolErr.code === "APPROVAL_REQUIRED"
+        || toolErr.code === "APPROVAL_INVALID")
+    ) {
+      throw toolErr;
+    }
+
     if (fallbackModel && fallbackModel !== resolvedModel) {
       try {
         const fallbackHandleOptions = {

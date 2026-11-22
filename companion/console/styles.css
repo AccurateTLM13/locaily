@@ -1318,6 +1318,41 @@ input {
   gap: 6px;
 }
 
+.security-stats-grid {
+  margin-bottom: 16px;
+}
+
+.approval-list,
+.decision-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.approval-card,
+.decision-row {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.approval-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.approval-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
 @media (max-width: 900px) {
   .workflow-catalog-grid {
     grid-template-columns: 1fr;

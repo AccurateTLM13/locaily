@@ -1,0 +1,63 @@
+{
+  "schema": "locaily.development.session.v1",
+  "id": "session-20261122-002",
+  "milestoneId": "sec-01-execution-policy-runtime-gate",
+  "agent": {
+    "platform": "unknown",
+    "model": "unknown"
+  },
+  "status": "closed",
+  "objective": null,
+  "branch": "milestone/sec-01-execution-policy-runtime-gate",
+  "startingCommit": "741f47fd6f68fac9ed6da6b7b5ab5fd57b04d40c",
+  "plannedFiles": [],
+  "completedWork": [
+    "SEC-01 central execution-policy runtime gate, hooks, approval API/UI, NOPE decision, full 28-suite + clean-server smoke passing",
+    "Implemented SEC-01 Central Execution-Policy Runtime Gate with fail-closed native evaluator behind pluggable adapter, runtime hooks across tools/packs/memory/relay, human approval API and Companion Console #security UI, NOPE evaluation decision record, and comprehensive test suite."
+  ],
+  "remainingWork": [],
+  "blockers": [],
+  "validationRunIds": [],
+  "checks": [
+    {
+      "timestamp": "2026-11-22T19:44:32.394Z",
+      "message": "SEC-01 central execution-policy runtime gate, hooks, approval API/UI, NOPE decision, full 28-suite + clean-server smoke passing",
+      "filesChanged": [
+        "(uncommitted changes)"
+      ]
+    }
+  ],
+  "startedAt": "2026-11-22T19:32:06.251Z",
+  "closedAt": "2026-11-22T19:44:33.213Z",
+  "closingCommit": "741f47fd6f68fac9ed6da6b7b5ab5fd57b04d40c",
+  "dirtyFiles": [
+    "companion/console/app.js",
+    "companion/console/index.html",
+    "companion/console/styles.css",
+    "companion/crew/tool-router.js",
+    "companion/packs/workflow-pack-loader.js",
+    "companion/relay/router.js",
+    "companion/server.js",
+    "development/milestones/sec-01-execution-policy-runtime-gate.json",
+    "development/project-state.json",
+    "docs/00-start-here/current-state.md",
+    "docs/06-decisions/decision-log.md",
+    "docs/07-progress/build-status.md",
+    "docs/07-progress/next-agent-brief.md",
+    "docs/07-progress/work-closeout.json",
+    "docs/security/CAPABILITY-BOUNDARIES.md",
+    "docs/security/EXECUTION-POLICY.md",
+    "docs/security/NOPE-EVALUATION.md",
+    "docs/security/README.md",
+    "package.json",
+    "policies/default-execution-policy.json",
+    "scripts/test-core07-starter-packs.js",
+    "companion/security/approval-store.js",
+    "companion/security/execution-gate.js",
+    "companion/security/index.js",
+    "companion/security/policy-evaluator-adapter.js",
+    "companion/security/policy-loader.js",
+    "development/sessions/session-20261122-002.json",
+    "scripts/test-sec01-execution-policy-gate.js"
+  ]
+}

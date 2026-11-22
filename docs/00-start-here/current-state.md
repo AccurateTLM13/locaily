@@ -2,13 +2,15 @@
 
 Blunt snapshot of what Locaily is **right now**. When docs disagree with this file, check running code first, then update this file.
 
-**Updated:** 2026-11-22 (CORE-07 Starter Read-Only Workflow Pack Library merged on `main` via PR #47; `main` is idle; SEC-01 Central Execution-Policy Runtime Gate queued as `planned`; CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
+**Updated:** 2026-11-22 (SEC-01 Central Execution-Policy Runtime Gate implemented on `milestone/sec-01-execution-policy-runtime-gate`; CORE-07 Starter Read-Only Workflow Pack Library merged on `main` via PR #47; CORE-06, SYSTEM-PROOF-01, CORE-01–CORE-05, PX1–PX5/PX7–PX9, CTK-01–CTK-03, M09A, and Benchmark Lab M1–M3 merged on `main`)
 
 ## Current Milestone
 
-**None — `main` is idle.** CORE-07 (`core-07-starter-workflow-packs`) merged on `main` via PR #47 (`25d3a2f`). Adds five strictly read-only starter Workflow Packs (`pr-diff-review-pack`, `ci-failure-triage-pack`, `issue-triage-pack`, `meeting-notes-pack`, `release-notes-pack`) alongside `incident-triage-pack`, expands Task Intake labeled evaluation coverage, adds pack read-only mode & runner shortcuts to Companion Console, and queues `sec-01-execution-policy-runtime-gate` (`SEC-01`) as the next `planned` milestone.
+**`sec-01-execution-policy-runtime-gate` (`SEC-01` — Active on `milestone/sec-01-execution-policy-runtime-gate`).** Enforces Locaily's central fail-closed execution-policy runtime gate (`companion/security/`, `policies/default-execution-policy.json` v1.0.0 `status: "enforced"`), wrapping tool, track/pack, memory writeback apply, and NearbyNode relay execution paths with human approval flows (`/security/*` + Companion Console `#security`) and the recorded NOPE dependency decision (`docs/security/NOPE-EVALUATION.md`).
 
 ## What Works
+
+- **Central Execution-Policy Runtime Gate (SEC-01)** — `companion/security/` (`policy-loader.js`, `policy-evaluator-adapter.js`, `approval-store.js`, `execution-gate.js`) evaluates `action-request.schema.json` against `policies/default-execution-policy.json` (`defaultDecision: "deny"`), enforces immutable hard denies (`shell.execute.arbitrary`, `credentials.read`, `credentials.write`, `audit.disable`, `policy.modify.runtime`, `nearbyNode.invoke.unregistered`), enforces workspace-escape/credential-path/config-file escalation guards, manages human approvals via `/security/approvals*` and Companion Console `#security`, and records schema-valid audit events and decision logs (`data/security/policy-decisions.jsonl`). Zero external npm dependencies (`@agnt-gg/nope` rejected in `docs/security/NOPE-EVALUATION.md` in favor of a native evaluator behind a swappable adapter).
 
 - **Starter Read-Only Workflow Pack Library (CORE-07)** — six total official read-only packs under `workflow-packs/` (`incident-triage-pack`, `pr-diff-review-pack`, `ci-failure-triage-pack`, `issue-triage-pack`, `meeting-notes-pack`, `release-notes-pack`), composing shared `core.*` capabilities with strict read-only permissions (`model.run` only, zero disk/shell/network side effects) pending `SEC-01`.
 - **Workflow Pack Contract & Starter SDK (CORE-06)** — self-contained packs under `workflow-packs/` (plus `LOCAILY_WORKFLOW_PACK_DIRS`) dynamically register workflows, tracks, tools, schemas, prompts, permissions, qualification requirements, and intake hints without editing Local Brain core files, with strict path-escape and ID-collision guards (`GET /packs`, `GET /packs/:id`, `POST /packs/validate`, `npm run pack:*`).
@@ -76,7 +78,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Qualification dashboard** - `GET /qualifications/dashboard` with per-model, per-track, per-role breakdown
 - **All 4 new tracks in shadow enforcement** - collecting routing evidence for future enforcement
 - **Operator Console UI** - `companion/operator/index.html` served at `GET /operator`. Confirmation dialog cancel/Escape correctly aborts destructive job actions. Enqueue form sends `executionType` to production `/jobs`. 34 tests in `scripts/test-operator-console.js`; 11 confirm/outcome regression tests in `scripts/test-operator-confirm.js`.
-- **Security Policy Foundation** - execution-security documentation (`docs/security/README.md`, `THREAT-MODEL.md`, `EXECUTION-POLICY.md`, `APPROVAL-RULES.md`, `CAPABILITY-BOUNDARIES.md`, `NOPE-EVALUATION.md`) and machine-readable policy definitions (`policies/default-execution-policy.json`, `action-request.schema.json`, `policy-decision.schema.json`). Policy documented; execution policy (filesystem, shell, network) not yet enforced at runtime.
+- **Central Execution-Policy Runtime Gate (SEC-01)** — `policies/default-execution-policy.json` (`1.0.0`, `"enforced"`, `defaultDecision: "deny"`) is enforced at runtime by `companion/security/` across `/tasks/run`, `/analyze`, `executeToolStep`, `/memory/writeback/apply`, `/packs`, `/relay/register`, `/relay/step`, and `companion/relay/router.js`, with operator approval API & Companion Console `#security` UI (`docs/security/NOPE-EVALUATION.md` records native adapter decision).
 - **LAN Security Hard Gate** - non-loopback binding requires `RELAY_TOKEN`, `LAN_MODE=1`, `RELAY_ALLOWLIST`, and `RELAY_CAPABILITY_ALLOWLIST`; server refuses startup otherwise. All relay endpoints enforce Bearer token authentication when `RELAY_TOKEN` is configured. 20/20 security gate tests pass.
 
 ## What Is Partial
@@ -102,7 +104,7 @@ Blunt snapshot of what Locaily is **right now**. When docs disagree with this fi
 - **Clean-machine install-and-run path** - no validated clone-to-cleanup flow for non-developer users
 - **End-to-end Lighthouse Handoff product bridge** - extension discovers Local Brain, CORS, report comparison, export
 - **Relay Node trust boundary** - full node-to-node pairing/signing rollout outside trusted dev network
-- **Central execution gate** - policy documented but not enforced at runtime (applies to filesystem, shell, network actions — separate from LAN security)
+- **OS-level container/VM process sandboxing** - intentional exclusion beyond `SEC-01` application-layer policy gate
 
 ## Lifecycle Infrastructure
 
