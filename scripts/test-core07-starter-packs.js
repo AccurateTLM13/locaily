@@ -330,7 +330,7 @@ async function main() {
     assert.equal(sec01.schema, "locaily.development.milestone.v1");
     assert.equal(sec01.id, "sec-01-execution-policy-runtime-gate");
     assert(
-      ["planned", "active", "completed", "merged"].includes(sec01.status),
+      ["planned", "ready", "active", "validating", "ready-for-delivery", "delivered", "completed", "merged"].includes(sec01.status),
       `Expected valid sec-01 status, got '${sec01.status}'`
     );
     assert(Array.isArray(sec01.acceptanceCriteria) && sec01.acceptanceCriteria.length >= 4);
