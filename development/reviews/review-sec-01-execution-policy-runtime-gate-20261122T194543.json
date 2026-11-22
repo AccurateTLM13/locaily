@@ -1,0 +1,15 @@
+{
+  "id": "review-sec-01-execution-policy-runtime-gate-20261122T194543",
+  "milestoneId": "sec-01-execution-policy-runtime-gate",
+  "status": "passed",
+  "branch": "milestone/sec-01-execution-policy-runtime-gate",
+  "headCommit": "cbb5ee0d192fb7c074ea43fdf65badf1d42f9408",
+  "findings": [],
+  "summary": {
+    "total": 0,
+    "errors": 0,
+    "warnings": 0,
+    "info": 0
+  },
+  "reviewedAt": "2026-11-22T19:45:43.704Z"
+}
