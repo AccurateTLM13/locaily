@@ -2,7 +2,7 @@
   "schema": "locaily.development.milestone.v1",
   "id": "core-07-starter-workflow-packs",
   "title": "CORE-07 Starter Read-Only Workflow Pack Library",
-  "status": "active",
+  "status": "ready-for-delivery",
   "type": "feature",
   "priority": "high",
   "purpose": "Deliver five read-only starter Workflow Packs (PR diff review, CI failure triage, issue triage, meeting notes action plan, release notes) composing qualified core.* capabilities, expand Task Intake labeled evaluation coverage, enhance Companion Console pack cards, and queue SEC-01 Central Execution-Policy Runtime Gate as the next planned milestone.",
@@ -115,9 +115,12 @@
   "lifecycleRef": null,
   "createdAt": "2026-11-22T18:52:00.684Z",
   "startedAt": "2026-11-22T18:52:00.685Z",
-  "completedAt": null,
+  "completedAt": "2026-11-22T19:05:06.122Z",
   "mergedAt": null,
   "preparedCommit": "83fe6ae649c8d0fd4a49cef8178f4ff36135510d",
   "preparedBranch": "milestone/core-07-starter-workflow-packs",
-  "preparedAt": "2026-11-22T19:02:56.446Z"
+  "preparedAt": "2026-11-22T19:02:56.446Z",
+  "latestValidationId": "validation-20261122T190311-b5387c7a",
+  "completionBranch": "milestone/core-07-starter-workflow-packs",
+  "completionHead": "05711081e179984c290b82688712d8aa83de7821"
 }
